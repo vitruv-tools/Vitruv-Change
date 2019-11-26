@@ -4,16 +4,16 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>tools.vitruv</groupId>
-		<artifactId>testutils</artifactId>
+		<artifactId>framework</artifactId>
 		<version>0.3.0-SNAPSHOT</version>
 		<relativePath>../</relativePath>
 	</parent>
-	<artifactId>tools.vitruv.testutils.metamodels</artifactId>
+	<artifactId>tools.vitruv.framework.correspondence</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<name>Vitruv Test Utilities Metamodels</name>
+	<name>Vitruv Framework Correspondence Metamodel</name>
 	
 	<properties>
-		<pathToMetamodelGenerationWorkflow>src/tools/vitruv/testutils/metamodels/GenerateTestMetamodels.mwe2</pathToMetamodelGenerationWorkflow>
+		<pathToMetamodelGenerationWorkflow>src/tools/vitruv/framework/correspondence/GenerateCorrespondenceMetamodel.mwe2</pathToMetamodelGenerationWorkflow>
 		<metamodelGenerationTargetFolder>src-gen/</metamodelGenerationTargetFolder>
 	</properties>
 
