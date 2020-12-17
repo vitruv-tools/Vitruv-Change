@@ -16,6 +16,7 @@
 		<module>framework</module>
 		<module>dsls</module>
 		<module>extensions</module>
+		<module>demo</module>
 	</modules>
 	
 </project>
