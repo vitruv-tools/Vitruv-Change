@@ -1,21 +1,16 @@
-module tools.vitruv.testutlis.metamodels.GenerateTestMetamodels
+module generate
 
 import org.eclipse.emf.mwe2.ecore.EcoreGenerator
 import org.eclipse.emf.mwe.utils.StandaloneSetup
-import org.eclipse.emf.mwe.utils.DirectoryCleaner
 
-var rootPath = ".."
 var pluginName = "tools.vitruv.testutils.metamodels"
-var basePath = "${rootPath}/${pluginName}"
 var platformPluginPath = "platform:/resource/${pluginName}"
 var metamodelsPath = "${platformPluginPath}/metamodels"
 
 Workflow {
-	component = DirectoryCleaner {
-		directory = "${basePath}/src-gen"
-	}
 
 	bean = StandaloneSetup {
+		scanClassPath = true
 		platformUri = "."
 	}
 
@@ -66,4 +61,5 @@ Workflow {
 		genModel = "${metamodelsPath}/uml_mockup.genmodel"
 		generateCustomClasses = false
 	}
+
 }
