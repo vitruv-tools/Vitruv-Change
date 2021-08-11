@@ -1,12 +1,10 @@
 package tools.vitruv.framework.change.description.impl
 
 import tools.vitruv.framework.change.echange.EChange
-import org.apache.log4j.Logger
 import java.util.List
 import tools.vitruv.framework.change.interaction.UserInteractionBase
 import java.util.ArrayList
 import static com.google.common.base.Preconditions.checkNotNull
-import tools.vitruv.framework.uuid.UuidResolver
 import org.eclipse.emf.ecore.EObject
 import tools.vitruv.framework.change.echange.feature.reference.RemoveEReference
 import tools.vitruv.framework.change.echange.feature.reference.InsertEReference
@@ -15,7 +13,6 @@ import tools.vitruv.framework.change.echange.eobject.EObjectExistenceEChange
 import tools.vitruv.framework.change.echange.feature.FeatureEChange
 import tools.vitruv.framework.change.echange.root.RemoveRootEObject
 import tools.vitruv.framework.change.echange.root.InsertRootEObject
-import tools.vitruv.framework.change.description.ConcreteChange
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.emf.ecore.InternalEObject
 import tools.vitruv.framework.change.echange.root.RootEChange
@@ -32,21 +29,30 @@ import tools.vitruv.framework.change.echange.feature.attribute.RemoveEAttributeV
 import java.util.Set
 import tools.vitruv.framework.change.echange.feature.attribute.UpdateAttributeEChange
 import org.eclipse.emf.common.util.URI
+import static extension tools.vitruv.framework.change.echange.resolve.EChangeResolverAndApplicator.*
+import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.mapFixed
+import tools.vitruv.framework.change.description.TransactionalChange
+import java.util.Collections
+import org.eclipse.emf.ecore.resource.ResourceSet
+import tools.vitruv.framework.change.echange.id.IdResolver
 
-class ConcreteChangeImpl implements ConcreteChange {
-	static val logger = Logger.getLogger(ConcreteChangeImpl)
-	var EChange eChange
+class TransactionalChangeImpl implements TransactionalChange {
+	var List<? extends EChange> eChanges
 	val List<UserInteractionBase> userInteractions = new ArrayList()
 
-	new(EChange eChange) {
-		this.eChange = checkNotNull(eChange, "eChange")
+	new(Iterable<? extends EChange> eChanges) {
+		this.eChanges = checkNotNull(eChanges, "eChanges").toList
+	}
+	
+	override getEChanges() {
+		return Collections.unmodifiableList(eChanges)
 	}
 
 	override containsConcreteChange() {
-		return true
+		return !eChanges.empty
 	}
 	
-	override getChangedURI() {
+	private static def getChangedURI(EChange eChange) {
 		switch(eChange) {
 			FeatureEChange<?, ?>: eChange.affectedEObject?.objectUri
 			EObjectExistenceEChange<?>: eChange.affectedEObject?.objectUri
@@ -55,30 +61,33 @@ class ConcreteChangeImpl implements ConcreteChange {
 	}
 	
 	override getChangedURIs() {
-		setOfNotNull(changedURI)
+		eChanges.map[changedURI].filterNull.toSet
 	}
 
-	override getEChange() {
-		return eChange
+	override resolveAndApply(ResourceSet resourceSet) {
+		val idResolver = IdResolver.create(resourceSet)
+		val resolvedChanges = eChanges.mapFixed[
+			val resolvedChange = resolveBefore(idResolver)
+			resolvedChange.applyForward(idResolver)
+			resolvedChange
+		]
+		return new TransactionalChangeImpl(resolvedChanges)
 	}
 
-	protected def setEChange(EChange eChange) {
-		this.eChange = eChange
+	override unresolve() {
+		val unresolvedChanges = EChanges.mapFixed[it.unresolve()]
+		return new TransactionalChangeImpl(unresolvedChanges)
 	}
 	
-	override resolveBeforeAndApplyForward(UuidResolver uuidResolver) {
-		logger.warn("The resolveBeforeAndapplyForward method is not implemented for " + this.class.simpleName + " yet.")
-	}
-
-	override resolveAfterAndApplyBackward(UuidResolver uuidResolver) {
-		logger.warn("The resolveAfterAndApplyBackward method is not implemented for " + this.class.simpleName + " yet.")
-	}
-
-	override unresolveIfApplicable() {
-		// Do nothing	
-	}
-
 	override getAffectedEObjects() {
+		eChanges.flatMap[it.affectedEObjects].toSet
+	}
+	
+	override getAffectedAndReferencedEObjects() {
+		eChanges.flatMap[it.affectedAndReferencedEObjects].toSet
+	}
+
+	private static def getAffectedEObjects(EChange eChange) {
 		switch (eChange) {
 			FeatureEChange<?, ?>: Set.of(eChange.affectedEObject)
 			EObjectExistenceEChange<?>: Set.of(eChange.affectedEObject)
@@ -87,16 +96,7 @@ class ConcreteChangeImpl implements ConcreteChange {
 		}
 	}
 	
-	override getAffectedEObjectIds() {
-		switch (eChange) {
-			FeatureEChange<?, ?>: Set.of(eChange.affectedEObjectID)
-			EObjectExistenceEChange<?>: Set.of(eChange.affectedEObjectID)
-			InsertRootEObject<?>: Set.of(eChange.newValueID)
-			RemoveRootEObject<?>: Set.of(eChange.oldValueID)
-		}
-	}
-
-	override getAffectedAndReferencedEObjects() {
+	private static def getAffectedAndReferencedEObjects(EChange eChange) {
 		switch (eChange) {
 			UpdateAttributeEChange<?>: Set.of(eChange.affectedEObject)
 			ReplaceSingleValuedEReference<?, ?>:
@@ -109,19 +109,6 @@ class ConcreteChangeImpl implements ConcreteChange {
 		}
 	}
 	
-	override getAffectedAndReferencedEObjectIds() {
-		switch (eChange) {
-			UpdateAttributeEChange<?>: Set.of(eChange.affectedEObjectID)
-			ReplaceSingleValuedEReference<?, ?>: 
-				setOfNotNull(eChange.affectedEObjectID, eChange.oldValueID, eChange.newValueID)
-			InsertEReference<?, ?>: Set.of(eChange.affectedEObjectID, eChange.newValueID)
-			RemoveEReference<?, ?>: Set.of(eChange.affectedEObjectID, eChange.oldValueID)
-			EObjectExistenceEChange<?>: Set.of(eChange.affectedEObjectID)
-			InsertRootEObject<?>: Set.of(eChange.newValueID)
-			RemoveRootEObject<?>: Set.of(eChange.oldValueID)
-		}
-	}
-
 	override getUserInteractions() {
 		return userInteractions
 	}
@@ -132,28 +119,28 @@ class ConcreteChangeImpl implements ConcreteChange {
 		this.userInteractions += userInteractions
 	}
 	
-	def protected getClonedEChange() {
-		EcoreUtil.copy(eChange)
+	def protected getClonedEChanges() {
+		eChanges.mapFixed[EcoreUtil.copy(it)]
 	}
 		
-	override ConcreteChangeImpl copy() {
-		new ConcreteChangeImpl(clonedEChange)
+	override TransactionalChangeImpl copy() {
+		new TransactionalChangeImpl(clonedEChanges)
 	}
 
 	override equals(Object obj) {
 		if (obj === this) true
 		else if (obj === null) false
-		else if (obj instanceof ConcreteChange) {
-			eChange == obj.EChange
+		else if (obj instanceof TransactionalChange) {
+			eChanges == obj.EChanges
 		} 
 		else false
 	}
 	
 	override hashCode() {
-		eChange.hashCode()
+		eChanges.hashCode()
 	}
 
-	private def getObjectUri(EObject object) {
+	private static def getObjectUri(EObject object) {
 		val objectResource = object.eResource
 		if (objectResource !== null) {
 			objectResource.URI
@@ -184,7 +171,18 @@ class ConcreteChangeImpl implements ConcreteChange {
 	}
 
     override String toString() {
-    	switch (change : eChange) {
+    	if (eChanges.isEmpty) '''«class.simpleName» (empty)'''
+		else '''
+			«class.simpleName»: [
+				«FOR eChange : eChanges»
+					«eChange.stringRepresetation»
+				«ENDFOR»
+			]
+			'''
+    }
+    
+    private def getStringRepresetation(EChange change) {
+    	switch (change) {
     		InsertRootEObject<?>: '''insert «change.newValueString» at «change.uri» (index «change.index»)'''
     		RemoveRootEObject<?>: '''remove «change.oldValueString» from «change.uri» (index «change.index»)'''
     		CreateEObject<?>: '''create «change.affectedObjectString»'''
