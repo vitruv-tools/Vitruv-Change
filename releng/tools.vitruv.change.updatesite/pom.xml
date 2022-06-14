@@ -10,8 +10,8 @@
 		<relativePath>../tools.vitruv.change.parent</relativePath>
 	</parent>
 	
-	<artifactId>tools.vitruv.updatesite</artifactId>
-	<name>Vitruv Framework Update Site</name>
+	<artifactId>tools.vitruv.change.updatesite</artifactId>
+	<name>Vitruv Change Update Site</name>
 	<packaging>eclipse-repository</packaging>
 	
 </project>
