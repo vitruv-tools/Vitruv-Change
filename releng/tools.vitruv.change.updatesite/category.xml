@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   C<feature url="features/tools.vitruv.framework.change.feature_2.1.0.qualifier.jar" id="tools.vitruv.framework.change.feature" version="2.1.0.qualifier">
+      <category name="Vitruv Change"/>
+   </feature>
+   <feature id="tools.vitruv.framework.change.feature.source" version="2.1.0.qualifier">
+      <category name="Vitruv Change"/>
+   </feature>
+   <feature url="features/tools.vitruv.testutils.feature_2.1.0.qualifier.jar" id="tools.vitruv.testutils.feature" version="2.1.0.qualifier">
+      <category name="Vitruv Change"/>
+   </feature>
+   <feature id="tools.vitruv.testutils.feature.source" version="2.1.0.qualifier">
+      <category name="Vitruv Change"/>
+   </feature>
+   <category-def name="Vitruv Change" label="Vitruv Change Specification and Propagation">
+      <description>
+         The Vitruv core for change specification and propagation
+      </description>
+   </category-def>
+</site>

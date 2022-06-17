@@ -2,12 +2,12 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   create:
     tags:
   pull_request:
   schedule:
-    - cron: '0 3 * * *' # run nightly at 3:00 am
+    - cron: '0 2 30 * *' # run nightly at 2:30 am
 
 jobs:
   build:
@@ -39,13 +39,13 @@ jobs:
         env: 
           MAVEN_OPTS: -Djansi.force=true
       - name: Publish Nightly Update Site
-        if: github.ref == 'refs/heads/master' && github.repository_owner == 'vitruv-tools'
+        if: github.ref == 'refs/heads/main' && github.repository_owner == 'vitruv-tools'
         uses: peaceiris/actions-gh-pages@v3
         with:
           deploy_key: ${{ secrets.UPDATE_SITE_DEPLOY_KEY }}
           external_repository: vitruv-tools/updatesite
-          destination_dir: nightly/framework
-          publish_dir: releng/tools.vitruv.updatesite/target/repository
+          destination_dir: nightly/change
+          publish_dir: releng/tools.vitruv.change.updatesite/target/repository
           publish_branch: master
       - name: Determine Release Version
         if: startsWith(github.ref, 'refs/tags/releases/') && github.repository_owner == 'vitruv-tools'
@@ -59,7 +59,7 @@ jobs:
         with:
           deploy_key: ${{ secrets.UPDATE_SITE_DEPLOY_KEY }}
           external_repository: vitruv-tools/updatesite
-          destination_dir: release/framework/${{ steps.releaseVersion.outputs.tag }}
-          publish_dir: releng/tools.vitruv.updatesite/target/repository
+          destination_dir: release/change/${{ steps.releaseVersion.outputs.tag }}
+          publish_dir: releng/tools.vitruv.changeupdatesite/target/repository
           publish_branch: master
           
