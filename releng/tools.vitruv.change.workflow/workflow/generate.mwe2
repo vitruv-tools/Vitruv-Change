@@ -23,7 +23,7 @@ Workflow {
 	
 	component = EcoreGenerator {
 		srcPath = "platform:/resource/tools.vitruv.change.interaction.model/src-gen"
-		genModel = "platform:/resource/tools.vitruv.change.interaction.model/model/interaction.genmodel"
+		genModel = "platform:/resource/tools.vitruv.change.interaction.model/metamodel/interaction.genmodel"
 		generateCustomClasses = false
 	}
 	
