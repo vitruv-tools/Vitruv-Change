@@ -3,7 +3,7 @@ package tools.vitruv.framework.propagation
 import tools.vitruv.change.correspondence.CorrespondenceModel
 import tools.vitruv.framework.userinteraction.UserInteractor
 import tools.vitruv.framework.propagation.ResourceAccess
-import tools.vitruv.framework.change.echange.EChange
+import tools.vitruv.change.atomic.EChange
 import tools.vitruv.framework.change.MetamodelDescriptor
 
 /**

@@ -1,7 +1,7 @@
 package tools.vitruv.framework.change.description
 
 import java.util.List
-import tools.vitruv.framework.change.echange.EChange
+import tools.vitruv.change.atomic.EChange
 import org.eclipse.emf.ecore.EObject
 import tools.vitruv.framework.change.interaction.UserInteractionBase
 import org.eclipse.emf.ecore.resource.Resource

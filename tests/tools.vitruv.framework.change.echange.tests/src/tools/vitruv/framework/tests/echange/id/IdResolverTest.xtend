@@ -19,7 +19,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil
 import static org.junit.jupiter.api.Assertions.assertThrows
 import static org.junit.jupiter.api.Assertions.assertTrue
 import org.eclipse.emf.ecore.resource.ResourceSet
-import tools.vitruv.framework.change.echange.id.IdResolver
+import tools.vitruv.change.atomic.id.IdResolver
 
 @ExtendWith(#[TestProjectManager, RegisterMetamodelsInStandalone])
 class IdResolverTest {

@@ -6,10 +6,10 @@ import org.eclipse.emf.ecore.EObject
 import tools.vitruv.framework.tests.echange.EChangeTest
 
 import static extension tools.vitruv.framework.tests.echange.util.EChangeAssertHelper.*
-import tools.vitruv.framework.change.echange.EChange
+import tools.vitruv.change.atomic.EChange
 import java.util.List
-import tools.vitruv.framework.change.echange.eobject.CreateEObject
-import tools.vitruv.framework.change.echange.root.InsertRootEObject
+import tools.vitruv.change.atomic.eobject.CreateEObject
+import tools.vitruv.change.atomic.root.InsertRootEObject
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import static org.junit.jupiter.api.Assertions.assertTrue

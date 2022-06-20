@@ -1,40 +1,40 @@
 package tools.vitruv.framework.change.description.impl
 
-import tools.vitruv.framework.change.echange.EChange
+import tools.vitruv.change.atomic.EChange
 import java.util.List
 import tools.vitruv.framework.change.interaction.UserInteractionBase
 import java.util.ArrayList
 import static com.google.common.base.Preconditions.checkNotNull
 import org.eclipse.emf.ecore.EObject
-import tools.vitruv.framework.change.echange.feature.reference.RemoveEReference
-import tools.vitruv.framework.change.echange.feature.reference.InsertEReference
-import tools.vitruv.framework.change.echange.feature.reference.ReplaceSingleValuedEReference
-import tools.vitruv.framework.change.echange.eobject.EObjectExistenceEChange
-import tools.vitruv.framework.change.echange.feature.FeatureEChange
-import tools.vitruv.framework.change.echange.root.RemoveRootEObject
-import tools.vitruv.framework.change.echange.root.InsertRootEObject
+import tools.vitruv.change.atomic.feature.reference.RemoveEReference
+import tools.vitruv.change.atomic.feature.reference.InsertEReference
+import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
+import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange
+import tools.vitruv.change.atomic.feature.FeatureEChange
+import tools.vitruv.change.atomic.root.RemoveRootEObject
+import tools.vitruv.change.atomic.root.InsertRootEObject
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.emf.ecore.InternalEObject
-import tools.vitruv.framework.change.echange.root.RootEChange
-import tools.vitruv.framework.change.echange.eobject.EObjectAddedEChange
-import tools.vitruv.framework.change.echange.eobject.EObjectSubtractedEChange
-import tools.vitruv.framework.change.echange.eobject.CreateEObject
-import tools.vitruv.framework.change.echange.eobject.DeleteEObject
-import tools.vitruv.framework.change.echange.feature.UnsetFeature
-import tools.vitruv.framework.change.echange.feature.attribute.ReplaceSingleValuedEAttribute
-import tools.vitruv.framework.change.echange.feature.reference.AdditiveReferenceEChange
-import tools.vitruv.framework.change.echange.feature.reference.SubtractiveReferenceEChange
-import tools.vitruv.framework.change.echange.feature.attribute.InsertEAttributeValue
-import tools.vitruv.framework.change.echange.feature.attribute.RemoveEAttributeValue
+import tools.vitruv.change.atomic.root.RootEChange
+import tools.vitruv.change.atomic.eobject.EObjectAddedEChange
+import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange
+import tools.vitruv.change.atomic.eobject.CreateEObject
+import tools.vitruv.change.atomic.eobject.DeleteEObject
+import tools.vitruv.change.atomic.feature.UnsetFeature
+import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute
+import tools.vitruv.change.atomic.feature.reference.AdditiveReferenceEChange
+import tools.vitruv.change.atomic.feature.reference.SubtractiveReferenceEChange
+import tools.vitruv.change.atomic.feature.attribute.InsertEAttributeValue
+import tools.vitruv.change.atomic.feature.attribute.RemoveEAttributeValue
 import java.util.Set
-import tools.vitruv.framework.change.echange.feature.attribute.UpdateAttributeEChange
+import tools.vitruv.change.atomic.feature.attribute.UpdateAttributeEChange
 import org.eclipse.emf.common.util.URI
-import static extension tools.vitruv.framework.change.echange.resolve.EChangeResolverAndApplicator.*
+import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.mapFixed
 import tools.vitruv.framework.change.description.TransactionalChange
 import java.util.Collections
 import org.eclipse.emf.ecore.resource.ResourceSet
-import tools.vitruv.framework.change.echange.id.IdResolver
+import tools.vitruv.change.atomic.id.IdResolver
 import java.util.HashSet
 import static com.google.common.base.Preconditions.checkState
 import org.eclipse.emf.ecore.EPackage

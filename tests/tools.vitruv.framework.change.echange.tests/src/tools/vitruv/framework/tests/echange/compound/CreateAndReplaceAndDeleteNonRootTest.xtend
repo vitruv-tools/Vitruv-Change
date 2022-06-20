@@ -7,11 +7,11 @@ import org.eclipse.emf.ecore.EReference
 import tools.vitruv.framework.tests.echange.feature.reference.ReferenceEChangeTest
 
 import static extension tools.vitruv.framework.tests.echange.util.EChangeAssertHelper.*
-import tools.vitruv.framework.change.echange.EChange
+import tools.vitruv.change.atomic.EChange
 import java.util.List
-import tools.vitruv.framework.change.echange.eobject.CreateEObject
-import tools.vitruv.framework.change.echange.feature.reference.ReplaceSingleValuedEReference
-import tools.vitruv.framework.change.echange.eobject.DeleteEObject
+import tools.vitruv.change.atomic.eobject.CreateEObject
+import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
+import tools.vitruv.change.atomic.eobject.DeleteEObject
 import tools.vitruv.framework.tests.echange.EChangeTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

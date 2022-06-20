@@ -1,8 +1,8 @@
 package tools.vitruv.framework.tests.echange.eobject
 
 import allElementTypes.Root
-import tools.vitruv.framework.change.echange.eobject.CreateEObject
-import tools.vitruv.framework.change.echange.eobject.EObjectExistenceEChange
+import tools.vitruv.change.atomic.eobject.CreateEObject
+import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange
 
 import org.junit.jupiter.api.Test
 import static org.junit.jupiter.api.Assertions.assertTrue

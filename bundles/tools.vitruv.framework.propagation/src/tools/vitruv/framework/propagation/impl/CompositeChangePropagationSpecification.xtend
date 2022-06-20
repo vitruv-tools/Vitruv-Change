@@ -10,7 +10,7 @@ import tools.vitruv.framework.propagation.ChangePropagationObserver
 import org.eclipse.emf.ecore.EObject
 import tools.vitruv.framework.propagation.ResourceAccess
 import org.eclipse.xtend.lib.annotations.Accessors
-import tools.vitruv.framework.change.echange.EChange
+import tools.vitruv.change.atomic.EChange
 import tools.vitruv.framework.change.MetamodelDescriptor
 
 class CompositeChangePropagationSpecification extends AbstractChangePropagationSpecification implements ChangePropagationObserver {

@@ -3,7 +3,7 @@ package tools.vitruv.framework.tests.change
 import allElementTypes.Root
 import java.util.List
 
-import tools.vitruv.framework.change.echange.EChange
+import tools.vitruv.change.atomic.EChange
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.AfterEach
@@ -23,14 +23,14 @@ import tools.vitruv.framework.change.recording.ChangeRecorder
 import tools.vitruv.framework.change.description.TransactionalChange
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.createFileURI
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.loadOrCreateResource
-import static extension tools.vitruv.framework.change.echange.resolve.EChangeResolverAndApplicator.*
+import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
 import org.eclipse.emf.ecore.util.EcoreUtil
 import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.junit.jupiter.api.Assertions.assertTrue
 import static org.junit.jupiter.api.Assertions.assertNotNull
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceUtil.getFirstRootEObject
-import tools.vitruv.framework.change.echange.id.IdResolver
+import tools.vitruv.change.atomic.id.IdResolver
 
 @ExtendWith(TestProjectManager, RegisterMetamodelsInStandalone)
 abstract class ChangeDescription2ChangeTransformationTest {

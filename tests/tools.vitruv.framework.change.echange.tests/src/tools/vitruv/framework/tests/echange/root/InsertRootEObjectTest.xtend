@@ -2,7 +2,7 @@ package tools.vitruv.framework.tests.echange.root
 
 import allElementTypes.Root
 import org.eclipse.emf.ecore.resource.Resource
-import tools.vitruv.framework.change.echange.root.InsertRootEObject
+import tools.vitruv.change.atomic.root.InsertRootEObject
 
 import org.junit.jupiter.api.Test
 import static org.junit.jupiter.api.Assertions.assertTrue

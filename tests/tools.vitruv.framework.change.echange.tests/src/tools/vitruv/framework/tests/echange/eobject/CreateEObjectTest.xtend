@@ -1,7 +1,7 @@
 package tools.vitruv.framework.tests.echange.eobject
 
 import allElementTypes.Root
-import tools.vitruv.framework.change.echange.eobject.CreateEObject
+import tools.vitruv.change.atomic.eobject.CreateEObject
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach

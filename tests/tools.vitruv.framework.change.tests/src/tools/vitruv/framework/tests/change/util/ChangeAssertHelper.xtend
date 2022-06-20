@@ -4,14 +4,14 @@ import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.resource.Resource
-import tools.vitruv.framework.change.echange.AdditiveEChange
-import tools.vitruv.framework.change.echange.EChange
-import tools.vitruv.framework.change.echange.SubtractiveEChange
-import tools.vitruv.framework.change.echange.eobject.EObjectExistenceEChange
-import tools.vitruv.framework.change.echange.feature.FeatureEChange
-import tools.vitruv.framework.change.echange.feature.list.UpdateSingleListEntryEChange
-import tools.vitruv.framework.change.echange.feature.reference.UpdateReferenceEChange
-import tools.vitruv.framework.change.echange.root.RootEChange
+import tools.vitruv.change.atomic.AdditiveEChange
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.SubtractiveEChange
+import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange
+import tools.vitruv.change.atomic.feature.FeatureEChange
+import tools.vitruv.change.atomic.feature.list.UpdateSingleListEntryEChange
+import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
+import tools.vitruv.change.atomic.root.RootEChange
 import static org.junit.jupiter.api.Assertions.assertFalse
 import static org.junit.jupiter.api.Assertions.assertNotNull
 import static org.junit.jupiter.api.Assertions.assertTrue

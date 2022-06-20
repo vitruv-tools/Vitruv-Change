@@ -3,23 +3,23 @@ package tools.vitruv.framework.tests.change.util
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.resource.Resource
-import tools.vitruv.framework.change.echange.EChange
-import tools.vitruv.framework.change.echange.eobject.CreateEObject
-import tools.vitruv.framework.change.echange.eobject.DeleteEObject
-import tools.vitruv.framework.change.echange.eobject.EObjectExistenceEChange
-import tools.vitruv.framework.change.echange.feature.attribute.InsertEAttributeValue
-import tools.vitruv.framework.change.echange.feature.attribute.RemoveEAttributeValue
-import tools.vitruv.framework.change.echange.feature.attribute.ReplaceSingleValuedEAttribute
-import tools.vitruv.framework.change.echange.feature.reference.InsertEReference
-import tools.vitruv.framework.change.echange.feature.reference.RemoveEReference
-import tools.vitruv.framework.change.echange.feature.reference.ReplaceSingleValuedEReference
-import tools.vitruv.framework.change.echange.root.InsertRootEObject
-import tools.vitruv.framework.change.echange.root.RemoveRootEObject
-import tools.vitruv.framework.change.echange.root.RootEChange
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.eobject.CreateEObject
+import tools.vitruv.change.atomic.eobject.DeleteEObject
+import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange
+import tools.vitruv.change.atomic.feature.attribute.InsertEAttributeValue
+import tools.vitruv.change.atomic.feature.attribute.RemoveEAttributeValue
+import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute
+import tools.vitruv.change.atomic.feature.reference.InsertEReference
+import tools.vitruv.change.atomic.feature.reference.RemoveEReference
+import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
+import tools.vitruv.change.atomic.root.InsertRootEObject
+import tools.vitruv.change.atomic.root.RemoveRootEObject
+import tools.vitruv.change.atomic.root.RootEChange
 
 import static extension tools.vitruv.framework.tests.change.util.ChangeAssertHelper.*
 import static extension tools.vitruv.framework.tests.change.util.CompoundEChangeAssertHelper.*
-import tools.vitruv.framework.change.echange.feature.UnsetFeature
+import tools.vitruv.change.atomic.feature.UnsetFeature
 import static org.junit.jupiter.api.Assertions.assertFalse
 import static org.junit.jupiter.api.Assertions.assertTrue
 import static org.junit.jupiter.api.Assertions.assertEquals

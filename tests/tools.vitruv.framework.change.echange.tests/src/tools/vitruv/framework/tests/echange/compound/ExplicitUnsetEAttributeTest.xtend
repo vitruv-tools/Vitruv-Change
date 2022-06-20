@@ -5,12 +5,12 @@ import allElementTypes.Root
 import java.util.List
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.ecore.EAttribute
-import tools.vitruv.framework.change.echange.feature.attribute.SubtractiveAttributeEChange
+import tools.vitruv.change.atomic.feature.attribute.SubtractiveAttributeEChange
 import tools.vitruv.framework.tests.echange.EChangeTest
 
 import static extension tools.vitruv.framework.tests.echange.util.EChangeAssertHelper.*
-import tools.vitruv.framework.change.echange.EChange
-import tools.vitruv.framework.change.echange.feature.UnsetFeature
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.feature.UnsetFeature
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import static org.junit.jupiter.api.Assertions.assertTrue

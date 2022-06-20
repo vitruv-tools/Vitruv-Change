@@ -1,9 +1,9 @@
 package tools.vitruv.framework.tests.echange.util
 
-import tools.vitruv.framework.change.echange.EChange
-import tools.vitruv.framework.change.echange.feature.attribute.ReplaceSingleValuedEAttribute
-import tools.vitruv.framework.change.echange.feature.attribute.InsertEAttributeValue
-import tools.vitruv.framework.change.echange.feature.attribute.RemoveEAttributeValue
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute
+import tools.vitruv.change.atomic.feature.attribute.InsertEAttributeValue
+import tools.vitruv.change.atomic.feature.attribute.RemoveEAttributeValue
 import static org.junit.jupiter.api.Assertions.assertTrue
 import static org.junit.jupiter.api.Assertions.assertEquals
 import static org.junit.jupiter.api.Assertions.assertSame

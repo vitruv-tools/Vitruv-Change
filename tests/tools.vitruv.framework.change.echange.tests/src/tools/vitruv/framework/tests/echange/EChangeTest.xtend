@@ -4,10 +4,10 @@ import allElementTypes.Root
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import tools.vitruv.framework.change.echange.TypeInferringAtomicEChangeFactory
-import tools.vitruv.framework.change.echange.TypeInferringCompoundEChangeFactory
+import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory
+import tools.vitruv.change.atomic.TypeInferringCompoundEChangeFactory
 import java.util.List
-import tools.vitruv.framework.change.echange.EChange
+import tools.vitruv.change.atomic.EChange
 import org.junit.jupiter.api.BeforeEach
 import static org.junit.jupiter.api.Assertions.assertFalse
 import static org.junit.jupiter.api.Assertions.assertTrue
@@ -17,9 +17,9 @@ import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 import java.nio.file.Path
 import org.junit.jupiter.api.io.TempDir
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.createFileURI
-import static extension tools.vitruv.framework.change.echange.resolve.EChangeResolverAndApplicator.*
+import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
 import tools.vitruv.framework.tests.echange.util.EChangeAssertHelper
-import tools.vitruv.framework.change.echange.id.IdResolver
+import tools.vitruv.change.atomic.id.IdResolver
 
 /**
  * Default class for testing EChange changes.

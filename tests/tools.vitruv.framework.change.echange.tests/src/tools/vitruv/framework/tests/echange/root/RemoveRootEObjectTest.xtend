@@ -2,7 +2,7 @@ package tools.vitruv.framework.tests.echange.root
 
 import allElementTypes.Root
 import org.eclipse.emf.ecore.resource.Resource
-import tools.vitruv.framework.change.echange.root.RemoveRootEObject
+import tools.vitruv.change.atomic.root.RemoveRootEObject
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -3,7 +3,7 @@ package tools.vitruv.framework.tests.change.util
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.resource.Resource
-import tools.vitruv.framework.change.echange.EChange
+import tools.vitruv.change.atomic.EChange
 
 import static extension tools.vitruv.framework.tests.change.util.AtomicEChangeAssertHelper.*
 import static extension tools.vitruv.framework.tests.change.util.ChangeAssertHelper.*

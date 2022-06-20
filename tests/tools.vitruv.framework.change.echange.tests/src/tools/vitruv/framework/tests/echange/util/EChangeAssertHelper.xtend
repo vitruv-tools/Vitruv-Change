@@ -1,6 +1,6 @@
 package tools.vitruv.framework.tests.echange.util
 
-import tools.vitruv.framework.change.echange.EChange
+import tools.vitruv.change.atomic.EChange
 import java.util.List
 import static org.junit.jupiter.api.Assertions.assertTrue
 import static org.junit.jupiter.api.Assertions.assertFalse
@@ -11,9 +11,9 @@ import static org.junit.jupiter.api.Assertions.assertNotSame
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.core.IsInstanceOf.instanceOf
 import static org.hamcrest.core.Is.is
-import static extension tools.vitruv.framework.change.echange.resolve.EChangeResolverAndApplicator.*
+import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
-import tools.vitruv.framework.change.echange.id.IdResolver
+import tools.vitruv.change.atomic.id.IdResolver
 
 /**
  * Utility class for frequently used assert methods in the tests.

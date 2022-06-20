@@ -5,7 +5,7 @@ import allElementTypes.NonRoot
 import allElementTypes.Root
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
-import tools.vitruv.framework.change.echange.feature.reference.ReplaceSingleValuedEReference
+import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

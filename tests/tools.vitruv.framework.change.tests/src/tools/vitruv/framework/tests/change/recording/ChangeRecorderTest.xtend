@@ -12,18 +12,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.eclipse.emf.common.util.URI
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
-import tools.vitruv.framework.change.echange.EChange
+import tools.vitruv.change.atomic.EChange
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 import tools.vitruv.framework.change.description.TransactionalChange
-import tools.vitruv.framework.change.echange.feature.attribute.ReplaceSingleValuedEAttribute
-import tools.vitruv.framework.change.echange.eobject.CreateEObject
-import tools.vitruv.framework.change.echange.root.InsertRootEObject
+import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute
+import tools.vitruv.change.atomic.eobject.CreateEObject
+import tools.vitruv.change.atomic.root.InsertRootEObject
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import java.util.List
-import tools.vitruv.framework.change.echange.root.RemoveRootEObject
-import tools.vitruv.framework.change.echange.eobject.DeleteEObject
-import tools.vitruv.framework.change.echange.feature.reference.InsertEReference
+import tools.vitruv.change.atomic.root.RemoveRootEObject
+import tools.vitruv.change.atomic.eobject.DeleteEObject
+import tools.vitruv.change.atomic.feature.reference.InsertEReference
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import tools.vitruv.testutils.TestProject
@@ -37,8 +37,8 @@ import org.eclipse.emf.ecore.InternalEObject
 import org.eclipse.emf.ecore.EObject
 import static tools.vitruv.testutils.matchers.ModelMatchers.*
 import org.eclipse.emf.ecore.util.EcoreUtil
-import tools.vitruv.framework.change.echange.feature.reference.RemoveEReference
-import tools.vitruv.framework.change.echange.feature.reference.ReplaceSingleValuedEReference
+import tools.vitruv.change.atomic.feature.reference.RemoveEReference
+import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
 
 @ExtendWith(TestProjectManager, RegisterMetamodelsInStandalone)
 class ChangeRecorderTest {

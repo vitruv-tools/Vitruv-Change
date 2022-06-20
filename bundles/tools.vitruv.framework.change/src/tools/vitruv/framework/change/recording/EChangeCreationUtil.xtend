@@ -8,10 +8,10 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.change.ChangeDescription
 import org.eclipse.emf.ecore.resource.Resource
-import tools.vitruv.framework.change.echange.EChange
-import tools.vitruv.framework.change.echange.TypeInferringAtomicEChangeFactory
-import tools.vitruv.framework.change.echange.TypeInferringCompoundEChangeFactory
-import tools.vitruv.framework.change.echange.feature.attribute.AdditiveAttributeEChange
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory
+import tools.vitruv.change.atomic.TypeInferringCompoundEChangeFactory
+import tools.vitruv.change.atomic.feature.attribute.AdditiveAttributeEChange
 
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.EObjectUtil.*
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.*

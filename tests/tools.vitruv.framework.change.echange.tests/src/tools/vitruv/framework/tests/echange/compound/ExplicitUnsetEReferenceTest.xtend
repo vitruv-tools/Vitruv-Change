@@ -8,15 +8,15 @@ import java.util.ArrayList
 import java.util.List
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.ecore.EReference
-import tools.vitruv.framework.change.echange.EChange
-import tools.vitruv.framework.change.echange.feature.reference.SubtractiveReferenceEChange
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.feature.reference.SubtractiveReferenceEChange
 import tools.vitruv.framework.tests.echange.EChangeTest
 
 import static extension tools.vitruv.framework.tests.echange.util.EChangeAssertHelper.*
-import tools.vitruv.framework.change.echange.feature.reference.RemoveEReference
-import tools.vitruv.framework.change.echange.eobject.DeleteEObject
+import tools.vitruv.change.atomic.feature.reference.RemoveEReference
+import tools.vitruv.change.atomic.eobject.DeleteEObject
 import org.eclipse.emf.ecore.EObject
-import tools.vitruv.framework.change.echange.feature.reference.ReplaceSingleValuedEReference
+import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import static org.junit.jupiter.api.Assertions.assertTrue

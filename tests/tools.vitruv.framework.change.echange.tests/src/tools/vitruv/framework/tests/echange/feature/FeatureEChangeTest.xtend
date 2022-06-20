@@ -7,11 +7,11 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.util.EcoreUtil
-import tools.vitruv.framework.change.echange.EChange
-import tools.vitruv.framework.change.echange.feature.FeatureEChange
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.feature.FeatureEChange
 import tools.vitruv.framework.tests.echange.EChangeTest
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import tools.vitruv.framework.change.echange.id.IdResolver
+import tools.vitruv.change.atomic.id.IdResolver
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertSame
 import static org.junit.jupiter.api.Assertions.assertNotSame
 import static org.junit.jupiter.api.Assertions.assertThrows
 import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
-import static extension tools.vitruv.framework.change.echange.resolve.EChangeResolverAndApplicator.*
+import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
 
 /**
  * Test class for {@link FeatureEChange} which is used by every {@link EChange} which modifies {@link EStructuralFeature}s 

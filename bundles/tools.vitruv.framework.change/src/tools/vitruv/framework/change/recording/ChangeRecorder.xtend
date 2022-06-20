@@ -13,26 +13,26 @@ import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import tools.vitruv.framework.change.description.TransactionalChange
 import tools.vitruv.framework.change.description.VitruviusChangeFactory
-import tools.vitruv.framework.change.echange.EChangeIdManager
-import tools.vitruv.framework.change.echange.eobject.EObjectAddedEChange
-import tools.vitruv.framework.change.echange.eobject.EObjectSubtractedEChange
+import tools.vitruv.change.atomic.EChangeIdManager
+import tools.vitruv.change.atomic.eobject.EObjectAddedEChange
+import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange
 
 import static com.google.common.base.Preconditions.checkState
 import static org.eclipse.emf.common.notify.Notification.*
 
 import static extension org.eclipse.emf.ecore.util.EcoreUtil.*
-import static extension tools.vitruv.framework.change.echange.EChangeUtil.*
+import static extension tools.vitruv.change.atomic.EChangeUtil.*
 import org.eclipse.emf.ecore.EReference
 import static com.google.common.base.Preconditions.checkNotNull
 import static com.google.common.base.Preconditions.checkArgument
 import static extension org.eclipse.emf.ecore.resource.Resource.RESOURCE__CONTENTS
 import static extension org.eclipse.emf.ecore.resource.Resource.RESOURCE__IS_LOADED
 import static extension org.eclipse.emf.ecore.resource.ResourceSet.RESOURCE_SET__RESOURCES
-import static extension tools.vitruv.framework.change.echange.resolve.EChangeResolverAndApplicator.applyForward
-import static extension tools.vitruv.framework.change.echange.resolve.EChangeResolverAndApplicator.applyBackward
-import tools.vitruv.framework.change.echange.id.IdResolver
-import tools.vitruv.framework.change.echange.feature.reference.UpdateReferenceEChange
-import tools.vitruv.framework.change.echange.EChange
+import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.applyForward
+import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.applyBackward
+import tools.vitruv.change.atomic.id.IdResolver
+import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
+import tools.vitruv.change.atomic.EChange
 
 /**
  * Records changes to model elements as a {@link TransactionalChange}.

@@ -2,19 +2,19 @@ package tools.vitruv.framework.change.recording
 
 import java.util.List
 import org.eclipse.emf.ecore.EObject
-import tools.vitruv.framework.change.echange.EChange
-import tools.vitruv.framework.change.echange.feature.attribute.AttributeFactory
-import tools.vitruv.framework.change.echange.TypeInferringAtomicEChangeFactory
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.feature.attribute.AttributeFactory
+import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.resource.Resource
-import tools.vitruv.framework.change.echange.eobject.EObjectAddedEChange
-import tools.vitruv.framework.change.echange.eobject.EObjectSubtractedEChange
+import tools.vitruv.change.atomic.eobject.EObjectAddedEChange
+import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange
 import static org.eclipse.emf.common.notify.Notification.*
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.*
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.common.util.URI
-import tools.vitruv.framework.change.echange.feature.reference.UpdateReferenceEChange
+import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
 import static extension tools.vitruv.framework.change.recording.EChangeCreationUtil.*
 
 /** 

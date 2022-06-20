@@ -6,7 +6,7 @@ import allElementTypes.Root
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
-import tools.vitruv.framework.change.echange.feature.reference.RemoveEReference
+import tools.vitruv.change.atomic.feature.reference.RemoveEReference
 
 import org.junit.jupiter.api.Test
 import static org.junit.jupiter.api.Assertions.assertTrue
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotSame
 import static org.junit.jupiter.api.Assertions.assertThrows
 import static org.hamcrest.MatcherAssert.assertThat
 import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
-import static extension tools.vitruv.framework.change.echange.resolve.EChangeResolverAndApplicator.*
+import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
 
 /**
  * Test class for the concrete {@link RemoveEReference} EChange, 

@@ -3,15 +3,15 @@ package tools.vitruv.framework.tests.echange
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 
-import static extension tools.vitruv.framework.change.echange.resolve.EChangeResolverAndApplicator.unresolve
+import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.unresolve
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.common.util.URI
-import tools.vitruv.framework.change.echange.TypeInferringAtomicEChangeFactory
-import tools.vitruv.framework.change.echange.EChangeIdManager
-import tools.vitruv.framework.change.echange.EChange
-import tools.vitruv.framework.change.echange.id.IdResolver
+import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory
+import tools.vitruv.change.atomic.EChangeIdManager
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.id.IdResolver
 
 /**
  * Factory singleton class for elements of change models.

@@ -1,12 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Vitruv Framework Atomic Change Tests
-Bundle-SymbolicName: tools.vitruv.framework.change.echange.tests
-Automatic-Module-Name: tools.vitruv.framework.change.echange.tests
+Bundle-SymbolicName: tools.vitruv.change.atomic.tests
+Automatic-Module-Name: tools.vitruv.change.atomic.tests
 Bundle-Version: 2.1.0.qualifier
 Bundle-Vendor: vitruv.tools
 Bundle-RequiredExecutionEnvironment: JavaSE-11
-Fragment-Host: tools.vitruv.framework.change.echange
+Fragment-Host: tools.vitruv.change.atomic
 Require-Bundle: org.junit.jupiter.api,
  org.eclipse.xtend.lib,
  tools.vitruv.testutils.metamodels,

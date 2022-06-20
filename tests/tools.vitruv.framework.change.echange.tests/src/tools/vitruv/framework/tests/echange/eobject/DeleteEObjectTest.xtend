@@ -1,7 +1,7 @@
 package tools.vitruv.framework.tests.echange.eobject
 
 import allElementTypes.Root
-import tools.vitruv.framework.change.echange.eobject.DeleteEObject
+import tools.vitruv.change.atomic.eobject.DeleteEObject
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
