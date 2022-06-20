@@ -8,7 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.apache.log4j,
  org.eclipse.xtend.lib,
  tools.vitruv.change.correspondence;visibility:=reexport,
- tools.vitruv.framework.userinteraction;visibility:=reexport,
+ tools.vitruv.change.interaction;visibility:=reexport,
  tools.vitruv.change.composite;visibility:=reexport,
  edu.kit.ipd.sdq.commons.util.java
 Export-Package: tools.vitruv.change.propagation,

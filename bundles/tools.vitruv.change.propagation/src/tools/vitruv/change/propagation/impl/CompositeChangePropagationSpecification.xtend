@@ -3,7 +3,7 @@ package tools.vitruv.change.propagation.impl
 import tools.vitruv.change.correspondence.CorrespondenceModel
 import java.util.List
 import java.util.ArrayList
-import tools.vitruv.framework.userinteraction.UserInteractor
+import tools.vitruv.change.interaction.UserInteractor
 import tools.vitruv.change.propagation.ChangePropagationSpecification
 import org.apache.log4j.Logger
 import tools.vitruv.change.propagation.ChangePropagationObserver

@@ -13,9 +13,9 @@ import tools.vitruv.change.interaction.UserInteractionBase
 import tools.vitruv.change.propagation.ChangePropagationObserver
 import tools.vitruv.change.propagation.ChangePropagationSpecification
 import tools.vitruv.change.propagation.ChangePropagationSpecificationProvider
-import tools.vitruv.framework.userinteraction.InternalUserInteractor
-import tools.vitruv.framework.userinteraction.UserInteractionFactory
-import tools.vitruv.framework.userinteraction.UserInteractionListener
+import tools.vitruv.change.interaction.InternalUserInteractor
+import tools.vitruv.change.interaction.UserInteractionFactory
+import tools.vitruv.change.interaction.UserInteractionListener
 
 import static com.google.common.base.Preconditions.checkState
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor

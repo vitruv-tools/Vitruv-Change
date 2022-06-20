@@ -9,8 +9,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import tools.vitruv.framework.userinteraction.UserInteractionFactory;
-import tools.vitruv.framework.userinteraction.UserInteractor;
+
+import tools.vitruv.change.interaction.UserInteractor;
+import tools.vitruv.change.interaction.UserInteractionFactory;
 import tools.vitruv.testutils.TestUserInteraction.ResultProvider;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;

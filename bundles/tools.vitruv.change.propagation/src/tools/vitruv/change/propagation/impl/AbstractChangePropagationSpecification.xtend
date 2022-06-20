@@ -1,6 +1,6 @@
 package tools.vitruv.change.propagation.impl
 
-import tools.vitruv.framework.userinteraction.UserInteractor
+import tools.vitruv.change.interaction.UserInteractor
 import tools.vitruv.change.propagation.ChangePropagationSpecification
 import tools.vitruv.change.propagation.ChangePropagationObserver
 import java.util.List
