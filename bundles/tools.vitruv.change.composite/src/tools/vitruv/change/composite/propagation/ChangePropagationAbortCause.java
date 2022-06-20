@@ -1,4 +1,4 @@
-package tools.vitruv.framework.change.propagation;
+package tools.vitruv.change.composite.propagation;
 
 /**
  * Marker interface for all classes, which could become a cause for a

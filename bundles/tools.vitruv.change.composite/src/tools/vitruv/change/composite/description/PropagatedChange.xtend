@@ -1,4 +1,4 @@
-package tools.vitruv.framework.change.description
+package tools.vitruv.change.composite.description
 
 import org.eclipse.xtend.lib.annotations.Data
 

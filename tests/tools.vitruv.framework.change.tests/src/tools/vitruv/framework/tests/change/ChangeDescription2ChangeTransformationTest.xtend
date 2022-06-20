@@ -19,8 +19,8 @@ import java.nio.file.Path
 import tools.vitruv.testutils.RegisterMetamodelsInStandalone
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
-import tools.vitruv.framework.change.recording.ChangeRecorder
-import tools.vitruv.framework.change.description.TransactionalChange
+import tools.vitruv.change.composite.recording.ChangeRecorder
+import tools.vitruv.change.composite.description.TransactionalChange
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.createFileURI
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.loadOrCreateResource
 import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*

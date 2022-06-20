@@ -1,4 +1,4 @@
-package tools.vitruv.framework.change.recording
+package tools.vitruv.change.composite.recording
 
 import java.util.ArrayList
 import java.util.HashSet
@@ -11,8 +11,8 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
-import tools.vitruv.framework.change.description.TransactionalChange
-import tools.vitruv.framework.change.description.VitruviusChangeFactory
+import tools.vitruv.change.composite.description.TransactionalChange
+import tools.vitruv.change.composite.description.VitruviusChangeFactory
 import tools.vitruv.change.atomic.EChangeIdManager
 import tools.vitruv.change.atomic.eobject.EObjectAddedEChange
 import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange

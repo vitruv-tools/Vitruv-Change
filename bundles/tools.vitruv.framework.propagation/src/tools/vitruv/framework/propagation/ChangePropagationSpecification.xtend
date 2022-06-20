@@ -4,7 +4,7 @@ import tools.vitruv.change.correspondence.CorrespondenceModel
 import tools.vitruv.framework.userinteraction.UserInteractor
 import tools.vitruv.framework.propagation.ResourceAccess
 import tools.vitruv.change.atomic.EChange
-import tools.vitruv.framework.change.MetamodelDescriptor
+import tools.vitruv.change.composite.MetamodelDescriptor
 
 /**
  * A specification of change propagation, which is able to process changes

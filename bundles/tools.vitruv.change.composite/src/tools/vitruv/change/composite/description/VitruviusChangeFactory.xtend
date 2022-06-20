@@ -1,8 +1,8 @@
-package tools.vitruv.framework.change.description
+package tools.vitruv.change.composite.description
 
-import tools.vitruv.framework.change.description.impl.CompositeContainerChangeImpl
+import tools.vitruv.change.composite.description.impl.CompositeContainerChangeImpl
 import tools.vitruv.change.atomic.EChange
-import tools.vitruv.framework.change.description.impl.TransactionalChangeImpl
+import tools.vitruv.change.composite.description.impl.TransactionalChangeImpl
 
 class VitruviusChangeFactory {
 	static VitruviusChangeFactory instance;

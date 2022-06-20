@@ -1,4 +1,4 @@
-package tools.vitruv.framework.change.description.impl
+package tools.vitruv.change.composite.description.impl
 
 import tools.vitruv.change.atomic.EChange
 import java.util.List
@@ -31,14 +31,14 @@ import tools.vitruv.change.atomic.feature.attribute.UpdateAttributeEChange
 import org.eclipse.emf.common.util.URI
 import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.mapFixed
-import tools.vitruv.framework.change.description.TransactionalChange
+import tools.vitruv.change.composite.description.TransactionalChange
 import java.util.Collections
 import org.eclipse.emf.ecore.resource.ResourceSet
 import tools.vitruv.change.atomic.id.IdResolver
 import java.util.HashSet
 import static com.google.common.base.Preconditions.checkState
 import org.eclipse.emf.ecore.EPackage
-import tools.vitruv.framework.change.MetamodelDescriptor
+import tools.vitruv.change.composite.MetamodelDescriptor
 
 class TransactionalChangeImpl implements TransactionalChange {
 	var List<? extends EChange> eChanges

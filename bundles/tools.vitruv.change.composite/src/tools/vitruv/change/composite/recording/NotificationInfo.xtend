@@ -1,4 +1,4 @@
-package tools.vitruv.framework.change.recording
+package tools.vitruv.change.composite.recording
 
 import java.lang.reflect.Field
 import org.eclipse.emf.common.notify.Notification

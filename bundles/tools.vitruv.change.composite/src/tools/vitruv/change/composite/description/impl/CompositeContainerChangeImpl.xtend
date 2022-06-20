@@ -1,7 +1,7 @@
-package tools.vitruv.framework.change.description.impl
+package tools.vitruv.change.composite.description.impl
 
-import tools.vitruv.framework.change.description.CompositeContainerChange
-import tools.vitruv.framework.change.description.VitruviusChange
+import tools.vitruv.change.composite.description.CompositeContainerChange
+import tools.vitruv.change.composite.description.VitruviusChange
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.*
 import java.util.List
 import org.eclipse.emf.ecore.resource.ResourceSet

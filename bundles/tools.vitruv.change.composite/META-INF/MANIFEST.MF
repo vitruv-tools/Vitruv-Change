@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Vitruv Framework Change Metamodel
-Bundle-SymbolicName: tools.vitruv.framework.change
-Automatic-Module-Name: tools.vitruv.framework.change
+Bundle-Name: Vitruv Composite Change Metamodel
+Bundle-SymbolicName: tools.vitruv.change.composite
+Automatic-Module-Name: tools.vitruv.change.composite
 Bundle-Version: 2.1.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.apache.log4j,
@@ -13,8 +13,8 @@ Require-Bundle: org.apache.log4j,
  edu.kit.ipd.sdq.activextendannotations,
  edu.kit.ipd.sdq.commons.util.java,
  edu.kit.ipd.sdq.commons.util.emf
-Export-Package: tools.vitruv.framework.change,
- tools.vitruv.framework.change.description,
- tools.vitruv.framework.change.propagation,
- tools.vitruv.framework.change.recording
+Export-Package: tools.vitruv.change.composite,
+ tools.vitruv.change.composite.propagation,
+ tools.vitruv.change.composite.recording,
+ tools.vitruv.change.composite.description
 Bundle-Vendor: vitruv.tools

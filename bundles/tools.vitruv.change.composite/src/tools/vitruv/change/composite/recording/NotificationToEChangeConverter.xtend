@@ -1,4 +1,4 @@
-package tools.vitruv.framework.change.recording
+package tools.vitruv.change.composite.recording
 
 import java.util.List
 import org.eclipse.emf.ecore.EObject
@@ -15,7 +15,7 @@ import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.common.util.URI
 import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
-import static extension tools.vitruv.framework.change.recording.EChangeCreationUtil.*
+import static extension tools.vitruv.change.composite.recording.EChangeCreationUtil.*
 
 /** 
  * Converts an EMF notification to an {@link EChange}.

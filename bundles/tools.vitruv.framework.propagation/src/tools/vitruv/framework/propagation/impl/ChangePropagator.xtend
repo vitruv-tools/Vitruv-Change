@@ -4,11 +4,11 @@ import java.util.ArrayList
 import java.util.List
 import org.apache.log4j.Logger
 import org.eclipse.emf.ecore.EObject
-import tools.vitruv.framework.change.description.CompositeChange
-import tools.vitruv.framework.change.description.PropagatedChange
-import tools.vitruv.framework.change.description.TransactionalChange
-import tools.vitruv.framework.change.description.VitruviusChange
-import tools.vitruv.framework.change.description.VitruviusChangeFactory
+import tools.vitruv.change.composite.description.CompositeChange
+import tools.vitruv.change.composite.description.PropagatedChange
+import tools.vitruv.change.composite.description.TransactionalChange
+import tools.vitruv.change.composite.description.VitruviusChange
+import tools.vitruv.change.composite.description.VitruviusChangeFactory
 import tools.vitruv.framework.change.interaction.UserInteractionBase
 import tools.vitruv.framework.propagation.ChangePropagationObserver
 import tools.vitruv.framework.propagation.ChangePropagationSpecification

@@ -1,4 +1,4 @@
-package tools.vitruv.framework.change.description
+package tools.vitruv.change.composite.description
 
 import java.util.List
 import tools.vitruv.change.atomic.EChange
@@ -8,7 +8,7 @@ import org.eclipse.emf.ecore.resource.Resource
 import java.util.Set
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.ResourceSet
-import tools.vitruv.framework.change.MetamodelDescriptor
+import tools.vitruv.change.composite.MetamodelDescriptor
 
 /** 
  * Base interface for all kinds of changes in Vitruvius.

@@ -1,9 +1,9 @@
-package tools.vitruv.framework.change.propagation;
+package tools.vitruv.change.composite.propagation;
 
 import java.util.List;
 
-import tools.vitruv.framework.change.description.PropagatedChange;
-import tools.vitruv.framework.change.description.VitruviusChange;
+import tools.vitruv.change.composite.description.PropagatedChange;
+import tools.vitruv.change.composite.description.VitruviusChange;
 
 /**
  * A model repository that can be changed by applying @{link VitruviusChange}s.

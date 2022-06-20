@@ -1,8 +1,8 @@
-package tools.vitruv.framework.change.description
+package tools.vitruv.change.composite.description
 
 import java.util.List
-import tools.vitruv.framework.change.description.VitruviusChange
-import tools.vitruv.framework.change.MetamodelDescriptor
+import tools.vitruv.change.composite.description.VitruviusChange
+import tools.vitruv.change.composite.MetamodelDescriptor
 import java.util.Set
 
 interface CompositeChange<C extends VitruviusChange> extends VitruviusChange {

@@ -1,7 +1,7 @@
 package tools.vitruv.framework.tests.change.recording
 
 import org.junit.jupiter.api.Test
-import tools.vitruv.framework.change.recording.ChangeRecorder
+import tools.vitruv.change.composite.recording.ChangeRecorder
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.junit.jupiter.api.DisplayName
@@ -15,7 +15,7 @@ import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resou
 import tools.vitruv.change.atomic.EChange
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
-import tools.vitruv.framework.change.description.TransactionalChange
+import tools.vitruv.change.composite.description.TransactionalChange
 import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute
 import tools.vitruv.change.atomic.eobject.CreateEObject
 import tools.vitruv.change.atomic.root.InsertRootEObject

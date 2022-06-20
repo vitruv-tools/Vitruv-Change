@@ -5,7 +5,7 @@ Bundle-SymbolicName: tools.vitruv.framework.change.tests
 Automatic-Module-Name: tools.vitruv.framework.change.tests
 Bundle-Version: 2.1.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-11
-Fragment-Host: tools.vitruv.framework.change
+Fragment-Host: tools.vitruv.change.composite
 Require-Bundle: org.junit.jupiter.api,
  org.hamcrest.core,
  org.eclipse.xtend.lib,

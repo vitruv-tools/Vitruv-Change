@@ -1,6 +1,6 @@
 package tools.vitruv.framework.propagation;
 
-import tools.vitruv.framework.change.description.VitruviusChange;
+import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.correspondence.CorrespondenceModel;
 
 public interface ChangeRecordingModelRepository extends ResourceAccess, AutoCloseable {

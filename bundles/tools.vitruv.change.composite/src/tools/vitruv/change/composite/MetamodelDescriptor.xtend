@@ -1,4 +1,4 @@
-package tools.vitruv.framework.change
+package tools.vitruv.change.composite
 
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtend.lib.annotations.Accessors

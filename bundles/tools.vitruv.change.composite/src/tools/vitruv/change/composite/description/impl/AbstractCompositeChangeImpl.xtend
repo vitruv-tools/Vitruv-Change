@@ -1,13 +1,13 @@
-package tools.vitruv.framework.change.description.impl
+package tools.vitruv.change.composite.description.impl
 
 import java.util.List
-import tools.vitruv.framework.change.description.CompositeChange
-import tools.vitruv.framework.change.description.VitruviusChange
+import tools.vitruv.change.composite.description.CompositeChange
+import tools.vitruv.change.composite.description.VitruviusChange
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.*
 import java.util.LinkedHashSet
 import java.util.Set
 import java.util.HashSet
-import tools.vitruv.framework.change.MetamodelDescriptor
+import tools.vitruv.change.composite.MetamodelDescriptor
 
 abstract class AbstractCompositeChangeImpl<C extends VitruviusChange> implements CompositeChange<C> {
 	List<C> changes

@@ -1,4 +1,4 @@
-package tools.vitruv.framework.change.recording
+package tools.vitruv.change.composite.recording
 
 import java.util.List
 import org.eclipse.emf.common.util.EList

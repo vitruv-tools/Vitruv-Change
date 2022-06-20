@@ -9,7 +9,7 @@ Require-Bundle: org.apache.log4j,
  org.eclipse.xtend.lib,
  tools.vitruv.change.correspondence;visibility:=reexport,
  tools.vitruv.framework.userinteraction;visibility:=reexport,
- tools.vitruv.framework.change;visibility:=reexport,
+ tools.vitruv.change.composite;visibility:=reexport,
  edu.kit.ipd.sdq.commons.util.java
 Export-Package: tools.vitruv.framework.propagation,
  tools.vitruv.framework.propagation.impl

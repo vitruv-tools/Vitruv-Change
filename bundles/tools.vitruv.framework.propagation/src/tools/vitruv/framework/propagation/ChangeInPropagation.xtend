@@ -1,7 +1,7 @@
 package tools.vitruv.framework.propagation
 
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
-import tools.vitruv.framework.change.description.TransactionalChange
+import tools.vitruv.change.composite.description.TransactionalChange
 import org.eclipse.xtend.lib.annotations.Accessors
 
 /**
