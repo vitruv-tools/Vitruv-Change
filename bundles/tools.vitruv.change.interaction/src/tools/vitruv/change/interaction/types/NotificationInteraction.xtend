@@ -2,7 +2,7 @@ package tools.vitruv.change.interaction.types
 
 import tools.vitruv.change.interaction.UserInteractionOptions.NotificationType
 import tools.vitruv.change.interaction.NotificationUserInteraction
-import tools.vitruv.change.interaction.impl.InteractionFactoryImpl
+import tools.vitruv.change.interaction.InteractionFactory
 import tools.vitruv.change.interaction.UserInteractionOptions.WindowModality
 import tools.vitruv.change.interaction.InteractionResultProvider
 
@@ -30,7 +30,7 @@ class NotificationInteraction extends BaseInteraction<NotificationUserInteractio
 	override startInteraction() {
 		interactionResultProvider.getNotificationInteractionResult(windowModality, title, message, positiveButtonText,
 			notificationType);
-		val userInput = InteractionFactoryImpl.eINSTANCE.createNotificationUserInteraction()
+		val userInput = InteractionFactory.eINSTANCE.createNotificationUserInteraction()
 		userInput.message = message
 		return userInput;
 	}

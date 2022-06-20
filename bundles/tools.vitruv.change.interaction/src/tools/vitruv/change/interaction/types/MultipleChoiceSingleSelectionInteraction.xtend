@@ -1,6 +1,6 @@
 package tools.vitruv.change.interaction.types
 
-import tools.vitruv.change.interaction.impl.InteractionFactoryImpl;
+import tools.vitruv.change.interaction.InteractionFactory
 import tools.vitruv.change.interaction.MultipleChoiceSingleSelectionUserInteraction
 import tools.vitruv.change.interaction.UserInteractionOptions.WindowModality
 import tools.vitruv.change.interaction.InteractionResultProvider
@@ -21,7 +21,7 @@ class MultipleChoiceSingleSelectionInteraction extends MultipleChoiceSelectionIn
 		val result = interactionResultProvider.
 			getMultipleChoiceSingleSelectionInteractionResult(windowModality, title, message, positiveButtonText,
 				cancelButtonText, choices)
-		val userInput = InteractionFactoryImpl.eINSTANCE.createMultipleChoiceSingleSelectionUserInteraction()
+		val userInput = InteractionFactory.eINSTANCE.createMultipleChoiceSingleSelectionUserInteraction()
 		userInput.message = message
 		userInput.choices.addAll(choices)
 		userInput.selectedIndex = result

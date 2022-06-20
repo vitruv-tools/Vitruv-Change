@@ -3,7 +3,7 @@ package tools.vitruv.change.interaction.types
 import tools.vitruv.change.interaction.UserInteractionOptions.WindowModality
 import tools.vitruv.change.interaction.UserInteractionOptions.InputFieldType
 import tools.vitruv.change.interaction.FreeTextUserInteraction
-import tools.vitruv.change.interaction.impl.InteractionFactoryImpl
+import tools.vitruv.change.interaction.InteractionFactory
 import tools.vitruv.change.interaction.InteractionResultProvider
 import tools.vitruv.change.interaction.UserInteractionOptions.InputValidator
 
@@ -53,7 +53,7 @@ class TextInputInteraction extends BaseInteraction<FreeTextUserInteraction> {
 	override startInteraction() {
 		val result = interactionResultProvider.getTextInputInteractionResult(windowModality, title, message,
 			positiveButtonText, cancelButtonText, inputValidator);
-		val userInput = InteractionFactoryImpl.eINSTANCE.createFreeTextUserInteraction()
+		val userInput = InteractionFactory.eINSTANCE.createFreeTextUserInteraction()
 		userInput.message = message
 		userInput.text = result
 		return userInput;

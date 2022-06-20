@@ -1,7 +1,5 @@
 package tools.vitruv.change.interaction;
 
-import tools.vitruv.change.interaction.UserInteractionBase;
-
 /**
  * A listener for getting notification about user interaction events.
  * 

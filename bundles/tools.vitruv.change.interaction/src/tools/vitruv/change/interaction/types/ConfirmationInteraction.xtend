@@ -1,7 +1,7 @@
 package tools.vitruv.change.interaction.types
 
 import tools.vitruv.change.interaction.ConfirmationUserInteraction
-import tools.vitruv.change.interaction.impl.InteractionFactoryImpl
+import tools.vitruv.change.interaction.InteractionFactory
 import tools.vitruv.change.interaction.UserInteractionOptions.WindowModality
 import tools.vitruv.change.interaction.InteractionResultProvider
 
@@ -22,7 +22,7 @@ class ConfirmationInteraction extends BaseInteraction<ConfirmationUserInteractio
 	override startInteraction() {
 		val result = interactionResultProvider.getConfirmationInteractionResult(windowModality, title, message,
 			positiveButtonText, negativeButtonText, cancelButtonText);
-		var userInput = InteractionFactoryImpl.eINSTANCE.createConfirmationUserInteraction()
+		var userInput = InteractionFactory.eINSTANCE.createConfirmationUserInteraction()
 		userInput.message = message
 		userInput.confirmed = result;
 		return userInput;
