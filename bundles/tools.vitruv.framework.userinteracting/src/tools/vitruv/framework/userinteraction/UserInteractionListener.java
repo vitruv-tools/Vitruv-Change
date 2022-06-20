@@ -1,6 +1,6 @@
 package tools.vitruv.framework.userinteraction;
 
-import tools.vitruv.framework.change.interaction.UserInteractionBase;
+import tools.vitruv.change.interaction.UserInteractionBase;
 
 /**
  * A listener for getting notification about user interaction events.

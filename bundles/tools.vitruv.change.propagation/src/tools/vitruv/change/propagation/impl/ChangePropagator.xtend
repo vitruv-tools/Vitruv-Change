@@ -9,7 +9,7 @@ import tools.vitruv.change.composite.description.PropagatedChange
 import tools.vitruv.change.composite.description.TransactionalChange
 import tools.vitruv.change.composite.description.VitruviusChange
 import tools.vitruv.change.composite.description.VitruviusChangeFactory
-import tools.vitruv.framework.change.interaction.UserInteractionBase
+import tools.vitruv.change.interaction.UserInteractionBase
 import tools.vitruv.change.propagation.ChangePropagationObserver
 import tools.vitruv.change.propagation.ChangePropagationSpecification
 import tools.vitruv.change.propagation.ChangePropagationSpecificationProvider

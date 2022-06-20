@@ -3,7 +3,7 @@ package tools.vitruv.framework.userinteraction.impl
 import tools.vitruv.framework.userinteraction.UserInteractionOptions.WindowModality
 import tools.vitruv.framework.userinteraction.UserInteractionOptions.NotificationType
 import tools.vitruv.framework.userinteraction.UserInteractionOptions.InputValidator
-import tools.vitruv.framework.change.interaction.UserInteractionBase
+import tools.vitruv.change.interaction.UserInteractionBase
 import tools.vitruv.framework.userinteraction.InteractionResultProvider
 import tools.vitruv.framework.userinteraction.PredefinedInteractionResultProvider
 

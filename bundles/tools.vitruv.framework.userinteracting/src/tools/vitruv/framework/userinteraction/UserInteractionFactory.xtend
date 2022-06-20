@@ -1,7 +1,7 @@
 package tools.vitruv.framework.userinteraction
 
 import tools.vitruv.framework.userinteraction.impl.UserInteractorImpl
-import tools.vitruv.framework.change.interaction.UserInteractionBase
+import tools.vitruv.change.interaction.UserInteractionBase
 import tools.vitruv.framework.userinteraction.impl.DialogInteractionResultProviderImpl
 import tools.vitruv.framework.userinteraction.impl.PredefinedInteractionResultProviderImpl
 import tools.vitruv.framework.userinteraction.impl.ThinktimeSimulatingInteractionResultProvider

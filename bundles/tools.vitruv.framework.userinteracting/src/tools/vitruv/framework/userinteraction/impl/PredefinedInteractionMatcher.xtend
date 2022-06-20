@@ -1,11 +1,11 @@
 package tools.vitruv.framework.userinteraction.impl
 
-import tools.vitruv.framework.change.interaction.UserInteractionBase
-import tools.vitruv.framework.change.interaction.MultipleChoiceSelectionInteractionBase
-import tools.vitruv.framework.change.interaction.ConfirmationUserInteraction
-import tools.vitruv.framework.change.interaction.FreeTextUserInteraction
-import tools.vitruv.framework.change.interaction.MultipleChoiceSingleSelectionUserInteraction
-import tools.vitruv.framework.change.interaction.MultipleChoiceMultiSelectionUserInteraction
+import tools.vitruv.change.interaction.UserInteractionBase
+import tools.vitruv.change.interaction.MultipleChoiceSelectionInteractionBase
+import tools.vitruv.change.interaction.ConfirmationUserInteraction
+import tools.vitruv.change.interaction.FreeTextUserInteraction
+import tools.vitruv.change.interaction.MultipleChoiceSingleSelectionUserInteraction
+import tools.vitruv.change.interaction.MultipleChoiceMultiSelectionUserInteraction
 import java.util.List
 import java.util.ArrayList
 import java.util.Collections

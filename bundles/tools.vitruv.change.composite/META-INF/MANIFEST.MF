@@ -9,7 +9,7 @@ Require-Bundle: org.apache.log4j,
  org.eclipse.xtend.lib,
  org.eclipse.emf.ecore.change,
  tools.vitruv.change.atomic;visibility:=reexport,
- tools.vitruv.framework.change.interaction;visibility:=reexport,
+ tools.vitruv.change.interaction.model;visibility:=reexport,
  edu.kit.ipd.sdq.activextendannotations,
  edu.kit.ipd.sdq.commons.util.java,
  edu.kit.ipd.sdq.commons.util.emf

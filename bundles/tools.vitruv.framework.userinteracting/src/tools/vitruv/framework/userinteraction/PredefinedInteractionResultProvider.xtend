@@ -1,6 +1,6 @@
 package tools.vitruv.framework.userinteraction
 
-import tools.vitruv.framework.change.interaction.UserInteractionBase
+import tools.vitruv.change.interaction.UserInteractionBase
 
 /**
  * A {@link InteractionResultProvider} which allows to predefine the performed inputs.

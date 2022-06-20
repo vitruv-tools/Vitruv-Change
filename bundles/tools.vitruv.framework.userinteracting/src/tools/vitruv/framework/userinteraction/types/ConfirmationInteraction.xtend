@@ -1,7 +1,7 @@
 package tools.vitruv.framework.userinteraction.types
 
-import tools.vitruv.framework.change.interaction.ConfirmationUserInteraction
-import tools.vitruv.framework.change.interaction.impl.InteractionFactoryImpl
+import tools.vitruv.change.interaction.ConfirmationUserInteraction
+import tools.vitruv.change.interaction.impl.InteractionFactoryImpl
 import tools.vitruv.framework.userinteraction.UserInteractionOptions.WindowModality
 import tools.vitruv.framework.userinteraction.InteractionResultProvider
 

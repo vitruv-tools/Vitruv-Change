@@ -2,7 +2,7 @@ package tools.vitruv.change.composite.description.impl
 
 import tools.vitruv.change.atomic.EChange
 import java.util.List
-import tools.vitruv.framework.change.interaction.UserInteractionBase
+import tools.vitruv.change.interaction.UserInteractionBase
 import java.util.ArrayList
 import static com.google.common.base.Preconditions.checkNotNull
 import org.eclipse.emf.ecore.EObject

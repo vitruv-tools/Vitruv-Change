@@ -3,7 +3,7 @@ package tools.vitruv.change.composite.description
 import java.util.List
 import tools.vitruv.change.atomic.EChange
 import org.eclipse.emf.ecore.EObject
-import tools.vitruv.framework.change.interaction.UserInteractionBase
+import tools.vitruv.change.interaction.UserInteractionBase
 import org.eclipse.emf.ecore.resource.Resource
 import java.util.Set
 import org.eclipse.emf.common.util.URI

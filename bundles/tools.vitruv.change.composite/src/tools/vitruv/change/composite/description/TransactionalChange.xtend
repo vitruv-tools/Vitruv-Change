@@ -1,7 +1,7 @@
 package tools.vitruv.change.composite.description
 
 import tools.vitruv.change.composite.description.VitruviusChange
-import tools.vitruv.framework.change.interaction.UserInteractionBase
+import tools.vitruv.change.interaction.UserInteractionBase
 import tools.vitruv.change.composite.MetamodelDescriptor
 import java.util.Set
 
