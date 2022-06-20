@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Vitruv Atomic Change Tests
+Bundle-Name: Vitruv Atomic Change Metamodel Tests
 Bundle-SymbolicName: tools.vitruv.change.atomic.tests
 Automatic-Module-Name: tools.vitruv.change.atomic.tests
 Bundle-Version: 2.1.0.qualifier
