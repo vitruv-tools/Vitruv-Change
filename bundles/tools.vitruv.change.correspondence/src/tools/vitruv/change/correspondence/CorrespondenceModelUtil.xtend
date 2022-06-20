@@ -1,9 +1,9 @@
-package tools.vitruv.framework.correspondence
+package tools.vitruv.change.correspondence
 
 import java.util.Set
 import org.eclipse.emf.ecore.EObject
 
-import tools.vitruv.framework.correspondence.Correspondence
+import tools.vitruv.change.correspondence.Correspondence
 import java.util.List
 import edu.kit.ipd.sdq.activextendannotations.Utility
 

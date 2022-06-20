@@ -1,6 +1,6 @@
-package tools.vitruv.framework.correspondence
+package tools.vitruv.change.correspondence
 
-import tools.vitruv.framework.correspondence.impl.InternalCorrespondenceModelImpl
+import tools.vitruv.change.correspondence.impl.InternalCorrespondenceModelImpl
 import org.eclipse.emf.common.util.URI
 import edu.kit.ipd.sdq.activextendannotations.Utility
 

@@ -1,6 +1,6 @@
 package tools.vitruv.framework.propagation
 
-import tools.vitruv.framework.correspondence.CorrespondenceModel
+import tools.vitruv.change.correspondence.CorrespondenceModel
 import tools.vitruv.framework.userinteraction.UserInteractor
 import tools.vitruv.framework.propagation.ResourceAccess
 import tools.vitruv.framework.change.echange.EChange

@@ -1,4 +1,4 @@
-package tools.vitruv.framework.correspondence;
+package tools.vitruv.change.correspondence;
 
 import java.util.List;
 import java.util.Set;

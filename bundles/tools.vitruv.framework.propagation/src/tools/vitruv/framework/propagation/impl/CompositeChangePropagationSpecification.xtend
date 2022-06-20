@@ -1,6 +1,6 @@
 package tools.vitruv.framework.propagation.impl
 
-import tools.vitruv.framework.correspondence.CorrespondenceModel
+import tools.vitruv.change.correspondence.CorrespondenceModel
 import java.util.List
 import java.util.ArrayList
 import tools.vitruv.framework.userinteraction.UserInteractor

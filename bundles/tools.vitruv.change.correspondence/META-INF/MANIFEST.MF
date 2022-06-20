@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
-Bundle-SymbolicName: tools.vitruv.framework.correspondence;singleton:=true
-Automatic-Module-Name: tools.vitruv.framework.correspondence
+Bundle-SymbolicName: tools.vitruv.change.correspondence;singleton:=true
+Automatic-Module-Name: tools.vitruv.change.correspondence
 Bundle-ClassPath: .
 Bundle-Version: 2.1.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-11
@@ -15,8 +15,8 @@ Require-Bundle: org.apache.log4j,
  edu.kit.ipd.sdq.commons.util.emf,
  edu.kit.ipd.sdq.commons.util.java
 Bundle-ActivationPolicy: lazy
-Export-Package: tools.vitruv.framework.correspondence,
- tools.vitruv.framework.correspondence.impl,
- tools.vitruv.framework.correspondence.util
+Export-Package: tools.vitruv.change.correspondence,
+ tools.vitruv.change.correspondence.impl,
+ tools.vitruv.change.correspondence.util
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin

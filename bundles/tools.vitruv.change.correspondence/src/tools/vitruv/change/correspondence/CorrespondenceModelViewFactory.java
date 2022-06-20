@@ -1,4 +1,4 @@
-package tools.vitruv.framework.correspondence;
+package tools.vitruv.change.correspondence;
 
 /**
  * Generic interface for factories generating {@link CorrespondenceModelView}s

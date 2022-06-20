@@ -1,4 +1,4 @@
-package tools.vitruv.framework.correspondence.impl
+package tools.vitruv.change.correspondence.impl
 
 import java.util.HashSet
 import java.util.LinkedHashSet
@@ -14,12 +14,12 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.util.EcoreUtil
-import tools.vitruv.framework.correspondence.Correspondence
-import tools.vitruv.framework.correspondence.CorrespondenceFactory
-import tools.vitruv.framework.correspondence.CorrespondenceModelView
-import tools.vitruv.framework.correspondence.CorrespondenceModelViewFactory
-import tools.vitruv.framework.correspondence.Correspondences
-import tools.vitruv.framework.correspondence.InternalCorrespondenceModel
+import tools.vitruv.change.correspondence.Correspondence
+import tools.vitruv.change.correspondence.CorrespondenceFactory
+import tools.vitruv.change.correspondence.CorrespondenceModelView
+import tools.vitruv.change.correspondence.CorrespondenceModelViewFactory
+import tools.vitruv.change.correspondence.Correspondences
+import tools.vitruv.change.correspondence.InternalCorrespondenceModel
 
 import static com.google.common.base.Preconditions.checkState
 

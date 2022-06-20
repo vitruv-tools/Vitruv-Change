@@ -16,7 +16,7 @@ Workflow {
 	}
 
 	component = DirectoryCleaner {
-		directory = "${workspaceRoot}/bundles/tools.vitruv.framework.correspondence/src-gen"
+		directory = "${workspaceRoot}/bundles/tools.vitruv.change.correspondence/src-gen"
 	}
 	
 	component = DirectoryCleaner {

@@ -1,13 +1,13 @@
-package tools.vitruv.framework.correspondence.impl
+package tools.vitruv.change.correspondence.impl
 
 import java.util.List
 import java.util.Set
 import org.eclipse.emf.ecore.EObject
 import java.util.function.Supplier
-import tools.vitruv.framework.correspondence.Correspondence
-import tools.vitruv.framework.correspondence.CorrespondenceModelView
-import tools.vitruv.framework.correspondence.InternalCorrespondenceModel
-import tools.vitruv.framework.correspondence.CorrespondenceModelViewFactory
+import tools.vitruv.change.correspondence.Correspondence
+import tools.vitruv.change.correspondence.CorrespondenceModelView
+import tools.vitruv.change.correspondence.InternalCorrespondenceModel
+import tools.vitruv.change.correspondence.CorrespondenceModelViewFactory
 import org.eclipse.xtend.lib.annotations.Accessors
 import java.util.function.Predicate
 

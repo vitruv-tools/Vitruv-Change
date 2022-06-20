@@ -1,4 +1,4 @@
-package tools.vitruv.framework.correspondence;
+package tools.vitruv.change.correspondence;
 
 /**
  * Extension of the generic {@link CorrespondenceModelView}, but without generically typed operations.

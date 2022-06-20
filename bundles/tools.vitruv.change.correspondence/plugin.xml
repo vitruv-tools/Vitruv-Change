@@ -10,7 +10,7 @@
       <!-- @generated correspondence -->
       <package
             uri="http://tools.vitruv/Correspondence/1.0"
-            class="tools.vitruv.framework.correspondence.CorrespondencePackage"
+            class="tools.vitruv.change.correspondence.CorrespondencePackage"
             genModel="metamodel/correspondence.genmodel"/>
    </extension>
 
