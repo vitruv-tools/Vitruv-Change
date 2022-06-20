@@ -7,17 +7,8 @@ Bundle-Version: 2.1.0.qualifier
 Bundle-Vendor: vitruv.tools
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Fragment-Host: tools.vitruv.change.atomic
-Require-Bundle: org.junit.jupiter.api,
- org.eclipse.xtend.lib,
- tools.vitruv.testutils.metamodels,
+Require-Bundle: org.eclipse.xtend.lib,
+ org.junit.jupiter.api,
  org.hamcrest.core,
- tools.vitruv.testutils
-Export-Package: tools.vitruv.change.atomic;x-internal:=true,
- tools.vitruv.change.atomic.command;x-internal:=true,
- tools.vitruv.change.atomic.compound;x-internal:=true,
- tools.vitruv.change.atomic.eobject;x-internal:=true,
- tools.vitruv.change.atomic.feature;x-internal:=true,
- tools.vitruv.change.atomic.feature.attribute;x-internal:=true,
- tools.vitruv.change.atomic.feature.reference;x-internal:=true,
- tools.vitruv.change.atomic.root;x-internal:=true,
- tools.vitruv.change.atomic.util;x-internal:=true
+ tools.vitruv.testutils,
+ tools.vitruv.testutils.metamodels

@@ -6,17 +6,11 @@ Automatic-Module-Name: tools.vitruv.change.composite.tests
 Bundle-Version: 2.1.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Fragment-Host: tools.vitruv.change.composite
-Require-Bundle: org.junit.jupiter.api,
+Require-Bundle: org.eclipse.xtend.lib,
+ org.junit.jupiter.api,
+ org.junit.jupiter.params,
  org.hamcrest.core,
- org.eclipse.xtend.lib,
- tools.vitruv.testutils.metamodels,
  edu.kit.ipd.sdq.activextendannotations,
  tools.vitruv.testutils,
- org.junit.jupiter.params
+ tools.vitruv.testutils.metamodels
 Bundle-Vendor: vitruv.tools
-Export-Package: tools.vitruv.change.composite;x-internal:=true,
- tools.vitruv.change.composite.attribute;x-internal:=true,
- tools.vitruv.change.composite.integration;x-internal:=true,
- tools.vitruv.change.composite.reference;x-internal:=true,
- tools.vitruv.change.composite.rootobject;x-internal:=true,
- tools.vitruv.change.composite.util;x-internal:=true
