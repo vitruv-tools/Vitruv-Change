@@ -17,7 +17,7 @@ Workflow {
 	
 	component = EcoreGenerator {
 		srcPath = "platform:/resource/tools.vitruv.change.atomic/src-gen"
-		genModel = "platform:/resource/tools.vitruv.change.atomic/metamodel/echange.genmodel"
+		genModel = "platform:/resource/tools.vitruv.change.atomic/metamodel/atomicModelChange.genmodel"
 		generateCustomClasses = false
 	}
 	
