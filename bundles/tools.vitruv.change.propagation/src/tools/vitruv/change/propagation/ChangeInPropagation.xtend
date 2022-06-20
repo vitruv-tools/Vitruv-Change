@@ -1,4 +1,4 @@
-package tools.vitruv.framework.propagation
+package tools.vitruv.change.propagation
 
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import tools.vitruv.change.composite.description.TransactionalChange

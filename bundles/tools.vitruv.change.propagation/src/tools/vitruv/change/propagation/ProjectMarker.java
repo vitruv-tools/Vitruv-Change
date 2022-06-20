@@ -1,4 +1,4 @@
-package tools.vitruv.framework.propagation;
+package tools.vitruv.change.propagation;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

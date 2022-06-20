@@ -63,7 +63,7 @@
          unpack="false"/>
 
    <plugin
-         id="tools.vitruv.framework.propagation"
+         id="tools.vitruv.change.propagation"
          download-size="0"
          install-size="0"
          version="0.0.0"

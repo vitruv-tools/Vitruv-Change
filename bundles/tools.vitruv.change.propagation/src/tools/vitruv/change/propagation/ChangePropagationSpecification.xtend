@@ -1,8 +1,8 @@
-package tools.vitruv.framework.propagation
+package tools.vitruv.change.propagation
 
 import tools.vitruv.change.correspondence.CorrespondenceModel
 import tools.vitruv.framework.userinteraction.UserInteractor
-import tools.vitruv.framework.propagation.ResourceAccess
+import tools.vitruv.change.propagation.ResourceAccess
 import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.composite.MetamodelDescriptor
 

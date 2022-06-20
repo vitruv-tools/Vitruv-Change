@@ -32,7 +32,7 @@
       <import plugin="org.eclipse.emf.compare"/>
       <import plugin="org.eclipse.xtend.lib"/>
       <import plugin="edu.kit.ipd.sdq.activextendannotations"/>
-      <import plugin="tools.vitruv.framework.propagation"/>
+      <import plugin="tools.vitruv.change.propagation"/>
       <import plugin="org.eclipse.emf.ecore"/>
       <import plugin="org.junit"/>
       <import plugin="org.eclipse.core.resources"/>

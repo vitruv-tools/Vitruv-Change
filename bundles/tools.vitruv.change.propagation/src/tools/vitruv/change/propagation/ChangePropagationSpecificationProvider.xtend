@@ -1,4 +1,4 @@
-package tools.vitruv.framework.propagation
+package tools.vitruv.change.propagation
 
 import java.util.List
 import tools.vitruv.change.composite.MetamodelDescriptor

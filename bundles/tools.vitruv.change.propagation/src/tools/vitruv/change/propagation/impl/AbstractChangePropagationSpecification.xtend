@@ -1,8 +1,8 @@
-package tools.vitruv.framework.propagation.impl
+package tools.vitruv.change.propagation.impl
 
 import tools.vitruv.framework.userinteraction.UserInteractor
-import tools.vitruv.framework.propagation.ChangePropagationSpecification
-import tools.vitruv.framework.propagation.ChangePropagationObserver
+import tools.vitruv.change.propagation.ChangePropagationSpecification
+import tools.vitruv.change.propagation.ChangePropagationObserver
 import java.util.List
 import org.eclipse.emf.ecore.EObject
 import tools.vitruv.change.composite.MetamodelDescriptor

@@ -1,4 +1,4 @@
-package tools.vitruv.framework.propagation.impl
+package tools.vitruv.change.propagation.impl
 
 import java.util.ArrayList
 import java.util.List
@@ -10,9 +10,9 @@ import tools.vitruv.change.composite.description.TransactionalChange
 import tools.vitruv.change.composite.description.VitruviusChange
 import tools.vitruv.change.composite.description.VitruviusChangeFactory
 import tools.vitruv.framework.change.interaction.UserInteractionBase
-import tools.vitruv.framework.propagation.ChangePropagationObserver
-import tools.vitruv.framework.propagation.ChangePropagationSpecification
-import tools.vitruv.framework.propagation.ChangePropagationSpecificationProvider
+import tools.vitruv.change.propagation.ChangePropagationObserver
+import tools.vitruv.change.propagation.ChangePropagationSpecification
+import tools.vitruv.change.propagation.ChangePropagationSpecificationProvider
 import tools.vitruv.framework.userinteraction.InternalUserInteractor
 import tools.vitruv.framework.userinteraction.UserInteractionFactory
 import tools.vitruv.framework.userinteraction.UserInteractionListener
@@ -23,7 +23,7 @@ import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.*
 import java.util.HashSet
 import java.util.Set
 import org.eclipse.emf.ecore.resource.Resource
-import tools.vitruv.framework.propagation.ChangeRecordingModelRepository
+import tools.vitruv.change.propagation.ChangeRecordingModelRepository
 
 class ChangePropagator {
 	static val logger = Logger.getLogger(ChangePropagator)

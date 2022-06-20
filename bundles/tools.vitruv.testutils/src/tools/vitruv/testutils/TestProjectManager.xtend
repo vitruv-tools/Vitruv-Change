@@ -27,7 +27,7 @@ import static com.google.common.base.Preconditions.checkArgument
 import java.nio.file.NoSuchFileException
 import java.util.stream.Stream
 import org.eclipse.core.runtime.Platform
-import static extension tools.vitruv.framework.propagation.ProjectMarker.markAsProjectRootFolder
+import static extension tools.vitruv.change.propagation.ProjectMarker.markAsProjectRootFolder
 
 /**
  * Extension managing the test projects for Eclipse tests. Test classes using this extension can have test project 

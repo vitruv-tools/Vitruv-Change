@@ -1,4 +1,4 @@
-package tools.vitruv.framework.propagation;
+package tools.vitruv.change.propagation;
 
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.correspondence.CorrespondenceModel;

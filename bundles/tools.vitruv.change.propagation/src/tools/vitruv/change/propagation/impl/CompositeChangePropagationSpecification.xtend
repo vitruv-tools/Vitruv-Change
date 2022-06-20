@@ -1,14 +1,14 @@
-package tools.vitruv.framework.propagation.impl
+package tools.vitruv.change.propagation.impl
 
 import tools.vitruv.change.correspondence.CorrespondenceModel
 import java.util.List
 import java.util.ArrayList
 import tools.vitruv.framework.userinteraction.UserInteractor
-import tools.vitruv.framework.propagation.ChangePropagationSpecification
+import tools.vitruv.change.propagation.ChangePropagationSpecification
 import org.apache.log4j.Logger
-import tools.vitruv.framework.propagation.ChangePropagationObserver
+import tools.vitruv.change.propagation.ChangePropagationObserver
 import org.eclipse.emf.ecore.EObject
-import tools.vitruv.framework.propagation.ResourceAccess
+import tools.vitruv.change.propagation.ResourceAccess
 import org.eclipse.xtend.lib.annotations.Accessors
 import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.composite.MetamodelDescriptor
