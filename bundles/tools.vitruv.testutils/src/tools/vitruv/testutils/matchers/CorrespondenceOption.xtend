@@ -1,6 +1,6 @@
 package tools.vitruv.testutils.matchers
 
-import tools.vitruv.framework.correspondence.Correspondence
+import tools.vitruv.change.correspondence.Correspondence
 import org.eclipse.emf.ecore.EObject
 import org.hamcrest.Description
 

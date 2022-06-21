@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Vitruv Composite Change Metamodel
+Bundle-SymbolicName: tools.vitruv.change.composite
+Automatic-Module-Name: tools.vitruv.change.composite
+Bundle-Version: 2.1.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Bundle: org.apache.log4j,
+ org.eclipse.xtend.lib,
+ org.eclipse.emf.ecore.change,
+ tools.vitruv.change.atomic;visibility:=reexport,
+ tools.vitruv.change.interaction.model;visibility:=reexport,
+ edu.kit.ipd.sdq.activextendannotations,
+ edu.kit.ipd.sdq.commons.util.java,
+ edu.kit.ipd.sdq.commons.util.emf
+Export-Package: tools.vitruv.change.composite,
+ tools.vitruv.change.composite.propagation,
+ tools.vitruv.change.composite.recording,
+ tools.vitruv.change.composite.description
+Bundle-Vendor: vitruv.tools

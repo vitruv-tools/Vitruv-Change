@@ -8,15 +8,15 @@ var workspaceRoot = "../../"
 Workflow {
 
 	component = DirectoryCleaner {
-		directory = "${workspaceRoot}/bundles/tools.vitruv.framework.change.echange/src-gen"
+		directory = "${workspaceRoot}/bundles/tools.vitruv.change.atomic/src-gen"
 	}
 
 	component = DirectoryCleaner {
-		directory = "${workspaceRoot}/bundles/tools.vitruv.framework.change.interaction/src-gen"
+		directory = "${workspaceRoot}/bundles/tools.vitruv.change.interaction.model/src-gen"
 	}
 
 	component = DirectoryCleaner {
-		directory = "${workspaceRoot}/bundles/tools.vitruv.framework.correspondence/src-gen"
+		directory = "${workspaceRoot}/bundles/tools.vitruv.change.correspondence/src-gen"
 	}
 	
 	component = DirectoryCleaner {

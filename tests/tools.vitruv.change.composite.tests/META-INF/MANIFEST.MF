@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Vitruv Composite Change Metamodel Tests
+Bundle-SymbolicName: tools.vitruv.change.composite.tests
+Automatic-Module-Name: tools.vitruv.change.composite.tests
+Bundle-Version: 2.1.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Fragment-Host: tools.vitruv.change.composite
+Require-Bundle: org.eclipse.xtend.lib,
+ org.junit.jupiter.api,
+ org.junit.jupiter.params,
+ org.hamcrest.core,
+ edu.kit.ipd.sdq.activextendannotations,
+ tools.vitruv.testutils,
+ tools.vitruv.testutils.metamodels
+Bundle-Vendor: vitruv.tools

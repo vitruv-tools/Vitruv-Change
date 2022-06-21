@@ -2,7 +2,7 @@ package tools.vitruv.testutils.matchers
 
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import org.hamcrest.SelfDescribing
-import tools.vitruv.framework.correspondence.CorrespondenceModelView
+import tools.vitruv.change.correspondence.CorrespondenceModelView
 import java.util.List
 import org.eclipse.emf.ecore.EObject
 import org.hamcrest.Description

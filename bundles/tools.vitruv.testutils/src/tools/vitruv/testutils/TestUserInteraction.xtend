@@ -1,9 +1,9 @@
 package tools.vitruv.testutils
 
-import tools.vitruv.framework.userinteraction.InteractionResultProvider
-import tools.vitruv.framework.userinteraction.UserInteractionOptions.WindowModality
-import tools.vitruv.framework.userinteraction.UserInteractionOptions.NotificationType
-import tools.vitruv.framework.userinteraction.UserInteractionOptions.InputValidator
+import tools.vitruv.change.interaction.InteractionResultProvider
+import tools.vitruv.change.interaction.UserInteractionOptions.WindowModality
+import tools.vitruv.change.interaction.UserInteractionOptions.NotificationType
+import tools.vitruv.change.interaction.UserInteractionOptions.InputValidator
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import java.util.LinkedList
 import static java.lang.System.lineSeparator
