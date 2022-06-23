@@ -22,11 +22,4 @@ public interface ChangePropagationListener {
 	 */
 	void finishedChangePropagation(Iterable<PropagatedChange> propagatedChanges);
 
-	/**
-	 * Called if the change propagation has been aborted.
-	 *
-	 * @param cause The cause for the abortion.
-	 */
-	void abortedChangePropagation(ChangePropagationAbortCause cause);
-
 }
