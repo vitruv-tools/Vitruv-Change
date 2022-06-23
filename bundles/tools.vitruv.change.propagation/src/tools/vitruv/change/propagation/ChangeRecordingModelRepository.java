@@ -29,7 +29,7 @@ public interface ChangeRecordingModelRepository extends ResourceAccess, AutoClos
 	 * 
 	 * @param changeApplicator - the function applying changes to the models, must
 	 *                         not be <code>null</code>
-	 * @return the list of {@link TransitiveChange} containing the performed
+	 * @return the list of {@link TransactionalChange} containing the performed
 	 *         changes, one for each metamodel
 	 */
 	Iterable<TransactionalChange> recordChanges(Runnable changeApplicator);

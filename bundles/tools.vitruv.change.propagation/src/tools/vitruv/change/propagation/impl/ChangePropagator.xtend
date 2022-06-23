@@ -34,7 +34,7 @@ class ChangePropagator {
 	
 	/**
 	 * Creates a change propagator to which changes can be passed, which are
-	 * propagated using the given <code>changePropagationProvider</code> and using the given
+	 * propagated using the given <code>changePropagationProvider</code> and
 	 * <code>userInteractor</code>.
 	 * By default, it records changes in the given <code>modelRepository</code> and
 	 * propagates them transitively. Transitive propagation can be disabled calling
