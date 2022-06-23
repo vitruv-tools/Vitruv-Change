@@ -30,14 +30,34 @@ class ChangePropagator {
 	val ChangeRecordingModelRepository modelRepository
 	val ChangePropagationSpecificationProvider changePropagationProvider
 	val InternalUserInteractor userInteractor
-
+	var boolean isPropagatingTransitively = true
+	
+	/**
+	 * Creates a change propagator to which changes can be passed, which are
+	 * propagated using the given <code>changePropagationProvider</code> and using the given
+	 * <code>userInteractor</code>.
+	 * By default, it records changes in the given <code>modelRepository</code> and
+	 * propagates them transitively. Transitive propagation can be disabled calling
+	 * {@link #setTransitivePropagationEnabled(boolean)}.
+	 * 
+	 */
 	new(ChangeRecordingModelRepository modelRepository,
 		ChangePropagationSpecificationProvider changePropagationProvider, InternalUserInteractor userInteractor) {
 		this.modelRepository = modelRepository
 		this.changePropagationProvider = changePropagationProvider
 		this.userInteractor = userInteractor
 	}
-
+	
+	/**
+	 * Enables or disables transitive propagation, such that changes produced by
+	 * executing change propagation specification are (not) propagated further.
+	 * 
+	 * @param enabled whether or not transitive propagation shall be enabled
+	 */
+	def void setTransitivePropagationEnabled(boolean enabled) {
+		isPropagatingTransitively = enabled
+	}
+	
 	def List<PropagatedChange> propagateChange(VitruviusChange change) {
 		val resolvedChange = modelRepository.applyChange(change)
 		resolvedChange.affectedEObjects.map[eResource].filterNull.forEach[modified = true]
@@ -90,42 +110,45 @@ class ChangePropagator {
 			if (logger.isDebugEnabled) {
 				logger.debug(
 					'''Propagated «FOR p : propagationPath SEPARATOR ' -> '»«p»«ENDFOR» -> {«FOR changeInPropagation : propagationResultChanges SEPARATOR ", "»«
-						changeInPropagation.change.affectedEObjectsMetamodelDescriptors»«ENDFOR»}'''
+						changeInPropagation.affectedEObjectsMetamodelDescriptors»«ENDFOR»}'''
 				)
 			}
 			if (logger.isTraceEnabled) {
 				logger.trace('''
 					Result changes:
 						«FOR result : propagationResultChanges»
-							«result.change.affectedEObjectsMetamodelDescriptors»: «result.change»
+							«result.affectedEObjectsMetamodelDescriptors»: «result»
 						«ENDFOR»
 				''')
 			}
 
 			change.userInteractions = userInteractions
 			val propagatedChange = new PropagatedChange(change,
-				VitruviusChangeFactory.instance.createCompositeChange(propagationResultChanges.mapFixed[it.change]))
+				VitruviusChangeFactory.instance.createCompositeChange(propagationResultChanges))
 			val resultingChanges = new ArrayList()
 			resultingChanges += propagatedChange
-
-			val nextPropagations = propagationResultChanges.filter [
-				shouldBeFurtherPropagated && it.change.containsConcreteChange
+			
+			if (isPropagatingTransitively) {
+				resultingChanges += propagationResultChanges.filter[it.containsConcreteChange].propgateTransitiveChanges
+			}
+			return resultingChanges
+		}
+		
+		def private propgateTransitiveChanges(Iterable<TransactionalChange> transitiveChanges) {
+			val nextPropagations = transitiveChanges.filter [
+				it.containsConcreteChange
 			].mapFixed [
-				new ChangePropagation(outer, it.change, this)
+				new ChangePropagation(outer, it, this)
 			]
 
-			for (nextPropagation : nextPropagations) {
-				resultingChanges += nextPropagation.propagateChanges()
-			}
-
-			return resultingChanges
+			return nextPropagations.mapFixed[propagateChanges()].flatten
 		}
 
 		def private propagateChangeForChangePropagationSpecification(
 			TransactionalChange change,
 			ChangePropagationSpecification propagationSpecification
 		) {
-			val changesInPropagation = modelRepository.recordChanges [
+			val transitiveChanges = modelRepository.recordChanges [
 				for (eChange : change.EChanges) {
 					propagationSpecification.propagateChange(eChange, modelRepository.correspondenceModel,
 						modelRepository)
@@ -133,9 +156,9 @@ class ChangePropagator {
 			]
 
 			// Store modification information
-			changedResources += changesInPropagation.flatMap[it.change.affectedEObjects].map[eResource].filterNull
+			changedResources += transitiveChanges.flatMap[it.affectedEObjects].map[eResource].filterNull
 
-			return changesInPropagation
+			return transitiveChanges
 		}
 
 		def private AutoCloseable installUserInteractorForChange(VitruviusChange change) {

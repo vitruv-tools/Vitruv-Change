@@ -1,5 +1,6 @@
 package tools.vitruv.change.propagation;
 
+import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.correspondence.CorrespondenceModel;
 
@@ -28,8 +29,8 @@ public interface ChangeRecordingModelRepository extends ResourceAccess, AutoClos
 	 * 
 	 * @param changeApplicator - the function applying changes to the models, must
 	 *                         not be <code>null</code>
-	 * @return the list of {@link ChangeInPropagation} containing the performed
-	 *         changes , one for each metamodel
+	 * @return the list of {@link TransitiveChange} containing the performed
+	 *         changes, one for each metamodel
 	 */
-	Iterable<ChangeInPropagation> recordChanges(Runnable changeApplicator);
+	Iterable<TransactionalChange> recordChanges(Runnable changeApplicator);
 }
