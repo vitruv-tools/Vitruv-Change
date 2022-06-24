@@ -15,8 +15,10 @@ public enum ChangePropagationMode {
 	TRANSITIVE_CYCLIC,
 
 	/**
-	 * Executes transformations transitively, but does not further propagate changes to a leaf model (i.e., a model with only
-	 * one transformation from and to another model).
+	 * Executes transformations transitively, but does not further propagate changes to a leaf model (i.e., a model with
+	 * only one transformation from and to another model). Provides specific behavior that is currently required for the
+	 * Commonalities language and should be removed after adapting that language.
 	 */
+	@Deprecated
 	TRANSITIVE_EXCEPT_LEAVES
 }
