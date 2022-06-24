@@ -24,21 +24,23 @@ import java.util.HashSet
 import java.util.Set
 import org.eclipse.emf.ecore.resource.Resource
 import tools.vitruv.change.propagation.ChangeRecordingModelRepository
+import tools.vitruv.change.propagation.ChangePropagationMode
 
 class ChangePropagator {
 	static val logger = Logger.getLogger(ChangePropagator)
 	val ChangeRecordingModelRepository modelRepository
 	val ChangePropagationSpecificationProvider changePropagationProvider
 	val InternalUserInteractor userInteractor
-	var boolean isPropagatingTransitively = true
+	var ChangePropagationMode changePropagationMode = ChangePropagationMode.TRANSITIVE_CYCLIC
 	
 	/**
 	 * Creates a change propagator to which changes can be passed, which are
 	 * propagated using the given <code>changePropagationProvider</code> and
 	 * <code>userInteractor</code>.
 	 * By default, it records changes in the given <code>modelRepository</code> and
-	 * propagates them transitively. Transitive propagation can be disabled calling
-	 * {@link #setTransitivePropagationEnabled(boolean)}.
+	 * propagates them transitively and cyclic, i.e. with 
+	 * {@link ChangePropagationMode#TRANSITIVE_CYCLIC}. It can be changed calling
+	 * {@link #setChangePropagationMode(ChangePropagationMode)}.
 	 * 
 	 */
 	new(ChangeRecordingModelRepository modelRepository,
@@ -49,13 +51,13 @@ class ChangePropagator {
 	}
 	
 	/**
-	 * Enables or disables transitive propagation, such that changes produced by
-	 * executing change propagation specification are (not) propagated further.
+	 * Sets the propagation mode to only perform single transformation steps
+	 * or different kinds of transitive change propagation.
 	 * 
-	 * @param enabled whether or not transitive propagation shall be enabled
+	 * @param mode the mode to use for change propagation
 	 */
-	def void setTransitivePropagationEnabled(boolean enabled) {
-		isPropagatingTransitively = enabled
+	def void setChangePropagationMode(ChangePropagationMode mode) {
+		changePropagationMode = mode
 	}
 	
 	def List<PropagatedChange> propagateChange(VitruviusChange change) {
@@ -128,16 +130,25 @@ class ChangePropagator {
 			val resultingChanges = new ArrayList()
 			resultingChanges += propagatedChange
 			
-			if (isPropagatingTransitively) {
-				resultingChanges += propagationResultChanges.filter[it.containsConcreteChange].propgateTransitiveChanges
+			if (changePropagationMode != ChangePropagationMode.SINGLE_STEP) {
+				resultingChanges += propagationResultChanges.filter[it.containsConcreteChange].	propgateTransitiveChanges
 			}
 			return resultingChanges
 		}
 		
 		def private propgateTransitiveChanges(Iterable<TransactionalChange> transitiveChanges) {
-			val nextPropagations = transitiveChanges.filter [
+			val nonEmptyChanges = transitiveChanges.filter [
 				it.containsConcreteChange
-			].mapFixed [
+			]
+			val nonLeafChanges = if (changePropagationMode == ChangePropagationMode.TRANSITIVE_EXCEPT_LEAVES) {
+				nonEmptyChanges.filter[
+					val targetSpecifications = changePropagationProvider.getChangePropagationSpecifications(it.affectedEObjectsMetamodelDescriptor)
+					return targetSpecifications.size > 1	
+				]
+			} else {
+				nonEmptyChanges
+			}		
+			val nextPropagations = nonLeafChanges.mapFixed [
 				new ChangePropagation(outer, it, this)
 			]
 
