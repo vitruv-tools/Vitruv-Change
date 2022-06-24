@@ -24,20 +24,42 @@ import java.util.HashSet
 import java.util.Set
 import org.eclipse.emf.ecore.resource.Resource
 import tools.vitruv.change.propagation.ChangeRecordingModelRepository
+import tools.vitruv.change.propagation.ChangePropagationMode
 
 class ChangePropagator {
 	static val logger = Logger.getLogger(ChangePropagator)
 	val ChangeRecordingModelRepository modelRepository
 	val ChangePropagationSpecificationProvider changePropagationProvider
 	val InternalUserInteractor userInteractor
-
+	var ChangePropagationMode changePropagationMode = ChangePropagationMode.TRANSITIVE_CYCLIC
+	
+	/**
+	 * Creates a change propagator to which changes can be passed, which are
+	 * propagated using the given <code>changePropagationProvider</code> and
+	 * <code>userInteractor</code>.
+	 * By default, it records changes in the given <code>modelRepository</code> and
+	 * propagates them transitively and cyclic, i.e. with 
+	 * {@link ChangePropagationMode#TRANSITIVE_CYCLIC}. It can be changed calling
+	 * {@link #setChangePropagationMode(ChangePropagationMode)}.
+	 * 
+	 */
 	new(ChangeRecordingModelRepository modelRepository,
 		ChangePropagationSpecificationProvider changePropagationProvider, InternalUserInteractor userInteractor) {
 		this.modelRepository = modelRepository
 		this.changePropagationProvider = changePropagationProvider
 		this.userInteractor = userInteractor
 	}
-
+	
+	/**
+	 * Sets the propagation mode to only perform single transformation steps
+	 * or different kinds of transitive change propagation.
+	 * 
+	 * @param mode the mode to use for change propagation
+	 */
+	def void setChangePropagationMode(ChangePropagationMode mode) {
+		changePropagationMode = mode
+	}
+	
 	def List<PropagatedChange> propagateChange(VitruviusChange change) {
 		val resolvedChange = modelRepository.applyChange(change)
 		resolvedChange.affectedEObjects.map[eResource].filterNull.forEach[modified = true]
@@ -90,42 +112,54 @@ class ChangePropagator {
 			if (logger.isDebugEnabled) {
 				logger.debug(
 					'''Propagated «FOR p : propagationPath SEPARATOR ' -> '»«p»«ENDFOR» -> {«FOR changeInPropagation : propagationResultChanges SEPARATOR ", "»«
-						changeInPropagation.change.affectedEObjectsMetamodelDescriptors»«ENDFOR»}'''
+						changeInPropagation.affectedEObjectsMetamodelDescriptors»«ENDFOR»}'''
 				)
 			}
 			if (logger.isTraceEnabled) {
 				logger.trace('''
 					Result changes:
 						«FOR result : propagationResultChanges»
-							«result.change.affectedEObjectsMetamodelDescriptors»: «result.change»
+							«result.affectedEObjectsMetamodelDescriptors»: «result»
 						«ENDFOR»
 				''')
 			}
 
 			change.userInteractions = userInteractions
 			val propagatedChange = new PropagatedChange(change,
-				VitruviusChangeFactory.instance.createCompositeChange(propagationResultChanges.mapFixed[it.change]))
+				VitruviusChangeFactory.instance.createCompositeChange(propagationResultChanges))
 			val resultingChanges = new ArrayList()
 			resultingChanges += propagatedChange
-
-			val nextPropagations = propagationResultChanges.filter [
-				shouldBeFurtherPropagated && it.change.containsConcreteChange
-			].mapFixed [
-				new ChangePropagation(outer, it.change, this)
+			
+			if (changePropagationMode != ChangePropagationMode.SINGLE_STEP) {
+				resultingChanges += propagationResultChanges.filter[it.containsConcreteChange].	propgateTransitiveChanges
+			}
+			return resultingChanges
+		}
+		
+		def private propgateTransitiveChanges(Iterable<TransactionalChange> transitiveChanges) {
+			val nonEmptyChanges = transitiveChanges.filter [
+				it.containsConcreteChange
+			]
+			val nonLeafChanges = if (changePropagationMode == ChangePropagationMode.TRANSITIVE_EXCEPT_LEAVES) {
+				nonEmptyChanges.filter[
+					val targetSpecifications = changePropagationProvider.getChangePropagationSpecifications(it.affectedEObjectsMetamodelDescriptor)
+					return targetSpecifications.size > 1	
+				]
+			} else {
+				nonEmptyChanges
+			}		
+			val nextPropagations = nonLeafChanges.mapFixed [
+				new ChangePropagation(outer, it, this)
 			]
 
-			for (nextPropagation : nextPropagations) {
-				resultingChanges += nextPropagation.propagateChanges()
-			}
-
-			return resultingChanges
+			return nextPropagations.mapFixed[propagateChanges()].flatten
 		}
 
 		def private propagateChangeForChangePropagationSpecification(
 			TransactionalChange change,
 			ChangePropagationSpecification propagationSpecification
 		) {
-			val changesInPropagation = modelRepository.recordChanges [
+			val transitiveChanges = modelRepository.recordChanges [
 				for (eChange : change.EChanges) {
 					propagationSpecification.propagateChange(eChange, modelRepository.correspondenceModel,
 						modelRepository)
@@ -133,9 +167,9 @@ class ChangePropagator {
 			]
 
 			// Store modification information
-			changedResources += changesInPropagation.flatMap[it.change.affectedEObjects].map[eResource].filterNull
+			changedResources += transitiveChanges.flatMap[it.affectedEObjects].map[eResource].filterNull
 
-			return changesInPropagation
+			return transitiveChanges
 		}
 
 		def private AutoCloseable installUserInteractorForChange(VitruviusChange change) {
