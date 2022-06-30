@@ -53,7 +53,7 @@ jobs:
         if: github.event_name == 'release' && github.repository_owner == 'vitruv-tools'
         id: releaseVersion
         run: |
-          releaseVersion=$(echo ${{ github.event.release.tag_name }} | sed 's/^Releases\///') #trimm "Releases/" prefix from tag name
+          releaseVersion=$(echo ${{ github.event.release.tag_name }} | sed 's/^releases\///') #trimm "releases/" prefix from tag name
           echo "::set-output name=tag::$releaseVersion"
       - name: Publish Release Update Site
         if: github.event_name == 'release' && github.repository_owner == 'vitruv-tools'
