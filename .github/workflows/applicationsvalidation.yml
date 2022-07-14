@@ -16,7 +16,7 @@ jobs:
         with:
           path: framework
           repository: vitruv-tools/Vitruv
-          ref: master
+          ref: main
           fetch-depth: 0
       - name: Checkout DSLs
         uses: actions/checkout@v3
@@ -30,7 +30,7 @@ jobs:
         with:
           path: cbsapplications
           repository: vitruv-tools/Vitruv-Applications-ComponentBasedSystems
-          ref: master
+          ref: main
           fetch-depth: 0
       - name: Checkout Matching Domains/Applications Branches
         run: |
