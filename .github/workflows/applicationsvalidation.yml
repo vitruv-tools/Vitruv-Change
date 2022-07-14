@@ -32,7 +32,7 @@ jobs:
           repository: vitruv-tools/Vitruv-Applications-ComponentBasedSystems
           ref: main
           fetch-depth: 0
-      - name: Checkout Matching Domains/Applications Branches
+      - name: Checkout Matching Framework/DSLs/Applications Branches
         run: |
           cd framework
           git checkout -B ${{ github.head_ref }} origin/${{ github.head_ref }} || true
