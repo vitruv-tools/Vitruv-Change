@@ -21,30 +21,22 @@ import org.eclipse.emf.ecore.EObject;
  */
 public interface GenericCorrespondenceModel<T extends Correspondence> {
 	/**
-	 * Creates a {@link ManualCorresponendce} with the given tag between the given
-	 * lists of {@link EObject}s.
-	 * 
-	 * @param eObjects1
-	 *            - the first list of {@link EObject}s
-	 * @param eObjects2
-	 *            - the second list of {@link EObject}s
-	 * @param tag
-	 *            - the tag to be added to the correspondence or <code>null</code>
-	 *            if none shall be added
-	 * @return the created correspondence
+	 * Returns whether at least one object corresponds to the given objects.
+	 *
+	 * @param eObjects the objects for which correspondences should be looked up
+	 * @return {@code true} if number of corresponding objects > 0
 	 */
-	public Correspondence createAndAddManualCorrespondence(List<EObject> eObjects1, List<EObject> eObjects2,
-			String tag);
-
+	public boolean hasCorrespondences(List<EObject> eObjects);
+	
 	/**
 	 * Returns whether at least one object corresponds to the given object.
 	 *
-	 * @param eObject
-	 *            - the object for which correspondences should be looked up
-	 * @return true if number of corresponding objects > 0
+	 * @param eObject the object for which correspondences should be looked up
+	 * @return {@code true} if number of corresponding objects > 0
 	 */
-
-	public boolean hasCorrespondences(List<EObject> eObject);
+	public default boolean hasCorrespondences(EObject eObject) {
+		return hasCorrespondences(List.of(eObject));
+	}
 
 	/**
 	 * Returns whether at least one object corresponds to another object.

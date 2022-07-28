@@ -1,109 +1,125 @@
 package tools.vitruv.change.correspondence;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
 
 /**
- * A view on a {@link GenericCorrespondenceModel} that is aware of the actual
- * correspondence type to be handled.
- * 
+ * A view on a {@link GenericCorrespondenceModel} that is aware of the actual correspondence type to be handled.
  * @author Heiko Klare
- *
- * @param <T> - the type of correspondences to be handled, i.e., to be
- *        retrieved, added or removed
+ * @param <T> - the type of correspondences to be handled, i.e., to be retrieved, added or removed
  */
 public interface CorrespondenceModelView<T extends Correspondence> extends GenericCorrespondenceModel<T> {
 	/**
-	 * Creates a correspondence of type <T> with the given tag between the given
-	 * lists of {@link EObject}s.
-	 * 
-	 * @param eObjects1 - the first list of {@link EObject}s
-	 * @param eObjects2 - the second list of {@link EObject}s
-	 * @param tag       - the tag to be added to the correspondence or
-	 *                  <code>null</code> if none shall be added
+	 * Creates a correspondence of type <T> with the given tag between the given lists of {@link EObject}s.
+	 * @param firstEObjects the first list of {@link EObject}s
+	 * @param secondEObjects the second list of {@link EObject}s
+	 * @param tag the tag to be added to the correspondence or {@code null} if none shall be added
 	 * @return the created correspondence
 	 */
-	public T createAndAddCorrespondence(List<EObject> eObjects1, List<EObject> eObjects2, String tag);
+	public T addCorrespondenceBetween(List<EObject> firstEObjects, List<EObject> secondEObjects, String tag);
 
 	/**
-	 * Creates a correspondence of type <T> without a tag (i.e., the tag is set to
-	 * <code>null</code> between the given lists of {@link EObject}s.
-	 * 
-	 * @param eObjects1 - the first list of {@link EObject}s
-	 * @param eObjects2 - the second list of {@link EObject}s
+	 * Creates a correspondence of type <T> with the given tag between the given {@link EObject}s.
+	 * @param firstEObject the first {@link EObject}
+	 * @param secondEObject the second {@link EObject}
+	 * @param tag the tag to be added to the correspondence or {@code null} if none shall be added
 	 * @return the created correspondence
 	 */
-	public T createAndAddCorrespondence(List<EObject> eObjects1, List<EObject> eObjects2);
+	public default T addCorrespondenceBetween(EObject firstEObject, EObject secondEObject, String tag) {
+		return addCorrespondenceBetween(List.of(firstEObject), List.of(secondEObject), tag);
+	}
+
+//	/**
+//	 * Creates a correspondence of type <T> without a tag between the given lists of {@link EObject}s.
+//	 * @param firstEObjects the first list of {@link EObject}s
+//	 * @param secondEObjects the second list of {@link EObject}s
+//	 * @return the created correspondence
+//	 */
+//	public T createAndAddCorrespondence(List<EObject> eObjects1, List<EObject> eObjects2);
+//
+//	/**
+//	 * Creates a correspondence of type <T> without a tag between the given {@link EObject}s.
+//	 * @param firstEObject the first {@link EObject}
+//	 * @param secondEObject the second {@link EObject}
+//	 * @return the created correspondence
+//	 */
+//	public default T createAndAddCorrespondence(EObject firstEObject, EObject secondEObject) {
+//		return createAndAddCorrespondence(List.of(firstEObject), List.of(secondEObject));
+//	}
 
 	/**
-	 * Returns all correspondences for the specified object and an empty set if the
-	 * object has no correspondences. Should never return {@link null}.
-	 *
-	 * @param eObjects - the {@link EObject}s to get the correspondences for
-	 * @return all correspondences for the specified object and an empty set if the
-	 *         object has no correspondences.
+	 * Returns all correspondences for the specified object and an empty set if the object has no correspondences. Should
+	 * never return {@link null}.
+	 * @param sourceObjects - the {@link EObject}s to get the correspondences for
+	 * @return all correspondences for the specified object and an empty set if the object has no correspondences.
 	 */
-	public Set<T> getCorrespondences(List<EObject> eObjects);
+	public Set<T> getCorrespondences(List<EObject> sourceObjects);
 
 	/**
-	 * Returns all correspondences for the specified object having the given tag,
-	 * and an empty set if the object has no correspondences. Should never return
-	 * {@link null}.
-	 *
-	 * @param eObjects - the {@link EObject}s to get the correspondences for
-	 * @param tag      - the tag to filter correspondences for
-	 * @return all correspondences for the specified object and an empty set if the
-	 *         object has no correspondences.
-	 */
-	public Set<T> getCorrespondences(List<EObject> eObjects, String tag);
-
-	/**
-	 * Returns all elements corresponding to the given one.
-	 * 
-	 * @param eObjects
-	 *            - the objects to get the corresponding ones for
+	 * Returns all elements corresponding to the given ones.
+	 * @param sourceObjects the objects to get the corresponding ones for
 	 * @return the elements corresponding to the given ones
 	 */
-	public Set<List<EObject>> getCorrespondingEObjects(List<EObject> eObjects);
+	public Set<List<EObject>> getCorrespondingEObjects(List<EObject> sourceObjects);
 
 	/**
-	 * Returns the elements corresponding to the given one, if the correspondence
-	 * contains the given tag.
-	 * 
-	 * @param eObjects
-	 *            - the objects to get the corresponding ones for
-	 * @param tag
-	 *            - the tag to filter correspondences for. If the tag is
-	 *            <code>null</code>, all correspondences will be returned
+	 * Returns the elements corresponding to the given one.
+	 * @param sourceObject the object to get the corresponding ones for
+	 * @return the elements corresponding to the given one
+	 */
+	public default Set<EObject> getCorrespondingEObjects(EObject sourceObject) {
+		return flatten(getCorrespondingEObjects(List.of(sourceObject)));
+	}
+
+	/**
+	 * Returns the elements of the given type corresponding to the given ones for all correspondences between these elements
+	 * containing the given tag.
+	 * @param sourceObjects the objects to get the corresponding ones for
+	 * @param type the type of the corresponding elements to retrieve
+	 * @param tag the tag to filter correspondences for. If the tag is {@code null}, all correspondences will be checked
 	 * @return the elements corresponding to the given ones
 	 */
-	public Set<List<EObject>> getCorrespondingEObjects(List<EObject> eObjects, String tag);
+	public <C extends EObject> Set<List<C>> getCorrespondingEObjects(List<EObject> sourceObjects, Class<C> type, String tag);
+
+	/**
+	 * Returns the elements of the given type corresponding to the given ones for all correspondences between these elements
+	 * containing the given tag.
+	 * @param sourceObject the object to get the corresponding ones for
+	 * @param type the type of the corresponding elements to retrieve
+	 * @param tag the tag to filter correspondences for. If the tag is {@code null}, all correspondences will be checked
+	 * @return the elements corresponding to the given one
+	 */
+	public default <C extends EObject> Set<C> getCorrespondingEObjects(EObject sourceObject, Class<C> type, String tag) {
+		return flatten(getCorrespondingEObjects(List.of(sourceObject), type, tag));
+	}
+
+	/**
+	 * Removes the correspondences between the given lists of {@link EObject}s with the given tag.
+	 * @param firstEObjects the first list of {@link EObject}s
+	 * @param secondEObjects the second list of {@link EObject}s
+	 * @param tag the tag to filter correspondences for or {@code null} if all correspondences shall be removed
+	 * @return the removed correspondences
+	 */
+	public Set<Correspondence> removeCorrespondencesBetween(List<EObject> firstEObjects, List<EObject> secondEObjects, String tag);
+
+	/**
+	 * Removes the correspondences between the given {@link EObject}s with the given tag.
+	 * @param firstEObjects the first {@link EObject}
+	 * @param secondEObjects the second {@link EObject}
+	 * @param tag the tag to filter correspondences for or {@code null} if all correspondences shall be removed
+	 * @return the removed correspondences
+	 */
+	public default Set<Correspondence> removeCorrespondencesBetween(EObject firstEObject, EObject secondEObject, String tag) {
+		return removeCorrespondencesBetween(List.of(firstEObject), List.of(secondEObject), tag);
+	}
 	
-	/**
-	 * Removes the correspondences between the given lists of {@link EObjects} with
-	 * the given tag.
-	 * 
-	 * @param aEObjects - the first list of {@link EObjects}
-	 * @param bEObjects - the second list of {@link EObjects}
-	 * @param tag       - the tag to filter correspondences for or <code>null</code>
-	 *                  if all correspondences shall be removed
-	 * @return the removed correspondences
-	 */
-	public Set<Correspondence> removeCorrespondencesBetween(List<EObject> aEObjects, List<EObject> bEObjects,
-			String tag);
-
-	/**
-	 * Removes the correspondences in which the given set of {@link EObject}s is
-	 * references. It also removes dependent correspondences.
-	 * 
-	 * @param eObjects - the list of {@link EObject}s whose correspondences shall be
-	 *                 removed
-	 * @param tag      - the tag to filter removed correspondences for or
-	 *                 <code>null</code> if all correspondences shall be removed
-	 * @return the removed correspondences
-	 */
-	public Set<Correspondence> removeCorrespondencesFor(List<EObject> eObjects, String tag);
+	private static <C extends EObject> Set<C> flatten(Set<List<C>> toFlatten) {
+		Set<C> correspondingElements = new HashSet<>();
+		toFlatten.forEach(correspondingElements::addAll);
+		return correspondingElements;
+	}
 
 }

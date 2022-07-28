@@ -101,12 +101,6 @@ class InternalCorrespondenceModelImpl implements InternalCorrespondenceModel {
 		createAndAddCorrespondence(eObjects1, eObjects2, tag, correspondence)
 	}
 
-	override Correspondence createAndAddManualCorrespondence(List<EObject> eObjects1, List<EObject> eObjects2,
-		String tag) {
-		val correspondence = CorrespondenceFactory.eINSTANCE.createManualCorrespondence
-		createAndAddCorrespondence(eObjects1, eObjects2, tag, correspondence)
-	}
-
 	def private <C extends Correspondence> C createAndAddCorrespondence(List<EObject> firstObjects,
 		List<EObject> secondObjects, String tag, C correspondence) {
 		correspondence => [
