@@ -10,7 +10,7 @@ This project contains the underlying definition of changes in Ecore-based models
 
 ## Installation
 
-Vitruv can be installed in Eclipse via the [nightly update site](https://vitruv.tools/updatesite/nightly). A wiki page provides [detailed instructions for using or extending Vitruv](https://github.com/vitruv-tools/.github/wiki/Getting-Started).
+The Vitruv change specification and propagation projects can be installed in Eclipse via the [nightly update site](https://vitruv.tools/updatesite/nightly). A wiki page provides [detailed instructions for using or extending Vitruv or parts of it](https://github.com/vitruv-tools/.github/wiki/Getting-Started).
 
 ## Project Development
 
