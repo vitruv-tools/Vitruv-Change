@@ -35,7 +35,7 @@ class CorrespondenceModelViewImpl<T extends Correspondence> implements Correspon
 	
 	override addCorrespondenceBetween(List<EObject> eObjects1, List<EObject> eObjects2, String tag) {
 		if (null === this.correspondenceCreator) {
-			throw new RuntimeException("The current view is not able to create new correspondences")
+			throw new UnsupportedOperationException("The current view is not able to create new correspondences")
 		}
 		correspondenceModelDelegate.createAndAddCorrespondence(eObjects1, eObjects2, tag, this.correspondenceCreator)
 	}
