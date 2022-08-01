@@ -92,7 +92,7 @@ public interface CorrespondenceModelView<T extends Correspondence> extends Gener
 	 * @param tag the tag to filter correspondences for or {@code null} if all correspondences shall be removed
 	 * @return the removed correspondences
 	 */
-	public Set<Correspondence> removeCorrespondencesBetween(List<EObject> firstEObjects, List<EObject> secondEObjects, String tag);
+	public Set<T> removeCorrespondencesBetween(List<EObject> firstEObjects, List<EObject> secondEObjects, String tag);
 
 	/**
 	 * Removes the correspondences between the given {@link EObject}s with the given tag.
@@ -101,7 +101,7 @@ public interface CorrespondenceModelView<T extends Correspondence> extends Gener
 	 * @param tag the tag to filter correspondences for or {@code null} if all correspondences shall be removed
 	 * @return the removed correspondences
 	 */
-	public default Set<Correspondence> removeCorrespondencesBetween(EObject firstEObject, EObject secondEObject, String tag) {
+	public default Set<T> removeCorrespondencesBetween(EObject firstEObject, EObject secondEObject, String tag) {
 		return removeCorrespondencesBetween(List.of(firstEObject), List.of(secondEObject), tag);
 	}
 	

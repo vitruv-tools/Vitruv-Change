@@ -79,8 +79,7 @@ public interface InternalCorrespondenceModel extends GenericCorrespondenceModel<
 
 	/**
 	 * Removes the correspondences of the given type and with the given type between
-	 * the given sets of {@link EObject}s. It also removes dependent
-	 * correspondences.
+	 * the given sets of {@link EObject}s.
 	 * 
 	 * @param correspondenceType
 	 *            - the type of correspondence to filter for
@@ -93,7 +92,7 @@ public interface InternalCorrespondenceModel extends GenericCorrespondenceModel<
 	 *            <code>null</code> if all correspondences shall be removed
 	 * @return the removed correspondences
 	 */
-	public <C extends Correspondence> Set<Correspondence> removeCorrespondencesBetween(Class<C> correspondenceType,
+	public <C extends Correspondence> Set<C> removeCorrespondencesBetween(Class<C> correspondenceType,
 			List<EObject> aEObjects, List<EObject> bEObjects, String tag);
 
 }

@@ -1,6 +1,5 @@
 package tools.vitruv.change.correspondence.impl
 
-import java.util.HashSet
 import java.util.LinkedHashSet
 import java.util.List
 import java.util.Set
@@ -115,27 +114,13 @@ class InternalCorrespondenceModelImpl implements InternalCorrespondenceModel {
 		EcoreUtil.remove(correspondence)
 	}
 
-	override <C extends Correspondence> Set<Correspondence> removeCorrespondencesBetween(Class<C> correspondenceType,
+	override <C extends Correspondence> Set<C> removeCorrespondencesBetween(Class<C> correspondenceType,
 		List<EObject> aEObjects, List<EObject> bEObjects, String tag) {
-		getCorrespondences(correspondenceType, aEObjects, tag).filter [
+		val removedCorrespondences = getCorrespondences(correspondenceType, aEObjects, tag).filter [
 			EcoreUtil.equals(bEObjects, getCorrespondingEObjects(aEObjects))
-		].flatMapFixedTo(new LinkedHashSet)[removeCorrespondencesAndDependendCorrespondences()]
-	}
-
-	private def Set<Correspondence> removeCorrespondencesAndDependendCorrespondences(Correspondence correspondence) {
-		var markedCorrespondences = new HashSet<Correspondence>()
-		markCorrespondenceAndDependingCorrespondencesRecursively(markedCorrespondences, correspondence)
-		markedCorrespondences.forEach[removeCorrespondence]
-		return markedCorrespondences
-	}
-
-	private def void markCorrespondenceAndDependingCorrespondencesRecursively(Set<Correspondence> markedCorrespondences,
-		Correspondence correspondence) {
-		markedCorrespondences.add(correspondence)
-		// FIXME MK detect dependency cycles in correspondences already when the reference is updated
-		for (dependingCorrespondence : correspondence.dependedOnBy) {
-			markCorrespondenceAndDependingCorrespondencesRecursively(markedCorrespondences, dependingCorrespondence)
-		}
+		].toSet
+		removedCorrespondences.forEach[removeCorrespondence]
+		return removedCorrespondences
 	}
 
 	override <C extends Correspondence> Set<C> getCorrespondences(Class<C> correspondenceType,
