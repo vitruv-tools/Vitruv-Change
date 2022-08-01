@@ -2,7 +2,6 @@ package tools.vitruv.change.correspondence;
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.eclipse.emf.ecore.EObject;
@@ -53,8 +52,6 @@ public interface InternalCorrespondenceModel extends GenericCorrespondenceModel<
 	 * 
 	 * @param correspondenceType
 	 *            - the type of correspondence to filter for
-	 * @param correspondencesFilter
-	 *            - the filter for getting the correspondences of interest
 	 * @param eObjects
 	 *            - the {@link EObject}s to find the correspondence for
 	 * @param tag
@@ -62,7 +59,7 @@ public interface InternalCorrespondenceModel extends GenericCorrespondenceModel<
 	 * @return all correspondences for the given objects with the given tag
 	 */
 	public <C extends Correspondence> Set<C> getCorrespondences(Class<C> correspondenceType,
-			Predicate<C> correspondencesFilter, List<EObject> eObjects, String tag);
+			List<EObject> eObjects, String tag);
 
 	/**
 	 * Returns the elements corresponding to the given ones, if the correspondence is
@@ -70,8 +67,6 @@ public interface InternalCorrespondenceModel extends GenericCorrespondenceModel<
 	 * 
 	 * @param correspondenceType
 	 *            - the type of correspondence to filter for
-	 * @param correspondencesFilter
-	 *            - the filter for getting the correspondences of interest
 	 * @param eObjects
 	 *            - the objects to get the corresponding ones for
 	 * @param tag
@@ -80,7 +75,7 @@ public interface InternalCorrespondenceModel extends GenericCorrespondenceModel<
 	 * @return the elements corresponding to the given ones
 	 */
 	public <C extends Correspondence> Set<List<EObject>> getCorrespondingEObjects(Class<C> correspondenceType,
-			Predicate<C> correspondencesFilter, List<EObject> eObjects, String tag);
+			List<EObject> eObjects, String tag);
 
 	/**
 	 * Removes the correspondences of the given type and with the given type between
@@ -89,8 +84,6 @@ public interface InternalCorrespondenceModel extends GenericCorrespondenceModel<
 	 * 
 	 * @param correspondenceType
 	 *            - the type of correspondence to filter for
-	 * @param correspondencesFilter
-	 *            - the filter for getting the correspondences of interest
 	 * @param aEObjects
 	 *            - the first list of corresponding {@link EObject}s
 	 * @param bEObjects
@@ -101,25 +94,6 @@ public interface InternalCorrespondenceModel extends GenericCorrespondenceModel<
 	 * @return the removed correspondences
 	 */
 	public <C extends Correspondence> Set<Correspondence> removeCorrespondencesBetween(Class<C> correspondenceType,
-			Predicate<C> correspondencesFilter, List<EObject> aEObjects, List<EObject> bEObjects, String tag);
-
-	/**
-	 * Removes all correspondences of the given type in which the given set of
-	 * {@link EObject}s is references. It also removes dependent correspondences.
-	 * 
-	 * @param correspondenceType
-	 *            - the type of correspondence to filter for
-	 * @param correspondencesFilter
-	 *            - the filter for getting the correspondences of interest
-	 * @param eObjects
-	 *            - the list of {@link EObject}s whose correspondences shall be
-	 *            removed
-	 * @param tag
-	 *            - the tag to filter removed correspondences for or
-	 *            <code>null</code> if all correspondences shall be removed
-	 * @return the removed correspondences
-	 */
-	public <C extends Correspondence> Set<Correspondence> removeCorrespondencesFor(Class<C> correspondenceType,
-			Predicate<C> correspondencesFilter, List<EObject> eObjects, String tag);
+			List<EObject> aEObjects, List<EObject> bEObjects, String tag);
 
 }

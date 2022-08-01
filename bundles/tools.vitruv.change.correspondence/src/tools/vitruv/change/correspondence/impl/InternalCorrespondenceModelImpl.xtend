@@ -4,7 +4,6 @@ import java.util.HashSet
 import java.util.LinkedHashSet
 import java.util.List
 import java.util.Set
-import java.util.function.Predicate
 import java.util.function.Supplier
 import org.apache.log4j.Logger
 import org.eclipse.emf.common.util.URI
@@ -117,17 +116,10 @@ class InternalCorrespondenceModelImpl implements InternalCorrespondenceModel {
 	}
 
 	override <C extends Correspondence> Set<Correspondence> removeCorrespondencesBetween(Class<C> correspondenceType,
-		Predicate<C> correspondencesFilter, List<EObject> aEObjects, List<EObject> bEObjects, String tag) {
-		getCorrespondences(correspondenceType, correspondencesFilter, aEObjects, tag).filter [
+		List<EObject> aEObjects, List<EObject> bEObjects, String tag) {
+		getCorrespondences(correspondenceType, aEObjects, tag).filter [
 			EcoreUtil.equals(bEObjects, getCorrespondingEObjects(aEObjects))
 		].flatMapFixedTo(new LinkedHashSet)[removeCorrespondencesAndDependendCorrespondences()]
-	}
-
-	override <C extends Correspondence> Set<Correspondence> removeCorrespondencesFor(Class<C> correspondenceType,
-		Predicate<C> correspondencesFilter, List<EObject> eObjects, String tag) {
-		getCorrespondences(correspondenceType, correspondencesFilter, eObjects, tag).flatMapFixedTo(new LinkedHashSet) [
-			removeCorrespondencesAndDependendCorrespondences()
-		]
 	}
 
 	private def Set<Correspondence> removeCorrespondencesAndDependendCorrespondences(Correspondence correspondence) {
@@ -147,8 +139,8 @@ class InternalCorrespondenceModelImpl implements InternalCorrespondenceModel {
 	}
 
 	override <C extends Correspondence> Set<C> getCorrespondences(Class<C> correspondenceType,
-		Predicate<C> correspondencesFilter, List<EObject> eObjects, String tag) {
-		return eObjects.getCorrespondences().filter(correspondenceType).filter(correspondencesFilter).filter [
+		List<EObject> eObjects, String tag) {
+		return eObjects.getCorrespondences().filter(correspondenceType).filter [
 			tag === null || it.tag == tag
 		].toSet
 	}
@@ -160,8 +152,8 @@ class InternalCorrespondenceModelImpl implements InternalCorrespondenceModel {
 	}
 
 	override <C extends Correspondence> Set<List<EObject>> getCorrespondingEObjects(Class<C> correspondenceType,
-		Predicate<C> correspondencesFilter, List<EObject> eObjects, String tag) {
-		return getCorrespondences(correspondenceType, correspondencesFilter, eObjects, tag).mapFixedTo(
+		List<EObject> eObjects, String tag) {
+		return getCorrespondences(correspondenceType, eObjects, tag).mapFixedTo(
 			new LinkedHashSet)[getCorrespondingEObjects(eObjects)]
 	}
 
@@ -178,7 +170,7 @@ class InternalCorrespondenceModelImpl implements InternalCorrespondenceModel {
 	}
 
 	override hasCorrespondences(List<EObject> eObjects) {
-		val correspondences = this.getCorrespondences(Correspondence, [true], eObjects, null)
+		val correspondences = this.getCorrespondences(Correspondence, eObjects, null)
 		return correspondences !== null && correspondences.size() > 0
 	}
 

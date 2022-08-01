@@ -9,7 +9,6 @@ import tools.vitruv.change.correspondence.CorrespondenceModelView
 import tools.vitruv.change.correspondence.InternalCorrespondenceModel
 import tools.vitruv.change.correspondence.CorrespondenceModelViewFactory
 import org.eclipse.xtend.lib.annotations.Accessors
-import java.util.function.Predicate
 
 class CorrespondenceModelViewImpl<T extends Correspondence> implements CorrespondenceModelView<T> {
 	@Accessors(PROTECTED_GETTER)
@@ -18,9 +17,6 @@ class CorrespondenceModelViewImpl<T extends Correspondence> implements Correspon
 	final Class<T> correspondenceType;
 	final Supplier<T> correspondenceCreator
 	
-	@Accessors(PROTECTED_GETTER)
-	final Predicate<T> defaultCorrespondenceFilter;
-	 
 	new(Class<T> correspondenceType, InternalCorrespondenceModel correspondenceModel) {
 		this(correspondenceType, correspondenceModel, null)
 	}
@@ -28,7 +24,6 @@ class CorrespondenceModelViewImpl<T extends Correspondence> implements Correspon
 	new(Class<T> correspondenceType, InternalCorrespondenceModel correspondenceModel,
 		Supplier<T> correspondenceCreator) {
 		this.correspondenceType = correspondenceType;
-		this.defaultCorrespondenceFilter =  [true];
 		this.correspondenceModelDelegate = correspondenceModel;
 		this.correspondenceCreator = correspondenceCreator
 	}
@@ -50,20 +45,20 @@ class CorrespondenceModelViewImpl<T extends Correspondence> implements Correspon
 	}
 	
 	override getCorrespondences(List<EObject> eObjects) {
-		correspondenceModelDelegate.getCorrespondences(correspondenceType, defaultCorrespondenceFilter, eObjects, null).toSet();
+		correspondenceModelDelegate.getCorrespondences(correspondenceType, eObjects, null).toSet();
 	}
 
 	override getCorrespondingEObjects(List<EObject> eObjects) {
-		correspondenceModelDelegate.getCorrespondingEObjects(correspondenceType, defaultCorrespondenceFilter, eObjects, null);
+		correspondenceModelDelegate.getCorrespondingEObjects(correspondenceType, eObjects, null);
 	}
 
 	override <C extends EObject> Set<List<C>> getCorrespondingEObjects(List<EObject> eObjects, Class<C> type, String tag) {
-		val correspondingObjects = correspondenceModelDelegate.getCorrespondingEObjects(correspondenceType, defaultCorrespondenceFilter, eObjects, tag);
+		val correspondingObjects = correspondenceModelDelegate.getCorrespondingEObjects(correspondenceType, eObjects, tag);
 		correspondingObjects.filter[it.forall[type.isInstance(it)]].map[it.filter(type).toList].toSet;
 	}
 
 	override removeCorrespondencesBetween(List<EObject> aEObjects, List<EObject> bEObjects, String tag) {
-		correspondenceModelDelegate.removeCorrespondencesBetween(correspondenceType, defaultCorrespondenceFilter, aEObjects, bEObjects, tag);
+		correspondenceModelDelegate.removeCorrespondencesBetween(correspondenceType, aEObjects, bEObjects, tag);
 	}
 
 	override <V extends CorrespondenceModelView<?>> getView(CorrespondenceModelViewFactory<V> correspondenceModelViewFactory) {
