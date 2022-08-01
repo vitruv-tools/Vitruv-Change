@@ -17,6 +17,8 @@ Require-Bundle: org.apache.log4j,
 Bundle-ActivationPolicy: lazy
 Export-Package: tools.vitruv.change.correspondence,
  tools.vitruv.change.correspondence.impl,
- tools.vitruv.change.correspondence.util
+ tools.vitruv.change.correspondence.util,
+ tools.vitruv.change.correspondence.view,
+ tools.vitruv.change.correspondence.model
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin

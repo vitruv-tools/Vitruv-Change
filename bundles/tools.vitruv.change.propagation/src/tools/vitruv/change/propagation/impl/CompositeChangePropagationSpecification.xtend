@@ -1,6 +1,5 @@
 package tools.vitruv.change.propagation.impl
 
-import tools.vitruv.change.correspondence.CorrespondenceModel
 import java.util.List
 import java.util.ArrayList
 import tools.vitruv.change.interaction.UserInteractor
@@ -12,6 +11,8 @@ import tools.vitruv.change.propagation.ResourceAccess
 import org.eclipse.xtend.lib.annotations.Accessors
 import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.composite.MetamodelDescriptor
+import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView
+import tools.vitruv.change.correspondence.Correspondence
 
 class CompositeChangePropagationSpecification extends AbstractChangePropagationSpecification implements ChangePropagationObserver {
 	static val logger = Logger.getLogger(CompositeChangePropagationSpecification);
@@ -56,12 +57,12 @@ class CompositeChangePropagationSpecification extends AbstractChangePropagationS
 		}
 	}
 
-	override propagateChange(EChange change, CorrespondenceModel correspondenceModel, ResourceAccess resourceAccess) {
+	override propagateChange(EChange change, EditableCorrespondenceModelView<Correspondence> correspondenceModel, ResourceAccess resourceAccess) {
 		propagateChangeViaPreprocessors(change, correspondenceModel, resourceAccess);
 		propagateChangeViaMainprocessors(change, correspondenceModel, resourceAccess);
 	}
 
-	protected def propagateChangeViaPreprocessors(EChange change, CorrespondenceModel correspondenceModel,
+	protected def propagateChangeViaPreprocessors(EChange change, EditableCorrespondenceModelView<Correspondence> correspondenceModel,
 		ResourceAccess resourceAccess) {
 		for (changeProcessor : changePreprocessors) {
 			logger.trace('''Calling change preprocessor «changeProcessor» for change event «change»''');
@@ -69,7 +70,7 @@ class CompositeChangePropagationSpecification extends AbstractChangePropagationS
 		}
 	}
 
-	protected def propagateChangeViaMainprocessors(EChange change, CorrespondenceModel correspondenceModel,
+	protected def propagateChangeViaMainprocessors(EChange change, EditableCorrespondenceModelView<Correspondence> correspondenceModel,
 		ResourceAccess resourceAccess) {
 		for (changeProcessor : changeMainprocessors) {
 			logger.trace('''Calling change mainprocessor «changeProcessor» for change event «change»''');
@@ -77,7 +78,7 @@ class CompositeChangePropagationSpecification extends AbstractChangePropagationS
 		}
 	}
 
-	override doesHandleChange(EChange change, CorrespondenceModel correspondenceModel) {
+	override doesHandleChange(EChange change, EditableCorrespondenceModelView<Correspondence> correspondenceModel) {
 		for (changeProcessor : allProcessors) {
 			if (changeProcessor.doesHandleChange(change, correspondenceModel)) {
 				return true;

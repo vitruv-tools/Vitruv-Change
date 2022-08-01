@@ -1,4 +1,4 @@
-package tools.vitruv.change.correspondence.impl
+package tools.vitruv.change.correspondence.model
 
 import java.util.LinkedHashSet
 import java.util.List
@@ -14,10 +14,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.util.EcoreUtil
 import tools.vitruv.change.correspondence.Correspondence
 import tools.vitruv.change.correspondence.CorrespondenceFactory
-import tools.vitruv.change.correspondence.CorrespondenceModelView
-import tools.vitruv.change.correspondence.CorrespondenceModelViewFactory
 import tools.vitruv.change.correspondence.Correspondences
-import tools.vitruv.change.correspondence.InternalCorrespondenceModel
 
 import static com.google.common.base.Preconditions.checkState
 
@@ -25,8 +22,8 @@ import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.*
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.loadOrCreateResource
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
 
-class InternalCorrespondenceModelImpl implements InternalCorrespondenceModel {
-	static val logger = Logger.getLogger(InternalCorrespondenceModelImpl)
+class CorrespondenceModelImpl implements PersistableCorrespondenceModel {
+	static val logger = Logger.getLogger(CorrespondenceModelImpl)
 	val Correspondences correspondences
 	val Resource correspondencesResource
 
@@ -48,22 +45,23 @@ class InternalCorrespondenceModelImpl implements InternalCorrespondenceModel {
 				correspondence.leftEObjects => [
 					val resolvedObjects = it.resolve(resolveIn)
 					it.clear()
-					it += resolvedObjects	
+					it += resolvedObjects
 				]
 				correspondence.rightEObjects => [
 					val resolvedObjects = it.resolve(resolveIn)
 					it.clear()
-					it += resolvedObjects	
+					it += resolvedObjects
 				]
 			}
 			this.correspondences.correspondences += loadedCorrespondences.correspondences
 		}
 	}
-	
+
 	private static def resolve(Iterable<EObject> eObjects, ResourceSet resolveIn) {
 		val resolvedEObjects = eObjects.mapFixed[EcoreUtil.resolve(it, resolveIn)]
 		for (resolvedEObject : resolvedEObjects) {
-			checkState(!resolvedEObject.eIsProxy, "object %s is referenced in correspondence but could not be resolved", resolvedEObject)
+			checkState(!resolvedEObject.eIsProxy, "object %s is referenced in correspondence but could not be resolved",
+				resolvedEObject)
 		}
 		return resolvedEObjects
 	}
@@ -72,28 +70,34 @@ class InternalCorrespondenceModelImpl implements InternalCorrespondenceModel {
 		removeCorrespondencesForRemovedElements()
 		this.correspondencesResource?.save(null)
 	}
-	
+
 	private def void removeCorrespondencesForRemovedElements() {
 		val iterator = correspondences.correspondences.iterator
 		while (iterator.hasNext()) {
 			val element = iterator.next()
-			if (element.leftEObjects.exists[!isInManagedResource] || element.rightEObjects.exists[!isInManagedResource]) {
-				checkState(element.leftEObjects.forall[!isInManagedResource] || element.leftEObjects.forall[!isInManagedResource],
+			if (element.leftEObjects.exists[!isInManagedResource] ||
+				element.rightEObjects.exists[!isInManagedResource]) {
+				checkState(element.leftEObjects.forall[!isInManagedResource] || element.leftEObjects.forall [
+					!isInManagedResource
+				],
 					"Correspondence between %s and %s contains elements %s that are not contained in a resource anymore.",
-					element.leftEObjects, element.rightEObjects, (element.leftEObjects + element.rightEObjects).filter[!isInManagedResource])
+					element.leftEObjects, element.rightEObjects, (element.leftEObjects + element.rightEObjects).filter [
+						!isInManagedResource
+					])
 				iterator.remove()
 				if (logger.traceEnabled) {
-					logger.trace('''Correspondence between «element.leftEObjects» and «element.rightEObjects» has been removed as all its elements have been removed from resources.''')
+					logger.
+						trace('''Correspondence between «element.leftEObjects» and «element.rightEObjects» has been removed as all its elements have been removed from resources.''')
 				}
 			}
 		}
 	}
-	
+
 	private def static isInManagedResource(EObject object) {
 		object instanceof EClass || object.eResource?.resourceSet !== null
 	}
 
-	override <C extends Correspondence> C createAndAddCorrespondence(List<EObject> eObjects1, List<EObject> eObjects2,
+	override <C extends Correspondence> C addCorrespondenceBetween(List<EObject> eObjects1, List<EObject> eObjects2,
 		String tag, Supplier<C> correspondenceCreator) {
 		val correspondence = correspondenceCreator.get
 		createAndAddCorrespondence(eObjects1, eObjects2, tag, correspondence)
@@ -123,7 +127,7 @@ class InternalCorrespondenceModelImpl implements InternalCorrespondenceModel {
 		return removedCorrespondences
 	}
 
-	override <C extends Correspondence> Set<C> getCorrespondences(Class<C> correspondenceType,
+	private def <C extends Correspondence> Set<C> getCorrespondences(Class<C> correspondenceType,
 		List<EObject> eObjects, String tag) {
 		return eObjects.getCorrespondences().filter(correspondenceType).filter [
 			tag === null || it.tag == tag
@@ -136,10 +140,11 @@ class InternalCorrespondenceModelImpl implements InternalCorrespondenceModel {
 		].toSet
 	}
 
-	override <C extends Correspondence> Set<List<EObject>> getCorrespondingEObjects(Class<C> correspondenceType,
+	override Set<List<EObject>> getCorrespondingEObjects(Class<? extends Correspondence> correspondenceType,
 		List<EObject> eObjects, String tag) {
-		return getCorrespondences(correspondenceType, eObjects, tag).mapFixedTo(
-			new LinkedHashSet)[getCorrespondingEObjects(eObjects)]
+		return getCorrespondences(correspondenceType, eObjects, tag).mapFixedTo(new LinkedHashSet) [
+			getCorrespondingEObjects(eObjects)
+		]
 	}
 
 	private def List<EObject> getCorrespondingEObjects(Correspondence correspondence, List<EObject> eObjects) {
@@ -150,27 +155,9 @@ class InternalCorrespondenceModelImpl implements InternalCorrespondenceModel {
 		}
 	}
 
-	override boolean hasCorrespondences() {
-		return !this.correspondences.correspondences.empty
-	}
-
 	override hasCorrespondences(List<EObject> eObjects) {
-		val correspondences = this.getCorrespondences(Correspondence, eObjects, null)
+		val correspondences = this.getCorrespondences(eObjects)
 		return correspondences !== null && correspondences.size() > 0
-	}
-
-	override <V extends CorrespondenceModelView<?>> getView(
-		CorrespondenceModelViewFactory<V> correspondenceModelViewFactory) {
-		return correspondenceModelViewFactory.createCorrespondenceModelView(this)
-	}
-
-	override <V extends CorrespondenceModelView<?>> getEditableView(
-		CorrespondenceModelViewFactory<V> correspondenceModelViewFactory) {
-		return correspondenceModelViewFactory.createEditableCorrespondenceModelView(this)
-	}
-
-	override getGenericView() {
-		return new GenericCorrespondenceModelViewImpl(this)
 	}
 
 }
