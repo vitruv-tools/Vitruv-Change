@@ -9,5 +9,5 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  tools.vitruv.change.composite
 Bundle-RequiredExecutionEnvironment: JavaSE-11
-Export-Package: tools.vitruv.extensions.changevisualization
+Export-Package: tools.vitruv.testutils.changevisualization
 Bundle-Vendor: vitruv.tools
