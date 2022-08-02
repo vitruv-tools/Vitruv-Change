@@ -12,6 +12,12 @@
    <feature id="tools.vitruv.testutils.feature.source" version="2.1.0.qualifier">
       <category name="Vitruv Change"/>
    </feature>
+   <feature url="features/tools.vitruv.testutils.changevisualization.feature_2.1.0.qualifier.jar" id="tools.vitruv.testutils.changevisualization.feature" version="2.1.0.qualifier">
+      <category name="Vitruv Change"/>
+   </feature>
+   <feature id="tools.vitruv.testutils.changevisualization.feature.source" version="2.1.0.qualifier">
+      <category name="Vitruv Change"/>
+   </feature>
    <category-def name="Vitruv Change" label="Vitruv Change Specification and Propagation">
       <description>
          The Vitruv core for change specification and propagation
