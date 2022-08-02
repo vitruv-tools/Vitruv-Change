@@ -189,10 +189,10 @@ class ChangePropagator {
 			// Find created objects without resource
 			for (createdObjectWithoutResource : createdObjects.filter[eResource === null]) {
 				checkState(
-					!modelRepository.correspondenceModel.hasCorrespondences(List.of(createdObjectWithoutResource)),
+					!modelRepository.correspondenceModel.hasCorrespondences(createdObjectWithoutResource),
 					"The object %s is part of a correspondence to %s but not in any resource",
 					createdObjectWithoutResource,
-					modelRepository.correspondenceModel.getCorrespondingEObjects(#[createdObjectWithoutResource]))
+					modelRepository.correspondenceModel.getCorrespondingEObjects(createdObjectWithoutResource))
 				logger.warn("Object was created but has no correspondence and is thus lost: " +
 					createdObjectWithoutResource)
 			}
