@@ -7,13 +7,9 @@ Bundle-ClassPath: .
 Bundle-Version: 2.1.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.apache.log4j,
- org.eclipse.xtend.lib,
  org.eclipse.emf.ecore.change,
- org.eclipse.core.runtime,
- org.eclipse.emf.ecore;visibility:=reexport,
- edu.kit.ipd.sdq.activextendannotations,
  edu.kit.ipd.sdq.commons.util.emf,
- edu.kit.ipd.sdq.commons.util.java
+ com.google.guava;bundle-version="30.1.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: tools.vitruv.change.correspondence,
  tools.vitruv.change.correspondence.impl,
