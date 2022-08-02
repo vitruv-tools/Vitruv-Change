@@ -7,7 +7,7 @@ public final class CorrespondenceModelFactory {
 	}
 
 	public static PersistableCorrespondenceModel createPersistableCorrespondenceModel(URI resourceUri) {
-		return new CorrespondenceModelImpl(resourceUri);
+		return new PersistableCorrespondenceModelImpl(resourceUri);
 	}
 
 }
