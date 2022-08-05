@@ -41,7 +41,8 @@ jobs:
           name: change
           path: change/releng/tools.vitruv.change.updatesite/target/repository
           retention-days: 1
-  validate_applications:
+          
+  validate_framework:
     needs: build_change
     runs-on: ubuntu-latest
     steps:
@@ -57,27 +58,9 @@ jobs:
           repository: vitruv-tools/Vitruv
           ref: main
           fetch-depth: 0
-      - name: Checkout DSLs
-        uses: actions/checkout@v3
-        with:
-          path: dsls
-          repository: vitruv-tools/Vitruv-DSLs
-          ref: main
-          fetch-depth: 0
-      - name: Checkout CBS Applications
-        uses: actions/checkout@v3
-        with:
-          path: cbsapplications
-          repository: vitruv-tools/Vitruv-Applications-ComponentBasedSystems
-          ref: main
-          fetch-depth: 0
-      - name: Checkout Matching Framework/DSLs/Applications Branches
+      - name: Checkout Matching Framework Branches
         run: |
           cd framework
-          git checkout -B ${{ github.head_ref }} origin/${{ github.head_ref }} || true
-          cd ../dsls
-          git checkout -B ${{ github.head_ref }} origin/${{ github.head_ref }} || true
-          cd ../cbsapplications
           git checkout -B ${{ github.head_ref }} origin/${{ github.head_ref }} || true
       - name: Cache
         uses: actions/cache@v3
@@ -104,6 +87,49 @@ jobs:
           -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.NoOpLog
         env: 
           MAVEN_OPTS: -Djansi.force=true
+      - name: Store Framework Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: framework
+          path: framework/releng/tools.vitruv.updatesite/target/repository
+          retention-days: 1
+
+  validate_DSLs:
+    needs: [build_change, validate_framework]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Change Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: change
+          path: change
+      - name: Download Framework Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: framework
+          path: framework
+      - name: Checkout DSLs
+        uses: actions/checkout@v3
+        with:
+          path: dsls
+          repository: vitruv-tools/Vitruv-DSLs
+          ref: main
+          fetch-depth: 0
+      - name: Checkout Matching DSLs Branches
+        run: |
+          cd dsls
+          git checkout -B ${{ github.head_ref }} origin/${{ github.head_ref }} || true
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/MANIFEST.MF') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: 11
       - name: Build DSLs
         uses: GabrielBB/xvfb-action@v1
         with:
@@ -111,7 +137,7 @@ jobs:
           run: >
             ./mvnw -B -U clean verify
             -Dvitruv.change.url=file:///${GITHUB_WORKSPACE}/change
-            -Dvitruv.framework.path=${GITHUB_WORKSPACE}/framework
+            -Dvitruv.framework.url=file:///${GITHUB_WORKSPACE}/framework
             -Dstyle.color=always
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
             -Dorg.slf4j.simpleLogger.log.org.eclipse.tycho.core.resolver.DefaultTychoResolver=warn
@@ -121,6 +147,54 @@ jobs:
             -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.NoOpLog
         env: 
           MAVEN_OPTS: -Djansi.force=true
+      - name: Store DSLs Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dsls
+          path: dsls/releng/tools.vitruv.dsls.updatesite/target/repository
+          retention-days: 1
+
+  validate_cbs_applications:
+    needs: [build_change, validate_framework, validate_DSLs]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Change Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: change
+          path: change
+      - name: Download Framework Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: framework
+          path: framework
+      - name: Download DSLs Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dsls
+          path: dsls
+      - name: Checkout CBS Applications
+        uses: actions/checkout@v3
+        with:
+          path: cbsapplications
+          repository: vitruv-tools/Vitruv-Applications-ComponentBasedSystems
+          ref: main
+          fetch-depth: 0
+      - name: Checkout Matching Applications Branches
+        run: |
+          cd cbsapplications
+          git checkout -B ${{ github.head_ref }} origin/${{ github.head_ref }} || true
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/MANIFEST.MF') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: 11
       - name: Build Applications
         uses: GabrielBB/xvfb-action@v1
         with:
@@ -128,8 +202,8 @@ jobs:
           run: >
             ./mvnw -B -U clean verify
             -Dvitruv.change.url=file:///${GITHUB_WORKSPACE}/change
-            -Dvitruv.framework.path=${GITHUB_WORKSPACE}/framework
-            -Dvitruv.dsls.path=${GITHUB_WORKSPACE}/dsls
+            -Dvitruv.framework.url=file:///${GITHUB_WORKSPACE}/framework
+            -Dvitruv.dsls.url=file:///${GITHUB_WORKSPACE}/dsls
             -Dstyle.color=always
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
             -Dorg.slf4j.simpleLogger.log.org.eclipse.tycho.core.resolver.DefaultTychoResolver=warn
