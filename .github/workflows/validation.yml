@@ -1,16 +1,15 @@
-name: Application Validation
+name: Validation
 
 on:
   pull_request:
 
 jobs:
   build_change:
+    name: Change
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Change
         uses: actions/checkout@v3
-        with:
-          path: change
       - name: Cache
         uses: actions/cache@v3
         with:
@@ -22,10 +21,9 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 11
-      - name: Build Change
-        working-directory: ./change
+      - name: Build and Verify Change
         run: >
-          ./mvnw -B -U package -Dmaven.test.skip=true
+          ./mvnw -B -U clean verify
           -Dstyle.color=always
           -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
           -Dorg.slf4j.simpleLogger.log.org.eclipse.tycho.core.resolver.DefaultTychoResolver=warn
@@ -39,11 +37,12 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: change
-          path: change/releng/tools.vitruv.change.updatesite/target/repository
+          path: releng/tools.vitruv.change.updatesite/target/repository
           retention-days: 1
           
   validate_framework:
     needs: build_change
+    name: Framework
     runs-on: ubuntu-latest
     steps:
       - name: Download Change Artifact
@@ -73,11 +72,11 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 11
-      - name: Build Framework
+      - name: Build and Verify Framework
         working-directory: ./framework
         run: >
           ./mvnw -B -U clean verify
-          -Dvitruv.change.url="file:///\${GITHUB_WORKSPACE}/change"
+          -Dvitruv.change.url=file:///${{ github.workspace }}/change
           -Dstyle.color=always
           -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
           -Dorg.slf4j.simpleLogger.log.org.eclipse.tycho.core.resolver.DefaultTychoResolver=warn
@@ -96,6 +95,7 @@ jobs:
 
   validate_DSLs:
     needs: [build_change, validate_framework]
+    name: DSLs
     runs-on: ubuntu-latest
     steps:
       - name: Download Change Artifact
@@ -130,14 +130,14 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 11
-      - name: Build DSLs
+      - name: Build and Verify DSLs
         uses: GabrielBB/xvfb-action@v1
         with:
           working-directory: ./dsls
           run: >
             ./mvnw -B -U clean verify
-            -Dvitruv.change.url=file:///${GITHUB_WORKSPACE}/change
-            -Dvitruv.framework.url=file:///${GITHUB_WORKSPACE}/framework
+            -Dvitruv.change.url=file:///${{ github.workspace }}/change
+            -Dvitruv.framework.url=file:///${{ github.workspace }}/framework
             -Dstyle.color=always
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
             -Dorg.slf4j.simpleLogger.log.org.eclipse.tycho.core.resolver.DefaultTychoResolver=warn
@@ -156,6 +156,7 @@ jobs:
 
   validate_cbs_applications:
     needs: [build_change, validate_framework, validate_DSLs]
+    name: Applications
     runs-on: ubuntu-latest
     steps:
       - name: Download Change Artifact
@@ -195,15 +196,15 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 11
-      - name: Build Applications
+      - name: Build and Verify Applications
         uses: GabrielBB/xvfb-action@v1
         with:
           working-directory: ./cbsapplications
           run: >
             ./mvnw -B -U clean verify
-            -Dvitruv.change.url=file:///${GITHUB_WORKSPACE}/change
-            -Dvitruv.framework.url=file:///${GITHUB_WORKSPACE}/framework
-            -Dvitruv.dsls.url=file:///${GITHUB_WORKSPACE}/dsls
+            -Dvitruv.change.url=file:///${{ github.workspace }}/change
+            -Dvitruv.framework.url=file:///${{ github.workspace }}/framework
+            -Dvitruv.dsls.url=file:///${{ github.workspace }}/dsls
             -Dstyle.color=always
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
             -Dorg.slf4j.simpleLogger.log.org.eclipse.tycho.core.resolver.DefaultTychoResolver=warn
