@@ -6,39 +6,7 @@ on:
 jobs:
   build_change:
     name: Change
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Change
-        uses: actions/checkout@v3
-      - name: Cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/MANIFEST.MF') }}
-          restore-keys: ${{ runner.os }}-m2
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'zulu'
-          java-version: 11
-      - name: Build and Verify Change
-        run: >
-          ./mvnw -B -U clean verify
-          -Dstyle.color=always
-          -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-          -Dorg.slf4j.simpleLogger.log.org.eclipse.tycho.core.resolver.DefaultTychoResolver=warn
-          -Dorg.slf4j.simpleLogger.log.org.eclipse.tycho.osgi.configuration.MavenContextConfigurator=warn
-          -Dorg.slf4j.simpleLogger.log.org.eclipse.sisu.equinox.launching.internal.DefaultEquinoxLauncher=warn
-          -Dorg.slf4j.simpleLogger.log.org.eclipse.xtext.maven.XtextGenerateMojo=warn
-          -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.NoOpLog
-        env: 
-          MAVEN_OPTS: -Djansi.force=true
-      - name: Store Change Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: change
-          path: releng/tools.vitruv.change.updatesite/target/repository
-          retention-days: 1
+    uses: ./.github/workflows/ci.yml
           
   validate_framework:
     needs: build_change
@@ -57,7 +25,7 @@ jobs:
           repository: vitruv-tools/Vitruv
           ref: main
           fetch-depth: 0
-      - name: Checkout Matching Framework Branches
+      - name: Checkout Matching Framework Branch
         run: |
           cd framework
           git checkout -B ${{ github.head_ref }} origin/${{ github.head_ref }} || true
@@ -115,7 +83,7 @@ jobs:
           repository: vitruv-tools/Vitruv-DSLs
           ref: main
           fetch-depth: 0
-      - name: Checkout Matching DSLs Branches
+      - name: Checkout Matching DSLs Branch
         run: |
           cd dsls
           git checkout -B ${{ github.head_ref }} origin/${{ github.head_ref }} || true
@@ -181,7 +149,7 @@ jobs:
           repository: vitruv-tools/Vitruv-Applications-ComponentBasedSystems
           ref: main
           fetch-depth: 0
-      - name: Checkout Matching Applications Branches
+      - name: Checkout Matching Applications Branch
         run: |
           cd cbsapplications
           git checkout -B ${{ github.head_ref }} origin/${{ github.head_ref }} || true
