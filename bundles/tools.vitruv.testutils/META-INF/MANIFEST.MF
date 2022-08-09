@@ -26,5 +26,6 @@ Require-Bundle: org.apache.log4j,
 Export-Package: tools.vitruv.testutils,
  tools.vitruv.testutils.activeannotations,
  tools.vitruv.testutils.matchers,
- tools.vitruv.testutils.printing
+ tools.vitruv.testutils.printing,
+ tools.vitruv.testutils.views
 Bundle-Vendor: vitruv.tools
