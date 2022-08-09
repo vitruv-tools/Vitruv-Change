@@ -101,7 +101,7 @@ interface TestView extends AutoCloseable {
 	def <T extends Notifier> List<PropagatedChange> propagate(T notifier, Consumer<T> consumer)
 
 	/**
-	 * @return the user interaction that can be used to program user interactions for the VSUM of this view.
+	 * @return the user interaction that can be used to program user interactions for this view.
 	 */
 	def tools.vitruv.testutils.TestUserInteraction getUserInteraction()
 
