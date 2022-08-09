@@ -17,6 +17,8 @@ import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.Resour
 import static tools.vitruv.change.correspondence.CorrespondenceModelFactory.createCorrespondenceModel;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,24 +39,29 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 	private final ResourceSet modelsResourceSet;
 	private final InternalCorrespondenceModel correspondenceModel;
 	private final ChangeRecorder changeRecorder;
+	private final Path consistencyMetadataFolder;
 
 	private boolean isLoading = false;
 
 	/**
-	 * Creates a repository without a defined persistence for the correspondence model. It is equivalent to calling
-	 * {@code new DefaultChangeableModelRepository(null)}.
+	 * Creates a repository without a defined persistence for the correspondence model and using a temporary folder for
+	 * storing consistency metadata.
+	 * @throws IOException when no temporary metadata folder can be instantiated
 	 */
-	public DefaultChangeRecordingModelRepository() {
-		this(null);
+	public DefaultChangeRecordingModelRepository() throws IOException {
+		this(null, Files.createTempDirectory(null));
 	}
 
 	/**
-	 * Creates a repository with the defined URI for the correspondence model. The URI must be resolvable when performing
-	 * load or save operations, or can be {@code null} is no persistence of the correspondence model shall be managed.
+	 * Creates a repository with the defined URI for the correspondence model and using the specified path for storing
+	 * metadata. The URI must be resolvable when performing load or save operations, or can be {@code null} is no
+	 * persistence of the correspondence model shall be managed.
 	 * @param correspondencesURI the URI of the correspondence model to use for saving and loading it, must be {@code null}
 	 * or valid
+	 * @param consistencyMetadataFolder the folder to store consistency metadata in, must not be {@code null}
 	 */
-	public DefaultChangeRecordingModelRepository(URI correspondencesURI) {
+	public DefaultChangeRecordingModelRepository(URI correspondencesURI, Path consistencyMetadataFolder) {
+		this.consistencyMetadataFolder = consistencyMetadataFolder;
 		this.modelsResourceSet = withGlobalFactories(new ResourceSetImpl());
 		this.correspondenceModel = createCorrespondenceModel(correspondencesURI);
 		this.modelsResourceSet.eAdapters().add(new ResourceRegistrationAdapter((resource) -> {
@@ -75,6 +82,12 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 	@Override
 	public CorrespondenceModel getCorrespondenceModel() {
 		return correspondenceModel.getGenericView();
+	}
+
+	@Override
+	public URI getMetadataModelURI(String... metadataKey) {
+		Path metadataPath = consistencyMetadataFolder.resolve(String.join("_", metadataKey));
+		return URI.createFileURI(metadataPath.toString());
 	}
 
 	@Override

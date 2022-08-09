@@ -9,6 +9,14 @@ import org.eclipse.emf.ecore.resource.Resource;
  */
 public interface ResourceAccess {
 	/**
+	 * Gets the {@link URI} of a model that stores metadata.
+	 * @param metadataKey The key uniquely identifying the metadata model. The different parts of the key can be used to
+	 * convey some sort of hierarchy in the metadata. The key may contain arbitrary characters. The last key part contains
+	 * the metadata model's file name and extension.
+	 */
+	URI getMetadataModelURI(String... metadataKey);
+
+	/**
 	 * Provides the resource for storing the specified model in it.
 	 * @param uri the model's uri, must not be {@code null}
 	 */
