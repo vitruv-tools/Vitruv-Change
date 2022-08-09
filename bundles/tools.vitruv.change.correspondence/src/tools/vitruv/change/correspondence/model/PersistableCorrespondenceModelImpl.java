@@ -131,7 +131,8 @@ public class PersistableCorrespondenceModelImpl implements PersistableCorrespond
 		return correspondencesToRemove;
 	}
 
-	private <C extends Correspondence> Set<C> filterCorrespondenceTypeAndTag(Set<Correspondence> original, Class<C> filteredType, String expectedTag) {
+	private <C extends Correspondence> Set<C> filterCorrespondenceTypeAndTag(Set<Correspondence> original, Class<C> filteredType,
+			String expectedTag) {
 		return original.stream().filter(filteredType::isInstance).map(filteredType::cast)
 				.filter(correspondence -> expectedTag == null || correspondence.getTag().equals(expectedTag)).collect(Collectors.toSet());
 	}
@@ -144,8 +145,8 @@ public class PersistableCorrespondenceModelImpl implements PersistableCorrespond
 	private Set<Correspondence> getCorrespondencesBetween(List<EObject> firstEObjects, List<EObject> secondEObjects) {
 		return this.correspondences.getCorrespondences().stream()
 				.filter(correspondence -> isEitherSideOfCorrespondence(correspondence, firstEObjects)
-						&& isEitherSideOfCorrespondence(correspondence, secondEObjects) && (!firstEObjects.equals(secondEObjects)
-						|| correspondence.getLeftEObjects().equals(correspondence.getRightEObjects())))
+						&& isEitherSideOfCorrespondence(correspondence, secondEObjects)
+						&& (!firstEObjects.equals(secondEObjects) || correspondence.getLeftEObjects().equals(correspondence.getRightEObjects())))
 				.collect(Collectors.toSet());
 	}
 
@@ -156,14 +157,15 @@ public class PersistableCorrespondenceModelImpl implements PersistableCorrespond
 	@Override
 	public Set<List<EObject>> getCorrespondingEObjects(Class<? extends Correspondence> correspondenceType, List<EObject> eObjects, String tag) {
 		Set<Correspondence> objectsCorrespondences = getCorrespondences(eObjects);
-		Set<? extends Correspondence> properlyTaggedAndTypedCorrespondences = filterCorrespondenceTypeAndTag(objectsCorrespondences, correspondenceType, tag);
+		Set<? extends Correspondence> properlyTaggedAndTypedCorrespondences = filterCorrespondenceTypeAndTag(objectsCorrespondences,
+				correspondenceType, tag);
 		return mapToCorrespondingEObjects(properlyTaggedAndTypedCorrespondences, eObjects);
 	}
-	
+
 	private Set<List<EObject>> mapToCorrespondingEObjects(Set<? extends Correspondence> correspondences, List<EObject> originalEObjects) {
 		return correspondences.stream().map(correspondence -> getCorrespondingEObjects(correspondence, originalEObjects)).collect(Collectors.toSet());
 	}
-	
+
 	private List<EObject> getCorrespondingEObjects(Correspondence correspondence, List<EObject> eObjects) {
 		if (correspondence.getLeftEObjects().equals(eObjects)) {
 			return correspondence.getRightEObjects();
@@ -176,6 +178,13 @@ public class PersistableCorrespondenceModelImpl implements PersistableCorrespond
 	public boolean hasCorrespondences(List<EObject> eObjects) {
 		Set<Correspondence> correspondences = this.getCorrespondences(eObjects);
 		return correspondences != null && correspondences.size() > 0;
+	}
+
+	@Override
+	public void close() throws Exception {
+		if (correspondencesResource != null) {
+			correspondencesResource.unload();
+		}
 	}
 
 }
