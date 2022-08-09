@@ -30,7 +30,7 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	val TestView delegate
 	val ChangeRecorder changeRecorder
 	val List<(VitruviusChange)=>List<PropagatedChange>> changeProcessors = new LinkedList()
-	var renewResourceCacheAfterPropagation = true
+	var disposeViewResourcesAfterPropagation = true
 
 	/**
 	 * Creates a test view that will store its persisted resources in the
@@ -104,13 +104,13 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 
 	def private propagateChanges(TransactionalChange change) {
 		val propagationResult = changeProcessors.flatMapFixed [apply(change)]
-		if (renewResourceCacheAfterPropagation) {
-			renewResourceCache()
+		if (disposeViewResourcesAfterPropagation) {
+			disposeViewResources()
 		}
 		return propagationResult
 	}
 
-	override renewResourceCache() {
+	override disposeViewResources() {
 		resourceSet.resources.clear()
 	}
 
@@ -135,8 +135,8 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 		return notifier
 	}
 
-	def setRenewResourceCacheAfterPropagation(boolean enabled) {
-		renewResourceCacheAfterPropagation = enabled
+	override setDisposeViewResourcesAfterPropagation(boolean enabled) {
+		disposeViewResourcesAfterPropagation = enabled
 	}
 
 	def static <T> List<T> operator_plus(List<T> a, List<T> b) {

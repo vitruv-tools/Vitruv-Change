@@ -46,5 +46,11 @@ interface NonTransactionalTestView extends TestView {
 	 * Clears all loaded resources, such that yet loaded resources become invalid and have to be reloaded using 
 	 * {@link #resourceAt resourceAt}.
 	 */
-	def void renewResourceCache()
+	def void disposeViewResources()
+
+	/**
+	 * Defines whether the view resources that have previously been loaded using methods like {@link #resourceAt} 
+	 * shall automatically be disposed up propagating changes, i.e. when calling {@link #propagate}.
+	 */
+	def void setDisposeViewResourcesAfterPropagation(boolean enabled)
 }
