@@ -99,7 +99,9 @@ class ChangePropagator {
 
 			val propagationResultChanges = try {
 					sourceChange.affectedEObjectsMetamodelDescriptors.flatMap [
-						changePropagationProvider.getChangePropagationSpecifications(it)
+						changePropagationProvider.getChangePropagationSpecifications(it) => [
+							forEach[it.userInteractor = outer.userInteractor]
+						]
 					].toSet.flatMapFixed [
 						propagateChangeForChangePropagationSpecification(change, it)
 					]
