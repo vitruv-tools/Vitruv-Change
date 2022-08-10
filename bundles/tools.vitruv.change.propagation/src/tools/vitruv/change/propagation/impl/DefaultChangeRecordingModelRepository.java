@@ -17,7 +17,6 @@ import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.Resour
 import static tools.vitruv.change.correspondence.CorrespondenceModelFactory.createCorrespondenceModel;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
@@ -42,15 +41,6 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 	private final Path consistencyMetadataFolder;
 
 	private boolean isLoading = false;
-
-	/**
-	 * Creates a repository without a defined persistence for the correspondence model and using a temporary folder for
-	 * storing consistency metadata.
-	 * @throws IOException when no temporary metadata folder can be instantiated
-	 */
-	public DefaultChangeRecordingModelRepository() throws IOException {
-		this(null, Files.createTempDirectory(null));
-	}
 
 	/**
 	 * Creates a repository with the defined URI for the correspondence model and using the specified path for storing
