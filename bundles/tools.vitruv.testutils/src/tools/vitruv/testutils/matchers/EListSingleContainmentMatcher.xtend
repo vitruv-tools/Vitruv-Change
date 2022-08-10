@@ -20,7 +20,7 @@ class EListSingleContainmentMatcher extends TypeSafeMatcher<Iterable<? extends E
 	 * @param options the options for the deep equality check
 	 */
 	new(EObject itemOfInterest, boolean included, ModelDeepEqualityOption[] options) {
-		this.itemOfInterest = itemOfInterest as EObject
+		this.itemOfInterest = itemOfInterest
 		this.options = options
 		this.included = included
 	}
