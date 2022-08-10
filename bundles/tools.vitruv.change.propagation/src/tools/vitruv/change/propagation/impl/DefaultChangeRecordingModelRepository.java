@@ -7,14 +7,16 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.composite.recording.ChangeRecorder;
-import tools.vitruv.change.correspondence.CorrespondenceModel;
-import tools.vitruv.change.correspondence.InternalCorrespondenceModel;
+import tools.vitruv.change.correspondence.Correspondence;
+import tools.vitruv.change.correspondence.model.PersistableCorrespondenceModel;
+import tools.vitruv.change.correspondence.view.CorrespondenceModelViewFactory;
+import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.propagation.PersistableChangeRecordingModelRepository;
 
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories;
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.getOrCreateResource;
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.loadOrCreateResource;
-import static tools.vitruv.change.correspondence.CorrespondenceModelFactory.createCorrespondenceModel;
+import static tools.vitruv.change.correspondence.model.CorrespondenceModelFactory.createPersistableCorrespondenceModel;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -36,9 +38,9 @@ import org.eclipse.emf.ecore.resource.Resource;
 public class DefaultChangeRecordingModelRepository implements PersistableChangeRecordingModelRepository {
 	private static final Logger LOGGER = Logger.getLogger(DefaultChangeRecordingModelRepository.class);
 	private static final String METADATA_KEY_FRAGMENT_SEPARATOR = "_";
-	
+
 	private final ResourceSet modelsResourceSet;
-	private final InternalCorrespondenceModel correspondenceModel;
+	private final PersistableCorrespondenceModel correspondenceModel;
 	private final ChangeRecorder changeRecorder;
 	private final Path consistencyMetadataFolder;
 
@@ -55,7 +57,7 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 	public DefaultChangeRecordingModelRepository(URI correspondencesURI, Path consistencyMetadataFolder) {
 		this.consistencyMetadataFolder = consistencyMetadataFolder;
 		this.modelsResourceSet = withGlobalFactories(new ResourceSetImpl());
-		this.correspondenceModel = createCorrespondenceModel(correspondencesURI);
+		this.correspondenceModel = createPersistableCorrespondenceModel(correspondencesURI);
 		this.modelsResourceSet.eAdapters().add(new ResourceRegistrationAdapter((resource) -> {
 			if (!isLoading) {
 				getCreateOrLoadModel(resource.getURI());
@@ -72,8 +74,8 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 	}
 
 	@Override
-	public CorrespondenceModel getCorrespondenceModel() {
-		return correspondenceModel.getGenericView();
+	public EditableCorrespondenceModelView<Correspondence> getCorrespondenceModel() {
+		return CorrespondenceModelViewFactory.createEditableCorrespondenceModelView(correspondenceModel);
 	}
 
 	@Override
