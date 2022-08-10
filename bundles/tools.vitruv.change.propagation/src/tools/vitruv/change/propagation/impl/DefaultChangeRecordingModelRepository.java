@@ -138,7 +138,7 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 			resource.delete(null);
 		} catch (IOException e) {
 			LOGGER.error("Deletion of resource " + resource + " did not work.", e);
-			throw new IllegalStateException("Could not delete URI " + resource.getURI(), e);
+			throw new IllegalStateException("Could not delete resource with URI " + resource.getURI(), e);
 		}
 	}
 
@@ -146,13 +146,13 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 		if (!resource.isModified()) {
 			return;
 		}
-		LOGGER.debug("Save resource: " + resource);
+		LOGGER.debug("Attempt to save resource: " + resource);
 		try {
 			resource.save(null);
 			resource.setModified(false);
 		} catch (IOException e) {
 			LOGGER.error("Model could not be saved: " + resource.getURI(), e);
-			throw new IllegalStateException("Could not save URI " + resource.getURI(), e);
+			throw new IllegalStateException("Could not save resource with URI " + resource.getURI(), e);
 		}
 	}
 
