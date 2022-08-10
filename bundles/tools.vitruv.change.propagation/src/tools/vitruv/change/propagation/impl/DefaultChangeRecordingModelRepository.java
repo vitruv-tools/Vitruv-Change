@@ -35,6 +35,8 @@ import org.eclipse.emf.ecore.resource.Resource;
  */
 public class DefaultChangeRecordingModelRepository implements PersistableChangeRecordingModelRepository {
 	private static final Logger LOGGER = Logger.getLogger(DefaultChangeRecordingModelRepository.class);
+	private static final String METADATA_KEY_FRAGMENT_SEPARATOR = "_";
+	
 	private final ResourceSet modelsResourceSet;
 	private final InternalCorrespondenceModel correspondenceModel;
 	private final ChangeRecorder changeRecorder;
@@ -76,7 +78,7 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 
 	@Override
 	public URI getMetadataModelURI(String... metadataKey) {
-		Path metadataPath = consistencyMetadataFolder.resolve(String.join("_", metadataKey));
+		Path metadataPath = consistencyMetadataFolder.resolve(String.join(METADATA_KEY_FRAGMENT_SEPARATOR, metadataKey));
 		return URI.createFileURI(metadataPath.toString());
 	}
 
