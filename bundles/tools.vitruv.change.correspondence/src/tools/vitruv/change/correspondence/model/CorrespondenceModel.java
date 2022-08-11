@@ -18,7 +18,7 @@ import tools.vitruv.change.correspondence.view.CorrespondenceModelView;
  * @author Heiko Klare
  * @param <C> - the type of correspondence that is handled
  */
-public interface CorrespondenceModel {
+public interface CorrespondenceModel extends AutoCloseable {
 	/**
 	 * Creates a correspondence of given type <C> with the given tag between the given lists of {@link EObject}s.
 	 * @param firstEObjects the first list of {@link EObject}s, must not be {@code null} or empty

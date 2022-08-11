@@ -9,7 +9,9 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.apache.log4j,
  org.eclipse.emf.ecore.change,
  edu.kit.ipd.sdq.commons.util.emf,
- com.google.guava
+ com.google.guava,
+ org.eclipse.core.runtime,
+ org.eclipse.emf.ecore;visibility:=reexport
 Bundle-ActivationPolicy: lazy
 Export-Package: tools.vitruv.change.correspondence,
  tools.vitruv.change.correspondence.impl,
