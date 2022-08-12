@@ -20,6 +20,11 @@ import static com.google.common.base.Preconditions.checkState
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.flatMapFixed
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
 import tools.vitruv.change.composite.propagation.ChangeableModelRepository
+import tools.vitruv.change.propagation.ChangePropagationSpecification
+import tools.vitruv.testutils.TestUserInteraction
+import tools.vitruv.change.propagation.ChangePropagationSpecificationRepository
+import static tools.vitruv.testutils.TestModelRepositoryFactory.createTestChangeableModelRepository
+import tools.vitruv.change.propagation.impl.DefaultChangeableModelRepository
 
 /**
  * A test view that will record and publish the changes created in it.
@@ -78,7 +83,7 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	}
 
 	override <T extends Notifier> List<PropagatedChange> propagate(T notifier, Consumer<T> consumer) {
-		val delegateChanges = delegate.propagate(notifier) [record(consumer)]
+		val delegateChanges = delegate.propagate(notifier)[record(consumer)]
 		changeRecorder.endRecording()
 		val ourChanges = propagateChanges(changeRecorder.change)
 		changeRecorder.beginRecording()
@@ -88,22 +93,20 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	override propagate() {
 		changeRecorder.endRecording()
 		val recordedChange = changeRecorder.change
-		val delegateChanges = recordedChange.changedURIs
-			.map[resourceSet.getResource(it, false)].filterNull
-			.flatMapFixed [changedResource |
-				// Propagating an empty modification for every changed resource gives the delegate a
-				// chance to participate in change propagation (e.g. BasicTestView saves or cleans up resources).
-				// This is not a meaningful operation at all, but rather a hack to bridge between this
-				// non-transactional operation and the transactional delegate.
-				delegate.propagate(changedResource) []
-			]
+		val delegateChanges = recordedChange.changedURIs.map[resourceSet.getResource(it, false)].filterNull.flatMapFixed [ changedResource |
+			// Propagating an empty modification for every changed resource gives the delegate a
+			// chance to participate in change propagation (e.g. BasicTestView saves or cleans up resources).
+			// This is not a meaningful operation at all, but rather a hack to bridge between this
+			// non-transactional operation and the transactional delegate.
+			delegate.propagate(changedResource)[]
+		]
 		val ourChanges = propagateChanges(recordedChange)
 		changeRecorder.beginRecording()
 		return delegateChanges + ourChanges
 	}
 
 	def private propagateChanges(TransactionalChange change) {
-		val propagationResult = changeProcessors.flatMapFixed [apply(change)]
+		val propagationResult = changeProcessors.flatMapFixed[apply(change)]
 		if (disposeViewResourcesAfterPropagation) {
 			disposeViewResources()
 		}
@@ -140,13 +143,34 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	}
 
 	def static <T> List<T> operator_plus(List<T> a, List<T> b) {
-		return if (a.isEmpty) b
-		else if (b.isEmpty) a
-		else {
+		return if (a.isEmpty) {
+			b
+		} else if (b.isEmpty){
+			a
+		} else {
 			val result = new ArrayList(a.size + b.size)
 			result.addAll(a)
 			result.addAll(b)
 			result
 		}
+	}
+
+	/**
+	 * Creates a {@link ChangePublishingTestView} with the given persistence directory
+	 * and for the given {@link ChangePropagationSpecification}s. It uses file URIs
+	 * (see {@link UriMode}) and instantiates a {@link DefaultChangeableModelRepository}
+	 * for a {@link TestUserInteraction}.
+	 */
+	static def createDefaultChangePublishingTestView(
+		Path persistenceDirectory,
+		Iterable<ChangePropagationSpecification> changePropagationSpecifications
+	) {
+		val userInteraction = new TestUserInteraction()
+		val changePropagationSpecificationProvider = new ChangePropagationSpecificationRepository(
+			changePropagationSpecifications)
+		val changeableModelRepository = createTestChangeableModelRepository(changePropagationSpecificationProvider,
+			userInteraction)
+		return new ChangePublishingTestView(persistenceDirectory, userInteraction, UriMode.FILE_URIS,
+			changeableModelRepository)
 	}
 }
