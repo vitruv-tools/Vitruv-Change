@@ -4,6 +4,8 @@ import org.apache.log4j.Logger;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 
+import com.google.common.collect.FluentIterable;
+
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.composite.recording.ChangeRecorder;
@@ -170,6 +172,8 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 
 	@Override
 	public VitruviusChange applyChange(VitruviusChange change) {
+		// Ensure all resources for changed elements are created/loaded and change monitors are initialized
+		FluentIterable.from(change.getChangedURIs()).forEach(uri -> getModelResource(uri));
 		return change.resolveAndApply(modelsResourceSet);
 	}
 
