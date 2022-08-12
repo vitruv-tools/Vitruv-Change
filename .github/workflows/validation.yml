@@ -62,7 +62,7 @@ jobs:
           retention-days: 1
 
   validate_DSLs:
-    needs: [validate_change, validate_framework]
+    needs: validate_change
     name: DSLs
     runs-on: ubuntu-latest
     steps:
@@ -71,11 +71,6 @@ jobs:
         with:
           name: change
           path: change
-      - name: Download Framework Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: framework
-          path: framework
       - name: Checkout DSLs
         uses: actions/checkout@v3
         with:
@@ -105,7 +100,6 @@ jobs:
           run: >
             ./mvnw -B -U clean verify
             -Dvitruv.change.url=file:///${{ github.workspace }}/change
-            -Dvitruv.framework.url=file:///${{ github.workspace }}/framework
             -Dstyle.color=always
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
             -Dorg.slf4j.simpleLogger.log.org.eclipse.tycho.core.resolver.DefaultTychoResolver=warn
