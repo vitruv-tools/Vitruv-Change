@@ -89,16 +89,7 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 		return getCreateOrLoadModel(uri);
 	}
 
-	private Resource getCreateOrLoadModel(URI modelURI) {
-		Resource existingResource = modelsResourceSet.getResource(modelURI, false);
-		if (existingResource != null) {
-			return existingResource;
-		} else {
-			return createOrLoadModelResource(modelURI);
-		}
-	}
-
-	private Resource createOrLoadModelResource(URI modelResourceURI) {
+	private Resource getCreateOrLoadModel(URI modelResourceURI) {
 		Resource resource;
 		if ((modelResourceURI.isFile() || modelResourceURI.isPlatform())) {
 			resource = getOrCreateResource(modelsResourceSet, modelResourceURI);
