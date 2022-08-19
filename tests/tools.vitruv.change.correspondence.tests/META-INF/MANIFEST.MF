@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Vitruv Correspondence Tests
 Bundle-SymbolicName: tools.vitruv.change.correspondence.tests
-Bundle-Version: 3.0.0
+Bundle-Version: 3.0.1.qualifier
 Bundle-Vendor: vitruv.tools
 Automatic-Module-Name: tools.vitruv.change.correspondence.tests
 Bundle-RequiredExecutionEnvironment: JavaSE-11
