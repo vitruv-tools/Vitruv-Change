@@ -9,7 +9,7 @@
 		<version>2.0.2</version>
 	</parent>
 	<artifactId>change-parent</artifactId>
-	<version>3.0.0-SNAPSHOT</version>
+	<version>3.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	
 	<repositories>
