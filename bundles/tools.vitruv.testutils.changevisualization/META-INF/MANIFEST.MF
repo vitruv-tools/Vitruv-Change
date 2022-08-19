@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Vitruv Change Visualization
 Bundle-SymbolicName: tools.vitruv.testutils.changevisualization;singleton:=true
 Automatic-Module-Name: tools.vitruv.testutils.changevisualization
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.0.0
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
