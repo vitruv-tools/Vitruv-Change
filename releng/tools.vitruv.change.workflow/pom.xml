@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>tools.vitruv</groupId>
 		<artifactId>change-parent</artifactId>
-		<version>3.0.0</version>
+		<version>3.0.1-SNAPSHOT</version>
 		<relativePath>../tools.vitruv.change.parent</relativePath>
 	</parent>
 	<artifactId>tools.vitruv.change.workflow</artifactId>
