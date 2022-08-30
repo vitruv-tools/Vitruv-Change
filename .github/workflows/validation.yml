@@ -11,7 +11,11 @@ jobs:
   validate_framework:
     needs: validate_change
     name: Framework
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Download Change Artifact
         uses: actions/download-artifact@v3
@@ -44,17 +48,18 @@ jobs:
         working-directory: ./framework
         run: >
           ./mvnw -B -U clean verify
-          -Dvitruv.change.url=file:///${{ github.workspace }}/change
-          -Dstyle.color=always
-          -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-          -Dorg.slf4j.simpleLogger.log.org.eclipse.tycho.core.resolver.DefaultTychoResolver=warn
-          -Dorg.slf4j.simpleLogger.log.org.eclipse.tycho.osgi.configuration.MavenContextConfigurator=warn
-          -Dorg.slf4j.simpleLogger.log.org.eclipse.sisu.equinox.launching.internal.DefaultEquinoxLauncher=warn
-          -Dorg.slf4j.simpleLogger.log.org.eclipse.xtext.maven.XtextGenerateMojo=warn
-          -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.NoOpLog
+          '-Dvitruv.change.url=file:///${{ github.workspace }}/change'
+          '-Dstyle.color=always'
+          '-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
+          '-Dorg.slf4j.simpleLogger.log.org.eclipse.tycho.core.resolver.DefaultTychoResolver=warn'
+          '-Dorg.slf4j.simpleLogger.log.org.eclipse.tycho.osgi.configuration.MavenContextConfigurator=warn'
+          '-Dorg.slf4j.simpleLogger.log.org.eclipse.sisu.equinox.launching.internal.DefaultEquinoxLauncher=warn'
+          '-Dorg.slf4j.simpleLogger.log.org.eclipse.xtext.maven.XtextGenerateMojo=warn'
+          '-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.NoOpLog'
         env: 
           MAVEN_OPTS: -Djansi.force=true
       - name: Store Framework Artifact
+        if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v3
         with:
           name: framework
@@ -64,7 +69,11 @@ jobs:
   validate_DSLs:
     needs: validate_change
     name: DSLs
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Download Change Artifact
         uses: actions/download-artifact@v3
@@ -110,6 +119,7 @@ jobs:
         env: 
           MAVEN_OPTS: -Djansi.force=true
       - name: Store DSLs Artifact
+        if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v3
         with:
           name: dsls
@@ -119,7 +129,11 @@ jobs:
   validate_casestudies:
     needs: [validate_change, validate_framework, validate_DSLs]
     name: Case Studies
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Download Change Artifact
         uses: actions/download-artifact@v3
