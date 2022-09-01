@@ -1,5 +1,6 @@
 # Vitruv Change
 [![GitHub Action CI](https://github.com/vitruv-tools/Vitruv-Change/workflows/CI/badge.svg)](https://github.com/vitruv-tools/Vitruv-Change/actions?query=workflow%3ACI)
+[![Latest Release](https://img.shields.io/github/release/vitruv-tools/Vitruv-Change.svg)](https://github.com/vitruv-tools/Vitruv-Change/releases/latest)
 [![Issues](https://img.shields.io/github/issues/vitruv-tools/Vitruv-Change.svg)](https://github.com/vitruv-tools/Vitruv-Change/issues)
 [![License](https://img.shields.io/github/license/vitruv-tools/Vitruv-Change.svg)](https://raw.githubusercontent.com/vitruv-tools/Vitruv-Change/main/LICENSE)
 
