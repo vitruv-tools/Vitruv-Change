@@ -11,11 +11,7 @@ jobs:
   validate_framework:
     needs: validate_change
     name: Framework
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: Download Change Artifact
         uses: actions/download-artifact@v3
@@ -59,7 +55,6 @@ jobs:
         env: 
           MAVEN_OPTS: -Djansi.force=true
       - name: Store Framework Artifact
-        if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v3
         with:
           name: framework
@@ -69,11 +64,7 @@ jobs:
   validate_DSLs:
     needs: validate_change
     name: DSLs
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: Download Change Artifact
         uses: actions/download-artifact@v3
@@ -119,7 +110,6 @@ jobs:
         env: 
           MAVEN_OPTS: -Djansi.force=true
       - name: Store DSLs Artifact
-        if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v3
         with:
           name: dsls
@@ -129,11 +119,7 @@ jobs:
   validate_casestudies:
     needs: [validate_change, validate_framework, validate_DSLs]
     name: Case Studies
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: Download Change Artifact
         uses: actions/download-artifact@v3
