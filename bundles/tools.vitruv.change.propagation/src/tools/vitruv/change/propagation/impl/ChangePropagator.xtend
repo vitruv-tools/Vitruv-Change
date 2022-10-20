@@ -31,33 +31,34 @@ class ChangePropagator {
 	val ChangeRecordingModelRepository modelRepository
 	val ChangePropagationSpecificationProvider changePropagationProvider
 	val InternalUserInteractor userInteractor
-	var ChangePropagationMode changePropagationMode = ChangePropagationMode.TRANSITIVE_CYCLIC
+	val ChangePropagationMode changePropagationMode
+	
+	/**
+	 * Creates a change propagator to which changes can be passed, which are
+	 * propagated using the given <code>changePropagationProvider</code> and
+	 * <code>userInteractor</code>.
+	 * Changes are recorded in the given <code>modelRepository</code> and
+	 * propagated transitively and cyclic, i.e. with 
+	 * {@link ChangePropagationMode#TRANSITIVE_CYCLIC}.
+	 */
+	new(ChangeRecordingModelRepository modelRepository,
+		ChangePropagationSpecificationProvider changePropagationProvider, InternalUserInteractor userInteractor) {
+		this(modelRepository, changePropagationProvider, userInteractor, ChangePropagationMode.TRANSITIVE_CYCLIC)
+	}
 	
 	/**
 	 * Creates a change propagator to which changes can be passed, which are
 	 * propagated using the given <code>changePropagationProvider</code> and
 	 * <code>userInteractor</code>.
 	 * By default, it records changes in the given <code>modelRepository</code> and
-	 * propagates them transitively and cyclic, i.e. with 
-	 * {@link ChangePropagationMode#TRANSITIVE_CYCLIC}. It can be changed calling
-	 * {@link #setChangePropagationMode(ChangePropagationMode)}.
-	 * 
+	 * propagates them using the given <code>mode</code>.
 	 */
 	new(ChangeRecordingModelRepository modelRepository,
-		ChangePropagationSpecificationProvider changePropagationProvider, InternalUserInteractor userInteractor) {
+		ChangePropagationSpecificationProvider changePropagationProvider, InternalUserInteractor userInteractor, ChangePropagationMode mode) {
 		this.modelRepository = modelRepository
 		this.changePropagationProvider = changePropagationProvider
 		this.userInteractor = userInteractor
-	}
-	
-	/**
-	 * Sets the propagation mode to only perform single transformation steps
-	 * or different kinds of transitive change propagation.
-	 * 
-	 * @param mode the mode to use for change propagation
-	 */
-	def void setChangePropagationMode(ChangePropagationMode mode) {
-		changePropagationMode = mode
+		this.changePropagationMode = mode
 	}
 	
 	def List<PropagatedChange> propagateChange(VitruviusChange change) {
