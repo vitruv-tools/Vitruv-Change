@@ -26,10 +26,10 @@ import static com.google.common.base.Preconditions.checkState;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 
-public class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceModel {
-	static Logger logger = Logger.getLogger(PersistableCorrespondenceModelImpl.class);
-	final Correspondences correspondences;
-	final Resource correspondencesResource;
+class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceModel {
+	private static final Logger logger = Logger.getLogger(PersistableCorrespondenceModelImpl.class);
+	private final Correspondences correspondences;
+	private final Resource correspondencesResource;
 
 	public PersistableCorrespondenceModelImpl(URI resourceUri) {
 		this.correspondences = CorrespondenceFactory.eINSTANCE.createCorrespondences();

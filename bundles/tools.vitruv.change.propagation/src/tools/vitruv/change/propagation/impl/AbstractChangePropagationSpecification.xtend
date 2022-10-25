@@ -8,7 +8,7 @@ import org.eclipse.emf.ecore.EObject
 import tools.vitruv.change.composite.MetamodelDescriptor
 
 abstract class AbstractChangePropagationSpecification implements ChangePropagationSpecification {
-	val List<ChangePropagationObserver> propagationObserver;
+	val List<ChangePropagationObserver> propagationObservers;
 	var UserInteractor userInteractor;
 	var MetamodelDescriptor sourceMetamodelDescriptor;
 	var MetamodelDescriptor targetMetamodelDescriptor;
@@ -16,7 +16,7 @@ abstract class AbstractChangePropagationSpecification implements ChangePropagati
 	new(MetamodelDescriptor sourceMetamodelDescriptor, MetamodelDescriptor targetMetamodelDescriptor) {
 		this.sourceMetamodelDescriptor = sourceMetamodelDescriptor
 		this.targetMetamodelDescriptor = targetMetamodelDescriptor
-		this.propagationObserver = newArrayList();
+		this.propagationObservers = newArrayList();
 	}
 
 	protected def UserInteractor getUserInteractor() {
@@ -37,16 +37,16 @@ abstract class AbstractChangePropagationSpecification implements ChangePropagati
 
 	override registerObserver(ChangePropagationObserver observer) {
 		if (observer !== null) {
-			this.propagationObserver += observer;
+			this.propagationObservers += observer;
 		}
 	}
 
 	override deregisterObserver(ChangePropagationObserver observer) {
-		this.propagationObserver -= observer;
+		this.propagationObservers -= observer;
 	}
 
 	override notifyObjectCreated(EObject createdObject) {
-		this.propagationObserver.forEach[it.objectCreated(createdObject)];
+		this.propagationObservers.forEach[it.objectCreated(createdObject)];
 	}
 
 }
