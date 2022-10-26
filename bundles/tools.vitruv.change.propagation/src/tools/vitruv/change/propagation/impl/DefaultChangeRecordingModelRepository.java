@@ -1,6 +1,20 @@
 package tools.vitruv.change.propagation.impl;
 
+import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.getOrCreateResource;
+import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.loadOrCreateResource;
+import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories;
+import static tools.vitruv.change.correspondence.model.CorrespondenceModelFactory.createPersistableCorrespondenceModel;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 
@@ -12,21 +26,6 @@ import tools.vitruv.change.correspondence.model.PersistableCorrespondenceModel;
 import tools.vitruv.change.correspondence.view.CorrespondenceModelViewFactory;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.propagation.PersistableChangeRecordingModelRepository;
-
-import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories;
-import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.getOrCreateResource;
-import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.loadOrCreateResource;
-import static tools.vitruv.change.correspondence.model.CorrespondenceModelFactory.createPersistableCorrespondenceModel;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.resource.Resource;
 
 /**
  * A default implementation of a {@link PersistableChangeRecordingModelRepository}. It manages a {@link ResourceSet} for
@@ -103,7 +102,7 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 
 	@Override
 	public void persistAsRoot(EObject rootEObject, URI uri) {
-		addRoot(getCreateOrLoadModel(uri), (rootEObject));
+		addRoot(getCreateOrLoadModel(uri), rootEObject);
 	}
 
 	private void addRoot(Resource resource, EObject root) {
@@ -122,7 +121,7 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 				save(modelResource);
 			}
 		}
-		resourcesToDelete.stream().forEach((resource) -> delete(resource));
+		resourcesToDelete.stream().forEach(this::delete);
 		correspondenceModel.save();
 	}
 

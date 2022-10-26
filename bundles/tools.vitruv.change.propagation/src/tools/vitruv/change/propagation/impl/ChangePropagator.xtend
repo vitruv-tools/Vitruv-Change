@@ -31,35 +31,37 @@ class ChangePropagator {
 	val ChangeRecordingModelRepository modelRepository
 	val ChangePropagationSpecificationProvider changePropagationProvider
 	val InternalUserInteractor userInteractor
-	var ChangePropagationMode changePropagationMode = ChangePropagationMode.TRANSITIVE_CYCLIC
-	
+	val ChangePropagationMode changePropagationMode
+
 	/**
 	 * Creates a change propagator to which changes can be passed, which are
 	 * propagated using the given <code>changePropagationProvider</code> and
 	 * <code>userInteractor</code>.
-	 * By default, it records changes in the given <code>modelRepository</code> and
-	 * propagates them transitively and cyclic, i.e. with 
-	 * {@link ChangePropagationMode#TRANSITIVE_CYCLIC}. It can be changed calling
-	 * {@link #setChangePropagationMode(ChangePropagationMode)}.
-	 * 
+	 * Changes are recorded in the given <code>modelRepository</code> and
+	 * propagated transitively and cyclic, i.e. with 
+	 * {@link ChangePropagationMode#TRANSITIVE_CYCLIC}.
 	 */
 	new(ChangeRecordingModelRepository modelRepository,
 		ChangePropagationSpecificationProvider changePropagationProvider, InternalUserInteractor userInteractor) {
+		this(modelRepository, changePropagationProvider, userInteractor, ChangePropagationMode.TRANSITIVE_CYCLIC)
+	}
+
+	/**
+	 * Creates a change propagator to which changes can be passed, which are
+	 * propagated using the given <code>changePropagationProvider</code> and
+	 * <code>userInteractor</code>.
+	 * Changes are recorded in the given <code>modelRepository</code> and
+	 * propagated using the given <code>mode</code>.
+	 */
+	new(ChangeRecordingModelRepository modelRepository,
+		ChangePropagationSpecificationProvider changePropagationProvider, InternalUserInteractor userInteractor,
+		ChangePropagationMode mode) {
 		this.modelRepository = modelRepository
 		this.changePropagationProvider = changePropagationProvider
 		this.userInteractor = userInteractor
+		this.changePropagationMode = mode
 	}
-	
-	/**
-	 * Sets the propagation mode to only perform single transformation steps
-	 * or different kinds of transitive change propagation.
-	 * 
-	 * @param mode the mode to use for change propagation
-	 */
-	def void setChangePropagationMode(ChangePropagationMode mode) {
-		changePropagationMode = mode
-	}
-	
+
 	def List<PropagatedChange> propagateChange(VitruviusChange change) {
 		val resolvedChange = modelRepository.applyChange(change)
 		resolvedChange.affectedEObjects.map[eResource].filterNull.forEach[modified = true]
@@ -131,25 +133,27 @@ class ChangePropagator {
 				VitruviusChangeFactory.instance.createCompositeChange(propagationResultChanges))
 			val resultingChanges = new ArrayList()
 			resultingChanges += propagatedChange
-			
+
 			if (changePropagationMode != ChangePropagationMode.SINGLE_STEP) {
-				resultingChanges += propagationResultChanges.filter[it.containsConcreteChange].	propgateTransitiveChanges
+				resultingChanges +=
+					propagationResultChanges.filter[it.containsConcreteChange].propagateTransitiveChanges
 			}
 			return resultingChanges
 		}
-		
-		def private propgateTransitiveChanges(Iterable<TransactionalChange> transitiveChanges) {
+
+		def private propagateTransitiveChanges(Iterable<TransactionalChange> transitiveChanges) {
 			val nonEmptyChanges = transitiveChanges.filter [
 				it.containsConcreteChange
 			]
 			val nonLeafChanges = if (changePropagationMode == ChangePropagationMode.TRANSITIVE_EXCEPT_LEAVES) {
-				nonEmptyChanges.filter[
-					val targetSpecifications = changePropagationProvider.getChangePropagationSpecifications(it.affectedEObjectsMetamodelDescriptor)
-					return targetSpecifications.size > 1	
-				]
-			} else {
-				nonEmptyChanges
-			}		
+					nonEmptyChanges.filter [
+						val targetSpecifications = changePropagationProvider.getChangePropagationSpecifications(
+							it.affectedEObjectsMetamodelDescriptor)
+						return targetSpecifications.size > 1
+					]
+				} else {
+					nonEmptyChanges
+				}
 			val nextPropagations = nonLeafChanges.mapFixed [
 				new ChangePropagation(outer, it, this)
 			]
@@ -190,8 +194,7 @@ class ChangePropagator {
 		def private void handleObjectsWithoutResource() {
 			// Find created objects without resource
 			for (createdObjectWithoutResource : createdObjects.filter[eResource === null]) {
-				checkState(
-					!modelRepository.correspondenceModel.hasCorrespondences(createdObjectWithoutResource),
+				checkState(!modelRepository.correspondenceModel.hasCorrespondences(createdObjectWithoutResource),
 					"The object %s is part of a correspondence to %s but not in any resource",
 					createdObjectWithoutResource,
 					modelRepository.correspondenceModel.getCorrespondingEObjects(createdObjectWithoutResource))
