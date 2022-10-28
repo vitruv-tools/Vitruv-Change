@@ -39,7 +39,7 @@ class FeatureEChangeTest extends EChangeTest {
 
 	@BeforeEach
 	def final void beforeTest() {
-		affectedEObject = rootObject
+		affectedEObject = rootObject.withUuid
 		affectedFeature = AllElementTypesPackage.Literals.IDENTIFIED__ID
 
 		// Load model in second resource
@@ -75,7 +75,7 @@ class FeatureEChangeTest extends EChangeTest {
 		// second resource has no such root element
 		assertNull(resource2.getEObject(EcoreUtil.getURI(affectedEObject).fragment))
 
-		// Create change 		
+		// Create change
 		val unresolvedChange = createUnresolvedChange()
 		unresolvedChange.assertIsNotResolved(affectedEObject, affectedFeature)
 
@@ -126,7 +126,7 @@ class FeatureEChangeTest extends EChangeTest {
 	 * Creates and inserts a new root element in the resource 1.
 	 */
 	def private Root prepareSecondRoot() {
-		val root = aet.Root
+		val root = aet.Root.withUuid
 		resource.contents.add(root)
 		return root
 	}

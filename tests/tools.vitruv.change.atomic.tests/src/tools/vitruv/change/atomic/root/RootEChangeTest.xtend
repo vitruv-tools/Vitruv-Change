@@ -20,7 +20,7 @@ abstract class RootEChangeTest extends EChangeTest {
 	 */
 	@BeforeEach
 	def final void beforeTest() {
-		newRootObject = aet.Root
-		newRootObject2 = aet.Root
+		newRootObject = aet.Root.withUuid
+		newRootObject2 = aet.Root.withUuid
 	}
 }

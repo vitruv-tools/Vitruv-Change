@@ -34,8 +34,8 @@ class CreateAndInsertRootTest extends EChangeTest {
 	 */
 	@BeforeEach
 	def void beforeTest() {
-		newRootObject = aet.Root
-		newRootObject2 = aet.Root
+		newRootObject = aet.Root.withUuid
+		newRootObject2 = aet.Root.withUuid
 		resourceContent = resource.contents
 		assertIsStateBefore
 	}

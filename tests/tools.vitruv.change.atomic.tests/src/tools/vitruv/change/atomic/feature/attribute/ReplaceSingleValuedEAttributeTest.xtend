@@ -93,7 +93,7 @@ class ReplaceSingleValuedEAttributeTest extends EChangeTest {
 	@Test
 	def void invalidAttributeTest() {
 		// NonRoot element has no int attribute.
-		val affectedNonRootEObject = aet.NonRoot
+		val affectedNonRootEObject = aet.NonRoot.withUuid
 		resource.contents.add(affectedNonRootEObject)
 		val affectedRootFeature = AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_EATTRIBUTE
 		val oldIntValue = DEFAULT_SINGLE_VALUED_EATTRIBUTE_VALUE

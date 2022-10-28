@@ -117,7 +117,7 @@ class RemoveEAttributeValueTest extends InsertRemoveEAttributeTest {
 	 */
 	@Test
 	def void invalidAttributeTest() {
-		val affectedNonRootEObject = aet.NonRoot
+		val affectedNonRootEObject = aet.NonRoot.withUuid
 		resource.contents.add(affectedNonRootEObject)
 
 		// Create change and resolve

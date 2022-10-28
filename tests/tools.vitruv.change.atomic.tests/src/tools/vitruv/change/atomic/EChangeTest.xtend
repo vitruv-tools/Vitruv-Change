@@ -58,14 +58,14 @@ abstract class EChangeTest {
 
 		// Create model
 		resourceSet = new ResourceSetImpl().withGlobalFactories
+		uuidResolver = UuidResolver.create(resourceSet)
 		resource = resourceSet.createResource(fileUri)
 
-		rootObject = aet.Root
+		rootObject = aet.Root.withUuid
 		resource.contents += rootObject
 		resource.save(null)
 
 		// Factories for creating changes
-		uuidResolver = UuidResolver.create(resourceSet)
 		atomicFactory = new TypeInferringUnresolvingAtomicEChangeFactory(uuidResolver)
 		compoundFactory = new TypeInferringUnresolvingCompoundEChangeFactory(uuidResolver)
 		helper = new EChangeAssertHelper(uuidResolver)
@@ -119,6 +119,11 @@ abstract class EChangeTest {
 	def protected void applyForward(EChange change) {
 		assertIsResolved(change)
 		change.assertApplyForward
+	}
+	
+	def protected <O extends EObject> withUuid(O eObject) {
+		uuidResolver.registerEObject(eObject)
+		return eObject
 	}
 	
 }
