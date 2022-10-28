@@ -15,19 +15,20 @@ import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReferenc
 import tools.vitruv.change.atomic.root.InsertRootEObject
 import tools.vitruv.change.atomic.root.RemoveRootEObject
 import tools.vitruv.change.atomic.root.RootEChange
-import static com.google.common.base.Preconditions.checkState
+import tools.vitruv.change.atomic.uuid.UuidResolver
+
 import static com.google.common.base.Preconditions.checkArgument
-import tools.vitruv.change.atomic.id.IdResolver
+import static com.google.common.base.Preconditions.checkState
 
 /**
  * Static class for resolving EChanges internally.
  */
 package class AtomicEChangeResolver {
-	val IdResolver idResolver
+	val UuidResolver uuidResolver
 	
-	new (IdResolver idResolver) {
-		checkArgument(idResolver !== null, "id resolver must not be null")
-		this.idResolver = idResolver
+	new (UuidResolver uuidResolver) {
+		checkArgument(uuidResolver !== null, "UUID resolver must not be null")
+		this.uuidResolver = uuidResolver
 	}
 	
 	/**
@@ -37,8 +38,8 @@ package class AtomicEChangeResolver {
 	def private <A extends EObject, F extends EStructuralFeature> void resolveFeatureEChange(FeatureEChange<A, F> change) {
 		checkArgument(change.affectedEObjectID !== null, "change %s must have an affected EObject ID", change)
 		checkArgument(change.affectedFeature !== null, "change %s must have an affected feature", change)
-		if (idResolver.hasEObject(change.affectedEObjectID)) {
-			change.affectedEObject = idResolver.getEObject(change.affectedEObjectID) as A		
+		if (uuidResolver.hasEObject(change.affectedEObjectID)) {
+			change.affectedEObject = uuidResolver.getEObject(change.affectedEObjectID) as A		
 		}
 		change.affectedEObject.checkNotNullAndNotProxy(change, "affected object")
 	}
@@ -47,7 +48,7 @@ package class AtomicEChangeResolver {
 		if (valueId === null) {
 			return null
 		}
-		return idResolver.getEObject(valueId)
+		return uuidResolver.getEObject(valueId)
 	}
 
 	/**
@@ -60,20 +61,19 @@ package class AtomicEChangeResolver {
 		// Resolve the affected object
 		if (isNewObject) {
 			// Check if ID resolver may still contain the removed object
-			if (idResolver.hasEObject(change.affectedEObjectID)) {
-				val stillExistingObject = idResolver.getEObject(change.affectedEObjectID) as A
+			if (uuidResolver.hasEObject(change.affectedEObjectID)) {
+				val stillExistingObject = uuidResolver.getEObject(change.affectedEObjectID) as A
 				change.affectedEObject = stillExistingObject
 				change.affectedEObject.checkNotNullAndNotProxy(change, "affected object")
 			} else {
 				// Create new one
 				val newObject = EcoreUtil.create(change.affectedEObjectType) as A
 				change.affectedEObject = newObject
-				val id = idResolver.getAndUpdateId(newObject)
-				checkState(id == change.affectedEObjectID, "generated ID %s does not match the original ID %s on element creation", id, change.affectedEObjectID)
+				uuidResolver.registerEObject(change.affectedEObjectID, newObject)
 			}
 		} else {
 			// Object still exists
-			change.affectedEObject = idResolver.getEObject(change.affectedEObjectID) as A
+			change.affectedEObject = uuidResolver.getEObject(change.affectedEObjectID) as A
 			change.affectedEObject.checkNotNullAndNotProxy(change, "affected object")
 		}
 		
@@ -88,7 +88,7 @@ package class AtomicEChangeResolver {
 	 */
 	def private void resolveRootEChange(RootEChange change) {
 		// Get resource where the root object will be inserted / removed.
-		change.resource = idResolver.getResource(URI.createURI(change.uri))
+		change.resource = uuidResolver.getResource(URI.createURI(change.uri))
 	}
 
 	/**
@@ -108,9 +108,9 @@ package class AtomicEChangeResolver {
 		} else {
 			// Root object is in staging area
 			if (change instanceof InsertRootEObject<?>) {
-				return idResolver.getEObject(change.newValueID)	
+				return uuidResolver.getEObject(change.newValueID)	
 			} else if (change instanceof RemoveRootEObject<?>) {
-				return idResolver.getEObject(change.oldValueID)	
+				return uuidResolver.getEObject(change.oldValueID)	
 			}
 		}
 		return value		

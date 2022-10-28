@@ -31,11 +31,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue
 import static org.junit.jupiter.api.Assertions.assertNotNull
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceUtil.getFirstRootEObject
 import tools.vitruv.change.atomic.id.IdResolver
+import tools.vitruv.change.atomic.uuid.UuidResolver
 
 @ExtendWith(TestProjectManager, RegisterMetamodelsInStandalone)
 abstract class ChangeDescription2ChangeTransformationTest {
 	var ChangeRecorder changeRecorder
-	var IdResolver idResolver
+	var UuidResolver uuidResolver
 	var ResourceSet resourceSet
 	var Path tempFolder
 	
@@ -46,8 +47,8 @@ abstract class ChangeDescription2ChangeTransformationTest {
 	def void beforeTest(@TestProject Path tempFolder) {
 		this.tempFolder = tempFolder
 		this.resourceSet = new ResourceSetImpl().withGlobalFactories()
-		this.idResolver = IdResolver.create(resourceSet)
-		this.changeRecorder = new ChangeRecorder(resourceSet)
+		this.uuidResolver = UuidResolver.create(resourceSet)
+		this.changeRecorder = new ChangeRecorder(resourceSet, uuidResolver)
 		this.resourceSet.startRecording
 	}
 
@@ -111,10 +112,10 @@ abstract class ChangeDescription2ChangeTransformationTest {
 			monitoredChange.applyBackward
 		]
 		val comparisonResourceSet = new ResourceSetImpl().withGlobalFactories()
-		val comparisonIdResolver = IdResolver.create(comparisonResourceSet)
+		val comparisonIdResolver = UuidResolver.create(comparisonResourceSet)
 		resourceSet.copyTo(comparisonResourceSet)
 		monitoredChanges.map[
-			applyForward(idResolver)
+			applyForward(uuidResolver)
 			EcoreUtil.copy(it)
 		].forEach[
 			val unresolvedChange = it.unresolve()

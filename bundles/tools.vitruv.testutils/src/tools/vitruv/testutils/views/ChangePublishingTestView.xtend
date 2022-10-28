@@ -25,6 +25,7 @@ import tools.vitruv.testutils.TestUserInteraction
 import tools.vitruv.change.propagation.ChangePropagationSpecificationRepository
 import static tools.vitruv.testutils.TestModelRepositoryFactory.createTestChangeableModelRepository
 import tools.vitruv.change.propagation.impl.DefaultChangeableModelRepository
+import tools.vitruv.change.atomic.uuid.UuidResolver
 
 /**
  * A test view that will record and publish the changes created in it.
@@ -49,7 +50,7 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	) {
 		this.resourceSet = new ResourceSetImpl().withGlobalFactories()
 		this.delegate = new BasicTestView(persistenceDirectory, resourceSet, userInteraction, uriMode)
-		this.changeRecorder = new ChangeRecorder(resourceSet)
+		this.changeRecorder = new ChangeRecorder(resourceSet, UuidResolver.create(resourceSet))
 		changeRecorder.beginRecording()
 	}
 

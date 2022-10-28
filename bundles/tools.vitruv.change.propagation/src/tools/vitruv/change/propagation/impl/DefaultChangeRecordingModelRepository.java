@@ -18,6 +18,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 
+import tools.vitruv.change.atomic.uuid.UuidResolver;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.composite.recording.ChangeRecorder;
@@ -42,6 +43,7 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 	private final PersistableCorrespondenceModel correspondenceModel;
 	private final ChangeRecorder changeRecorder;
 	private final Path consistencyMetadataFolder;
+	private final UuidResolver uuidResolver;
 
 	private boolean isLoading = false;
 
@@ -56,13 +58,14 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 	public DefaultChangeRecordingModelRepository(URI correspondencesURI, Path consistencyMetadataFolder) {
 		this.consistencyMetadataFolder = consistencyMetadataFolder;
 		this.modelsResourceSet = withGlobalFactories(new ResourceSetImpl());
+		this.uuidResolver = UuidResolver.create(modelsResourceSet);
 		this.correspondenceModel = createPersistableCorrespondenceModel(correspondencesURI);
 		this.modelsResourceSet.eAdapters().add(new ResourceRegistrationAdapter((resource) -> {
 			if (!isLoading) {
 				getCreateOrLoadModel(resource.getURI());
 			}
 		}));
-		this.changeRecorder = new ChangeRecorder(modelsResourceSet);
+		this.changeRecorder = new ChangeRecorder(modelsResourceSet, uuidResolver);
 	}
 
 	@Override
@@ -160,7 +163,7 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 
 	@Override
 	public VitruviusChange applyChange(VitruviusChange change) {
-		return change.resolveAndApply(modelsResourceSet);
+		return change.resolveAndApply(uuidResolver);
 	}
 
 	@Override

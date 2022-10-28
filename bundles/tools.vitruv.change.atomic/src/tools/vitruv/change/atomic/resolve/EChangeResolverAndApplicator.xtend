@@ -1,18 +1,19 @@
 package tools.vitruv.change.atomic.resolve
 
+import edu.kit.ipd.sdq.activextendannotations.Utility
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.util.EcoreUtil
 import tools.vitruv.change.atomic.EChange
-import static com.google.common.base.Preconditions.checkArgument
-import edu.kit.ipd.sdq.activextendannotations.Utility
 import tools.vitruv.change.atomic.command.ApplyEChangeSwitch
-import tools.vitruv.change.atomic.feature.FeatureEChange
 import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange
+import tools.vitruv.change.atomic.feature.FeatureEChange
+import tools.vitruv.change.atomic.feature.reference.SubtractiveReferenceEChange
+import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
 import tools.vitruv.change.atomic.root.InsertRootEObject
 import tools.vitruv.change.atomic.root.RemoveRootEObject
-import org.eclipse.emf.ecore.EObject
-import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
-import tools.vitruv.change.atomic.feature.reference.SubtractiveReferenceEChange
-import tools.vitruv.change.atomic.id.IdResolver
+import tools.vitruv.change.atomic.uuid.UuidResolver
+
+import static com.google.common.base.Preconditions.checkArgument
 
 /**
  * Utility class for applying and resolving a given EChange.
@@ -25,15 +26,15 @@ class EChangeResolverAndApplicator {
 		return copy
 	}
 	
-	static def EChange resolveBefore(EChange eChange, IdResolver idResolver) {
+	static def EChange resolveBefore(EChange eChange, UuidResolver idResolver) {
 		return resolveCopy(eChange, idResolver)
 	}
 
-	static def void applyForward(EChange eChange, IdResolver idResolver) {
+	static def void applyForward(EChange eChange, UuidResolver idResolver) {
 		executeUpdatingIds(eChange, idResolver, true)
 	}
 
-	static def void applyBackward(EChange eChange, IdResolver idResolver) {
+	static def void applyBackward(EChange eChange, UuidResolver idResolver) {
 		executeUpdatingIds(eChange, idResolver, false)
 	}
 
@@ -41,12 +42,12 @@ class EChangeResolverAndApplicator {
 		ApplyEChangeSwitch.applyEChange(eChange, false)
 	}
 	
-	static def void executeUpdatingIds(EChange eChange, IdResolver idResolver, boolean forward) {
+	static def void executeUpdatingIds(EChange eChange, UuidResolver idResolver, boolean forward) {
 		val affectedObject = eChange.affectedEObject
-		val affectedId = idResolver.getAndUpdateId(affectedObject)
+		val affectedId = idResolver.getUuid(affectedObject)
 		val oldObject = eChange.oldContainedEObject
 		ApplyEChangeSwitch.applyEChange(eChange, forward)
-		if (eChange.isContainmentChange || affectedId != idResolver.getAndUpdateId(affectedObject)) {
+		if (eChange.isContainmentChange || affectedId != idResolver.getUuid(affectedObject)) {
 			affectedObject.updateIds(idResolver)
 		}
 		if (oldObject !== null) {
@@ -76,8 +77,8 @@ class EChangeResolverAndApplicator {
 		}
 	}
 	
-	private static def void updateIds(EObject object, IdResolver idResolver) {
-		idResolver.getAndUpdateId(object)
+	private static def void updateIds(EObject object, UuidResolver idResolver) {
+		idResolver.getUuid(object)
 		object.eContents.forEach[updateIds(idResolver)]
 	}
 
@@ -91,7 +92,7 @@ class EChangeResolverAndApplicator {
 	 * @throws IllegalArgumentException The change is already resolved.
 	 * @throws IllegalStateException 	The change cannot be resolved.
 	 */
-	def private static EChange resolveCopy(EChange change, IdResolver idResolver) {
+	def private static EChange resolveCopy(EChange change, UuidResolver idResolver) {
 		checkArgument(!change.isResolved, "change must not be resolved when trying to resolve")
 		var EChange copy = EcoreUtil.copy(change)
 		new AtomicEChangeResolver(idResolver).resolve(copy)

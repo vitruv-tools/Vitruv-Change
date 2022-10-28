@@ -20,7 +20,7 @@ import tools.vitruv.change.atomic.eobject.DeleteEObject
 import tools.vitruv.change.atomic.eobject.EObjectAddedEChange
 import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange
 import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
-import tools.vitruv.change.atomic.id.IdResolver
+import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.TransactionalChange
 import tools.vitruv.change.composite.description.VitruviusChangeFactory
 
@@ -58,16 +58,16 @@ class ChangeRecorder implements AutoCloseable {
 	// closed: null
 	List<EChange> resultChanges = emptyList
 	val NotificationToEChangeConverter converter
-	val IdResolver idResolver
+	val UuidResolver uuidResolver
 	val EChangeIdManager eChangeIdManager
 	val Set<EObject> existingObjects = new HashSet
 	val Set<Notifier> toDesinfect = new HashSet
 	val ResourceSet resourceSet
 
-	new(ResourceSet resourceSet) {
+	new(ResourceSet resourceSet, UuidResolver uuidResolver) {
 		this.resourceSet = resourceSet
-		this.idResolver = IdResolver.create(resourceSet)
-		this.eChangeIdManager = new EChangeIdManager(idResolver)
+		this.uuidResolver = uuidResolver;
+		this.eChangeIdManager = new EChangeIdManager(this.uuidResolver);
 		this.converter = new NotificationToEChangeConverter([ affectedObject, addedObject |
 			isCreateChange(affectedObject, addedObject)
 		])
@@ -154,7 +154,7 @@ class ChangeRecorder implements AutoCloseable {
 		checkState(isRecording, "This recorder is not recording")
 		isRecording = false
 		resultChanges = List.copyOf(resultChanges.postprocessRemovals().assignIds())
-		idResolver.endTransaction()
+		uuidResolver.endTransaction()
 		return getChange()
 	}
 
@@ -166,7 +166,7 @@ class ChangeRecorder implements AutoCloseable {
 
 	def private void assignIds(EChange change) {
 		eChangeIdManager.setOrGenerateIds(change)
-		change.applyForward(idResolver)
+		change.applyForward(uuidResolver)
 	}
 
 	/**

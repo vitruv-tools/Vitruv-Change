@@ -1,14 +1,14 @@
 package tools.vitruv.change.composite.description
 
 import java.util.List
-import tools.vitruv.change.atomic.EChange
-import org.eclipse.emf.ecore.EObject
-import tools.vitruv.change.interaction.UserInteractionBase
-import org.eclipse.emf.ecore.resource.Resource
 import java.util.Set
 import org.eclipse.emf.common.util.URI
-import org.eclipse.emf.ecore.resource.ResourceSet
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.resource.Resource
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.MetamodelDescriptor
+import tools.vitruv.change.interaction.UserInteractionBase
 
 /** 
  * Base interface for all kinds of changes in Vitruvius.
@@ -34,7 +34,7 @@ interface VitruviusChange {
 	 * 
 	 * @throws IllegalStateException if the change cannot be resolved or is already resolved.
 	 */
-	def VitruviusChange resolveAndApply(ResourceSet resourceSet)
+	def VitruviusChange resolveAndApply(UuidResolver uuidResolver)
 
 	/**
 	 * Returns an unresolved change, such that all its affected and referenced {@link EObjects} are removed.
