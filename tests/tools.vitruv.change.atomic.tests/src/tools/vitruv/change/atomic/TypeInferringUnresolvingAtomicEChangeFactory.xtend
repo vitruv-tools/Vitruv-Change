@@ -1,17 +1,14 @@
 package tools.vitruv.change.atomic
 
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.resource.Resource
-
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.unresolve
+import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
-import org.eclipse.emf.common.util.URI
-import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory
-import tools.vitruv.change.atomic.EChangeIdManager
-import tools.vitruv.change.atomic.EChange
-import tools.vitruv.change.atomic.id.IdResolver
+import org.eclipse.emf.ecore.resource.Resource
+import tools.vitruv.change.atomic.uuid.UuidResolver
+
+import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.unresolve
 
 /**
  * Factory singleton class for elements of change models.
@@ -23,8 +20,8 @@ import tools.vitruv.change.atomic.id.IdResolver
 package final class TypeInferringUnresolvingAtomicEChangeFactory extends TypeInferringAtomicEChangeFactory {
 	val EChangeIdManager eChangeIdManager;
 	
-	new(IdResolver idResolver) {
-		this.eChangeIdManager = new EChangeIdManager(idResolver);
+	new(UuidResolver uuidResolver) {
+		this.eChangeIdManager = new EChangeIdManager(uuidResolver);
 	}
 	
 	def private setIds(EChange change) {

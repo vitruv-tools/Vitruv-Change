@@ -6,22 +6,23 @@ import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.emf.ecore.util.EcoreUtil
-import tools.vitruv.change.atomic.EChange
-import tools.vitruv.change.atomic.feature.FeatureEChange
-import tools.vitruv.change.atomic.EChangeTest
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import tools.vitruv.change.atomic.id.IdResolver
-import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
+import org.eclipse.emf.ecore.util.EcoreUtil
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import static org.junit.jupiter.api.Assertions.assertTrue
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.EChangeTest
+import tools.vitruv.change.atomic.uuid.UuidResolver
+
 import static org.junit.jupiter.api.Assertions.assertFalse
+import static org.junit.jupiter.api.Assertions.assertNotSame
 import static org.junit.jupiter.api.Assertions.assertNull
 import static org.junit.jupiter.api.Assertions.assertSame
-import static org.junit.jupiter.api.Assertions.assertNotSame
 import static org.junit.jupiter.api.Assertions.assertThrows
+import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+
+import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
 import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
 
 /**
@@ -33,7 +34,7 @@ class FeatureEChangeTest extends EChangeTest {
 	var EAttribute affectedFeature
 
 	// Second model instance
-	var IdResolver idResolver2
+	var UuidResolver uuidResolver2
 	var Resource resource2
 
 	@BeforeEach
@@ -44,7 +45,7 @@ class FeatureEChangeTest extends EChangeTest {
 		// Load model in second resource
 		val resourceSet2 = new ResourceSetImpl().withGlobalFactories
 		this.resource2 = resourceSet2.getResource(resource.URI, true)
-		this.idResolver2 = IdResolver.create(resourceSet2)
+		this.uuidResolver2 = UuidResolver.create(resourceSet2)
 	}
 
 	/**
@@ -79,7 +80,7 @@ class FeatureEChangeTest extends EChangeTest {
 		unresolvedChange.assertIsNotResolved(affectedEObject, affectedFeature)
 
 		// Resolve
-		assertThrows(IllegalStateException)[unresolvedChange.resolveBefore(idResolver2)]
+		assertThrows(IllegalStateException)[unresolvedChange.resolveBefore(uuidResolver2)]
 	}
 
 	/**

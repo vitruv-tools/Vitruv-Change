@@ -39,13 +39,14 @@ import static tools.vitruv.testutils.matchers.ModelMatchers.*
 import org.eclipse.emf.ecore.util.EcoreUtil
 import tools.vitruv.change.atomic.feature.reference.RemoveEReference
 import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
+import tools.vitruv.change.atomic.uuid.UuidResolver
 
 @ExtendWith(TestProjectManager, RegisterMetamodelsInStandalone)
 class ChangeRecorderTest {
 	// this test only covers general behaviour of ChangeRecorder. Whether it always produces correct change sequences
 	// is covered by other tests
 	val ResourceSet resourceSet = new ResourceSetImpl().withGlobalFactories()
-	var ChangeRecorder changeRecorder = new ChangeRecorder(resourceSet)
+	var ChangeRecorder changeRecorder = new ChangeRecorder(resourceSet, UuidResolver.create(resourceSet))
 
 	private def <T extends EObject> T wrapIntoRecordedResource(T object) {
 		val resource = resourceSet.createResource(URI.createURI('test://test.aet'))

@@ -1,26 +1,27 @@
 package tools.vitruv.change.atomic.util
 
-import tools.vitruv.change.atomic.EChange
 import java.util.List
-import static org.junit.jupiter.api.Assertions.assertTrue
-import static org.junit.jupiter.api.Assertions.assertFalse
+import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.uuid.UuidResolver
+
+import static org.hamcrest.MatcherAssert.assertThat
+import static org.hamcrest.core.Is.is
+import static org.hamcrest.core.IsInstanceOf.instanceOf
 import static org.junit.jupiter.api.Assertions.assertEquals
-import static org.junit.jupiter.api.Assertions.assertNull
+import static org.junit.jupiter.api.Assertions.assertFalse
 import static org.junit.jupiter.api.Assertions.assertNotNull
 import static org.junit.jupiter.api.Assertions.assertNotSame
-import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.core.IsInstanceOf.instanceOf
-import static org.hamcrest.core.Is.is
+import static org.junit.jupiter.api.Assertions.assertTrue
+
 import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
-import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
-import tools.vitruv.change.atomic.id.IdResolver
 
 /**
  * Utility class for frequently used assert methods in the tests.
  */
 @FinalFieldsConstructor
 class EChangeAssertHelper {
-	val IdResolver idResolver
+	val UuidResolver uuidResolver
 	
 	/**
 	 * Tests whether a unresolved change and a resolved change are the same class.
@@ -49,7 +50,7 @@ class EChangeAssertHelper {
 	def void assertApplyForward(EChange change) {
 		assertNotNull(change)
 		assertTrue(change.isResolved)
-		change.applyForward(idResolver)
+		change.applyForward(uuidResolver)
 	}
 
 	/**

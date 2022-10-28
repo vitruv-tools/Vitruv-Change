@@ -1,25 +1,25 @@
 package tools.vitruv.change.atomic
 
 import allElementTypes.Root
+import java.nio.file.Path
+import java.util.List
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory
-import tools.vitruv.change.atomic.TypeInferringCompoundEChangeFactory
-import java.util.List
-import tools.vitruv.change.atomic.EChange
+import org.eclipse.xtend.lib.annotations.Accessors
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.io.TempDir
+import tools.vitruv.change.atomic.util.EChangeAssertHelper
+import tools.vitruv.change.atomic.uuid.UuidResolver
+
 import static org.junit.jupiter.api.Assertions.assertFalse
 import static org.junit.jupiter.api.Assertions.assertTrue
-import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
-import org.eclipse.xtend.lib.annotations.Accessors
 import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
-import java.nio.file.Path
-import org.junit.jupiter.api.io.TempDir
+
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.createFileURI
+import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
 import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
-import tools.vitruv.change.atomic.util.EChangeAssertHelper
-import tools.vitruv.change.atomic.id.IdResolver
+import org.eclipse.emf.ecore.EObject
 
 /**
  * Default class for testing EChange changes.
@@ -35,7 +35,7 @@ abstract class EChangeTest {
 	@Accessors(PROTECTED_GETTER)
 	var Resource resource
 	var ResourceSet resourceSet
-	var IdResolver idResolver
+	var UuidResolver uuidResolver
 
 	@Accessors(PROTECTED_GETTER)
 	var TypeInferringAtomicEChangeFactory atomicFactory
@@ -65,10 +65,10 @@ abstract class EChangeTest {
 		resource.save(null)
 
 		// Factories for creating changes
-		idResolver = IdResolver.create(resourceSet)
-		atomicFactory = new TypeInferringUnresolvingAtomicEChangeFactory(idResolver)
-		compoundFactory = new TypeInferringUnresolvingCompoundEChangeFactory(idResolver)
-		helper = new EChangeAssertHelper(idResolver)
+		uuidResolver = UuidResolver.create(resourceSet)
+		atomicFactory = new TypeInferringUnresolvingAtomicEChangeFactory(uuidResolver)
+		compoundFactory = new TypeInferringUnresolvingCompoundEChangeFactory(uuidResolver)
+		helper = new EChangeAssertHelper(uuidResolver)
 	}
 
 	protected def final getResourceContent() {
@@ -98,7 +98,7 @@ abstract class EChangeTest {
 	}
 
 	def protected EChange resolveBefore(EChange change) {
-		return change.resolveBefore(idResolver)
+		return change.resolveBefore(uuidResolver)
 	}
 
 	def protected List<EChange> resolveBefore(List<? extends EChange> changes) {
