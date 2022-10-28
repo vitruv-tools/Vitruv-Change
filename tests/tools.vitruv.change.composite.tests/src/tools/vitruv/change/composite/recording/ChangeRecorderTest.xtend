@@ -46,7 +46,8 @@ class ChangeRecorderTest {
 	// this test only covers general behaviour of ChangeRecorder. Whether it always produces correct change sequences
 	// is covered by other tests
 	val ResourceSet resourceSet = new ResourceSetImpl().withGlobalFactories()
-	var ChangeRecorder changeRecorder = new ChangeRecorder(resourceSet, UuidResolver.create(resourceSet))
+	val uuidResolver = UuidResolver.create(resourceSet)
+	val ChangeRecorder changeRecorder = new ChangeRecorder(resourceSet, uuidResolver)
 
 	private def <T extends EObject> T wrapIntoRecordedResource(T object) {
 		val resource = resourceSet.createResource(URI.createURI('test://test.aet'))
@@ -80,7 +81,7 @@ class ChangeRecorderTest {
 	@Test
 	@DisplayName("records direct changes to an object")
 	def void recordOnObject() {
-		val root = aet.Root
+		val root = aet.Root.withUuid
 		changeRecorder.addToRecording(root)
 		record [
 			root.id = 'test'
@@ -361,8 +362,8 @@ class ChangeRecorderTest {
 	def void recordsOnDeletedResource(@TestProject Path testDir) {
 		changeRecorder.addToRecording(resourceSet)
 		val resource = resourceSet.createResource(URI.createFileURI(testDir.resolve("test.aet").toString)) => [
-			contents += aet.Root => [
-				singleValuedContainmentEReference = aet.NonRoot
+			contents += aet.Root.withUuid => [
+				singleValuedContainmentEReference = aet.NonRoot.withUuid
 			]
 		]
 		record [
@@ -832,6 +833,11 @@ class ChangeRecorderTest {
 
 	def private static hasNoChanges() {
 		new EChangeSequenceMatcher(emptyList)
+	}
+	
+	def private <O extends EObject> withUuid(O eObject) {
+		uuidResolver.registerEObject(eObject)
+		eObject
 	}
 
 	@FinalFieldsConstructor

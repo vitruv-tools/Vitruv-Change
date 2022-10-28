@@ -9,6 +9,8 @@ import static com.google.common.base.Preconditions.checkArgument
 import static com.google.common.base.Preconditions.checkState
 import tools.vitruv.change.atomic.id.IdResolver
 import tools.vitruv.change.atomic.uuid.UuidResolver
+import tools.vitruv.change.atomic.eobject.DeleteEObject
+import tools.vitruv.change.atomic.eobject.CreateEObject
 
 /**
  * Provides logic for initializing the IDs within changes. 
@@ -29,6 +31,8 @@ class EChangeIdManager {
 
 	def void setOrGenerateIds(EChange eChange) {
 		switch eChange {
+			CreateEObject<?>:
+				setOrGenerateCreatedEObjectId(eChange)
 			EObjectExistenceEChange<?>:
 				setAffectedEObjectId(eChange)
 			FeatureEChange<?,?>:
@@ -49,16 +53,21 @@ class EChangeIdManager {
 		checkState(id !== null, "id must not be null")
 		return id
 	}
+	
+	private def String getOrGenerateId(EObject object) {
+		try {
+			getId(object)
+		}
+		catch (IllegalStateException e) {
+			uuidResolver.registerEObject(object)
+		}
+	}
 
 	private def void setOrGenerateNewValueId(EObjectAddedEChange<?> addedEChange) {
 		if (addedEChange.newValue === null) {
 			return;
 		}
-		try {
-			addedEChange.newValueID = addedEChange.newValue.id
-		} catch (IllegalStateException e) {
-			addedEChange.newValueID = uuidResolver.generateUuid(addedEChange.newValue)
-		}
+		addedEChange.newValueID = addedEChange.newValue.getOrGenerateId
 	}
 
 	private def void setOldValueId(EObjectSubtractedEChange<?> subtractedEChange) {
@@ -71,7 +80,13 @@ class EChangeIdManager {
 	private def void setAffectedEObjectId(EObjectExistenceEChange<?> existenceChange) {
 		val affectedEObject = existenceChange.affectedEObject
 		checkArgument(affectedEObject !== null, "existence change must have an affected EObject: %s", existenceChange)
-		existenceChange.affectedEObjectID = affectedEObject.id	
+		existenceChange.affectedEObjectID = affectedEObject.id
+	}
+	
+	private def void setOrGenerateCreatedEObjectId(CreateEObject<?> existenceChange) {
+		val affectedEObject = existenceChange.affectedEObject
+		checkArgument(affectedEObject !== null, "existence change must have an affected EObject: %s", existenceChange)
+		existenceChange.affectedEObjectID = affectedEObject.getOrGenerateId
 	}
 
 	private def void setAffectedEObjectId(FeatureEChange<?, ?> featureChange) {

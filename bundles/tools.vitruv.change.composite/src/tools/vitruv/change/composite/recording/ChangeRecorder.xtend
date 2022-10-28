@@ -66,8 +66,8 @@ class ChangeRecorder implements AutoCloseable {
 
 	new(ResourceSet resourceSet, UuidResolver uuidResolver) {
 		this.resourceSet = resourceSet
-		this.uuidResolver = uuidResolver;
-		this.eChangeIdManager = new EChangeIdManager(this.uuidResolver);
+		this.uuidResolver = uuidResolver
+		this.eChangeIdManager = new EChangeIdManager(this.uuidResolver)
 		this.converter = new NotificationToEChangeConverter([ affectedObject, addedObject |
 			isCreateChange(affectedObject, addedObject)
 		])
@@ -97,7 +97,7 @@ class ChangeRecorder implements AutoCloseable {
 		checkNotDisposed()
 		checkNotNull(notifier, "notifier")
 		checkArgument(notifier.isInOurResourceSet,
-			"cannot record changes in a different resource set than that of our ID resolver!")
+			"cannot record changes in a different resource set than that of our UUID resolver!")
 
 		if (rootObjects += notifier) {
 			notifier.recursively [
@@ -159,14 +159,8 @@ class ChangeRecorder implements AutoCloseable {
 	}
 
 	def private List<EChange> assignIds(List<EChange> changes) {
-		changes.toList.reverseView.forEach[applyBackward]
-		changes.forEach[assignIds]
+		changes.forEach[eChangeIdManager.setOrGenerateIds(it)]
 		changes
-	}
-
-	def private void assignIds(EChange change) {
-		eChangeIdManager.setOrGenerateIds(change)
-		change.applyForward(uuidResolver)
 	}
 
 	/**
