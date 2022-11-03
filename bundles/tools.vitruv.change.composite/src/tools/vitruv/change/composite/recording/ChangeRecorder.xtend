@@ -19,7 +19,6 @@ import tools.vitruv.change.atomic.EChangeIdManager
 import tools.vitruv.change.atomic.eobject.DeleteEObject
 import tools.vitruv.change.atomic.eobject.EObjectAddedEChange
 import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange
-import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
 import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.TransactionalChange
 import tools.vitruv.change.composite.description.VitruviusChangeFactory
@@ -58,7 +57,6 @@ class ChangeRecorder implements AutoCloseable {
 	val NotificationToEChangeConverter converter
 	val UuidResolver uuidResolver
 	val EChangeIdManager eChangeIdManager
-	val Set<EObject> existingObjects = new HashSet
 	val Set<Notifier> toDesinfect = new HashSet
 	val ResourceSet resourceSet
 
@@ -75,13 +73,13 @@ class ChangeRecorder implements AutoCloseable {
 		// We do not check the containment of the reference, because an element may be inserted into a non-containment
 		// reference before inserting it into a containment reference so that the create change has to be added
 		// for the insertion into the non-containment reference
-		var create = addedObject !== null && !existingObjects.contains(addedObject)
+		var create = addedObject !== null && !uuidResolver.hasUuid(addedObject)
 		// Look if the new value has no resource or if it is a reference change, if the resource of the affected
 		// object is the same. Otherwise, the create has to be handled by an insertion/reference in that resource, as
 		// it can be potentially a reference to a third party model, for which no create shall be instantiated		
 		create = create && (addedObject.eResource === null || affectedObject === null ||
 			addedObject.eResource == affectedObject.eResource)
-		if(create) existingObjects += addedObject
+		if (create) uuidResolver.registerEObject(addedObject)
 		return create;
 	}
 
@@ -99,7 +97,7 @@ class ChangeRecorder implements AutoCloseable {
 
 		if (rootObjects += notifier) {
 			notifier.recursively [
-				if(it instanceof EObject) existingObjects.add(it)
+				if (it instanceof EObject) checkState(uuidResolver.hasUuid(it), "Existing object %s must have a UUID when added to recording", it)
 				addAdapter()
 			]
 		}
@@ -133,7 +131,6 @@ class ChangeRecorder implements AutoCloseable {
 		resultChanges = null
 		val rootCopy = Set.copyOf(rootObjects)
 		rootObjects.clear()
-		existingObjects.clear()
 		rootCopy.forEach[recursively [removeAdapter()]]
 	}
 
@@ -322,15 +319,6 @@ class ChangeRecorder implements AutoCloseable {
 				} else {
 					converter.convert(new NotificationInfo(notification))
 				}
-			if (!changes.isEmpty) {
-				// Register any added object as existing, even if we are not recording
-				changes.forEach [
-					if (it instanceof EObjectAddedEChange<?>) {
-						existingObjects += newValue
-						if(it instanceof UpdateReferenceEChange<?>) existingObjects += affectedEObject
-					}
-				]
-			}
 			return changes
 		}
 
@@ -341,7 +329,6 @@ class ChangeRecorder implements AutoCloseable {
 		private def void finishLoadingResource(Resource resource) {
 			currentlyLoadingResources -= resource
 			resource.recursively [
-				if(it instanceof EObject) existingObjects.add(it)
 				addAdapter()
 			]
 		}
