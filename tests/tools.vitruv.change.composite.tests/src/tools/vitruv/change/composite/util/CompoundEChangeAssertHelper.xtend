@@ -42,9 +42,13 @@ class CompoundEChangeAssertHelper {
 	
 	def static Iterable<? extends EChange> assertReplaceAndDeleteNonRoot(Iterable<? extends EChange> changes, EObject expectedOldValue,
 		EObject affectedEObject, EStructuralFeature affectedFeature, boolean isUnset) {
-		changes.assertSizeGreaterEquals(2)
-		return changes.assertReplaceSingleValuedEReference(affectedEObject, affectedFeature, expectedOldValue, null, true, false, isUnset)
-			.assertDeleteEObject(expectedOldValue)
+		val deletedContainedElements = expectedOldValue.eAllContents.toList.reverse // elements are deleted from inner to outer
+		changes.assertSizeGreaterEquals(2 + deletedContainedElements.size)
+		var filteredChanges = changes.assertReplaceSingleValuedEReference(affectedEObject, affectedFeature, expectedOldValue, null, true, false, isUnset)
+		for (deletedContainedElement : deletedContainedElements) {
+			filteredChanges = filteredChanges.assertDeleteEObject(deletedContainedElement)
+		}
+		return filteredChanges.assertDeleteEObject(expectedOldValue)
 	}
 
 	def static Iterable<? extends EChange> assertCreateAndInsertRootEObject(Iterable<? extends EChange> changes, EObject expectedNewValue, String uri, Resource resource) {

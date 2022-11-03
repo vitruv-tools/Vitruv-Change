@@ -137,7 +137,7 @@ class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2ChangeTra
 		]
 
 		// assert
-		result.assertChangeCount(4)
+		result.assertChangeCount(5)
 			.assertReplaceAndDeleteNonRoot(containedRoot, uniquePersistedRoot, ROOT__RECURSIVE_ROOT, false)
 			.assertReplaceSingleValuedEReference(innerContainedRoot, ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE, nonRoot, null, true, false, false)
 			.assertReplaceSingleValuedEReference(uniquePersistedRoot, ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE, null, nonRoot, true, false, false)

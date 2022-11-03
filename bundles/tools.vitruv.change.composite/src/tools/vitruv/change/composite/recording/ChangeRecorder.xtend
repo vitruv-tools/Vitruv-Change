@@ -191,7 +191,7 @@ class ChangeRecorder implements AutoCloseable {
 				switch (eChange) {
 					EObjectSubtractedEChange<?> case eChange.isContainmentRemoval &&
 						removedElements.contains(eChange.oldValue):
-						converter.createDeleteChange(eChange)
+						converter.createDeleteChanges(eChange)
 					default:
 						null
 				}
@@ -208,7 +208,7 @@ class ChangeRecorder implements AutoCloseable {
 	 */
 	def private static List<EChange> insertChanges(
 		List<EChange> changes,
-		(EChange)=>EChange inserter
+		(EChange)=>List<EChange> inserter
 	) {
 		var List<EChange> resultEChanges = null
 		for (var k = 0; k < changes.size; k++) {
@@ -217,10 +217,10 @@ class ChangeRecorder implements AutoCloseable {
 			val additional = inserter.apply(eChange)
 			if (additional !== null) {
 				if (resultEChanges === null) {
-					resultEChanges = new ArrayList(changes.size + 1)
+					resultEChanges = new ArrayList(changes.size + additional.size)
 					resultEChanges.addAll(changes.subList(0, k + 1))
 				}
-				resultEChanges.add(additional)
+				resultEChanges += additional
 			}
 		}
 		return if (resultEChanges !== null) {
