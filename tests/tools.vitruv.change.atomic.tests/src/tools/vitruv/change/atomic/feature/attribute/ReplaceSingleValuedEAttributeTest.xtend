@@ -4,17 +4,14 @@ import allElementTypes.AllElementTypesPackage
 import allElementTypes.NonRoot
 import allElementTypes.Root
 import org.eclipse.emf.ecore.EAttribute
-import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute
-import tools.vitruv.change.atomic.EChangeTest
-
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import static org.junit.jupiter.api.Assertions.assertTrue
-import static org.junit.jupiter.api.Assertions.assertFalse
+import tools.vitruv.change.atomic.EChangeTest
+
 import static org.junit.jupiter.api.Assertions.assertEquals
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 import static org.junit.jupiter.api.Assertions.assertThrows
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
+import static org.junit.jupiter.api.Assertions.assertTrue
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 
 /**
  * Test class for the concrete {@link ReplaceSingleValuedEAttribute} EChange, 

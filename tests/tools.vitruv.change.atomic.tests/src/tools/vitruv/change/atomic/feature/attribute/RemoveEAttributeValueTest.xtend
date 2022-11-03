@@ -2,17 +2,13 @@ package tools.vitruv.change.atomic.feature.attribute
 
 import allElementTypes.NonRoot
 import allElementTypes.Root
-import tools.vitruv.change.atomic.feature.attribute.RemoveEAttributeValue
-
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import static org.junit.jupiter.api.Assertions.assertTrue
-import static org.junit.jupiter.api.Assertions.assertFalse
+
 import static org.junit.jupiter.api.Assertions.assertEquals
-import static org.junit.jupiter.api.Assertions.assertNull
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 import static org.junit.jupiter.api.Assertions.assertThrows
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
+import static org.junit.jupiter.api.Assertions.assertTrue
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 
 /**
  * Test class for the concrete {@link RemoveEAttributeValue} EChange,

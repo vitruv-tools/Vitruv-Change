@@ -66,7 +66,7 @@ class EChangeAssertHelper {
 	def void assertApplyBackward(EChange change) {
 		assertNotNull(change)
 		assertTrue(change.isResolved)
-		change.applyBackward
+		change.applyBackward(uuidResolver)
 	}
 
 	/**

@@ -33,8 +33,6 @@ import static org.eclipse.emf.ecore.resource.ResourceSet.*
 
 import static extension org.eclipse.emf.ecore.util.EcoreUtil.*
 import static extension tools.vitruv.change.atomic.EChangeUtil.*
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.applyBackward
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.applyForward
 
 /**
  * Records changes to model elements as a {@link TransactionalChange}.

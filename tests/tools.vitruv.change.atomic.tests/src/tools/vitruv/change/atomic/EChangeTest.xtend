@@ -109,7 +109,12 @@ abstract class EChangeTest {
 
 	def protected void applyBackward(List<EChange> changes) {
 		assertIsResolved(changes)
-		changes.reverseView.forEach[applyBackward]
+		changes.reverseView.forEach[applyBackward(uuidResolver)]
+	}
+	
+	def protected void applyBackward(EChange change) {
+		assertIsResolved(change)
+		change.assertApplyForward
 	}
 
 	def protected void applyForward(List<EChange> changes) {

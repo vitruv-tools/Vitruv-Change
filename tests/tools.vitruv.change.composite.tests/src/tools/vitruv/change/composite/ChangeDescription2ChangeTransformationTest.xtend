@@ -1,37 +1,37 @@
 package tools.vitruv.change.composite
 
 import allElementTypes.Root
-import java.util.List
-
-import tools.vitruv.change.atomic.EChange
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.AfterEach
-import static org.junit.jupiter.api.Assertions.assertEquals
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet
-import org.eclipse.emf.common.notify.Notifier
-import java.util.function.Consumer
-import static com.google.common.base.Preconditions.checkState
-import org.junit.jupiter.api.^extension.ExtendWith
-import tools.vitruv.testutils.TestProjectManager
-import tools.vitruv.testutils.TestProject
 import java.nio.file.Path
-import tools.vitruv.testutils.RegisterMetamodelsInStandalone
+import java.util.List
+import java.util.function.Consumer
+import org.eclipse.emf.common.notify.Notifier
+import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
-import tools.vitruv.change.composite.recording.ChangeRecorder
+import org.eclipse.emf.ecore.util.EcoreUtil
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.^extension.ExtendWith
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.TransactionalChange
+import tools.vitruv.change.composite.recording.ChangeRecorder
+import tools.vitruv.testutils.RegisterMetamodelsInStandalone
+import tools.vitruv.testutils.TestProject
+import tools.vitruv.testutils.TestProjectManager
+
+import static com.google.common.base.Preconditions.checkState
+import static org.hamcrest.MatcherAssert.assertThat
+import static org.junit.jupiter.api.Assertions.assertEquals
+import static org.junit.jupiter.api.Assertions.assertNotNull
+import static org.junit.jupiter.api.Assertions.assertTrue
+import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet
+
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.createFileURI
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.loadOrCreateResource
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
-import org.eclipse.emf.ecore.util.EcoreUtil
-import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
-import static org.hamcrest.MatcherAssert.assertThat
-import static org.junit.jupiter.api.Assertions.assertTrue
-import static org.junit.jupiter.api.Assertions.assertNotNull
+import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceUtil.getFirstRootEObject
-import tools.vitruv.change.atomic.id.IdResolver
-import tools.vitruv.change.atomic.uuid.UuidResolver
+import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
 
 @ExtendWith(TestProjectManager, RegisterMetamodelsInStandalone)
 abstract class ChangeDescription2ChangeTransformationTest {
@@ -109,11 +109,12 @@ abstract class ChangeDescription2ChangeTransformationTest {
 		// be applied to a different state
 		val monitoredChanges = change.EChanges
 		monitoredChanges.reverseView.forEach[monitoredChange|
-			monitoredChange.applyBackward
+			monitoredChange.applyBackward(uuidResolver)
 		]
+		uuidResolver.endTransaction
 		val comparisonResourceSet = new ResourceSetImpl().withGlobalFactories()
-		val comparisonIdResolver = UuidResolver.create(comparisonResourceSet)
 		resourceSet.copyTo(comparisonResourceSet)
+		val comparisonIdResolver = uuidResolver.resolveIn(comparisonResourceSet)
 		monitoredChanges.map[
 			applyForward(uuidResolver)
 			EcoreUtil.copy(it)
@@ -156,5 +157,4 @@ abstract class ChangeDescription2ChangeTransformationTest {
 		)
 		return changes
 	}
-
 }
