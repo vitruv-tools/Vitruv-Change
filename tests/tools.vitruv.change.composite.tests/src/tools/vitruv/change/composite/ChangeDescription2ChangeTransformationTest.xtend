@@ -114,14 +114,14 @@ abstract class ChangeDescription2ChangeTransformationTest {
 		uuidResolver.endTransaction
 		val comparisonResourceSet = new ResourceSetImpl().withGlobalFactories()
 		resourceSet.copyTo(comparisonResourceSet)
-		val comparisonIdResolver = uuidResolver.resolveIn(comparisonResourceSet)
+		val comparisonUuidResolver = uuidResolver.resolveIn(comparisonResourceSet)
 		monitoredChanges.map[
 			applyForward(uuidResolver)
 			EcoreUtil.copy(it)
 		].forEach[
 			val unresolvedChange = it.unresolve()
-			val resolvedChange = unresolvedChange.resolveBefore(comparisonIdResolver)
-			resolvedChange.applyForward(comparisonIdResolver)
+			val resolvedChange = unresolvedChange.resolveBefore(comparisonUuidResolver)
+			resolvedChange.applyForward(comparisonUuidResolver)
 		]
 		resourceSet.assertContains(comparisonResourceSet)
 		comparisonResourceSet.assertContains(resourceSet)
