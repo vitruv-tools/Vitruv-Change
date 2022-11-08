@@ -1,20 +1,22 @@
 package tools.vitruv.change.composite.recording
 
 import java.util.List
+import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EObject
-import tools.vitruv.change.atomic.EChange
-import tools.vitruv.change.atomic.feature.attribute.AttributeFactory
-import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory
 import tools.vitruv.change.atomic.eobject.EObjectAddedEChange
 import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange
-import static org.eclipse.emf.common.notify.Notification.*
-import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.*
-import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
-import org.eclipse.emf.ecore.EAttribute
-import org.eclipse.emf.common.util.URI
+import tools.vitruv.change.atomic.feature.attribute.AttributeFactory
 import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
+
+import static org.eclipse.emf.common.notify.Notification.*
+
+import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.*
 import static extension tools.vitruv.change.composite.recording.EChangeCreationUtil.*
 
 /** 
@@ -27,9 +29,10 @@ package final class NotificationToEChangeConverter {
 	
 	val (EObject, EObject)=>boolean isCreateChange
 
-	def createDeleteChange(EObjectSubtractedEChange<?> change) {
-		val deleteChange = createDeleteEObjectChange(change.oldValue)
-		return deleteChange
+	def List<EChange> createDeleteChanges(EObjectSubtractedEChange<?> change) {
+		var allDeletedElements = change.oldValue.eAllContents.toList.reverse //delete from inner to outer
+		allDeletedElements.add(change.oldValue)
+		return allDeletedElements.mapFixed[createDeleteEObjectChange]
 	}
 	
 	/** 
