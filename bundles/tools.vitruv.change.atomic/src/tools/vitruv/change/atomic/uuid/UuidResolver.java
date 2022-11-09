@@ -1,5 +1,7 @@
 package tools.vitruv.change.atomic.uuid;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -8,6 +10,12 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
+/**
+ * A UUID resolver manages the mapping of {@link EObject} to UUIDs within one
+ * resource set. UUIDs are used to uniquely identify an element in changes,
+ * independent of the location within a resource set and the actual resource set
+ * instance.
+ */
 public interface UuidResolver {
 	/**
 	 * Returns whether the given {@link EObject} has a registered UUID or not.
@@ -59,25 +67,25 @@ public interface UuidResolver {
 	/**
 	 * Registers the given {@link EObject} for the given UUID.
 	 * 
-	 * @throws IllegalStateException if there is already a UUID registered for the
-	 *                               given {@link EObject} or vice versa
+	 * @param uuid    is the UUID to register the {@link EObject} for. Must not be
+	 *                <code>null</code>.
+	 * @param eObject is the {@link EObject} to register. Must not be
+	 *                <code>null</code> or a proxy.
 	 */
-	public void registerEObject(String uuid, EObject eObject) throws IllegalStateException;
+	public void registerEObject(String uuid, EObject eObject);
 
-	public default String registerEObject(EObject eObject) throws IllegalStateException {
+	/**
+	 * Registers the given {@link EObjecty} for a newly generated UUID and returns
+	 * that UUID. The UUID is generated using {@link UuidResolver#generateUuid}.
+	 * 
+	 * @param eObject is the object to register. Must not be <code>null</code> or a
+	 *                proxy.
+	 * @return the UUID registered for the given {@link EObject}.
+	 */
+	public default String registerEObject(EObject eObject) {
 		String uuid = generateUuid(eObject);
 		registerEObject(uuid, eObject);
 		return uuid;
-	}
-
-	public UuidResolver resolveIn(ResourceSet resourceSet) throws IllegalStateException;
-
-	public void resolveResources(Map<Resource, Resource> sourceToTargetResourceMapping, UuidResolver targetUuidResolver)
-			throws IllegalStateException;
-
-	public default void resolveResource(Resource sourceResource, Resource targetResource,
-			UuidResolver targetUuidResolver) throws IllegalStateException {
-		resolveResources(Map.of(sourceResource, targetResource), targetUuidResolver);
 	}
 
 	/**
@@ -87,26 +95,93 @@ public interface UuidResolver {
 	public Resource getResource(URI uri);
 
 	/**
-	 * Returns the {@link ResourceSet} used by this resolver instance.
-	 */
-	public ResourceSet getResourceSet();
-
-	/**
 	 * Ends a transactions such that all {@link EObject}s not being contained in a
 	 * resource, which is contained in a resource set, are removed from the UUID
 	 * mapping.
 	 */
 	public void endTransaction();
 
+	/**
+	 * Resolves all {@link EObject}s contained in any resource of the given
+	 * mapping's key set to its counterpart {@link EObject} in the corresponding
+	 * resource of the <code>targetUuidResolver</code> and registers the resolved
+	 * object under the same UUID as in the current resolver. The resource
+	 * correspondences are determined by the
+	 * <code>sourceToTargetResourceMapping</code>. Each resource pair in the mapping
+	 * is expected to be structurally equal.
+	 * 
+	 * @param sourceToTargetResourceMapping is the mapping between resources from
+	 *                                      the current resolver to the given target
+	 *                                      resolver. Must not be <code>null</code>.
+	 *                                      The key set must contain only resources
+	 *                                      of the current UUID resolver. The values
+	 *                                      must contain only resources of the
+	 *                                      target UUID resolver. Each resource pair
+	 *                                      is expected to be structurally equal.
+	 * @param targetUuidResolver            is the {@link UuidResolver} to resolve
+	 *                                      the given resources in. Must not be
+	 *                                      <code>null</code>.
+	 * @throws IllegalStateException if any {@link EObject} of the current resolver
+	 *                               is not contained in a resource or a resource
+	 *                               pair is not structurally equal.
+	 */
+	public void resolveResources(Map<Resource, Resource> sourceToTargetResourceMapping, UuidResolver targetUuidResolver)
+			throws IllegalStateException;
+
+	/**
+	 * Resolves all {@link EObject}s contained in the given
+	 * <code>sourceResource</code> to its counterpart {@link EObject} in the
+	 * <code>targetResource</code> and registers the resolved object under the same
+	 * UUID as in the current resolver. The source and target resources are expected
+	 * to be structurally equal.
+	 * 
+	 * @param sourceResource     is the source resource, contained in the current
+	 *                           resolver's resource set. Must not be
+	 *                           <code>null</code>.
+	 * @param targetResource     is the target resource, contained in the target
+	 *                           resolver's resource set. Must not be
+	 *                           <code>null</code>.
+	 * @param targetUuidResolver is the {@link UuidResolver} to resolve the given
+	 *                           resources in. Must not be <code>null</code>.
+	 * @throws IllegalStateException if any {@link EObject} of the current resolver
+	 *                               is not contained in a resource or the given
+	 *                               resources are not structurally equal.
+	 */
+	public default void resolveResource(Resource sourceResource, Resource targetResource,
+			UuidResolver targetUuidResolver) throws IllegalStateException {
+		checkState(sourceResource != null, "source resource must not be null");
+		checkState(targetResource != null, "target resource must not be null");
+		resolveResources(Map.of(sourceResource, targetResource), targetUuidResolver);
+	}
+
+	/**
+	 * Creates a new {@link UuidResolver} with the given resource set.
+	 * 
+	 * @param resourceSet is the resource set the UUID resolver uses.
+	 * @return a new {@link UuidResolver} instance.
+	 */
 	public static UuidResolver create(ResourceSet resourceSet) {
 		return new UuidResolverImpl(resourceSet);
 	}
-	
+
+	/**
+	 * Stores the contents of this resolver at the given {@link URI}.
+	 * 
+	 * @param uri is the {@link URI} to store the serialization at. Must not be
+	 *            <code>null</code> and must be a file URI.
+	 * @throws IOException if saving to file fails.
+	 */
 	public void storeAtUri(URI uri) throws IOException;
-	
-	public void loadFromUri(URI uri) throws IOException;
-	
-	public static UuidResolver create(ResourceSet resourceSet, URI serializationUri) throws IOException {
-		return new UuidResolverImpl(resourceSet, serializationUri);
-	}
+
+	/**
+	 * Initializes this resolver with the contents at the given {@link URI}. Can
+	 * only be called before any elements are registered with this resolver.
+	 * 
+	 * @param uri is the {@link URI} to load the serialization from. Must not be
+	 *            <code>null</code> and must be a file URI.
+	 * @throws IOException           if reading the file fails.
+	 * @throws IllegalStateException if this resolver already has elements
+	 *                               registered.
+	 */
+	public void loadFromUri(URI uri) throws IOException, IllegalStateException;
 }

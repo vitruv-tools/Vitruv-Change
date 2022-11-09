@@ -32,6 +32,7 @@ import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resou
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceUtil.getFirstRootEObject
 import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
+import java.util.HashMap
 
 @ExtendWith(TestProjectManager, RegisterMetamodelsInStandalone)
 abstract class ChangeDescription2ChangeTransformationTest {
@@ -113,8 +114,9 @@ abstract class ChangeDescription2ChangeTransformationTest {
 		]
 		uuidResolver.endTransaction
 		val comparisonResourceSet = new ResourceSetImpl().withGlobalFactories()
-		resourceSet.copyTo(comparisonResourceSet)
-		val comparisonUuidResolver = uuidResolver.resolveIn(comparisonResourceSet)
+		val originalToComparisonResourceMapping = resourceSet.copyTo(comparisonResourceSet)
+		val comparisonUuidResolver = UuidResolver.create(comparisonResourceSet)
+		uuidResolver.resolveResources(originalToComparisonResourceMapping, comparisonUuidResolver)
 		monitoredChanges.map[
 			applyForward(uuidResolver)
 			EcoreUtil.copy(it)
@@ -129,12 +131,15 @@ abstract class ChangeDescription2ChangeTransformationTest {
 	}
 	
 	private static def copyTo(ResourceSet original, ResourceSet target) {
+		var resourceMapping = new HashMap;
 		for (originalResource : original.resources) {
 			val comparisonResource = target.createResource(originalResource.URI)
 			if (!originalResource.contents.empty) {
 				comparisonResource.contents += EcoreUtil.copyAll(originalResource.contents)
 			}
+			resourceMapping.put(originalResource, comparisonResource)
 		}
+		return resourceMapping
 	}
 	
 	private static def assertContains(ResourceSet first, ResourceSet second) {

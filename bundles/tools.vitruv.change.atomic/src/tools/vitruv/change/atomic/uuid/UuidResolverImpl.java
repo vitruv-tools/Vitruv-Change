@@ -7,11 +7,9 @@ import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.Resour
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,11 +38,6 @@ class UuidResolverImpl implements UuidResolver {
 	public UuidResolverImpl(ResourceSet resourceSet) {
 		checkArgument(resourceSet != null, "Resource set may not be null");
 		this.resourceSet = resourceSet;
-	}
-
-	public UuidResolverImpl(ResourceSet resourceSet, URI serializationUri) throws IOException {
-		this(resourceSet);
-		loadFromUri(serializationUri);
 	}
 
 	@Override
@@ -92,48 +85,26 @@ class UuidResolverImpl implements UuidResolver {
 	}
 
 	@Override
-	public ResourceSet getResourceSet() {
-		return resourceSet;
-	}
-
-	@Override
 	public void endTransaction() {
 		cleanupRemovedElements();
 	}
 
 	@Override
-	public UuidResolver resolveIn(ResourceSet resourceSet) throws IllegalStateException {
-		var resolver = new UuidResolverImpl(resourceSet);
-		for (Resource resource : this.resourceSet.getResources()) {
-			checkState(resource.getURI() != null, "trying to resolve in resource without URI: %s", resource);
-			resolver.getResource(resource.getURI());
-		}
-		var idUnresolver = IdResolver.create(this.resourceSet);
-		var idResolver = IdResolver.create(resourceSet);
-		for (var entry : eObjectToUuid.entrySet()) {
-			EObject eObject = entry.getKey();
-			checkState(eObject.eResource() != null && eObject.eResource().getResourceSet() != null,
-					"trying to unresolve dangling EObject %s", eObject);
-			String uuid = entry.getValue();
-			String id = idUnresolver.getAndUpdateId(eObject);
-			EObject resolvedEObject = idResolver.getEObject(id);
-			checkState(resolvedEObject != null, "could not find object corresponding to %s in resource set %s", eObject,
-					resourceSet);
-			resolver.registerEObject(uuid, resolvedEObject);
-		}
-		return resolver;
-	}
-
-	@Override
 	public void resolveResources(Map<Resource, Resource> sourceToTargetResourceMapping,
 			UuidResolver targetUuidResolver) {
+		checkState(sourceToTargetResourceMapping != null, "source to target resource mapping must not be null");
+		checkState(targetUuidResolver != null, "target UUID resolver must not be null");
+		if (sourceToTargetResourceMapping.isEmpty()) {
+			return;
+		}
 		sourceToTargetResourceMapping.keySet().forEach(resource -> checkState(resource.getResourceSet() == resourceSet,
 				"trying to unresolve resource %s from different resource set", resource));
+		ResourceSet targetResourceSet = sourceToTargetResourceMapping.values().iterator().next().getResourceSet();
 		sourceToTargetResourceMapping.values()
-				.forEach(resource -> checkState(resource.getResourceSet() == targetUuidResolver.getResourceSet(),
+				.forEach(resource -> checkState(resource.getResourceSet() == targetResourceSet,
 						"trying to resolve resource %s from different resource set", resource));
 		Map<String, String> uuidToIdMapping = generateUuidToIdMapping(sourceToTargetResourceMapping.keySet());
-		applyUuidToIdMapping(uuidToIdMapping, targetUuidResolver, sourceToTargetResourceMapping);
+		applyUuidToIdMapping(uuidToIdMapping, targetUuidResolver, targetResourceSet, sourceToTargetResourceMapping);
 	}
 
 	@Override
@@ -150,12 +121,13 @@ class UuidResolverImpl implements UuidResolver {
 			String line = reader.readLine();
 			while (line != null) {
 				String[] components = line.split("\\" + SERIALIZATION_SEPARATOR);
-				checkState(components.length == 2, "invalid UUID resolver serialization (line %s) found at %s", line, uri);
+				checkState(components.length == 2, "invalid UUID resolver serialization (line %s) found at %s", line,
+						uri);
 				uuidToIdMapping.put(components[0], components[1]);
 				line = reader.readLine();
 			}
 		}
-		applyUuidToIdMapping(uuidToIdMapping, this, null);
+		applyUuidToIdMapping(uuidToIdMapping, this, resourceSet, null);
 	}
 
 	@Override
@@ -258,34 +230,30 @@ class UuidResolverImpl implements UuidResolver {
 	 * @param uuidToIdMapping               is the UUID to hierarchical ID mapping.
 	 * @param targetUuidResolver            is the {@link UuidResolver} to register
 	 *                                      the given UUIDs in.
+	 * @param targetResourceSet             is the resource set of the given uuid
+	 *                                      resolver.
 	 * @param sourceToTargetResourceMapping is the mapping from own resources to the
 	 *                                      given resolver's resources, or
 	 *                                      <code>null</code> if the mapping shall
 	 *                                      not be validated.
 	 */
 	private void applyUuidToIdMapping(Map<String, String> uuidToIdMapping, UuidResolver targetUuidResolver,
-			Map<Resource, Resource> sourceToTargetResourceMapping) throws IllegalStateException {
-		var idResolver = IdResolver.create(targetUuidResolver.getResourceSet());
+			ResourceSet targetResourceSet, Map<Resource, Resource> sourceToTargetResourceMapping)
+			throws IllegalStateException {
+		var idResolver = IdResolver.create(targetResourceSet);
 		for (var entry : uuidToIdMapping.entrySet()) {
 			String uuid = entry.getKey();
 			String id = entry.getValue();
-			try {
-				EObject targetEObject = idResolver.getEObject(id);
-				checkState(targetEObject != null, "could not find object corresponding to %s in resource set %s", uuid,
-						resourceSet);
-				if (sourceToTargetResourceMapping != null) {
-					EObject sourceEObject = eObjectToUuid.inverse().get(uuid);
-					checkState(
-							targetEObject.eResource() == sourceToTargetResourceMapping.get(sourceEObject.eResource()),
-							"resolved object %s to element %s which is contained in wrong resource", targetEObject,
-							sourceEObject);
-				}
-				targetUuidResolver.registerEObject(uuid, targetEObject);
-			} catch (IllegalStateException e) {
-				System.out.println(e);
-				// ignore missing elements
-				// TODO: should we do this or throw an error? Where is it needed?
+			EObject targetEObject = idResolver.getEObject(id);
+			checkState(targetEObject != null, "could not find object corresponding to %s in resource set %s", uuid,
+					resourceSet);
+			if (sourceToTargetResourceMapping != null) {
+				EObject sourceEObject = eObjectToUuid.inverse().get(uuid);
+				checkState(targetEObject.eResource() == sourceToTargetResourceMapping.get(sourceEObject.eResource()),
+						"resolved object %s to element %s which is contained in wrong resource", targetEObject,
+						sourceEObject);
 			}
+			targetUuidResolver.registerEObject(uuid, targetEObject);
 		}
 	}
 }
