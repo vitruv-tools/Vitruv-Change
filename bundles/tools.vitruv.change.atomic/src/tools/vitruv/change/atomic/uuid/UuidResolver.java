@@ -1,5 +1,8 @@
 package tools.vitruv.change.atomic.uuid;
 
+import java.io.IOException;
+import java.util.Map;
+
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -13,68 +16,97 @@ public interface UuidResolver {
 		try {
 			String uuid = getUuid(eObject);
 			return uuid != null;
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			return false;
 		}
 	};
-	
+
 	/**
-	 * Returns whether an {@link EObject} is registered for the given UUID or not. 
+	 * Returns whether an {@link EObject} is registered for the given UUID or not.
 	 */
 	public default boolean hasEObject(String uuid) {
 		try {
 			EObject eObject = getEObject(uuid);
 			return eObject != null;
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			return false;
 		}
 	};
 
 	/**
- 	 * Returns the UUID for the given {@link EObject}.
- 	 * If no UUID is registered for it, an {@link IllegalStateException} is thrown.
- 	 */
+	 * Returns the UUID for the given {@link EObject}. If no UUID is registered for
+	 * it, an {@link IllegalStateException} is thrown.
+	 */
 	public String getUuid(EObject eObject) throws IllegalStateException;
 
 	/**
-	 * Returns the {@link EObject} for the given UUID. If more than one object was registered
-	 * for the UUID, the last one is returned.
-	 * @throws IllegalStateException if no {@link EObject} was registered for the UUID
+	 * Returns the {@link EObject} for the given UUID. If more than one object was
+	 * registered for the UUID, the last one is returned.
+	 * 
+	 * @throws IllegalStateException if no {@link EObject} was registered for the
+	 *                               UUID
 	 */
 	public EObject getEObject(String uuid) throws IllegalStateException;
-	
+
+	/**
+	 * Generates a new UUID for the given {@link EObject}.
+	 * 
+	 * @param eObject is the object to generate a UUID for. Must not be
+	 *                <code>null</code> or a proxy.
+	 */
 	public String generateUuid(EObject eObject);
-	
+
 	/**
- 	 * Registers the given {@link EObject} for the given UUID.
- 	 * @throws IllegalStateException if there is already a UUID registered for the given {@link EObject}
- 	 * or vice versa
- 	 */
- 	public void registerEObject(String uuid, EObject eObject) throws IllegalStateException;
- 	
- 	public default String registerEObject(EObject eObject) throws IllegalStateException {
- 		String uuid = generateUuid(eObject);
- 		registerEObject(uuid, eObject);
- 		return uuid;
- 	}
-	
- 	public UuidResolver resolveIn(ResourceSet resourceSet) throws IllegalStateException;
-	
+	 * Registers the given {@link EObject} for the given UUID.
+	 * 
+	 * @throws IllegalStateException if there is already a UUID registered for the
+	 *                               given {@link EObject} or vice versa
+	 */
+	public void registerEObject(String uuid, EObject eObject) throws IllegalStateException;
+
+	public default String registerEObject(EObject eObject) throws IllegalStateException {
+		String uuid = generateUuid(eObject);
+		registerEObject(uuid, eObject);
+		return uuid;
+	}
+
+	public UuidResolver resolveIn(ResourceSet resourceSet) throws IllegalStateException;
+
+	public void resolveResources(Map<Resource, Resource> sourceToTargetResourceMapping, UuidResolver targetUuidResolver)
+			throws IllegalStateException;
+
+	public default void resolveResource(Resource sourceResource, Resource targetResource,
+			UuidResolver targetUuidResolver) throws IllegalStateException {
+		resolveResources(Map.of(sourceResource, targetResource), targetUuidResolver);
+	}
+
 	/**
-	 * Returns the {@link Resource} for the given {@link URI}. If the resource does not exist yet,
-	 * it gets created.
+	 * Returns the {@link Resource} for the given {@link URI}. If the resource does
+	 * not exist yet, it gets created.
 	 */
 	public Resource getResource(URI uri);
-	
+
 	/**
-	 * Ends a transactions such that all {@link EObject}s not being contained in a resource, which is
-	 * contained in a resource set, are removed from the ID mapping.
+	 * Returns the {@link ResourceSet} used by this resolver instance.
+	 */
+	public ResourceSet getResourceSet();
+
+	/**
+	 * Ends a transactions such that all {@link EObject}s not being contained in a
+	 * resource, which is contained in a resource set, are removed from the UUID
+	 * mapping.
 	 */
 	public void endTransaction();
-	
+
 	public static UuidResolver create(ResourceSet resourceSet) {
 		return new UuidResolverImpl(resourceSet);
+	}
+	
+	public void storeAtUri(URI uri) throws IOException;
+	
+	public void loadFromUri(URI uri) throws IOException;
+	
+	public static UuidResolver create(ResourceSet resourceSet, URI serializationUri) throws IOException {
+		return new UuidResolverImpl(resourceSet, serializationUri);
 	}
 }
