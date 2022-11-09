@@ -33,6 +33,7 @@ Export-Package: tools.vitruv.change.atomic,
  tools.vitruv.change.atomic.root.impl,
  tools.vitruv.change.atomic.root.util,
  tools.vitruv.change.atomic.resolve,
+ tools.vitruv.change.atomic.id,
  tools.vitruv.change.atomic.uuid
 Require-Bundle: org.eclipse.xtend.lib,
  org.apache.log4j,
