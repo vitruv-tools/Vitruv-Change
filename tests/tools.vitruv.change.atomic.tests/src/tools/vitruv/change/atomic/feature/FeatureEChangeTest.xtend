@@ -39,13 +39,14 @@ class FeatureEChangeTest extends EChangeTest {
 
 	@BeforeEach
 	def final void beforeTest() {
-		affectedEObject = rootObject.withUuid
+		affectedEObject = rootObject
 		affectedFeature = AllElementTypesPackage.Literals.IDENTIFIED__ID
 
 		// Load model in second resource
 		val resourceSet2 = new ResourceSetImpl().withGlobalFactories
-		this.resource2 = resourceSet2.getResource(resource.URI, true)
-		this.uuidResolver2 = UuidResolver.create(resourceSet2)
+		resource2 = resourceSet2.getResource(resource.URI, true)
+		uuidResolver2 = UuidResolver.create(resourceSet2)
+		uuidResolver.resolveResource(resource, resource2, uuidResolver2)
 	}
 
 	/**

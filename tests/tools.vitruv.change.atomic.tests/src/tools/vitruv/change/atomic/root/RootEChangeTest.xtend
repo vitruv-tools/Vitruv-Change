@@ -19,7 +19,7 @@ abstract class RootEChangeTest extends EChangeTest {
 	 * Creates two new root elements which can be used in the tests.
 	 */
 	@BeforeEach
-	def final void beforeTest() {
+	def void beforeTest() {
 		newRootObject = aet.Root.withUuid
 		newRootObject2 = aet.Root.withUuid
 	}
