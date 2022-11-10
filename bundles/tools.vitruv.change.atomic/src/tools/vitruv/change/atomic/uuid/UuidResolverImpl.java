@@ -58,17 +58,18 @@ class UuidResolverImpl implements UuidResolver {
 	public void registerEObject(String uuid, EObject element) throws IllegalStateException {
 		checkState(uuid != null, "uuid must not be null");
 		checkState(element != null, "object must not be null");
-		checkState(!isReadOnlyEObject(element), "object must not be read-only");
+		checkState(eObjectToUuid.getOrDefault(element, uuid).equals(uuid),
+				"element %s is already registered for UUID %s", element, eObjectToUuid.get(element));
+		checkState(eObjectToUuid.inverse().getOrDefault(uuid, element).equals(element),
+				"UUID %s is already registered for element %s", uuid, eObjectToUuid.inverse().get(uuid));
+		if (isReadOnlyEObject(element)) {
+			String expectedUuid = getUuidForReadOnlyEObject(element);
+			checkState(uuid.equals(expectedUuid), "read-only object %s must be registered for UUID %s but was %s",
+					element, expectedUuid, uuid);
+			return;
+		}
 		if (LOGGER.isTraceEnabled()) {
 			LOGGER.trace("Adding UUID " + uuid + " for EObject: " + element);
-		}
-		EObject oldObject = eObjectToUuid.inverse().get(uuid);
-		String oldUuid = eObjectToUuid.get(element);
-		if (oldObject != null && oldObject != element) {
-			eObjectToUuid.remove(oldObject);
-		}
-		if (oldUuid != null && !oldUuid.equals(uuid)) {
-			eObjectToUuid.inverse().remove(oldUuid);
 		}
 		eObjectToUuid.put(element, uuid);
 	}
@@ -76,6 +77,9 @@ class UuidResolverImpl implements UuidResolver {
 	@Override
 	public String generateUuid(EObject eObject) {
 		checkState(!eObject.eIsProxy(), "Cannot generate UUID for proxy object %s", eObject);
+		if (isReadOnlyEObject(eObject)) {
+			return getUuidForReadOnlyEObject(eObject);
+		}
 		return NON_READONLY_PREFIX + EcoreUtil.generateUUID();
 	}
 

@@ -100,20 +100,20 @@ package class AtomicEChangeResolver {
 	 */
 	def private <T extends EObject> resolveRootValue(RootEChange change, T value, boolean isInserted) {
 		// Resolve the root object
-		if (isInserted) {
-			// Root object is in resource
-			if (0 <= change.index && change.index < change.resource.contents.size) {
-				return change.resource.contents.get(change.index)				
-			}
-		} else {
-			// Root object is in staging area
-			if (change instanceof InsertRootEObject<?>) {
-				return uuidResolver.getEObject(change.newValueID)	
+		val result = if (change instanceof InsertRootEObject<?>) {
+				uuidResolver.getEObject(change.newValueID)
 			} else if (change instanceof RemoveRootEObject<?>) {
-				return uuidResolver.getEObject(change.oldValueID)	
+				uuidResolver.getEObject(change.oldValueID)
+			} else {
+				value
 			}
+
+		if (isInserted) {
+			checkState(0 <= change.index && change.index < change.resource.contents.size &&
+				change.resource.contents.get(change.index) === result,
+				"invalid index in change %s for resolved object %s", change, result)
 		}
-		return value		
+		return result
 	}
 	
 	/**
@@ -148,7 +148,7 @@ package class AtomicEChangeResolver {
 	 * @param change 			The change which should be resolved.
 	 */
 	def package dispatch void resolve(RemoveEReference<EObject, EObject> change) {
-		change.resolveFeatureEChange()		
+		change.resolveFeatureEChange()
 		change.oldValue = change.oldValueID.resolveObject()
 		change.oldValue.checkNotNullAndNotProxy(change, "old value")
 	}

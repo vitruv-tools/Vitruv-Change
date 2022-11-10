@@ -71,8 +71,10 @@ public interface UuidResolver {
 	 *                <code>null</code>.
 	 * @param eObject is the {@link EObject} to register. Must not be
 	 *                <code>null</code> or a proxy.
+	 * @throws IllegalStateException if there is already another UUID registered for
+	 *                               the given {@link EObject} or vice versa.
 	 */
-	public void registerEObject(String uuid, EObject eObject);
+	public void registerEObject(String uuid, EObject eObject) throws IllegalStateException;
 
 	/**
 	 * Registers the given {@link EObjecty} for a newly generated UUID and returns
@@ -80,9 +82,11 @@ public interface UuidResolver {
 	 * 
 	 * @param eObject is the object to register. Must not be <code>null</code> or a
 	 *                proxy.
+	 * @throws IllegalStateException if there is already another UUID registered for
+	 *                               the given {@link EObject}.
 	 * @return the UUID registered for the given {@link EObject}.
 	 */
-	public default String registerEObject(EObject eObject) {
+	public default String registerEObject(EObject eObject) throws IllegalStateException {
 		String uuid = generateUuid(eObject);
 		registerEObject(uuid, eObject);
 		return uuid;
