@@ -174,4 +174,9 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 		correspondenceModel.close();
 	}
 
+	@Override
+	public UuidResolver getUuidResolver() {
+		return uuidResolver;
+	}
+
 }
