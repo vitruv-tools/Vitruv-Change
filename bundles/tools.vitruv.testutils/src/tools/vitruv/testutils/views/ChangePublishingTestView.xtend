@@ -83,7 +83,7 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	 * @param changeableModelRepository is the repository responsible for propagating and storing the models.
 	 * @param modelUuidResolver is the {@link UuidResolver} associated with the {@code changeableModelRepository}.
 	 * @param modelResourceAt is a function that provides the model resource as stored in the 
-	 * 						  {@code changeableModelRepository} for a given URI. Must not return <code>null</code>.
+	 * 						  {@code changeableModelRepository} for a given URI.
 	 */
 	new(
 		Path persistenceDirectory,
@@ -95,7 +95,9 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	) {
 		this(persistenceDirectory, userInteraction, uriMode, changeableModelRepository) [ viewResource, viewUuidResolver |
 			val modelResource = modelResourceAt.apply(viewResource.URI)
-			modelUuidResolver.resolveResource(modelResource, viewResource, viewUuidResolver)
+			if (modelResource !== null) {
+				modelUuidResolver.resolveResource(modelResource, viewResource, viewUuidResolver)
+			}
 		]
 	}
 
