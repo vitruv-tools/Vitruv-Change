@@ -167,6 +167,10 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	override <T extends EObject> T from(Class<T> clazz, Path viewRelativePath) {
 		clazz.from(viewRelativePath.uri)
 	}
+	
+	override getUuidResolver() {
+		return uuidResolver
+	}
 
 	override disposeViewResources() {
 		resourceSet.resources.clear()
