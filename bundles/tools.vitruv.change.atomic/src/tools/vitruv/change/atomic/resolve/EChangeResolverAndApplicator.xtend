@@ -42,6 +42,8 @@ class EChangeResolverAndApplicator {
 			switch (eChange) {
 				CreateEObject<?>:
 					uuidResolver.registerEObject(eChange.affectedEObjectID, eChange.affectedEObject)
+			}
+			switch (eChange) {
 				EObjectAddedEChange<?>:
 					if (eChange.newValue !== null) {
 						uuidResolver.registerEObject(eChange.newValueID, eChange.newValue)
@@ -51,6 +53,8 @@ class EChangeResolverAndApplicator {
 			switch (eChange) {
 				DeleteEObject<?>:
 					uuidResolver.registerEObject(eChange.affectedEObjectID, eChange.affectedEObject)
+			}
+			switch (eChange) {
 				EObjectSubtractedEChange<?>:
 					if (eChange.oldValue !== null) {
 						uuidResolver.registerEObject(eChange.oldValueID, eChange.oldValue)
