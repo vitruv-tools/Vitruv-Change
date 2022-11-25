@@ -58,10 +58,13 @@ class UuidResolverImpl implements UuidResolver {
 	public void registerEObject(String uuid, EObject element) throws IllegalStateException {
 		checkState(uuid != null, "uuid must not be null");
 		checkState(element != null, "object must not be null");
+		if (element.eResource() != null && element.eResource().getResourceSet() != null) {
+			checkState(element.eResource().getResourceSet() == resourceSet, "element %s is contained in wrong resource set", element);
+		}
 		checkState(eObjectToUuid.getOrDefault(element, uuid).equals(uuid),
 				"element %s is already registered for UUID %s", element, eObjectToUuid.get(element));
 		checkState(eObjectToUuid.inverse().getOrDefault(uuid, element).equals(element),
-				"UUID %s is already registered for element %s", uuid, eObjectToUuid.inverse().get(uuid));
+				"UUID %s is already registered for element %s, was trying to register %s", uuid, eObjectToUuid.inverse().get(uuid), element);
 		if (isReadOnlyEObject(element)) {
 			String expectedUuid = getUuidForReadOnlyEObject(element);
 			checkState(uuid.equals(expectedUuid), "read-only object %s must be registered for UUID %s but was %s",
