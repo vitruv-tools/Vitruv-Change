@@ -18,6 +18,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 
+import tools.vitruv.change.atomic.EChangeIdManager;
 import tools.vitruv.change.atomic.uuid.UuidResolver;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
@@ -65,7 +66,7 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 				getCreateOrLoadModel(resource.getURI());
 			}
 		}));
-		this.changeRecorder = new ChangeRecorder(modelsResourceSet, uuidResolver);
+		this.changeRecorder = new ChangeRecorder(modelsResourceSet);
 	}
 
 	@Override
@@ -158,7 +159,9 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 		changeApplicator.run();
 		LOGGER.debug("End recording changes");
 		changeRecorder.endRecording();
-		return List.of(changeRecorder.getChange());
+		TransactionalChange recordedChange = changeRecorder.getChange();
+		EChangeIdManager.setOrGenerateIds(recordedChange.getEChanges(), uuidResolver);
+		return List.of(recordedChange);
 	}
 
 	@Override
@@ -171,6 +174,7 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 		changeRecorder.close();
 		modelsResourceSet.getResources().stream().forEach((resource) -> resource.unload());
 		modelsResourceSet.getResources().clear();
+		uuidResolver.endTransaction();
 		correspondenceModel.close();
 	}
 

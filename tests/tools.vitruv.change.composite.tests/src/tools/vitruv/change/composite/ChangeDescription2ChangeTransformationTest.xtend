@@ -2,6 +2,7 @@ package tools.vitruv.change.composite
 
 import allElementTypes.Root
 import java.nio.file.Path
+import java.util.HashMap
 import java.util.List
 import java.util.function.Consumer
 import org.eclipse.emf.common.notify.Notifier
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.^extension.ExtendWith
 import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.EChangeIdManager
 import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.TransactionalChange
 import tools.vitruv.change.composite.recording.ChangeRecorder
@@ -32,7 +34,6 @@ import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resou
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceUtil.getFirstRootEObject
 import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
-import java.util.HashMap
 
 @ExtendWith(TestProjectManager, RegisterMetamodelsInStandalone)
 abstract class ChangeDescription2ChangeTransformationTest {
@@ -49,7 +50,7 @@ abstract class ChangeDescription2ChangeTransformationTest {
 		this.tempFolder = tempFolder
 		this.resourceSet = new ResourceSetImpl().withGlobalFactories()
 		this.uuidResolver = UuidResolver.create(resourceSet)
-		this.changeRecorder = new ChangeRecorder(resourceSet, uuidResolver)
+		this.changeRecorder = new ChangeRecorder(resourceSet)
 		this.resourceSet.startRecording
 	}
 
@@ -65,10 +66,12 @@ abstract class ChangeDescription2ChangeTransformationTest {
 	
 	protected def <T extends Notifier> recordComposite(T objectToRecord, Consumer<T> operationToRecord) {
 		resourceSet.stopRecording
+		EChangeIdManager.setOrGenerateIds(changeRecorder.change.EChanges, uuidResolver)
 		objectToRecord.startRecording
 		operationToRecord.accept(objectToRecord)
 		objectToRecord.stopRecording
 		val recordedChange = changeRecorder.change
+		EChangeIdManager.setOrGenerateIds(recordedChange.EChanges, uuidResolver)
 		resourceSet.startRecording
 		return recordedChange
 	}

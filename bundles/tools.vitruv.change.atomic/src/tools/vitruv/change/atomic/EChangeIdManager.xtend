@@ -27,6 +27,18 @@ class EChangeIdManager {
 		checkArgument(uuidResolver !== null, "uuid resolver must not be null")
 		this.uuidResolver = uuidResolver
 	}
+	
+	def static void setOrGenerateIds(Iterable<EChange> eChanges, UuidResolver uuidResolver) {
+		setOrGenerateIds(eChanges, uuidResolver, true)
+	}
+	
+	def static void setOrGenerateIds(Iterable<EChange> eChanges, UuidResolver uuidResolver, boolean endTransaction) {
+		val manager = new EChangeIdManager(uuidResolver)
+		eChanges.forEach[manager.setOrGenerateIds(it)]
+		if (endTransaction) {
+			uuidResolver.endTransaction
+		}
+	}
 
 	def void setOrGenerateIds(EChange eChange) {
 		switch eChange {

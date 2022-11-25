@@ -14,6 +14,7 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.xtend.lib.annotations.Delegate
+import tools.vitruv.change.atomic.EChangeIdManager
 import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.PropagatedChange
 import tools.vitruv.change.composite.description.TransactionalChange
@@ -67,7 +68,7 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 		this.uuidResolver = UuidResolver.create(resourceSet)
 		this.modelRepository = changeableModelRepository
 		this.delegate = new BasicTestView(persistenceDirectory, resourceSet, userInteraction, uriMode)
-		this.changeRecorder = new ChangeRecorder(resourceSet, uuidResolver)
+		this.changeRecorder = new ChangeRecorder(resourceSet)
 		this.uuidResolution = uuidResolution
 		changeRecorder.beginRecording()
 	}
@@ -139,6 +140,7 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	}
 
 	def private propagateChanges(TransactionalChange change) {
+		EChangeIdManager.setOrGenerateIds(change.EChanges, uuidResolver)
 		val propagationResult = modelRepository.propagateChange(change)
 		if (disposeViewResourcesAfterPropagation) {
 			disposeViewResources()

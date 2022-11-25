@@ -47,7 +47,7 @@ class ChangeRecorderTest {
 	// is covered by other tests
 	val ResourceSet resourceSet = new ResourceSetImpl().withGlobalFactories()
 	val uuidResolver = UuidResolver.create(resourceSet)
-	val ChangeRecorder changeRecorder = new ChangeRecorder(resourceSet, uuidResolver)
+	val ChangeRecorder changeRecorder = new ChangeRecorder(resourceSet)
 
 	private def <T extends EObject> T wrapIntoRecordedResource(T object) {
 		val resource = resourceSet.createResource(URI.createURI('test://test.aet'))
