@@ -5,4 +5,4 @@ Bundle-SymbolicName: tools.vitruv.change.workflow
 Bundle-Version: 3.0.1.qualifier
 Bundle-Vendor: vitruv.tools
 Automatic-Module-Name: tools.vitruv.change.workflow
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17

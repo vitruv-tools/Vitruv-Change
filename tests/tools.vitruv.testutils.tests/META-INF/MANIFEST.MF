@@ -4,7 +4,7 @@ Bundle-Name: Vitruv Test Utilities Tests
 Bundle-SymbolicName: tools.vitruv.testutils.tests
 Bundle-Version: 3.0.1.qualifier
 Automatic-Module-Name: tools.vitruv.testutils.tests
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-Vendor: vitruv.tools
 Require-Bundle: tools.vitruv.testutils,
  tools.vitruv.testutils.metamodels,

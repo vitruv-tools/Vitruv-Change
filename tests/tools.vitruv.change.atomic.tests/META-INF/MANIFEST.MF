@@ -5,7 +5,7 @@ Bundle-SymbolicName: tools.vitruv.change.atomic.tests
 Automatic-Module-Name: tools.vitruv.change.atomic.tests
 Bundle-Version: 3.0.1.qualifier
 Bundle-Vendor: vitruv.tools
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Fragment-Host: tools.vitruv.change.atomic
 Require-Bundle: org.eclipse.xtend.lib,
  org.junit.jupiter.api,
