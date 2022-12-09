@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   C<feature url="features/tools.vitruv.change.feature_3.0.1.qualifier.jar" id="tools.vitruv.change.feature" version="3.0.1.qualifier">
+   <feature url="features/tools.vitruv.change.feature_3.0.1.qualifier.jar" id="tools.vitruv.change.feature" version="3.0.1.qualifier">
       <category name="Vitruv Change"/>
    </feature>
    <feature id="tools.vitruv.change.feature.source" version="3.0.1.qualifier">
