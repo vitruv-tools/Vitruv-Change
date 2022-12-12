@@ -1,15 +1,7 @@
 package tools.vitruv.change.correspondence.model;
 
-import org.apache.log4j.Logger;
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.emf.ecore.util.EcoreUtil;
-
-import tools.vitruv.change.correspondence.Correspondence;
-import tools.vitruv.change.correspondence.CorrespondenceFactory;
-import tools.vitruv.change.correspondence.Correspondences;
+import static com.google.common.base.Preconditions.checkState;
+import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.loadOrCreateResource;
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories;
 
 import java.io.IOException;
@@ -20,11 +12,18 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.loadOrCreateResource;
-import static com.google.common.base.Preconditions.checkState;
-
+import org.apache.log4j.Logger;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil;
+
+import tools.vitruv.change.correspondence.Correspondence;
+import tools.vitruv.change.correspondence.CorrespondenceFactory;
+import tools.vitruv.change.correspondence.Correspondences;
 
 class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceModel {
 	private static final Logger logger = Logger.getLogger(PersistableCorrespondenceModelImpl.class);
@@ -63,7 +62,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
 	}
 
 	private static List<EObject> resolve(List<EObject> eObjects, ResourceSet resolveIn) {
-		List<EObject> resolvedEObjects = eObjects.stream().map(eObject -> EcoreUtil.resolve(eObject, resolveIn)).collect(Collectors.toList());
+		List<EObject> resolvedEObjects = eObjects.stream().map(eObject -> EcoreUtil.resolve(eObject, resolveIn)).toList();
 		for (EObject resolvedEObject : resolvedEObjects) {
 			checkState(!resolvedEObject.eIsProxy(), "object %s is referenced in correspondence but could not be resolved", resolvedEObject);
 		}
@@ -104,7 +103,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
 						"Correspondence between %s and %s contains elements %s that are not contained in a resource anymore.",
 						element.getLeftEObjects(), element.getRightEObjects(),
 						Stream.concat(element.getLeftEObjects().stream(), element.getRightEObjects().stream()).filter(this::isNotInManagedResource)
-								.collect(Collectors.toList()));
+								.toList());
 				iterator.remove();
 				if (logger.isTraceEnabled()) {
 					logger.trace("Correspondence between " + element.getLeftEObjects() + " and " + element.getRightEObjects()
