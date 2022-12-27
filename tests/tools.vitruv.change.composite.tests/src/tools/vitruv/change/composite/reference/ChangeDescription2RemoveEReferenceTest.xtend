@@ -1,11 +1,16 @@
 package tools.vitruv.change.composite.reference
 
+import org.junit.jupiter.api.Test
+import tools.vitruv.change.atomic.eobject.DeleteEObject
+import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
+
+import static allElementTypes.AllElementTypesPackage.Literals.*
+import static tools.vitruv.change.composite.util.ChangeAssertHelper.*
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+
 import static extension tools.vitruv.change.composite.util.AtomicEChangeAssertHelper.*
 import static extension tools.vitruv.change.composite.util.CompoundEChangeAssertHelper.*
-import static allElementTypes.AllElementTypesPackage.Literals.*
-import org.junit.jupiter.api.Test
-import static extension tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
-import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
+import static org.junit.jupiter.api.Assertions.assertTrue
 
 class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2ChangeTransformationTest {
 
@@ -66,7 +71,8 @@ class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2ChangeTra
 
 		// assert
 		result.assertChangeCount(2)
-			.assertRemoveAndDeleteNonRoot(uniquePersistedRoot, ROOT__MULTI_VALUED_CONTAINMENT_EREFERENCE, nonRoot, 0)
+			.assertRemoveEReference(uniquePersistedRoot, ROOT__MULTI_VALUED_CONTAINMENT_EREFERENCE, nonRoot, 0, true)
+			.assertDeleteEObject(nonRoot)
 			.assertEmpty
 	}
 
@@ -86,8 +92,9 @@ class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2ChangeTra
 
 		// assert
 		result.assertChangeCount(3)
-			.assertRemoveAndDeleteNonRoot(uniquePersistedRoot, ROOT__MULTI_VALUED_UNSETTABLE_CONTAINMENT_EREFERENCE, nonRoot, 0)
+			.assertRemoveEReference(uniquePersistedRoot, ROOT__MULTI_VALUED_UNSETTABLE_CONTAINMENT_EREFERENCE, nonRoot, 0, true)
 			.assertUnsetFeature(uniquePersistedRoot, ROOT__MULTI_VALUED_UNSETTABLE_CONTAINMENT_EREFERENCE)
+			.assertDeleteEObject(nonRoot)
 			.assertEmpty
 	}
 	
@@ -110,9 +117,10 @@ class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2ChangeTra
 
 		// assert
 		result.assertChangeCount(4)
-			.assertReplaceAndDeleteNonRoot(containedRoot, uniquePersistedRoot, ROOT__RECURSIVE_ROOT, false)
+			.assertReplaceSingleValuedEReference(uniquePersistedRoot, ROOT__RECURSIVE_ROOT, containedRoot, null, true, false, false)
 			.assertReplaceSingleValuedEReference(containedRoot, ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE, nonRoot, null, true, false, false)
 			.assertReplaceSingleValuedEReference(uniquePersistedRoot, ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE, null, nonRoot, true, false, false)
+			.assertDeleteEObjectAndContainedElements(containedRoot)
 			.assertEmpty
 	}
 	
@@ -138,9 +146,10 @@ class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2ChangeTra
 
 		// assert
 		result.assertChangeCount(5)
-			.assertReplaceAndDeleteNonRoot(containedRoot, uniquePersistedRoot, ROOT__RECURSIVE_ROOT, false)
+			.assertReplaceSingleValuedEReference(uniquePersistedRoot, ROOT__RECURSIVE_ROOT, containedRoot, null, true, false, false)
 			.assertReplaceSingleValuedEReference(innerContainedRoot, ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE, nonRoot, null, true, false, false)
 			.assertReplaceSingleValuedEReference(uniquePersistedRoot, ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE, null, nonRoot, true, false, false)
+			.assertDeleteEObjectAndContainedElements(containedRoot)
 			.assertEmpty
 	}
 	
@@ -160,9 +169,14 @@ class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2ChangeTra
 		]
 
 		// assert
-		result.assertChangeCount(4)
-			.assertRemoveAndDeleteNonRoot(uniquePersistedRoot, ROOT__MULTI_VALUED_CONTAINMENT_EREFERENCE, nonRoot2, 1)
-			.assertRemoveAndDeleteNonRoot(uniquePersistedRoot, ROOT__MULTI_VALUED_CONTAINMENT_EREFERENCE, nonRoot1, 0)
-			.assertEmpty
+		val deleteChanges = result.assertChangeCount(4)
+			.assertRemoveEReference(uniquePersistedRoot, ROOT__MULTI_VALUED_CONTAINMENT_EREFERENCE, nonRoot2, 1, true)
+			.assertRemoveEReference(uniquePersistedRoot, ROOT__MULTI_VALUED_CONTAINMENT_EREFERENCE, nonRoot1, 0, true)
+			.assertChangeCount(2)
+		// order of delete changes is random, thus use custom assertions
+		deleteChanges.forEach[assertType(it, DeleteEObject)]
+		val deletedObjects = deleteChanges.map[(it as DeleteEObject<?>).affectedEObject]
+		assertTrue(deletedObjects.contains(nonRoot1), "deleted objects are missing " + nonRoot1)
+		assertTrue(deletedObjects.contains(nonRoot2), "deleted objects are missing " + nonRoot2)
 	}
 }
