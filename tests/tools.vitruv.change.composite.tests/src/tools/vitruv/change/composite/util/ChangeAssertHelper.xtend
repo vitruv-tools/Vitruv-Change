@@ -33,11 +33,11 @@ class ChangeAssertHelper {
 
 	static def assertOldValue(EChange eChange, Object oldValue) {
 		if (oldValue instanceof EObject) {
-			assertThat("old value must be the same or a copy than the given old value", oldValue,
+			assertThat("old value must be the same or a copy as the given old value", oldValue,
 				equalsDeeply((eChange as SubtractiveEChange<?>).oldValue as EObject))
 		} else {
 			assertEquals(oldValue, (eChange as SubtractiveEChange<?>).oldValue,
-				"old value must be the same than the given old value")
+				"old value must be the same as the given old value")
 		}
 	}
 
@@ -48,14 +48,14 @@ class ChangeAssertHelper {
 			val newEObject = newValue as EObject
 			var newEObjectInChange = newValueInChange as EObject
 			assertThat(
-				'''new value in change '«newValueInChange»' must be the same than the given new value '«newValue»!''',
+				'''new value in change '«newValueInChange»' must be the same as the given new value '«newValue»!''',
 				newEObject,
 				equalsDeeply(newEObjectInChange)
 			)
 		} else if (!condition) {
 			assertNotNull(newValue)
 			assertEquals(newValue,
-				newValueInChange, '''new value in change '«newValueInChange»' must be the same than the given new value '«newValue»!''')
+				newValueInChange, '''new value in change '«newValueInChange»' must be the same as the given new value '«newValue»!''')
 		}
 	}
 
