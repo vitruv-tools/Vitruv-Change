@@ -70,15 +70,6 @@ class CreateAndReplaceAndDeleteNonRootTest extends ReferenceEChangeTest {
 
 		// State after
 		assertIsStateAfter
-
-		// Create and resolve 2
-		val resolvedChange2 = createUnresolvedChange(newValue2).resolveBefore
-
-		// Apply change 2 forward
-		resolvedChange2.assertApplyForward
-
-		var NonRoot valueAfterChange2 = affectedEObject.eGet(affectedFeature) as NonRoot
-		assertThat(valueAfterChange2, equalsDeeply(newValue2))
 	}
 
 	/**
