@@ -1,38 +1,40 @@
 package tools.vitruv.change.composite.recording
 
 import java.util.ArrayList
+import java.util.HashMap
 import java.util.HashSet
 import java.util.List
+import java.util.Map
 import java.util.Set
 import org.eclipse.emf.common.notify.Adapter
 import org.eclipse.emf.common.notify.Notification
 import org.eclipse.emf.common.notify.Notifier
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
-import tools.vitruv.change.composite.description.TransactionalChange
-import tools.vitruv.change.composite.description.VitruviusChangeFactory
+import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.EChangeIdManager
+import tools.vitruv.change.atomic.eobject.DeleteEObject
 import tools.vitruv.change.atomic.eobject.EObjectAddedEChange
 import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange
+import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
+import tools.vitruv.change.atomic.id.IdResolver
+import tools.vitruv.change.composite.description.TransactionalChange
+import tools.vitruv.change.composite.description.VitruviusChangeFactory
 
+import static com.google.common.base.Preconditions.checkArgument
+import static com.google.common.base.Preconditions.checkNotNull
 import static com.google.common.base.Preconditions.checkState
 import static org.eclipse.emf.common.notify.Notification.*
+import static org.eclipse.emf.ecore.resource.Resource.*
+import static org.eclipse.emf.ecore.resource.ResourceSet.*
 
 import static extension org.eclipse.emf.ecore.util.EcoreUtil.*
 import static extension tools.vitruv.change.atomic.EChangeUtil.*
-import org.eclipse.emf.ecore.EReference
-import static com.google.common.base.Preconditions.checkNotNull
-import static com.google.common.base.Preconditions.checkArgument
-import static extension org.eclipse.emf.ecore.resource.Resource.RESOURCE__CONTENTS
-import static extension org.eclipse.emf.ecore.resource.Resource.RESOURCE__IS_LOADED
-import static extension org.eclipse.emf.ecore.resource.ResourceSet.RESOURCE_SET__RESOURCES
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.applyForward
 import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.applyBackward
-import tools.vitruv.change.atomic.id.IdResolver
-import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
-import tools.vitruv.change.atomic.EChange
+import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.applyForward
 
 /**
  * Records changes to model elements as a {@link TransactionalChange}.
@@ -167,6 +169,11 @@ class ChangeRecorder implements AutoCloseable {
 		change.applyForward(idResolver)
 	}
 
+	/**
+	 * Creates {@link DeleteEObject} changes for every element implicitly deleted in the change 
+	 * sequence and all of its contained elements. The delete changes are appended at the end 
+	 * of the list. Contained elements are deleted before their container.
+	 */
 	def private postprocessRemovals(List<EChange> changes) {
 		if(changes.isEmpty) return changes
 
@@ -183,51 +190,29 @@ class ChangeRecorder implements AutoCloseable {
 				}
 			}
 		}
-
-		return if (removedElements.isEmpty) {
-			changes
-		} else {
-			changes.insertChanges [ eChange |
-				switch (eChange) {
-					EObjectSubtractedEChange<?> case eChange.isContainmentRemoval &&
-						removedElements.contains(eChange.oldValue):
-						converter.createDeleteChanges(eChange)
-					default:
-						null
+		if (!removedElements.isEmpty) {
+			// removed elements may contain elements with parent - child relation.
+			// As a deleted parent removes all its children, filter out such children
+			// to avoid duplicated delete changes
+			val Map<EObject, Iterable<EObject>> allElementsToDelete = new HashMap
+			removedElements.forEach [ element |
+				if (allElementsToDelete.values.exists[it.contains(element)]) {
+					return
 				}
+				var elementsToDelete = element.eAllContents.toList.reverse //delete from inner to outer
+				elementsToDelete.forEach [ child |
+					if (allElementsToDelete.containsKey(child)) {
+						allElementsToDelete.remove(child)
+					}
+				]
+				elementsToDelete.add(element)
+				allElementsToDelete.put(element, elementsToDelete)
 			]
+			changes += allElementsToDelete.values.flatMap [ elementsToDelete | 
+				elementsToDelete.map [ converter.createDeleteChange(it) ]
+			].toList
 		}
-	}
-
-	/**
-	 * Iterates over the {@code target} change tree and returns a modified tree, where all new changes
-	 * provided by {@code inserter} have been inserted.
-	 *  
-	 * @param inserter a function that receives a {@link ConcreteChange} and returns a change to insert directly
-	 * 		after the received {@link ConcreteChange}. Can return {@code null} to not insert a change.
-	 */
-	def private static List<EChange> insertChanges(
-		List<EChange> changes,
-		(EChange)=>List<EChange> inserter
-	) {
-		var List<EChange> resultEChanges = null
-		for (var k = 0; k < changes.size; k++) {
-			val eChange = changes.get(k)
-			resultEChanges?.add(eChange)
-			val additional = inserter.apply(eChange)
-			if (additional !== null) {
-				if (resultEChanges === null) {
-					resultEChanges = new ArrayList(changes.size + additional.size)
-					resultEChanges.addAll(changes.subList(0, k + 1))
-				}
-				resultEChanges += additional
-			}
-		}
-		return if (resultEChanges !== null) {
-			resultEChanges
-		} else {
-			changes
-		}
+		return changes
 	}
 
 	def TransactionalChange getChange() {

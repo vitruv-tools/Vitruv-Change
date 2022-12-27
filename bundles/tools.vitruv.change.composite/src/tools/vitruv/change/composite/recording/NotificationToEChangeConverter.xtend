@@ -10,7 +10,6 @@ import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory
 import tools.vitruv.change.atomic.eobject.EObjectAddedEChange
-import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange
 import tools.vitruv.change.atomic.feature.attribute.AttributeFactory
 import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
 
@@ -28,11 +27,9 @@ package final class NotificationToEChangeConverter {
 	extension val TypeInferringAtomicEChangeFactory changeFactory = TypeInferringAtomicEChangeFactory.instance
 	
 	val (EObject, EObject)=>boolean isCreateChange
-
-	def List<EChange> createDeleteChanges(EObjectSubtractedEChange<?> change) {
-		var allDeletedElements = change.oldValue.eAllContents.toList.reverse //delete from inner to outer
-		allDeletedElements.add(change.oldValue)
-		return allDeletedElements.mapFixed[createDeleteEObjectChange]
+	
+	def EChange createDeleteChange(EObject eObject) {
+		return createDeleteEObjectChange(eObject)
 	}
 	
 	/** 
