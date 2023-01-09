@@ -45,8 +45,9 @@ class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeDescript
 
 		// assert
 		result.assertChangeCount(4)
-			.assertCreateAndReplaceAndDeleteNonRoot(nonRoot, replaceNonRoot, ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE, uniquePersistedRoot, true, false, false)
+			.assertCreateAndReplaceNonRoot(replaceNonRoot, uniquePersistedRoot, nonRoot, ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE, false)
 			.assertReplaceSingleValuedEAttribute(replaceNonRoot, IDENTIFIED__ID, null, replaceNonRoot.id, false, false)
+			.assertDeleteEObjectAndContainedElements(nonRoot)
 			.assertEmpty
 	}
 	
