@@ -5,14 +5,13 @@ Bundle-SymbolicName: tools.vitruv.testutils
 Automatic-Module-Name: tools.vitruv.testutils
 Bundle-Version: 3.0.1.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-17
+Import-Package: org.junit.jupiter.api.extension,
+ org.junit.jupiter.params.converter,
+ org.junit.platform.commons.support
 Require-Bundle: org.apache.log4j,
  org.slf4j.api,
  ch.qos.logback.classic,
  ch.qos.logback.core,
- org.junit,
- org.junit.jupiter.api,
- org.junit.jupiter.params,
- org.junit.platform.commons,
  org.hamcrest.core,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
