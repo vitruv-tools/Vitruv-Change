@@ -8,7 +8,7 @@ import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.resource.Resource
 import tools.vitruv.change.atomic.uuid.UuidResolver
 
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.unresolve
+import static extension tools.vitruv.change.atomic.resolve.EChangeUuidResolverAndApplicator.unresolve
 
 /**
  * Factory singleton class for elements of change models.
@@ -18,14 +18,14 @@ import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApp
  * Can be used by any transformation that creates change models.
  */
 package final class TypeInferringUnresolvingAtomicEChangeFactory extends TypeInferringAtomicEChangeFactory {
-	val EChangeIdManager eChangeIdManager;
+	val EChangeUuidManager eChangeUuidManager;
 	
 	new(UuidResolver uuidResolver) {
-		this.eChangeIdManager = new EChangeIdManager(uuidResolver);
+		this.eChangeUuidManager = new EChangeUuidManager(uuidResolver);
 	}
 	
 	def private setIds(EChange change) {
-		eChangeIdManager.setOrGenerateIds(change);
+		eChangeUuidManager.setOrGenerateIds(change);
 	}
 	
 	override <A extends EObject> createCreateEObjectChange(A affectedEObject) {

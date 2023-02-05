@@ -17,7 +17,7 @@ import static com.google.common.base.Preconditions.checkArgument
  * Utility class for applying and resolving a given EChange.
  */
 @Utility
-class EChangeResolverAndApplicator {
+class EChangeUuidResolverAndApplicator {
 	static def <C extends EChange> C unresolve(C eChange) {
 		val copy = EcoreUtil.copy(eChange)
 		EChangeUnresolver.unresolve(copy)
@@ -76,8 +76,7 @@ class EChangeResolverAndApplicator {
 	def private static EChange resolveCopy(EChange change, UuidResolver uuidResolver) {
 		checkArgument(!change.isResolved, "change must not be resolved when trying to resolve")
 		var EChange copy = EcoreUtil.copy(change)
-		new AtomicEChangeResolver(uuidResolver).resolve(copy)
+		new AtomicEChangeUuidResolver(uuidResolver).resolve(copy)
 		return copy
 	}
-
 }

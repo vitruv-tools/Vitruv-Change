@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
+import static extension tools.vitruv.change.atomic.resolve.EChangeUuidResolverAndApplicator.*
 
 /**
  * Test class for {@link FeatureEChange} which is used by every {@link EChange} which modifies {@link EStructuralFeature}s 

@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull
 import static org.junit.jupiter.api.Assertions.assertNotSame
 import static org.junit.jupiter.api.Assertions.assertTrue
 
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
+import static extension tools.vitruv.change.atomic.resolve.EChangeUuidResolverAndApplicator.*
 
 /**
  * Utility class for frequently used assert methods in the tests.

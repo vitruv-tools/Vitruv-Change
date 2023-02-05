@@ -1,9 +1,7 @@
 package tools.vitruv.testutils.views
 
-import com.google.common.annotations.Beta
 import java.util.List
 import org.eclipse.emf.common.notify.Notifier
-import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.PropagatedChange
 
 /**
@@ -35,15 +33,6 @@ interface NonTransactionalTestView extends TestView {
 	 * Use {@link #record record} to run recording in a transaction that automatically stops recording on return. 
 	 */
 	def <T extends Notifier> T stopRecordingChanges(T notifier)
-	
-	/**
-	 * Returns the {@link UuidResolver} associated with resources obtained from this test view. Accessing the UUID resolver
-	 * directly might be necessary for state-based change propagation.
-	 * 
-	 * TODO: remove as soon as PCM - Java Editor tests are migrated to view-based API
-	 */
-	 @Beta
-	def UuidResolver getUuidResolver()
 
 	/**
 	 * Propagates all changes recorded since the last call of this method at all objects for which recording has been started

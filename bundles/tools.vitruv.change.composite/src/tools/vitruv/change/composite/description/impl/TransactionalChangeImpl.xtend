@@ -27,6 +27,7 @@ import tools.vitruv.change.atomic.feature.reference.InsertEReference
 import tools.vitruv.change.atomic.feature.reference.RemoveEReference
 import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
 import tools.vitruv.change.atomic.feature.reference.SubtractiveReferenceEChange
+import tools.vitruv.change.atomic.id.IdResolver
 import tools.vitruv.change.atomic.root.InsertRootEObject
 import tools.vitruv.change.atomic.root.RemoveRootEObject
 import tools.vitruv.change.atomic.root.RootEChange
@@ -39,7 +40,8 @@ import static com.google.common.base.Preconditions.checkNotNull
 import static com.google.common.base.Preconditions.checkState
 
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.mapFixed
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
+import static extension tools.vitruv.change.atomic.resolve.EChangeIdResolverAndApplicator.*
+import static extension tools.vitruv.change.atomic.resolve.EChangeUuidResolverAndApplicator.*
 
 class TransactionalChangeImpl implements TransactionalChange {
 	var List<? extends EChange> eChanges
@@ -88,6 +90,15 @@ class TransactionalChangeImpl implements TransactionalChange {
 		val resolvedChanges = eChanges.mapFixed[
 			val resolvedChange = resolveBefore(uuidResolver)
 			resolvedChange.applyForward(uuidResolver)
+			resolvedChange
+		]
+		return new TransactionalChangeImpl(resolvedChanges)
+	}
+	
+	override resolveAndApply(IdResolver idResolver) {
+		val resolvedChanges = eChanges.mapFixed[
+			val resolvedChange = resolveBefore(idResolver)
+			resolvedChange.applyForward(idResolver)
 			resolvedChange
 		]
 		return new TransactionalChangeImpl(resolvedChanges)

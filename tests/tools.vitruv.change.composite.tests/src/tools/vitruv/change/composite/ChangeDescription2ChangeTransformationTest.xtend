@@ -13,7 +13,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.^extension.ExtendWith
 import tools.vitruv.change.atomic.EChange
-import tools.vitruv.change.atomic.EChangeIdManager
+import tools.vitruv.change.atomic.EChangeUuidManager
 import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.TransactionalChange
 import tools.vitruv.change.composite.recording.ChangeRecorder
@@ -33,7 +33,7 @@ import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.loadOrCreateResource
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceUtil.getFirstRootEObject
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
+import static extension tools.vitruv.change.atomic.resolve.EChangeUuidResolverAndApplicator.*
 
 @ExtendWith(TestProjectManager, RegisterMetamodelsInStandalone)
 abstract class ChangeDescription2ChangeTransformationTest {
@@ -66,12 +66,12 @@ abstract class ChangeDescription2ChangeTransformationTest {
 	
 	protected def <T extends Notifier> recordComposite(T objectToRecord, Consumer<T> operationToRecord) {
 		resourceSet.stopRecording
-		EChangeIdManager.setOrGenerateIds(changeRecorder.change.EChanges, uuidResolver)
+		EChangeUuidManager.setOrGenerateIds(changeRecorder.change.EChanges, uuidResolver)
 		objectToRecord.startRecording
 		operationToRecord.accept(objectToRecord)
 		objectToRecord.stopRecording
 		val recordedChange = changeRecorder.change
-		EChangeIdManager.setOrGenerateIds(recordedChange.EChanges, uuidResolver)
+		EChangeUuidManager.setOrGenerateIds(recordedChange.EChanges, uuidResolver)
 		resourceSet.startRecording
 		return recordedChange
 	}

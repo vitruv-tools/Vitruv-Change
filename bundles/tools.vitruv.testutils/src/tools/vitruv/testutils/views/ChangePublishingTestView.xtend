@@ -14,7 +14,7 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.xtend.lib.annotations.Delegate
-import tools.vitruv.change.atomic.EChangeIdManager
+import tools.vitruv.change.atomic.EChangeUuidManager
 import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.PropagatedChange
 import tools.vitruv.change.composite.description.TransactionalChange
@@ -140,7 +140,7 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	}
 
 	def private propagateChanges(TransactionalChange change) {
-		EChangeIdManager.setOrGenerateIds(change.EChanges, uuidResolver)
+		EChangeUuidManager.setOrGenerateIds(change.EChanges, uuidResolver)
 		val propagationResult = modelRepository.propagateChange(change)
 		if (disposeViewResourcesAfterPropagation) {
 			disposeViewResources()
@@ -166,10 +166,6 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 
 	override <T extends EObject> T from(Class<T> clazz, Path viewRelativePath) {
 		clazz.from(viewRelativePath.uri)
-	}
-	
-	override getUuidResolver() {
-		return uuidResolver
 	}
 
 	override disposeViewResources() {

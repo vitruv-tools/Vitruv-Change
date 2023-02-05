@@ -18,8 +18,8 @@ import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.createFileURI
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
 import org.eclipse.emf.ecore.EObject
+import static extension tools.vitruv.change.atomic.resolve.EChangeUuidResolverAndApplicator.*
 
 /**
  * Default class for testing EChange changes.
