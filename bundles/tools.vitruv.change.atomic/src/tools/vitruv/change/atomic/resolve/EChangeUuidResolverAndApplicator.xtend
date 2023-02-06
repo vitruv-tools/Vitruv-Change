@@ -7,8 +7,6 @@ import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.command.ApplyEChangeSwitch
 import tools.vitruv.change.atomic.eobject.CreateEObject
 import tools.vitruv.change.atomic.eobject.DeleteEObject
-import tools.vitruv.change.atomic.eobject.EObjectAddedEChange
-import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange
 import tools.vitruv.change.atomic.uuid.UuidResolver
 
 import static com.google.common.base.Preconditions.checkArgument
@@ -43,22 +41,10 @@ class EChangeUuidResolverAndApplicator {
 				CreateEObject<?>:
 					uuidResolver.registerEObject(eChange.affectedEObjectID, eChange.affectedEObject)
 			}
-			switch (eChange) {
-				EObjectAddedEChange<?>:
-					if (eChange.newValue !== null) {
-						uuidResolver.registerEObject(eChange.newValueID, eChange.newValue)
-					}
-			}
 		} else {
 			switch (eChange) {
 				DeleteEObject<?>:
 					uuidResolver.registerEObject(eChange.affectedEObjectID, eChange.affectedEObject)
-			}
-			switch (eChange) {
-				EObjectSubtractedEChange<?>:
-					if (eChange.oldValue !== null) {
-						uuidResolver.registerEObject(eChange.oldValueID, eChange.oldValue)
-					}
 			}
 		}
 	}
