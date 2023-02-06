@@ -55,26 +55,28 @@ class UuidResolverImpl implements UuidResolver {
 	}
 
 	@Override
-	public void registerEObject(String uuid, EObject element) throws IllegalStateException {
+	public void registerEObject(String uuid, EObject eObject) throws IllegalStateException {
 		checkState(uuid != null, "uuid must not be null");
-		checkState(element != null, "object must not be null");
-		if (element.eResource() != null && element.eResource().getResourceSet() != null) {
-			checkState(element.eResource().getResourceSet() == resourceSet, "element %s is contained in wrong resource set", element);
+		checkState(eObject != null, "object must not be null");
+		if (eObject.eResource() != null && eObject.eResource().getResourceSet() != null) {
+			checkState(eObject.eResource().getResourceSet() == resourceSet,
+					"element %s is contained in wrong resource set", eObject);
 		}
-		checkState(eObjectToUuid.getOrDefault(element, uuid).equals(uuid),
-				"element %s is already registered for UUID %s", element, eObjectToUuid.get(element));
-		checkState(eObjectToUuid.inverse().getOrDefault(uuid, element).equals(element),
-				"UUID %s is already registered for element %s, was trying to register %s", uuid, eObjectToUuid.inverse().get(uuid), element);
-		if (isReadOnlyEObject(element)) {
-			String expectedUuid = getUuidForReadOnlyEObject(element);
+		checkState(eObjectToUuid.getOrDefault(eObject, uuid).equals(uuid),
+				"element %s is already registered for UUID %s", eObject, eObjectToUuid.get(eObject));
+		checkState(eObjectToUuid.inverse().getOrDefault(uuid, eObject).equals(eObject),
+				"UUID %s is already registered for element %s, was trying to register %s", uuid,
+				eObjectToUuid.inverse().get(uuid), eObject);
+		if (isReadOnlyEObject(eObject)) {
+			String expectedUuid = getUuidForReadOnlyEObject(eObject);
 			checkState(uuid.equals(expectedUuid), "read-only object %s must be registered for UUID %s but was %s",
-					element, expectedUuid, uuid);
+					eObject, expectedUuid, uuid);
 			return;
 		}
 		if (LOGGER.isTraceEnabled()) {
-			LOGGER.trace("Adding UUID " + uuid + " for EObject: " + element);
+			LOGGER.trace("Adding UUID " + uuid + " for EObject: " + eObject);
 		}
-		eObjectToUuid.put(element, uuid);
+		eObjectToUuid.put(eObject, uuid);
 	}
 
 	@Override

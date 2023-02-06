@@ -89,7 +89,7 @@ class ChangeRecorder implements AutoCloseable {
 		checkNotDisposed()
 		checkNotNull(notifier, "notifier")
 		checkArgument(notifier.isInOurResourceSet,
-			"cannot record changes in a different resource set than that of our UUID resolver!")
+			"cannot record changes in a different resource set!")
 
 		if (rootObjects += notifier) {
 			notifier.recursively [
