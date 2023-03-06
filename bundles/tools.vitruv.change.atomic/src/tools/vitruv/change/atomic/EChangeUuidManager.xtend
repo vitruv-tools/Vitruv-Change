@@ -68,12 +68,10 @@ class EChangeUuidManager {
 	}
 	
 	private def String getOrGenerateUuid(EObject object) {
-		try {
-			getUuid(object)
+		if (uuidResolver.hasUuid(object)) {
+			return getUuid(object)
 		}
-		catch (IllegalStateException e) {
-			uuidResolver.registerEObject(object)
-		}
+		uuidResolver.registerEObject(object)
 	}
 
 	private def void setOrGenerateNewValueUuid(EObjectAddedEChange<?> addedEChange) {
