@@ -1,25 +1,26 @@
 package tools.vitruv.change.atomic.id
 
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.^extension.ExtendWith
-import tools.vitruv.testutils.TestProjectManager
-import tools.vitruv.testutils.RegisterMetamodelsInStandalone
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
-import org.eclipse.emf.common.util.URI
-import tools.vitruv.testutils.TestProject
 import java.nio.file.Path
+import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.resource.ResourceSet
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
+import org.eclipse.emf.ecore.util.EcoreUtil
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.^extension.ExtendWith
+import tools.vitruv.testutils.RegisterMetamodelsInStandalone
+import tools.vitruv.testutils.TestProject
+import tools.vitruv.testutils.TestProjectManager
+
 import static org.junit.jupiter.api.Assertions.assertEquals
 import static org.junit.jupiter.api.Assertions.assertNotEquals
-import static extension org.eclipse.emf.ecore.util.EcoreUtil.getURI
-import org.junit.jupiter.api.BeforeEach
-import org.eclipse.emf.ecore.util.EcoreUtil
 import static org.junit.jupiter.api.Assertions.assertThrows
 import static org.junit.jupiter.api.Assertions.assertTrue
-import org.eclipse.emf.ecore.resource.ResourceSet
-import tools.vitruv.change.atomic.id.IdResolver
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet
+
+import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
+import static extension org.eclipse.emf.ecore.util.EcoreUtil.getURI
 
 @ExtendWith(#[TestProjectManager, RegisterMetamodelsInStandalone])
 class IdResolverTest {
@@ -221,7 +222,7 @@ class IdResolverTest {
 
 	@Test
 	@DisplayName("generate ID and resolve it after element deletion")
-	def void elementDeletionDoesNotRemoveUiud() {
+	def void elementDeletionDoesNotRemoveId() {
 		val root = aet.Root
 		resourceSet.createResource(URI.createFileURI(testProjectPath.resolve("root.aet").toString)) => [
 			contents += root

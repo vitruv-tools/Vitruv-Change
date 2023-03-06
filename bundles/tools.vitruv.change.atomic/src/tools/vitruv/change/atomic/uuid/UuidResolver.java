@@ -173,9 +173,11 @@ public interface UuidResolver {
 	 * 
 	 * @param uri is the {@link URI} to store the serialization at. Must not be
 	 *            <code>null</code> and must be a file URI.
-	 * @throws IOException if saving to file fails.
+	 * @throws IOException           if saving to file fails.
+	 * @throws IllegalStateException if any {@link EObject} of the current resolver
+	 *                               is not contained in a resource.
 	 */
-	public void storeAtUri(URI uri) throws IOException;
+	public void storeAtUri(URI uri) throws IOException, IllegalStateException;
 
 	/**
 	 * Initializes this resolver with the contents at the given {@link URI}. Can
