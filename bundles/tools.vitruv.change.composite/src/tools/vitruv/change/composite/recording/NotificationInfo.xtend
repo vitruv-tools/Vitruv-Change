@@ -12,6 +12,18 @@ import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtend.lib.annotations.Delegate
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 
+package enum EventType {
+	ADD,
+	ADD_MANY,
+	MOVE,
+	REMOVE,
+	REMOVE_MANY,
+	REMOVING_ADAPTER,
+	RESOLVE,
+	SET,
+	UNSET
+}
+
 /** 
  * NotificationInfo is a type safe wrapper for EMF Notifications. It wraps a {@link Notification}and implements a few 
  * additional getter methods
@@ -22,6 +34,25 @@ package class NotificationInfo implements Notification {
 	val Notification notification
 	@Accessors
 	var String validationMessage
+	
+	override int getEventType() {
+		throw new IllegalArgumentException("Use eventTypeEnum for type-safe event types.")
+	}
+	
+	def EventType getEventTypeEnum() {
+		switch(notification.eventType) {
+			case SET: EventType.SET
+			case UNSET: EventType.UNSET
+			case ADD: EventType.ADD
+			case REMOVE: EventType.REMOVE
+			case ADD_MANY: EventType.ADD_MANY
+			case REMOVE_MANY: EventType.REMOVE_MANY
+			case MOVE: EventType.MOVE
+			case REMOVING_ADAPTER: EventType.REMOVING_ADAPTER
+			case RESOLVE: EventType.RESOLVE
+			default: throw new IllegalArgumentException("Unexpected eventType.")
+		}
+	}
 
 	/** 
 	 * @return the structural feature affected
