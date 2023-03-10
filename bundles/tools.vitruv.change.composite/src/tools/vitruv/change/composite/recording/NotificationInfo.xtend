@@ -12,6 +12,11 @@ import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtend.lib.annotations.Delegate
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 
+/*
+ * note:
+ * - event type CREATE is deprecated and not added to EventYpe enum
+ * - fields NO_FEATURE_ID, NO_INDEX and EVENT_TYPE_COUNT are no event types
+ */
 package enum EventType {
 	ADD,
 	ADD_MANY,

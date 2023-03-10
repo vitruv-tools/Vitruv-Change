@@ -30,6 +30,13 @@ package final class NotificationToEChangeConverter {
 		return createDeleteEObjectChange(eObject)
 	}
 	
+	private def String convertExceptionMessage(EventType eventType, String notificationType) {
+		String.format("Event type {} for {} Notifications unexpected.")
+	}
+	final String ATTRIBUTE_TYPE = "Attribute";
+	final String REFERENCE_TYPE = "Reference";
+	final String RESOURCE_CONTENTS_TYPE = "Resource Contents"
+	
 	/** 
 	 * Converts the given notification to a list of {@link EChange}s.
 	 * @param n the notification to convert
@@ -50,8 +57,8 @@ package final class NotificationToEChangeConverter {
 					case REMOVE: handleRemoveAttribute(notification)
 					case REMOVE_MANY: handleMultiRemoveAttribute(notification)
 					case MOVE: handleMoveAttribute(notification)
-					case RESOLVE: throw new IllegalArgumentException("Event type RESOLVE for Attribute Notifications unexpected.")
-					case REMOVING_ADAPTER: throw new IllegalArgumentException("Event type REMOVING_ADAPTER for Attribute Notifications unexpected.")
+					case RESOLVE: throw new IllegalArgumentException(convertExceptionMessage(EventType.RESOLVE, ATTRIBUTE_TYPE))
+					case REMOVING_ADAPTER: throw new IllegalArgumentException(convertExceptionMessage(EventType.REMOVING_ADAPTER, ATTRIBUTE_TYPE))
 					default: throw new IllegalArgumentException("Unexpected event type " + eventType)
 				}
 			case notification.isReferenceNotification:
@@ -63,8 +70,8 @@ package final class NotificationToEChangeConverter {
 					case REMOVE: handleRemoveReference(notification)
 					case REMOVE_MANY: handleMultiRemoveReference(notification)
 					case MOVE: handleMoveReference(notification)
-					case RESOLVE: throw new IllegalArgumentException("Event type RESOLVE for Reference Notifications unexpected.")
-					case REMOVING_ADAPTER: throw new IllegalArgumentException("Event type REMOVING_ADAPTER for Reference Notifications unexpected.")
+					case RESOLVE: throw new IllegalArgumentException(convertExceptionMessage(EventType.RESOLVE, REFERENCE_TYPE))
+					case REMOVING_ADAPTER: throw new IllegalArgumentException(convertExceptionMessage(EventType.REMOVING_ADAPTER, REFERENCE_TYPE))
 					default: throw new IllegalArgumentException("Unexpected event type " + eventType)
 				}
 			case notifier instanceof Resource:
@@ -75,11 +82,11 @@ package final class NotificationToEChangeConverter {
 							case ADD_MANY: handleMultiInsertRootChange(notification)
 							case REMOVE: handleRemoveRootChange(notification)
 							case REMOVE_MANY: handleMultiRemoveRootChange(notification)
-							case SET: throw new IllegalArgumentException("Event type SET for Resource Content Notifications unexpected.")
-							case UNSET: throw new IllegalArgumentException("Event type UNSET for Resource Content Notifications unexpected.")
-							case MOVE: throw new IllegalArgumentException("Event type MOVE for Resource Content Notifications unexpected.")
-							case RESOLVE: throw new IllegalArgumentException("Event type RESOLVE for Resource Content Notifications unexpected.")
-							case REMOVING_ADAPTER: throw new IllegalArgumentException("Event type REMOVING_ADAPTER for Resource Content Notifications unexpected.")
+							case SET: throw new IllegalArgumentException(convertExceptionMessage(EventType.SET, RESOURCE_CONTENTS_TYPE))
+							case UNSET: throw new IllegalArgumentException(convertExceptionMessage(EventType.UNSET, RESOURCE_CONTENTS_TYPE))
+							case MOVE: throw new IllegalArgumentException(convertExceptionMessage(EventType.MOVE, RESOURCE_CONTENTS_TYPE))
+							case RESOLVE: throw new IllegalArgumentException(convertExceptionMessage(EventType.RESOLVE, RESOURCE_CONTENTS_TYPE))
+							case REMOVING_ADAPTER: throw new IllegalArgumentException(convertExceptionMessage(EventType.REMOVING_ADAPTER, RESOURCE_CONTENTS_TYPE))
 							default: throw new IllegalArgumentException("Unexpected event type " + eventType)
 						}
 					case Resource.RESOURCE__URI:
