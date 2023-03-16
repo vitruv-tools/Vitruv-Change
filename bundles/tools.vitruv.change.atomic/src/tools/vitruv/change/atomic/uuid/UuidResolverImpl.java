@@ -255,7 +255,7 @@ class UuidResolverImpl implements UuidResolver {
 			String id = entry.getValue();
 			EObject targetEObject = idResolver.getEObject(id);
 			checkState(targetEObject != null, "could not find object corresponding to %s in resource set %s", uuid,
-					resourceSet);
+					targetResourceSet);
 			if (sourceToTargetResourceMapping != null) {
 				EObject sourceEObject = eObjectToUuid.inverse().get(uuid);
 				checkState(targetEObject.eResource() == sourceToTargetResourceMapping.get(sourceEObject.eResource()),
