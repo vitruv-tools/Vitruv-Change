@@ -49,7 +49,7 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	/**
 	 * Creates a test view that will store its persisted resources in the
 	 * provided {@code persistenceDirectory}, allow to program interactions through the provided {@code userInteraction},
-	 * use the provided {@code uriMode} and be connected to the provided {@code virtualModel}.
+	 * use the provided {@code uriMode}.
 	 * 
 	 * @param persistenceDirectory is the directory to store files at.
 	 * @param userInteraction the {@link TestUserInteraction} to use for interactions during change propagation.
@@ -76,7 +76,7 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	/**
 	 * Creates a test view that will store its persisted resources in the
 	 * provided {@code persistenceDirectory}, allow to program interactions through the provided {@code userInteraction},
-	 * use the provided {@code uriMode} and be connected to the provided {@code virtualModel}.
+	 * use the provided {@code uriMode}.
 	 * 
 	 * @param persistenceDirectory is the directory to store files at.
 	 * @param userInteraction the {@link TestUserInteraction} to use for interactions during change propagation.
