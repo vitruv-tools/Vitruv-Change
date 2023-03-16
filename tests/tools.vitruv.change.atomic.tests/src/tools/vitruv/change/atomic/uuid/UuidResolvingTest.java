@@ -147,7 +147,7 @@ class UuidResolvingTest {
 
 	@Test
 	@DisplayName("cleanup resolver when saving after element removal")
-	void cleanupAfterElementRemovalRemovesId() {
+	void cleanupAfterElementRemovalRemovesUuid() {
 		var root = aet.Root();
 		String uuid = uuidResolver.registerEObject(root);
 		uuidResolver.endTransaction();
@@ -159,7 +159,7 @@ class UuidResolvingTest {
 
 	@Test
 	@DisplayName("cleanup resolver when saving resource after element removal")
-	void cleanupAfterElementRemovalRemovesIdWithResource() {
+	void cleanupAfterElementRemovalRemovesUuidWithResource() {
 		var root = aet.Root();
 		URI resourceUri = URI.createFileURI(testProjectPath.resolve("root.aet").toString());
 		Resource rootResource = resourceSet.createResource(resourceUri);
