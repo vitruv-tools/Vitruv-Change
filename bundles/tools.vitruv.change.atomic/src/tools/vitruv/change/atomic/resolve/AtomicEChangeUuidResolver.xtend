@@ -54,6 +54,7 @@ package class AtomicEChangeUuidResolver {
 	/**
 	 * Resolves {@link EObjectExistenceEChange} attribute {@code affectedEObject}.
 	 * @param change 			The change which should be resolved.
+	 * @param isNewObject		true if the given change creates the object, false if it deletes the object
 	 */
 	def private <A extends EObject> void resolveEObjectExistenceEChange(EObjectExistenceEChange<A> change, boolean isNewObject) {
 		checkArgument(change.affectedEObjectID !== null, "change %s must have an affected EObject ID", change)
@@ -94,6 +95,7 @@ package class AtomicEChangeUuidResolver {
 	/**
 	 * Resolves the value of an {@link RootEChange}.
 	 * @param change		The change whose value shall be resolved.
+	 * @param value			The value that should be used if no value can be resolved for an id linked in the given change
 	 * @param isInserted	{@code true} if the concrete value is already inserted into the resource.
 	 * 						Depends on the kind of the change and the model state.
 	 * @returns				The resolved value.
