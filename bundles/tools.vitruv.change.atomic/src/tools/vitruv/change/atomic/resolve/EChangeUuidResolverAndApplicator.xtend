@@ -27,26 +27,19 @@ class EChangeUuidResolverAndApplicator {
 	}
 
 	static def void applyForward(EChange eChange, UuidResolver uuidResolver) {
-		executeUpdatingIds(eChange, uuidResolver, true)
-	}
-
-	static def void applyBackward(EChange eChange, UuidResolver uuidResolver) {
-		executeUpdatingIds(eChange, uuidResolver, false)
-	}
-
-	static def void executeUpdatingIds(EChange eChange, UuidResolver uuidResolver, boolean forward) {
-		ApplyEChangeSwitch.applyEChange(eChange, forward)
-		if (forward) {
-			switch (eChange) {
+		ApplyEChangeSwitch.applyEChange(eChange, true)
+		switch (eChange) {
 				CreateEObject<?>:
 					uuidResolver.registerEObject(eChange.affectedEObjectID, eChange.affectedEObject)
 			}
-		} else {
-			switch (eChange) {
+	}
+
+	static def void applyBackward(EChange eChange, UuidResolver uuidResolver) {
+		ApplyEChangeSwitch.applyEChange(eChange, false)
+		switch (eChange) {
 				DeleteEObject<?>:
 					uuidResolver.registerEObject(eChange.affectedEObjectID, eChange.affectedEObject)
 			}
-		}
 	}
 
 	/**
