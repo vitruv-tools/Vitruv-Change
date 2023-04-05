@@ -25,11 +25,24 @@ public class TestModelRepositoryFactory {
 	 */
 	public static ChangeableModelRepository createTestChangeableModelRepository(
 			ChangePropagationSpecificationProvider changePropagationSpecificationProvider, TestUserInteraction userInteraction) throws IOException {
-		InternalUserInteractor userInteractor = UserInteractionFactory.instance
-				.createUserInteractor(new TestUserInteraction.ResultProvider(userInteraction));
 		PersistableChangeRecordingModelRepository recordingModelRepository = new DefaultChangeRecordingModelRepository(null,
 				Files.createTempDirectory(null));
-		ChangeableModelRepository changeableModelRepository = new DefaultChangeableModelRepository(recordingModelRepository,
+		return createTestChangeableModelRepository(recordingModelRepository, changePropagationSpecificationProvider, userInteraction);
+	}
+	
+	/**
+	 * Creates a {@link ChangeableModelRepository} for the given change propagation specification provider, user
+	 * interaction, and persistable change recording model repository.
+	 * @param modelRepository manages where files are stored.
+	 * @param changePropagationSpecificationProvider provides the {@link ChangePropagationSpecifications} to use in the
+	 * repository
+	 * @param userInteraction the {@link TestUserInteraction} to use for interactions during change propagation
+	 * @return the test model repository
+	 */
+	public static ChangeableModelRepository createTestChangeableModelRepository(PersistableChangeRecordingModelRepository modelRepository, ChangePropagationSpecificationProvider changePropagationSpecificationProvider, TestUserInteraction userInteraction) {
+		InternalUserInteractor userInteractor = UserInteractionFactory.instance
+				.createUserInteractor(new TestUserInteraction.ResultProvider(userInteraction));
+		ChangeableModelRepository changeableModelRepository = new DefaultChangeableModelRepository(modelRepository,
 				changePropagationSpecificationProvider, userInteractor);
 		return changeableModelRepository;
 	}

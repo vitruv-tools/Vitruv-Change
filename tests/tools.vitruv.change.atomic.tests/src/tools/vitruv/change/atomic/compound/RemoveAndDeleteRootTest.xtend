@@ -1,35 +1,30 @@
 package tools.vitruv.change.atomic.compound
 
 import allElementTypes.Root
-import tools.vitruv.change.atomic.EChangeTest
-
-import static extension tools.vitruv.change.atomic.util.EChangeAssertHelper.*
-import tools.vitruv.change.atomic.EChange
 import java.util.List
-import tools.vitruv.change.atomic.root.RemoveRootEObject
-import tools.vitruv.change.atomic.eobject.DeleteEObject
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import static org.junit.jupiter.api.Assertions.assertTrue
-import static org.junit.jupiter.api.Assertions.assertFalse
-import static org.junit.jupiter.api.Assertions.assertEquals
-import static org.junit.jupiter.api.Assertions.assertNull
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.EChangeTest
+import tools.vitruv.change.atomic.eobject.DeleteEObject
+import tools.vitruv.change.atomic.root.RemoveRootEObject
+import tools.vitruv.change.atomic.root.RootEChangeTest
+
 import static org.hamcrest.MatcherAssert.assertThat
+import static org.junit.jupiter.api.Assertions.assertEquals
+import static org.junit.jupiter.api.Assertions.assertFalse
+import static org.junit.jupiter.api.Assertions.assertTrue
+import static tools.vitruv.change.atomic.util.EChangeAssertHelper.*
 import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
 
 /**
  * Test class for the concrete {@link RemoveAndDeleteRoot} EChange,
  * which removes a root element from a resource and deletes it.
  */
-class RemoveAndDeleteRootTest extends EChangeTest {
-	var Root newRootObject
-	var Root newRootObject2
-
+class RemoveAndDeleteRootTest extends RootEChangeTest {
 	@BeforeEach
-	def void beforeTest() {
-		newRootObject = aet.Root
-		newRootObject2 = aet.Root
+	override void beforeTest() {
+		super.beforeTest()
 		prepareStateBefore
 
 	}
@@ -60,7 +55,7 @@ class RemoveAndDeleteRootTest extends EChangeTest {
 	@Test
 	def void resolveToCorrectType() {
 		// Create change
-		val unresolvedChange = createUnresolvedChange(newRootObject, 0)
+		val unresolvedChange = createUnresolvedChange(newRootObject, 1)
 
 		// Resolve		
 		val resolvedChange = unresolvedChange.resolveBefore
@@ -100,11 +95,11 @@ class RemoveAndDeleteRootTest extends EChangeTest {
 	@Test
 	def void applyBackwardTest() {
 		// Create and resolve and apply change 1
-		val resolvedChange = createUnresolvedChange(newRootObject, 0).resolveBefore
+		val resolvedChange = createUnresolvedChange(newRootObject, 1).resolveBefore
 		resolvedChange.assertApplyForward
 
 		// Create and resolve and apply change 2
-		val resolvedChange2 = createUnresolvedChange(newRootObject2, 0).resolveBefore
+		val resolvedChange2 = createUnresolvedChange(newRootObject2, 1).resolveBefore
 		resolvedChange2.assertApplyForward
 
 		// State after

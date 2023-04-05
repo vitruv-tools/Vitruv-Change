@@ -1,71 +1,105 @@
 package tools.vitruv.testutils.views
 
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.ArrayList
-import java.util.LinkedList
 import java.util.List
+import java.util.function.BiConsumer
 import java.util.function.Consumer
+import java.util.function.Function
 import org.eclipse.emf.common.notify.Notifier
+import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.xtend.lib.annotations.Delegate
+import tools.vitruv.change.atomic.EChangeUuidManager
+import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.PropagatedChange
 import tools.vitruv.change.composite.description.TransactionalChange
-import tools.vitruv.change.composite.description.VitruviusChange
+import tools.vitruv.change.composite.propagation.ChangeableModelRepository
 import tools.vitruv.change.composite.recording.ChangeRecorder
+import tools.vitruv.change.propagation.ChangePropagationSpecification
+import tools.vitruv.change.propagation.ChangePropagationSpecificationRepository
+import tools.vitruv.change.propagation.impl.DefaultChangeRecordingModelRepository
+import tools.vitruv.change.propagation.impl.DefaultChangeableModelRepository
+import tools.vitruv.testutils.TestUserInteraction
 
 import static com.google.common.base.Preconditions.checkArgument
 import static com.google.common.base.Preconditions.checkState
+import static tools.vitruv.testutils.TestModelRepositoryFactory.createTestChangeableModelRepository
 
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.flatMapFixed
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
-import tools.vitruv.change.composite.propagation.ChangeableModelRepository
-import tools.vitruv.change.propagation.ChangePropagationSpecification
-import tools.vitruv.testutils.TestUserInteraction
-import tools.vitruv.change.propagation.ChangePropagationSpecificationRepository
-import static tools.vitruv.testutils.TestModelRepositoryFactory.createTestChangeableModelRepository
-import tools.vitruv.change.propagation.impl.DefaultChangeableModelRepository
 
 /**
  * A test view that will record and publish the changes created in it.
  */
 class ChangePublishingTestView implements NonTransactionalTestView {
 	val ResourceSet resourceSet
+	val UuidResolver uuidResolver
 	@Delegate
 	val TestView delegate
 	val ChangeRecorder changeRecorder
-	val List<(VitruviusChange)=>List<PropagatedChange>> changeProcessors = new LinkedList()
+	val ChangeableModelRepository modelRepository
+	val BiConsumer<Resource, UuidResolver> uuidResolution
 	var disposeViewResourcesAfterPropagation = true
 
 	/**
 	 * Creates a test view that will store its persisted resources in the
 	 * provided {@code persistenceDirectory}, allow to program interactions through the provided {@code userInteraction},
 	 * use the provided {@code uriMode}.
+	 * 
+	 * @param persistenceDirectory is the directory to store files at.
+	 * @param userInteraction the {@link TestUserInteraction} to use for interactions during change propagation.
+	 * @param uriMode is the URI mode.
+	 * @param changeableModelRepository is the repository responsible for propagating and storing the models.
+	 * @param uuidResolution is a consumer that populates the given view's {@link UuidResolver} with the UUIDs of all elements in the given {@link Resource}.
 	 */
 	new(
 		Path persistenceDirectory,
-		tools.vitruv.testutils.TestUserInteraction userInteraction,
-		UriMode uriMode
+		TestUserInteraction userInteraction,
+		UriMode uriMode,
+		ChangeableModelRepository changeableModelRepository,
+		BiConsumer<Resource, UuidResolver> uuidResolution
 	) {
 		this.resourceSet = new ResourceSetImpl().withGlobalFactories()
+		this.uuidResolver = UuidResolver.create(resourceSet)
+		this.modelRepository = changeableModelRepository
 		this.delegate = new BasicTestView(persistenceDirectory, resourceSet, userInteraction, uriMode)
 		this.changeRecorder = new ChangeRecorder(resourceSet)
+		this.uuidResolution = uuidResolution
 		changeRecorder.beginRecording()
 	}
 
 	/**
 	 * Creates a test view that will store its persisted resources in the
 	 * provided {@code persistenceDirectory}, allow to program interactions through the provided {@code userInteraction},
-	 * use the provided {@code uriMode} and be connected to the provided {@code virtualModel}.
+	 * use the provided {@code uriMode}.
+	 * 
+	 * @param persistenceDirectory is the directory to store files at.
+	 * @param userInteraction the {@link TestUserInteraction} to use for interactions during change propagation.
+	 * @param uriMode is the URI mode.
+	 * @param changeableModelRepository is the repository responsible for propagating and storing the models.
+	 * @param modelUuidResolver is the {@link UuidResolver} associated with the {@code changeableModelRepository}.
+	 * @param modelResourceAt is a function that provides the model resource as stored in the 
+	 * 						  {@code changeableModelRepository} for a given URI.
 	 */
 	new(
 		Path persistenceDirectory,
-		tools.vitruv.testutils.TestUserInteraction userInteraction,
+		TestUserInteraction userInteraction,
 		UriMode uriMode,
-		ChangeableModelRepository changeableModelRepository
+		ChangeableModelRepository changeableModelRepository,
+		UuidResolver modelUuidResolver,
+		Function<URI, Resource> modelResourceAt
 	) {
-		this(persistenceDirectory, userInteraction, uriMode)
-		registerChangeProcessor [change|changeableModelRepository.propagateChange(change)]
+		this(persistenceDirectory, userInteraction, uriMode, changeableModelRepository) [ viewResource, viewUuidResolver |
+			val modelResource = modelResourceAt.apply(viewResource.URI)
+			if (modelResource !== null) {
+				modelUuidResolver.resolveResource(modelResource, viewResource, viewUuidResolver)
+			}
+		]
 	}
 
 	override close() {
@@ -106,22 +140,37 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	}
 
 	def private propagateChanges(TransactionalChange change) {
-		val propagationResult = changeProcessors.flatMapFixed[apply(change)]
+		EChangeUuidManager.setOrGenerateIds(change.EChanges, uuidResolver)
+		val propagationResult = modelRepository.propagateChange(change)
 		if (disposeViewResourcesAfterPropagation) {
 			disposeViewResources()
 		}
 		return propagationResult
 	}
 
-	override disposeViewResources() {
-		resourceSet.resources.clear()
+	override Resource resourceAt(URI modelUri) {
+		val resource = delegate.resourceAt(modelUri)
+		uuidResolution.accept(resource, uuidResolver)
+		return resource
 	}
 
-	/**
-	 * Registers the provided {@code processor} to be used when this view publishes changes.
-	 */
-	def registerChangeProcessor((VitruviusChange)=>List<PropagatedChange> processor) {
-		changeProcessors += processor
+	override Resource resourceAt(Path viewRelativePath) {
+		resourceAt(viewRelativePath.uri)
+	}
+
+	override <T extends EObject> T from(Class<T> clazz, URI modelUri) {
+		val resource = resourceSet.getResource(modelUri, true)
+		uuidResolution.accept(resource, uuidResolver)
+		return clazz.from(resource)
+	}
+
+	override <T extends EObject> T from(Class<T> clazz, Path viewRelativePath) {
+		clazz.from(viewRelativePath.uri)
+	}
+
+	override disposeViewResources() {
+		resourceSet.resources.clear()
+		uuidResolver.endTransaction()
 	}
 
 	override <T extends Notifier> T startRecordingChanges(T notifier) {
@@ -145,7 +194,7 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	def static <T> List<T> operator_plus(List<T> a, List<T> b) {
 		return if (a.isEmpty) {
 			b
-		} else if (b.isEmpty){
+		} else if (b.isEmpty) {
 			a
 		} else {
 			val result = new ArrayList(a.size + b.size)
@@ -168,9 +217,10 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 		val userInteraction = new TestUserInteraction()
 		val changePropagationSpecificationProvider = new ChangePropagationSpecificationRepository(
 			changePropagationSpecifications)
-		val changeableModelRepository = createTestChangeableModelRepository(changePropagationSpecificationProvider,
-			userInteraction)
+		val modelRepository = new DefaultChangeRecordingModelRepository(null, Files.createTempDirectory(null));
+		val changeableModelRepository = createTestChangeableModelRepository(modelRepository,
+			changePropagationSpecificationProvider, userInteraction)
 		return new ChangePublishingTestView(persistenceDirectory, userInteraction, UriMode.FILE_URIS,
-			changeableModelRepository)
+			changeableModelRepository, modelRepository.uuidResolver) [ modelRepository.getModelResource(it) ]
 	}
 }

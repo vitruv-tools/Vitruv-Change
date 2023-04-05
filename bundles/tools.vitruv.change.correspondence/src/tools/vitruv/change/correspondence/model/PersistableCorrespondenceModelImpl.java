@@ -133,7 +133,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
 	private <C extends Correspondence> Set<C> filterCorrespondenceTypeAndTag(Set<Correspondence> original, Class<C> filteredType,
 			String expectedTag) {
 		return original.stream().filter(filteredType::isInstance).map(filteredType::cast)
-				.filter(correspondence -> expectedTag == null || correspondence.getTag().equals(expectedTag)).collect(Collectors.toSet());
+				.filter(correspondence -> expectedTag == null || expectedTag.equals(correspondence.getTag())).collect(Collectors.toSet());
 	}
 
 	private Set<Correspondence> getCorrespondences(List<EObject> eObjects) {

@@ -34,7 +34,7 @@ class ReplaceAndDeleteNonRootTest extends EChangeTest {
 	def void beforeTest() {
 		affectedEObject = rootObject
 		affectedFeature = AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE
-		oldNonRootObject = aet.NonRoot
+		oldNonRootObject = aet.NonRoot.withUuid
 		prepareStateBefore
 	}
 

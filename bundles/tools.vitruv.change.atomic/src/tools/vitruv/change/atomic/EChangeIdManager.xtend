@@ -1,13 +1,14 @@
 package tools.vitruv.change.atomic
 
-import tools.vitruv.change.atomic.eobject.EObjectAddedEChange
-import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange
-import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange
-import tools.vitruv.change.atomic.feature.FeatureEChange
 import org.eclipse.emf.ecore.EObject
+import tools.vitruv.change.atomic.eobject.EObjectAddedEChange
+import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange
+import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange
+import tools.vitruv.change.atomic.feature.FeatureEChange
+import tools.vitruv.change.atomic.id.IdResolver
+
 import static com.google.common.base.Preconditions.checkArgument
 import static com.google.common.base.Preconditions.checkState
-import tools.vitruv.change.atomic.id.IdResolver
 
 /**
  * Provides logic for initializing the IDs within changes. 

@@ -11,6 +11,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.xtend.lib.annotations.Accessors
 import tools.vitruv.change.composite.description.PropagatedChange
+import tools.vitruv.testutils.TestUserInteraction
 
 import static com.google.common.base.Preconditions.checkArgument
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.createFileURI
@@ -28,7 +29,7 @@ class BasicTestView implements TestView {
 	val Path persistenceDirectory
 	val ResourceSet resourceSet
 	@Accessors
-	val tools.vitruv.testutils.TestUserInteraction userInteraction
+	val TestUserInteraction userInteraction
 	val UriMode uriMode
 
 	/**
@@ -36,7 +37,7 @@ class BasicTestView implements TestView {
 	 * provided {@code persistenceDirectory}, and use the provided {@code uriMode}.
 	 */
 	new(Path persistenceDirectory, UriMode uriMode) {
-		this(persistenceDirectory, new tools.vitruv.testutils.TestUserInteraction(), uriMode)
+		this(persistenceDirectory, new TestUserInteraction(), uriMode)
 	}
 
 	/**
@@ -46,7 +47,7 @@ class BasicTestView implements TestView {
 	 */
 	new(
 		Path persistenceDirectory,
-		tools.vitruv.testutils.TestUserInteraction userInteraction,
+		TestUserInteraction userInteraction,
 		UriMode uriMode
 	) {
 		this(
@@ -65,7 +66,7 @@ class BasicTestView implements TestView {
 	new(
 		Path persistenceDirectory,
 		ResourceSet resourceSet,
-		tools.vitruv.testutils.TestUserInteraction userInteraction,
+		TestUserInteraction userInteraction,
 		UriMode uriMode
 	) {
 		this.persistenceDirectory = persistenceDirectory

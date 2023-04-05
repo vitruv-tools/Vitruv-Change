@@ -15,12 +15,10 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import tools.vitruv.change.atomic.EChange
-import tools.vitruv.change.atomic.EChangeIdManager
 import tools.vitruv.change.atomic.eobject.DeleteEObject
 import tools.vitruv.change.atomic.eobject.EObjectAddedEChange
 import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange
 import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
-import tools.vitruv.change.atomic.id.IdResolver
 import tools.vitruv.change.composite.description.TransactionalChange
 import tools.vitruv.change.composite.description.VitruviusChangeFactory
 
@@ -33,8 +31,6 @@ import static org.eclipse.emf.ecore.resource.ResourceSet.*
 
 import static extension org.eclipse.emf.ecore.util.EcoreUtil.*
 import static extension tools.vitruv.change.atomic.EChangeUtil.*
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.applyBackward
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.applyForward
 
 /**
  * Records changes to model elements as a {@link TransactionalChange}.
@@ -58,16 +54,12 @@ class ChangeRecorder implements AutoCloseable {
 	// closed: null
 	List<EChange> resultChanges = emptyList
 	val NotificationToEChangeConverter converter
-	val IdResolver idResolver
-	val EChangeIdManager eChangeIdManager
 	val Set<EObject> existingObjects = new HashSet
 	val Set<Notifier> toDesinfect = new HashSet
 	val ResourceSet resourceSet
 
 	new(ResourceSet resourceSet) {
 		this.resourceSet = resourceSet
-		this.idResolver = IdResolver.create(resourceSet)
-		this.eChangeIdManager = new EChangeIdManager(idResolver)
 		this.converter = new NotificationToEChangeConverter([ affectedObject, addedObject |
 			isCreateChange(affectedObject, addedObject)
 		])
@@ -83,7 +75,7 @@ class ChangeRecorder implements AutoCloseable {
 		// it can be potentially a reference to a third party model, for which no create shall be instantiated		
 		create = create && (addedObject.eResource === null || affectedObject === null ||
 			addedObject.eResource == affectedObject.eResource)
-		if(create) existingObjects += addedObject
+		if (create) existingObjects += addedObject
 		return create;
 	}
 
@@ -97,11 +89,11 @@ class ChangeRecorder implements AutoCloseable {
 		checkNotDisposed()
 		checkNotNull(notifier, "notifier")
 		checkArgument(notifier.isInOurResourceSet,
-			"cannot record changes in a different resource set than that of our ID resolver!")
+			"cannot record changes in a different resource set!")
 
 		if (rootObjects += notifier) {
 			notifier.recursively [
-				if(it instanceof EObject) existingObjects.add(it)
+				if (it instanceof EObject) existingObjects += it
 				addAdapter()
 			]
 		}
@@ -153,20 +145,8 @@ class ChangeRecorder implements AutoCloseable {
 		checkNotDisposed()
 		checkState(isRecording, "This recorder is not recording")
 		isRecording = false
-		resultChanges = List.copyOf(resultChanges.postprocessRemovals().assignIds())
-		idResolver.endTransaction()
+		resultChanges = List.copyOf(resultChanges.postprocessRemovals())
 		return getChange()
-	}
-
-	def private List<EChange> assignIds(List<EChange> changes) {
-		changes.toList.reverseView.forEach[applyBackward]
-		changes.forEach[assignIds]
-		changes
-	}
-
-	def private void assignIds(EChange change) {
-		eChangeIdManager.setOrGenerateIds(change)
-		change.applyForward(idResolver)
 	}
 
 	/**
@@ -331,14 +311,14 @@ class ChangeRecorder implements AutoCloseable {
 					converter.convert(new NotificationInfo(notification))
 				}
 			if (!changes.isEmpty) {
-				// Register any added object as existing, even if we are not recording
-				changes.forEach [
-					if (it instanceof EObjectAddedEChange<?>) {
-						existingObjects += newValue
-						if(it instanceof UpdateReferenceEChange<?>) existingObjects += affectedEObject
-					}
-				]
-			}
+ 				// Register any added object as existing, even if we are not recording
+ 				changes.forEach [
+ 					if (it instanceof EObjectAddedEChange<?>) {
+ 						existingObjects += newValue
+ 						if(it instanceof UpdateReferenceEChange<?>) existingObjects += affectedEObject
+ 					}
+ 				]
+ 			}
 			return changes
 		}
 

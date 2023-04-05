@@ -8,6 +8,7 @@ import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import tools.vitruv.change.composite.description.PropagatedChange
+import tools.vitruv.testutils.TestUserInteraction
 
 import static com.google.common.base.Preconditions.checkState
 
@@ -103,6 +104,6 @@ interface TestView extends AutoCloseable {
 	/**
 	 * @return the user interaction that can be used to program user interactions for this view.
 	 */
-	def tools.vitruv.testutils.TestUserInteraction getUserInteraction()
+	def TestUserInteraction getUserInteraction()
 
 }

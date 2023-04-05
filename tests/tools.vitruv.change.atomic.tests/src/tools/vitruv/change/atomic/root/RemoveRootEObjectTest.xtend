@@ -55,7 +55,7 @@ class RemoveRootEObjectTest extends RootEChangeTest {
 	@Test
 	def void resolveToCorrectType() {
 		// Create change
-		val unresolvedChange = createUnresolvedChange(newRootObject, 0)
+		val unresolvedChange = createUnresolvedChange(newRootObject, 1)
 		unresolvedChange.assertIsNotResolved(newRootObject)
 
 		// Resolve
@@ -73,7 +73,7 @@ class RemoveRootEObjectTest extends RootEChangeTest {
 		val resolvedChange = createUnresolvedChange(newRootObject, 1).resolveBefore as RemoveRootEObject<Root>
 		resolvedChange.assertIsResolved(newRootObject, resource)
 
-		// Apply forward 1	
+		// Apply forward 1
 		resolvedChange.assertApplyForward
 
 		assertEquals(resourceContent.size, 2)
@@ -83,10 +83,10 @@ class RemoveRootEObjectTest extends RootEChangeTest {
 		val resolvedChange2 = createUnresolvedChange(newRootObject2, 1).resolveBefore as RemoveRootEObject<Root>
 		resolvedChange2.assertIsResolved(newRootObject2, resource)
 
-		// Apply forward 2	
+		// Apply forward 2
 		resolvedChange2.assertApplyForward
 
-		// State after					
+		// State after
 		assertIsStateAfter
 	}
 
@@ -97,11 +97,12 @@ class RemoveRootEObjectTest extends RootEChangeTest {
 	@Test
 	def void applyBackwardTest() {
 		// Create and resolve and apply forward 1
-		val resolvedChange = createUnresolvedChange(newRootObject, 0).resolveBefore as RemoveRootEObject<Root>
+		val resolvedChange = createUnresolvedChange(newRootObject, 1).resolveBefore as RemoveRootEObject<Root>
 		resolvedChange.assertApplyForward
 
+
 		// Create and resolve and apply forward 2
-		val resolvedChange2 = createUnresolvedChange(newRootObject2, 0).resolveBefore as RemoveRootEObject<Root>
+		val resolvedChange2 = createUnresolvedChange(newRootObject2, 1).resolveBefore as RemoveRootEObject<Root>
 		resolvedChange2.assertApplyForward
 
 		// State after
