@@ -1,11 +1,12 @@
 package tools.vitruv.change.composite.description
 
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtend.lib.annotations.Data
 
 @Data
 class PropagatedChange {
-	val VitruviusChange originalChange
-	val VitruviusChange consequentialChanges
+	val VitruviusChange<EObject> originalChange
+	val VitruviusChange<EObject> consequentialChanges
 	
 	override toString() '''
 	Original change:

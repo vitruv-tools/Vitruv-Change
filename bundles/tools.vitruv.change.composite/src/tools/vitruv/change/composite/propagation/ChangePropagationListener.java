@@ -1,5 +1,6 @@
 package tools.vitruv.change.composite.propagation;
 
+import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.composite.description.PropagatedChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 
@@ -13,7 +14,7 @@ public interface ChangePropagationListener {
 	 * 
 	 * @param changeToPropagate the change to be propagated, must not be <code>null</code>
 	 */
-	void startedChangePropagation(VitruviusChange changeToPropagate);
+	void startedChangePropagation(VitruviusChange<Uuid> changeToPropagate);
 
 	/**
 	 * Called after the change propagation is finished.

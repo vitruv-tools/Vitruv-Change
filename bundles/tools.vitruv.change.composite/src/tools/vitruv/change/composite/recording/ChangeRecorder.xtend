@@ -141,7 +141,7 @@ class ChangeRecorder implements AutoCloseable {
 	 * are treated as deleted and a delete change is created for them, inserted right after
 	 * the change describing the removal from the container.
 	 */
-	def TransactionalChange endRecording() {
+	def TransactionalChange<EObject> endRecording() {
 		checkNotDisposed()
 		checkState(isRecording, "This recorder is not recording")
 		isRecording = false
@@ -195,7 +195,7 @@ class ChangeRecorder implements AutoCloseable {
 		return changes
 	}
 
-	def TransactionalChange getChange() {
+	def TransactionalChange<EObject> getChange() {
 		checkNotDisposed()
 		checkState(!isRecording, "This recorder is still recording!")
 		VitruviusChangeFactory.instance.createTransactionalChange(resultChanges)

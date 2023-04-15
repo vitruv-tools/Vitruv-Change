@@ -18,6 +18,7 @@ import tools.vitruv.change.atomic.EChangeUuidManager
 import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.PropagatedChange
 import tools.vitruv.change.composite.description.TransactionalChange
+import tools.vitruv.change.composite.description.VitruviusChangeResolver
 import tools.vitruv.change.composite.propagation.ChangeableModelRepository
 import tools.vitruv.change.composite.recording.ChangeRecorder
 import tools.vitruv.change.propagation.ChangePropagationSpecification
@@ -139,9 +140,10 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 		return delegateChanges + ourChanges
 	}
 
-	def private propagateChanges(TransactionalChange change) {
+	def private propagateChanges(TransactionalChange<EObject> change) {
 		EChangeUuidManager.setOrGenerateIds(change.EChanges, uuidResolver)
-		val propagationResult = modelRepository.propagateChange(change)
+		val unresolvedChange = VitruviusChangeResolver.unresolve(change, uuidResolver)
+		val propagationResult = modelRepository.propagateChange(unresolvedChange)
 		if (disposeViewResourcesAfterPropagation) {
 			disposeViewResources()
 		}

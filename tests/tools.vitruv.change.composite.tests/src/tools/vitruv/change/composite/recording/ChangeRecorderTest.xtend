@@ -841,7 +841,7 @@ class ChangeRecorderTest {
 	}
 
 	@FinalFieldsConstructor
-	private static class EChangeSequenceMatcher extends TypeSafeMatcher<TransactionalChange> {
+	private static class EChangeSequenceMatcher extends TypeSafeMatcher<TransactionalChange<EObject>> {
 		val List<Class<? extends EChange>> expectedTypes
 
 		override describeTo(Description description) {
@@ -853,7 +853,7 @@ class ChangeRecorderTest {
 			}
 		}
 
-		override protected matchesSafely(TransactionalChange item) {
+		override protected matchesSafely(TransactionalChange<EObject> item) {
 			val actualTypes = item.EChanges.map[class].iterator
 			for (val expectedTypesIt = expectedTypes.iterator; expectedTypesIt.hasNext;) {
 				if (!actualTypes.hasNext || !expectedTypesIt.next.isAssignableFrom(actualTypes.next)) {

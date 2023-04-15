@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.composite.description.PropagatedChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.composite.propagation.ChangePropagationListener;
@@ -36,28 +37,27 @@ public class DefaultChangeableModelRepository implements ChangeableModelReposito
 	}
 
 	@Override
-	public List<PropagatedChange> propagateChange(VitruviusChange change) {
+	public List<PropagatedChange> propagateChange(VitruviusChange<Uuid> change) {
 		checkArgument(change != null, "change to propagate must not be null");
 		checkArgument(change.containsConcreteChange(), "change to propagate must contain concrete changes:%s%s", System.lineSeparator(), change);
-		VitruviusChange unresolvedChange = change.unresolve();
 
 		LOGGER.info("Start change propagation");
-		notifyChangePropagationStarted(unresolvedChange);
-		List<PropagatedChange> resultChanges = changePropagator.propagateChange(unresolvedChange);
+		notifyChangePropagationStarted(change);
+		List<PropagatedChange> resultChanges = changePropagator.propagateChange(change);
 		modelRepository.saveOrDeleteModels();
-		notifyChangePropagationFinished(unresolvedChange, resultChanges);
+		notifyChangePropagationFinished(change, resultChanges);
 		LOGGER.info("Finished change propagation");
 		return resultChanges;
 	}
 
-	private void notifyChangePropagationStarted(VitruviusChange change) {
+	private void notifyChangePropagationStarted(VitruviusChange<Uuid> change) {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Started synchronizing change: " + change);
 		}
 		changePropagationListeners.stream().forEach((listener) -> listener.startedChangePropagation(change));
 	}
 
-	private void notifyChangePropagationFinished(VitruviusChange inputChange, Iterable<PropagatedChange> generatedChanges) {
+	private void notifyChangePropagationFinished(VitruviusChange<Uuid> inputChange, Iterable<PropagatedChange> generatedChanges) {
 		changePropagationListeners.stream().forEach((listener) -> listener.finishedChangePropagation(generatedChanges));
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Finished synchronizing change: " + inputChange);

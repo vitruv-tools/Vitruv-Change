@@ -1,30 +1,32 @@
 package tools.vitruv.change.propagation.impl
 
 import java.util.ArrayList
+import java.util.HashSet
 import java.util.List
+import java.util.Set
 import org.apache.log4j.Logger
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
+import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.composite.description.CompositeChange
 import tools.vitruv.change.composite.description.PropagatedChange
 import tools.vitruv.change.composite.description.TransactionalChange
 import tools.vitruv.change.composite.description.VitruviusChange
 import tools.vitruv.change.composite.description.VitruviusChangeFactory
+import tools.vitruv.change.interaction.InternalUserInteractor
 import tools.vitruv.change.interaction.UserInteractionBase
+import tools.vitruv.change.interaction.UserInteractionFactory
+import tools.vitruv.change.interaction.UserInteractionListener
+import tools.vitruv.change.propagation.ChangePropagationMode
 import tools.vitruv.change.propagation.ChangePropagationObserver
 import tools.vitruv.change.propagation.ChangePropagationSpecification
 import tools.vitruv.change.propagation.ChangePropagationSpecificationProvider
-import tools.vitruv.change.interaction.InternalUserInteractor
-import tools.vitruv.change.interaction.UserInteractionFactory
-import tools.vitruv.change.interaction.UserInteractionListener
+import tools.vitruv.change.propagation.ChangeRecordingModelRepository
 
 import static com.google.common.base.Preconditions.checkState
-import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
+
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.*
-import java.util.HashSet
-import java.util.Set
-import org.eclipse.emf.ecore.resource.Resource
-import tools.vitruv.change.propagation.ChangeRecordingModelRepository
-import tools.vitruv.change.propagation.ChangePropagationMode
 
 class ChangePropagator {
 	static val logger = Logger.getLogger(ChangePropagator)
@@ -62,7 +64,7 @@ class ChangePropagator {
 		this.changePropagationMode = mode
 	}
 
-	def List<PropagatedChange> propagateChange(VitruviusChange change) {
+	def List<PropagatedChange> propagateChange(VitruviusChange<Uuid> change) {
 		val resolvedChange = modelRepository.applyChange(change)
 		resolvedChange.affectedEObjects.map[eResource].filterNull.forEach[modified = true]
 
@@ -78,7 +80,7 @@ class ChangePropagator {
 	@FinalFieldsConstructor
 	private static class ChangePropagation implements ChangePropagationObserver, UserInteractionListener {
 		extension val ChangePropagator outer
-		val VitruviusChange sourceChange
+		val VitruviusChange<EObject> sourceChange
 		val ChangePropagation previous
 		val Set<Resource> changedResources = new HashSet
 		val List<EObject> createdObjects = new ArrayList
@@ -91,7 +93,7 @@ class ChangePropagator {
 			return result
 		}
 
-		def private List<PropagatedChange> propagateSingleChange(TransactionalChange change) {
+		def private List<PropagatedChange> propagateSingleChange(TransactionalChange<EObject> change) {
 			checkState(!change.affectedEObjects.isNullOrEmpty, "There are no objects affected by this change:%s%s",
 				System.lineSeparator, change)
 
@@ -141,7 +143,7 @@ class ChangePropagator {
 			return resultingChanges
 		}
 
-		def private propagateTransitiveChanges(Iterable<TransactionalChange> transitiveChanges) {
+		def private propagateTransitiveChanges(Iterable<TransactionalChange<EObject>> transitiveChanges) {
 			val nonEmptyChanges = transitiveChanges.filter [
 				it.containsConcreteChange
 			]
@@ -162,7 +164,7 @@ class ChangePropagator {
 		}
 
 		def private propagateChangeForChangePropagationSpecification(
-			TransactionalChange change,
+			TransactionalChange<EObject> change,
 			ChangePropagationSpecification propagationSpecification
 		) {
 			val transitiveChanges = modelRepository.recordChanges [
@@ -178,7 +180,7 @@ class ChangePropagator {
 			return transitiveChanges
 		}
 
-		def private AutoCloseable installUserInteractorForChange(VitruviusChange change) {
+		def private AutoCloseable installUserInteractorForChange(VitruviusChange<EObject> change) {
 			// retrieve user inputs from past changes, construct a UserInteractor which tries to reuse them:
 			val pastUserInputsFromChange = change.userInteractions
 
@@ -221,11 +223,11 @@ class ChangePropagator {
 		}
 	}
 
-	def private Iterable<TransactionalChange> getTransactionalChangeSequence(VitruviusChange change) {
+	def private Iterable<TransactionalChange<EObject>> getTransactionalChangeSequence(VitruviusChange<EObject> change) {
 		switch (change) {
 			case !change.containsConcreteChange: emptyList()
-			TransactionalChange: List.of(change)
-			CompositeChange<?>: change.changes.flatMap[transactionalChangeSequence]
+			TransactionalChange<EObject>: List.of(change)
+			CompositeChange<EObject, ?>: change.changes.flatMap[transactionalChangeSequence]
 			default: throw new IllegalStateException("Unexpected change type: " + change.class.simpleName)
 		}
 	}

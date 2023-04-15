@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.composite.description.PropagatedChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.composite.propagation.ChangePropagationListener;
@@ -57,7 +58,7 @@ public class ModelRepositoryChanges implements ChangePropagationListener, Serial
 	}
 
 	@Override
-	public void startedChangePropagation(VitruviusChange changeToPropagate) {
+	public void startedChangePropagation(VitruviusChange<Uuid> changeToPropagate) {
 		// Do nothing
 	}
 

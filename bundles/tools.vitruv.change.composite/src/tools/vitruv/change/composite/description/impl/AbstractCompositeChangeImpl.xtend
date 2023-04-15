@@ -9,14 +9,14 @@ import java.util.Set
 import java.util.HashSet
 import tools.vitruv.change.composite.MetamodelDescriptor
 
-abstract class AbstractCompositeChangeImpl<C extends VitruviusChange> implements CompositeChange<C> {
-	List<C> changes
+abstract class AbstractCompositeChangeImpl<Element, ContanedChange extends VitruviusChange<Element>> implements CompositeChange<Element, ContanedChange> {
+	List<ContanedChange> changes
 
-	new(List<? extends C> changes) {
+	new(List<? extends ContanedChange> changes) {
 		this.changes = List.copyOf(changes)
 	}
 
-	override List<C> getChanges() {
+	override List<ContanedChange> getChanges() {
 		return this.changes
 	}
 
@@ -68,7 +68,7 @@ abstract class AbstractCompositeChangeImpl<C extends VitruviusChange> implements
 	override equals(Object other) {
 		if (other === this) true
 		else if (other === null) false
-		else if (other instanceof CompositeChange<?>) {
+		else if (other instanceof CompositeChange<?, ?>) {
 			changes == other.changes
 		}
 		else false

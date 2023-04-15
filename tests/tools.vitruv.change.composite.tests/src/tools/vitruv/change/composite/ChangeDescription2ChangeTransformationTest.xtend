@@ -6,6 +6,7 @@ import java.util.HashMap
 import java.util.List
 import java.util.function.Consumer
 import org.eclipse.emf.common.notify.Notifier
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.util.EcoreUtil
@@ -107,7 +108,7 @@ abstract class ChangeDescription2ChangeTransformationTest {
 		this.changeRecorder.removeFromRecording(notifier)
 	}
 
-	private def List<EChange> validateChange(TransactionalChange change) {
+	private def List<EChange> validateChange(TransactionalChange<EObject> change) {
 		// Rollback changes, copy the state before their execution, reapply the changes to restore the state
 		// and re-resolve the changes for the copied state and apply them to check whether they can properly
 		// be applied to a different state
