@@ -1,8 +1,10 @@
 package tools.vitruv.change.propagation;
 
+import tools.vitruv.change.atomic.uuid.UuidResolver;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.correspondence.Correspondence;
+import tools.vitruv.change.correspondence.model.CorrespondenceModel;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 
 public interface ChangeRecordingModelRepository extends ResourceAccess, AutoCloseable {
@@ -13,6 +15,11 @@ public interface ChangeRecordingModelRepository extends ResourceAccess, AutoClos
 	 * @return the {@link CorrespondenceModel} managed by this repository
 	 */
 	EditableCorrespondenceModelView<Correspondence> getCorrespondenceModel();
+	
+	/**
+	 * Returns the {@link UuidResolver} associated with all model resources in this repository.
+	 */
+	UuidResolver getUuidResolver();
 
 	/**
 	 * Applies the given change to this model repository. It resolves the change

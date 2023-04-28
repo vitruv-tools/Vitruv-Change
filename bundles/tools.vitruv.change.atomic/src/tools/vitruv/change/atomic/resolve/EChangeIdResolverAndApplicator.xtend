@@ -18,13 +18,7 @@ import tools.vitruv.change.atomic.id.IdResolver
  * Utility class for applying and resolving a given EChange.
  */
 @Utility
-class EChangeResolverAndApplicator {
-	static def <C extends EChange> C unresolve(C eChange) {
-		val copy = EcoreUtil.copy(eChange)
-		EChangeUnresolver.unresolve(copy)
-		return copy
-	}
-	
+class EChangeIdResolverAndApplicator {
 	static def EChange resolveBefore(EChange eChange, IdResolver idResolver) {
 		return resolveCopy(eChange, idResolver)
 	}
@@ -94,7 +88,7 @@ class EChangeResolverAndApplicator {
 	def private static EChange resolveCopy(EChange change, IdResolver idResolver) {
 		checkArgument(!change.isResolved, "change must not be resolved when trying to resolve")
 		var EChange copy = EcoreUtil.copy(change)
-		new AtomicEChangeResolver(idResolver).resolve(copy)
+		new AtomicEChangeIdResolver(idResolver).resolve(copy)
 		return copy
 	}
 	

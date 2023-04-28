@@ -1,7 +1,7 @@
 package tools.vitruv.testutils.views
 
-import org.eclipse.emf.common.notify.Notifier
 import java.util.List
+import org.eclipse.emf.common.notify.Notifier
 import tools.vitruv.change.composite.description.PropagatedChange
 
 /**

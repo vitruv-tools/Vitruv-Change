@@ -2,17 +2,13 @@ package tools.vitruv.change.atomic.feature.attribute
 
 import allElementTypes.NonRoot
 import allElementTypes.Root
-import tools.vitruv.change.atomic.feature.attribute.InsertEAttributeValue
-
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import static org.junit.jupiter.api.Assertions.assertTrue
-import static org.junit.jupiter.api.Assertions.assertFalse
+
 import static org.junit.jupiter.api.Assertions.assertEquals
-import static org.junit.jupiter.api.Assertions.assertNull
 import static org.junit.jupiter.api.Assertions.assertThrows
+import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
 
 /**
  * Test class for the concrete {@link InsertEAttributeValue} EChange,
@@ -120,7 +116,7 @@ class InsertEAttributeValueTest extends InsertRemoveEAttributeTest {
 	@Test
 	def void invalidAttributeTest() {
 		// NonRoot has no multi-valued int attribute
-		val affectedNonRootEObject = aet.NonRoot
+		val affectedNonRootEObject = aet.NonRoot.withUuid
 		resource.contents.add(affectedNonRootEObject)
 
 		// Resolving the change will be tested in EFeatureChange

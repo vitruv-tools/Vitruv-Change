@@ -1,5 +1,7 @@
 package tools.vitruv.change.propagation.impl;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,7 +15,6 @@ import tools.vitruv.change.composite.propagation.ChangeableModelRepository;
 import tools.vitruv.change.interaction.InternalUserInteractor;
 import tools.vitruv.change.propagation.ChangePropagationSpecificationProvider;
 import tools.vitruv.change.propagation.PersistableChangeRecordingModelRepository;
-import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * A default implementation of a {@link ChangeableModelRepository} that requires a

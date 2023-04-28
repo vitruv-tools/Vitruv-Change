@@ -1,41 +1,44 @@
 package tools.vitruv.change.composite
 
 import allElementTypes.Root
-import java.util.List
-
-import tools.vitruv.change.atomic.EChange
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.AfterEach
-import static org.junit.jupiter.api.Assertions.assertEquals
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet
-import org.eclipse.emf.common.notify.Notifier
-import java.util.function.Consumer
-import static com.google.common.base.Preconditions.checkState
-import org.junit.jupiter.api.^extension.ExtendWith
-import tools.vitruv.testutils.TestProjectManager
-import tools.vitruv.testutils.TestProject
 import java.nio.file.Path
-import tools.vitruv.testutils.RegisterMetamodelsInStandalone
+import java.util.HashMap
+import java.util.List
+import java.util.function.Consumer
+import org.eclipse.emf.common.notify.Notifier
+import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
-import tools.vitruv.change.composite.recording.ChangeRecorder
+import org.eclipse.emf.ecore.util.EcoreUtil
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.^extension.ExtendWith
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.EChangeUuidManager
+import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.TransactionalChange
+import tools.vitruv.change.composite.recording.ChangeRecorder
+import tools.vitruv.testutils.RegisterMetamodelsInStandalone
+import tools.vitruv.testutils.TestProject
+import tools.vitruv.testutils.TestProjectManager
+
+import static com.google.common.base.Preconditions.checkState
+import static org.hamcrest.MatcherAssert.assertThat
+import static org.junit.jupiter.api.Assertions.assertEquals
+import static org.junit.jupiter.api.Assertions.assertNotNull
+import static org.junit.jupiter.api.Assertions.assertTrue
+import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet
+
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.createFileURI
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.loadOrCreateResource
-import static extension tools.vitruv.change.atomic.resolve.EChangeResolverAndApplicator.*
-import org.eclipse.emf.ecore.util.EcoreUtil
-import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
-import static org.hamcrest.MatcherAssert.assertThat
-import static org.junit.jupiter.api.Assertions.assertTrue
-import static org.junit.jupiter.api.Assertions.assertNotNull
+import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceUtil.getFirstRootEObject
-import tools.vitruv.change.atomic.id.IdResolver
+import static extension tools.vitruv.change.atomic.resolve.EChangeUuidResolverAndApplicator.*
 
 @ExtendWith(TestProjectManager, RegisterMetamodelsInStandalone)
 abstract class ChangeDescription2ChangeTransformationTest {
 	var ChangeRecorder changeRecorder
-	var IdResolver idResolver
+	var UuidResolver uuidResolver
 	var ResourceSet resourceSet
 	var Path tempFolder
 	
@@ -46,7 +49,7 @@ abstract class ChangeDescription2ChangeTransformationTest {
 	def void beforeTest(@TestProject Path tempFolder) {
 		this.tempFolder = tempFolder
 		this.resourceSet = new ResourceSetImpl().withGlobalFactories()
-		this.idResolver = IdResolver.create(resourceSet)
+		this.uuidResolver = UuidResolver.create(resourceSet)
 		this.changeRecorder = new ChangeRecorder(resourceSet)
 		this.resourceSet.startRecording
 	}
@@ -63,10 +66,12 @@ abstract class ChangeDescription2ChangeTransformationTest {
 	
 	protected def <T extends Notifier> recordComposite(T objectToRecord, Consumer<T> operationToRecord) {
 		resourceSet.stopRecording
+		EChangeUuidManager.setOrGenerateIds(changeRecorder.change.EChanges, uuidResolver)
 		objectToRecord.startRecording
 		operationToRecord.accept(objectToRecord)
 		objectToRecord.stopRecording
 		val recordedChange = changeRecorder.change
+		EChangeUuidManager.setOrGenerateIds(recordedChange.EChanges, uuidResolver)
 		resourceSet.startRecording
 		return recordedChange
 	}
@@ -108,18 +113,20 @@ abstract class ChangeDescription2ChangeTransformationTest {
 		// be applied to a different state
 		val monitoredChanges = change.EChanges
 		monitoredChanges.reverseView.forEach[monitoredChange|
-			monitoredChange.applyBackward
+			monitoredChange.applyBackward(uuidResolver)
 		]
+		uuidResolver.endTransaction
 		val comparisonResourceSet = new ResourceSetImpl().withGlobalFactories()
-		val comparisonIdResolver = IdResolver.create(comparisonResourceSet)
-		resourceSet.copyTo(comparisonResourceSet)
+		val originalToComparisonResourceMapping = resourceSet.copyTo(comparisonResourceSet)
+		val comparisonUuidResolver = UuidResolver.create(comparisonResourceSet)
+		uuidResolver.resolveResources(originalToComparisonResourceMapping, comparisonUuidResolver)
 		monitoredChanges.map[
-			applyForward(idResolver)
+			applyForward(uuidResolver)
 			EcoreUtil.copy(it)
 		].forEach[
 			val unresolvedChange = it.unresolve()
-			val resolvedChange = unresolvedChange.resolveBefore(comparisonIdResolver)
-			resolvedChange.applyForward(comparisonIdResolver)
+			val resolvedChange = unresolvedChange.resolveBefore(comparisonUuidResolver)
+			resolvedChange.applyForward(comparisonUuidResolver)
 		]
 		resourceSet.assertContains(comparisonResourceSet)
 		comparisonResourceSet.assertContains(resourceSet)
@@ -127,12 +134,15 @@ abstract class ChangeDescription2ChangeTransformationTest {
 	}
 	
 	private static def copyTo(ResourceSet original, ResourceSet target) {
+		var resourceMapping = new HashMap;
 		for (originalResource : original.resources) {
 			val comparisonResource = target.createResource(originalResource.URI)
 			if (!originalResource.contents.empty) {
 				comparisonResource.contents += EcoreUtil.copyAll(originalResource.contents)
 			}
+			resourceMapping.put(originalResource, comparisonResource)
 		}
+		return resourceMapping
 	}
 	
 	private static def assertContains(ResourceSet first, ResourceSet second) {
@@ -155,5 +165,4 @@ abstract class ChangeDescription2ChangeTransformationTest {
 		)
 		return changes
 	}
-
 }
