@@ -20,3 +20,4 @@ Export-Package: tools.vitruv.change.correspondence,
  tools.vitruv.change.correspondence.model
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
+Import-Package: tools.vitruv.change.changederivation
