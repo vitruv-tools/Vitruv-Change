@@ -72,7 +72,9 @@ class ChangePropagator {
 					«resolvedChange»
 			''')
 		}
-		return new ChangePropagation(this, resolvedChange, null).propagateChanges()
+		
+		val filteredChange = VitruviusChangeFactory.instance.createCompositeChange(resolvedChange.transactionalChangeSequence.filter[it.containsConcreteChange])
+		return new ChangePropagation(this, filteredChange, null).propagateChanges()
 	}
 
 	@FinalFieldsConstructor
