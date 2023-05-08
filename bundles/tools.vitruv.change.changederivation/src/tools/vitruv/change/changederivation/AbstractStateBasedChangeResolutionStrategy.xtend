@@ -1,11 +1,17 @@
 package tools.vitruv.change.changederivation
 
 import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceCopier
+import java.util.Collection
 import org.eclipse.emf.common.notify.Notifier
 import org.eclipse.emf.common.util.BasicMonitor
 import org.eclipse.emf.compare.EMFCompare
+import org.eclipse.emf.compare.diff.IDiffEngine
+import org.eclipse.emf.compare.match.IMatchEngine.Factory
+import org.eclipse.emf.compare.match.impl.MatchEngineFactoryRegistryImpl
 import org.eclipse.emf.compare.merge.BatchMerger
 import org.eclipse.emf.compare.merge.IMerger
+import org.eclipse.emf.compare.postprocessor.IPostProcessor
+import org.eclipse.emf.compare.postprocessor.PostProcessorDescriptorRegistryImpl
 import org.eclipse.emf.compare.scope.DefaultComparisonScope
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
@@ -22,9 +28,13 @@ import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.Resour
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceUtil.getReferencedProxies
 import static extension tools.vitruv.change.atomic.resolve.EChangeIdResolverAndApplicator.applyBackward
 import static extension tools.vitruv.change.atomic.resolve.EChangeIdResolverAndApplicator.applyForward
+import java.util.List
+import org.eclipse.emf.compare.diff.DefaultDiffEngine
+import org.eclipse.emf.compare.diff.DiffBuilder
 
 /**
- * Abstract base class for StateBasedChangeResolutionStrategies
+ * Abstract base class for StateBasedChangeResolutionStrategies that uses EMFCompare 
+ * to resolve a diff to a sequence of individual changes.
  */
 abstract class AbstractStateBasedChangeResolutionStrategy implements StateBasedChangeResolutionStrategy {
     
@@ -99,13 +109,47 @@ abstract class AbstractStateBasedChangeResolutionStrategy implements StateBasedC
      */
     private def compareStatesAndReplayChanges(Notifier newState, Notifier currentState) {
         val scope = new DefaultComparisonScope(newState, currentState, null)
-        val emfCompare = getEMFCompareInstance
-        val differences = emfCompare.compare(scope).differences
+        val differences = buildEMFCompare().compare(scope).differences
         // Replay the EMF compare differences
         val mergerRegistry = IMerger.RegistryImpl.createStandaloneInstance()
         val merger = new BatchMerger(mergerRegistry)
         merger.copyAllLeftToRight(differences, new BasicMonitor)
     }
     
-    protected abstract def EMFCompare getEMFCompareInstance();
+    private def buildEMFCompare() {
+    	val usedMatchEngineFactoryRegistry = MatchEngineFactoryRegistryImpl.createStandaloneInstance()
+    	getMatchEngineFactories.forEach[it | it.ranking = 20]
+    	getMatchEngineFactories.forEach[it | usedMatchEngineFactoryRegistry.add(it)]
+    	
+    	val usedPostProcessorRegistry = new PostProcessorDescriptorRegistryImpl()
+    	getPostProcessors.forEach[it | usedPostProcessorRegistry.put(it.getInstanceClassName, it)]
+    	
+    	return (EMFCompare.builder => [
+            matchEngineFactoryRegistry = usedMatchEngineFactoryRegistry
+            diffEngine = getDiffEngine()
+            postProcessorRegistry = usedPostProcessorRegistry
+        ]).build
+    }
+    
+    /**
+     * {@link Factory}'s (MatchEngine + rank + is MatchEngine suitable for comparison scope) used by EMFCompare 
+     * The rank will be overwritten by this class. To ensure that it has a greater value than the default implementation.
+     */
+    protected def Collection<Factory> getMatchEngineFactories() {
+    	List.of()
+    }
+    
+    /**
+     * {@link IDiffEngine} used by EMFCompare
+     */
+    protected def IDiffEngine getDiffEngine() {
+    	return new DefaultDiffEngine(new DiffBuilder());
+    }
+    
+    /**
+     * {@link IPostProcessor.Descriptor}'s (PostProcessor + Pattern where to be applied) used by EMFCompare
+     */
+    protected def Collection<IPostProcessor.Descriptor> getPostProcessors() {
+    	List.of()
+    }
 }

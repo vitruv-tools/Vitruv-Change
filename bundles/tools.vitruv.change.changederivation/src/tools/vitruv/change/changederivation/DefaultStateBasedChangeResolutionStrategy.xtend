@@ -1,13 +1,11 @@
 package tools.vitruv.change.changederivation
 
-import org.eclipse.emf.compare.match.impl.MatchEngineFactoryRegistryImpl
-import org.eclipse.emf.compare.match.impl.MatchEngineFactoryImpl
-import org.eclipse.emf.compare.EMFCompare
 import org.eclipse.emf.compare.utils.UseIdentifiers
+import java.util.List
+import org.eclipse.emf.compare.match.impl.MatchEngineFactoryImpl
 
 /**
- * This default strategy for diff based state changes uses EMFCompare to resolve a 
- * diff to a sequence of individual changes.
+ * This is a default strategy to resolve a diff as a sequence of individual changes
  */
 class DefaultStateBasedChangeResolutionStrategy extends AbstractStateBasedChangeResolutionStrategy implements StateBasedChangeResolutionStrategy {
 	
@@ -30,11 +28,7 @@ class DefaultStateBasedChangeResolutionStrategy extends AbstractStateBasedChange
         this.useIdentifiers = useIdentifiers
     }
 	
-	override protected getEMFCompareInstance() {
-		return (EMFCompare.builder => [
-            matchEngineFactoryRegistry = MatchEngineFactoryRegistryImpl.createStandaloneInstance => [
-                add(new MatchEngineFactoryImpl(useIdentifiers))
-            ]
-        ]).build
+	override protected getMatchEngineFactories() {
+		return List.of(new MatchEngineFactoryImpl(useIdentifiers))
 	}
 }
