@@ -1,5 +1,6 @@
 package tools.vitruv.change.changederivation
 
+import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceCopier
 import org.eclipse.emf.common.notify.Notifier
 import org.eclipse.emf.common.util.BasicMonitor
 import org.eclipse.emf.compare.EMFCompare
@@ -19,11 +20,11 @@ import tools.vitruv.change.composite.description.VitruviusChange
 import tools.vitruv.change.composite.recording.ChangeRecorder
 
 import static com.google.common.base.Preconditions.checkArgument
+import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
 
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceUtil.getReferencedProxies
 import static extension tools.vitruv.change.atomic.resolve.EChangeIdResolverAndApplicator.applyBackward
 import static extension tools.vitruv.change.atomic.resolve.EChangeIdResolverAndApplicator.applyForward
-import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceCopier
 
 /**
  * This default strategy for diff based state changes uses EMFCompare to resolve a 
@@ -74,7 +75,7 @@ class DefaultStateBasedChangeResolutionStrategy implements StateBasedChangeResol
         newState.checkNoProxies("new state")
         // It is possible that root elements are automatically generated during resource creation (e.g., Java packages).
         // Thus, we create the resource and then monitor the re-insertion of the elements
-        val monitoredResourceSet = new ResourceSetImpl()
+        val monitoredResourceSet = withGlobalFactories(new ResourceSetImpl());
         val newResource = monitoredResourceSet.createResource(newState.URI)
         newResource.contents.clear()
         return newResource.record [
