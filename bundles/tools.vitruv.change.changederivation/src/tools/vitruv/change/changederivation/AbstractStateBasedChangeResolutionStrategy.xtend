@@ -28,9 +28,6 @@ import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.Resour
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceUtil.getReferencedProxies
 import static extension tools.vitruv.change.atomic.resolve.EChangeIdResolverAndApplicator.applyBackward
 import static extension tools.vitruv.change.atomic.resolve.EChangeIdResolverAndApplicator.applyForward
-import java.util.List
-import org.eclipse.emf.compare.diff.DefaultDiffEngine
-import org.eclipse.emf.compare.diff.DiffBuilder
 
 /**
  * Abstract base class for StateBasedChangeResolutionStrategies that uses EMFCompare 
@@ -135,21 +132,15 @@ abstract class AbstractStateBasedChangeResolutionStrategy implements StateBasedC
      * {@link Factory}'s (MatchEngine + rank + is MatchEngine suitable for comparison scope) used by EMFCompare 
      * The rank will be overwritten by this class. To ensure that it has a greater value than the default implementation.
      */
-    protected def Collection<Factory> getMatchEngineFactories() {
-    	List.of()
-    }
+    abstract protected def Collection<Factory> getMatchEngineFactories();
     
     /**
      * {@link IDiffEngine} used by EMFCompare
      */
-    protected def IDiffEngine getDiffEngine() {
-    	return new DefaultDiffEngine(new DiffBuilder());
-    }
+    abstract protected def IDiffEngine getDiffEngine();
     
     /**
      * {@link IPostProcessor.Descriptor}'s (PostProcessor + Pattern where to be applied) used by EMFCompare
      */
-    protected def Collection<IPostProcessor.Descriptor> getPostProcessors() {
-    	List.of()
-    }
+    abstract protected def Collection<IPostProcessor.Descriptor> getPostProcessors();
 }

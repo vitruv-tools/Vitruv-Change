@@ -3,6 +3,8 @@ package tools.vitruv.change.changederivation
 import org.eclipse.emf.compare.utils.UseIdentifiers
 import java.util.List
 import org.eclipse.emf.compare.match.impl.MatchEngineFactoryImpl
+import org.eclipse.emf.compare.diff.DiffBuilder
+import org.eclipse.emf.compare.diff.DefaultDiffEngine
 
 /**
  * This is a default strategy to resolve a diff as a sequence of individual changes
@@ -31,4 +33,13 @@ class DefaultStateBasedChangeResolutionStrategy extends AbstractStateBasedChange
 	override protected getMatchEngineFactories() {
 		return List.of(new MatchEngineFactoryImpl(useIdentifiers))
 	}
+	
+	override protected getDiffEngine() {
+		return new DefaultDiffEngine(new DiffBuilder());
+	}
+	
+	override protected getPostProcessors() {
+		return List.of()
+	}
+	
 }
