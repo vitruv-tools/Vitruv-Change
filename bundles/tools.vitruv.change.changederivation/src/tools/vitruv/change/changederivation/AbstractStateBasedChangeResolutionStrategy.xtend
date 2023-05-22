@@ -115,8 +115,10 @@ abstract class AbstractStateBasedChangeResolutionStrategy implements StateBasedC
     
     private def buildEMFCompare() {
     	val usedMatchEngineFactoryRegistry = MatchEngineFactoryRegistryImpl.createStandaloneInstance()
-    	getMatchEngineFactories.forEach[it | it.ranking = 20]
-    	getMatchEngineFactories.forEach[it | usedMatchEngineFactoryRegistry.add(it)]
+    	getMatchEngineFactories.forEach[it | 
+    		it.ranking = 20
+    		usedMatchEngineFactoryRegistry.add(it)
+    	]
     	
     	val usedPostProcessorRegistry = new PostProcessorDescriptorRegistryImpl()
     	getPostProcessors.forEach[it | usedPostProcessorRegistry.put(it.getInstanceClassName, it)]
