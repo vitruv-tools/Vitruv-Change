@@ -21,6 +21,7 @@ import static org.eclipse.emf.common.util.URI.createPlatformResourceURI
 
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.loadOrCreateResource
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
+import tools.vitruv.change.changederivation.DeltaBasedResourceUtil
 
 /**
  * A minimal test view that gives access to resources, but does not record any changes.
@@ -52,7 +53,7 @@ class BasicTestView implements TestView {
 	) {
 		this(
 			persistenceDirectory,
-			new ResourceSetImpl().withGlobalFactories(),
+			DeltaBasedResourceUtil.withDeltaFactory(new ResourceSetImpl()),
 			userInteraction,
 			uriMode
 		)

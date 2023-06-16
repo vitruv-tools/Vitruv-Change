@@ -13,6 +13,7 @@ import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.id.IdResolver
 import tools.vitruv.change.composite.description.VitruviusChangeFactory
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 
 class DeltaBasedResource extends ResourceImpl {
 	
@@ -20,8 +21,14 @@ class DeltaBasedResource extends ResourceImpl {
 		super(uri)
 	}
 	
+	def markAsLoaded() {
+		this.loaded = true
+	}
+	
 	private static def List<EChange> loadDeltas(URI modelUri) {
-        val resourceSet = withGlobalFactories(new ResourceSetImpl());
+        val resourceSet = new ResourceSetImpl();
+		resourceSet.resourceFactoryRegistry.extensionToFactoryMap += "*" -> new XMIResourceFactoryImpl()
+		
         val resource = resourceSet.getResource(modelUri, true);
         return resource.getContents().map[it as EChange].toList
 	}

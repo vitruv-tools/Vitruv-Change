@@ -31,8 +31,7 @@ import static com.google.common.base.Preconditions.checkState
 import static tools.vitruv.testutils.TestModelRepositoryFactory.createTestChangeableModelRepository
 
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.flatMapFixed
-import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
-
+import tools.vitruv.change.changederivation.DeltaBasedResourceUtil;
 /**
  * A test view that will record and publish the changes created in it.
  */
@@ -64,7 +63,7 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 		ChangeableModelRepository changeableModelRepository,
 		BiConsumer<Resource, UuidResolver> uuidResolution
 	) {
-		this.resourceSet = new ResourceSetImpl().withGlobalFactories()
+		this.resourceSet = DeltaBasedResourceUtil.withDeltaFactory(new ResourceSetImpl())
 		this.uuidResolver = UuidResolver.create(resourceSet)
 		this.modelRepository = changeableModelRepository
 		this.delegate = new BasicTestView(persistenceDirectory, resourceSet, userInteraction, uriMode)

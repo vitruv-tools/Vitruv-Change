@@ -13,3 +13,4 @@ Require-Bundle: org.apache.log4j,
  edu.kit.ipd.sdq.commons.util.emf
 Export-Package: tools.vitruv.change.changederivation
 Bundle-Vendor: vitruv.tools
+Import-Package: edu.kit.ipd.sdq.activextendannotations
