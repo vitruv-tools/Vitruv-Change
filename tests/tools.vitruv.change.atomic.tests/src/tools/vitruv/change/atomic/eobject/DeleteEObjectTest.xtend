@@ -1,10 +1,10 @@
 package tools.vitruv.change.atomic.eobject
 
 import allElementTypes.Root
-import tools.vitruv.change.atomic.eobject.DeleteEObject
-
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.uuid.Uuid
 
 /**
  * Test class for the concrete {@link DeleteEObject} EChange,
@@ -26,7 +26,7 @@ class DeleteEObjectTest extends EObjectTest {
 		val unresolvedChange = createUnresolvedChange(createdObject)
 
 		// Resolve		
-		val resolvedChange = unresolvedChange.resolveBefore
+		val resolvedChange = unresolvedChange.applyForwardAndResolve
 		unresolvedChange.assertDifferentChangeSameClass(resolvedChange)
 	}
 
@@ -37,10 +37,8 @@ class DeleteEObjectTest extends EObjectTest {
 	@Test
 	def void applyForwardTest() {
 		// Create change and resolve
-		val resolvedChange = createUnresolvedChange(createdObject).resolveBefore as DeleteEObject<Root>
-
-		// Apply forward
-		resolvedChange.assertApplyForward
+		val unresolvedChange = createUnresolvedChange(createdObject)
+		unresolvedChange.applyForwardAndResolve
 
 		// State after
 		assertIsStateAfter
@@ -49,10 +47,8 @@ class DeleteEObjectTest extends EObjectTest {
 		prepareStateBefore(createdObject2)
 
 		// Create change and resolve 2
-		val resolvedChange2 = createUnresolvedChange(createdObject2).resolveBefore as DeleteEObject<Root>
-
-		// Apply forward 2
-		resolvedChange2.assertApplyForward
+		val unresolvedChange2 = createUnresolvedChange(createdObject2)
+		unresolvedChange2.applyForwardAndResolve
 
 		// State after
 		assertIsStateAfter
@@ -65,22 +61,22 @@ class DeleteEObjectTest extends EObjectTest {
 	@Test
 	def void applyBackwardTest() {
 		// Create change and resolve 1
-		val resolvedChange = createUnresolvedChange(createdObject).resolveBefore as DeleteEObject<Root>
-		resolvedChange.assertApplyForward
+		val resolvedChange = createUnresolvedChange(createdObject).applyForwardAndResolve
 
 		// Apply backward 1
-		resolvedChange.assertApplyBackward
+		resolvedChange.applyBackwardAndUnresolve
 
 		// State before
 		assertIsStateBefore(createdObject)
+		
+		prepareStateBefore(createdObject2)
 
 		// Now another change would be applied and the object would be inserted in.
 		// Create change and resolve 2
-		val resolvedChange2 = createUnresolvedChange(createdObject2).resolveBefore as DeleteEObject<Root>
-		resolvedChange2.assertApplyForward
+		val resolvedChange2 = createUnresolvedChange(createdObject2).applyForwardAndResolve
 		
-		// Apply backward 1
-		resolvedChange2.assertApplyBackward
+		// Apply backward 2
+		resolvedChange2.applyBackwardAndUnresolve
 
 		// State before
 		assertIsStateBefore(createdObject2)
@@ -108,8 +104,8 @@ class DeleteEObjectTest extends EObjectTest {
 	/**
 	 * Creates new unresolved change.
 	 */
-	def private DeleteEObject<Root> createUnresolvedChange(Root oldObject) {
-		return atomicFactory.createDeleteEObjectChange(oldObject)
+	def private EChange<Uuid> createUnresolvedChange(Root oldObject) {
+		return atomicFactory.createDeleteEObjectChange(oldObject).unresolve
 	}
 
 }

@@ -47,7 +47,7 @@ class UuidResolvingTest {
 	@ValueSource(ints = { 1, 5, 10, 100 })
 	@DisplayName("resolve element(s) without resource")
 	void registerMultipleElementsWithoutResource(int count) {
-		Map<String, EObject> uuidToEObjectMapping = IntStream.range(0, count).mapToObj((i) -> aet.Root())
+		Map<Uuid, EObject> uuidToEObjectMapping = IntStream.range(0, count).mapToObj((i) -> aet.Root())
 				.collect(Collectors.toMap(root -> uuidResolver.generateUuid(root), root -> root));
 
 		uuidToEObjectMapping.forEach((uuid, element) -> uuidResolver.registerEObject(uuid, element));
@@ -63,7 +63,7 @@ class UuidResolvingTest {
 	@ValueSource(ints = { 1, 5, 10, 100 })
 	@DisplayName("resolve element(s) with resource")
 	void registerMultipleElementsWithResource(int count) {
-		Map<String, EObject> uuidToEObjectMapping = IntStream.range(0, count).mapToObj((i) -> {
+		Map<Uuid, EObject> uuidToEObjectMapping = IntStream.range(0, count).mapToObj((i) -> {
 			var root = aet.Root();
 			URI resourceUri = URI.createFileURI(testProjectPath.resolve("root" + i + ".aet").toString());
 			Resource resource = resourceSet.createResource(resourceUri);
@@ -84,7 +84,7 @@ class UuidResolvingTest {
 	@DisplayName("re-register element with same UUID")
 	void reregisterElementSame() {
 		var root = aet.Root();
-		String uuid = uuidResolver.registerEObject(root);
+		Uuid uuid = uuidResolver.registerEObject(root);
 
 		assertDoesNotThrow(() -> uuidResolver.registerEObject(uuid, root));
 	}
@@ -93,7 +93,7 @@ class UuidResolvingTest {
 	@DisplayName("re-register element with changed UUID")
 	void reregisterElementChanged() {
 		var root = aet.Root();
-		String uuid = uuidResolver.registerEObject(root);
+		Uuid uuid = uuidResolver.registerEObject(root);
 
 		assertThrows(IllegalStateException.class, () -> uuidResolver.registerEObject(uuid + "modified", root));
 	}
@@ -102,7 +102,7 @@ class UuidResolvingTest {
 	@DisplayName("modify element after registration")
 	void modifyElementAfterRegistration() {
 		var root = aet.Root();
-		String uuid = uuidResolver.registerEObject(root);
+		Uuid uuid = uuidResolver.registerEObject(root);
 
 		root.setId("newId");
 		URI resourceUri = URI.createFileURI(testProjectPath.resolve("root.aet").toString());
@@ -136,7 +136,7 @@ class UuidResolvingTest {
 		URI resourceUri = URI.createFileURI(testProjectPath.resolve("root.aet").toString());
 		Resource rootResource = resourceSet.createResource(resourceUri);
 		rootResource.getContents().add(root);
-		String uuid = uuidResolver.registerEObject(root);
+		Uuid uuid = uuidResolver.registerEObject(root);
 
 		EcoreUtil.delete(root);
 		assertEquals(root, uuidResolver.getEObject(uuid));
@@ -149,7 +149,7 @@ class UuidResolvingTest {
 	@DisplayName("cleanup resolver when saving after element removal")
 	void cleanupAfterElementRemovalRemovesUuid() {
 		var root = aet.Root();
-		String uuid = uuidResolver.registerEObject(root);
+		Uuid uuid = uuidResolver.registerEObject(root);
 		uuidResolver.endTransaction();
 		assertThrows(IllegalStateException.class, () -> uuidResolver.getEObject(uuid));
 		assertThrows(IllegalStateException.class, () -> uuidResolver.getUuid(root));
@@ -164,7 +164,7 @@ class UuidResolvingTest {
 		URI resourceUri = URI.createFileURI(testProjectPath.resolve("root.aet").toString());
 		Resource rootResource = resourceSet.createResource(resourceUri);
 		rootResource.getContents().add(root);
-		String uuid = uuidResolver.registerEObject(root);
+		Uuid uuid = uuidResolver.registerEObject(root);
 
 		uuidResolver.endTransaction();
 		assertEquals(root, uuidResolver.getEObject(uuid));

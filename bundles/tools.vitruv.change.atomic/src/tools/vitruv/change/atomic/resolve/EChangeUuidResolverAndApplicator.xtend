@@ -7,39 +7,36 @@ import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.command.ApplyEChangeSwitch
 import tools.vitruv.change.atomic.eobject.CreateEObject
 import tools.vitruv.change.atomic.eobject.DeleteEObject
+import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.atomic.uuid.UuidResolver
-
-import static com.google.common.base.Preconditions.checkArgument
 
 /**
  * Utility class for applying and resolving a given EChange.
  */
 @Utility
-class EChangeUuidResolverAndApplicator {
-	static def <C extends EChange> C unresolve(C eChange) {
-		val copy = EcoreUtil.copy(eChange)
-		EChangeUnresolver.unresolve(copy)
-		return copy
-	}
-
-	static def EChange resolveBefore(EChange eChange, UuidResolver uuidResolver) {
-		return resolveCopy(eChange, uuidResolver)
-	}
-
-	static def void applyForward(EChange eChange, UuidResolver uuidResolver) {
-		ApplyEChangeSwitch.applyEChange(eChange, true)
-		switch (eChange) {
-				CreateEObject<?>:
-					uuidResolver.registerEObject(eChange.affectedEObjectID, eChange.affectedEObject)
+class EChangeUuidResolverAndApplicator {		
+	static def EChange<EObject> resolveAndApplyForward(EChange<Uuid> eChange, UuidResolver uuidResolver) {
+		val resolvedChange = resolve(eChange, uuidResolver)
+		ApplyEChangeSwitch.applyEChange(resolvedChange, true)
+		switch eChange {
+			CreateEObject<Uuid>: {
+				val resolvedCreateChange = resolvedChange as CreateEObject<EObject>
+				uuidResolver.registerEObject(eChange.affectedElement, resolvedCreateChange.affectedElement)
 			}
+		}
+		return resolvedChange
 	}
-
-	static def void applyBackward(EChange eChange, UuidResolver uuidResolver) {
+	
+	static def EChange<Uuid> unresolveAndApplyBackward(EChange<EObject> eChange, UuidResolver uuidResolver) {
+		val unresolvedChange = unresolve(eChange, uuidResolver)
 		ApplyEChangeSwitch.applyEChange(eChange, false)
-		switch (eChange) {
-				DeleteEObject<?>:
-					uuidResolver.registerEObject(eChange.affectedEObjectID, eChange.affectedEObject)
+		switch eChange {
+			DeleteEObject<EObject>: {
+				val unresolvedDeleteChange = unresolvedChange as DeleteEObject<Uuid>
+				uuidResolver.registerEObject(unresolvedDeleteChange.affectedElement, eChange.affectedElement)
 			}
+		}
+		return unresolvedChange
 	}
 
 	/**
@@ -52,10 +49,19 @@ class EChangeUuidResolverAndApplicator {
 	 * @throws IllegalArgumentException The change is already resolved.
 	 * @throws IllegalStateException 	The change cannot be resolved.
 	 */
-	def private static EChange resolveCopy(EChange change, UuidResolver uuidResolver) {
-		checkArgument(!change.isResolved, "change must not be resolved when trying to resolve")
-		var EChange copy = EcoreUtil.copy(change)
-		new AtomicEChangeUuidResolver(uuidResolver).resolve(copy)
-		return copy
+	private static def EChange<EObject> resolve(EChange<Uuid> change, UuidResolver uuidResolver) {
+		AtomicEChangeResolver.resolveChange(change) [ 
+			switch change {
+				CreateEObject<Uuid>: {
+					return EcoreUtil.create(change.affectedEObjectType)
+				}
+				default:
+					return uuidResolver.getEObject(it)
+			}
+		]
+	}
+	
+	private static def EChange<Uuid> unresolve(EChange<EObject> change, UuidResolver uuidResolver) {
+		AtomicEChangeResolver.resolveChange(change) [ uuidResolver.getUuid(it) ]
 	}
 }

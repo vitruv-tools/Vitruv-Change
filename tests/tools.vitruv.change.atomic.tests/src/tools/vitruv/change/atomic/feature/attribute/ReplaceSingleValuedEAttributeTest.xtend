@@ -1,16 +1,17 @@
 package tools.vitruv.change.atomic.feature.attribute
 
 import allElementTypes.AllElementTypesPackage
-import allElementTypes.NonRoot
 import allElementTypes.Root
 import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EObject
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.EChangeTest
+import tools.vitruv.change.atomic.uuid.Uuid
 
 import static org.junit.jupiter.api.Assertions.assertEquals
 import static org.junit.jupiter.api.Assertions.assertThrows
-import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 
 /**
@@ -45,7 +46,7 @@ class ReplaceSingleValuedEAttributeTest extends EChangeTest {
 		val unresolvedChange = createUnresolvedChange()
 
 		// Resolve
-		val resolvedChange = unresolvedChange.resolveBefore
+		val resolvedChange = unresolvedChange.applyForwardAndResolve
 		unresolvedChange.assertDifferentChangeSameClass(resolvedChange)
 	}
 
@@ -56,10 +57,8 @@ class ReplaceSingleValuedEAttributeTest extends EChangeTest {
 	@Test
 	def void applyForwardTest() {
 		// Create change
-		val resolvedChange = createUnresolvedChange().resolveBefore as ReplaceSingleValuedEAttribute<Root, String>
-
-		// Apply forward
-		resolvedChange.assertApplyForward
+		val unresolvedChange = createUnresolvedChange()
+		unresolvedChange.applyForwardAndResolve
 
 		// State after
 		assertIsStateAfter
@@ -72,13 +71,13 @@ class ReplaceSingleValuedEAttributeTest extends EChangeTest {
 	@Test
 	def void applyBackwardTest() {
 		// Create change
-		val resolvedChange = createUnresolvedChange().resolveBefore as ReplaceSingleValuedEAttribute<Root, String>
+		val resolvedChange = createUnresolvedChange().applyForwardAndResolve
 
 		// Set state after
 		prepareStateAfter
 
 		// Apply backward
-		resolvedChange.assertApplyBackward
+		resolvedChange.applyBackwardAndUnresolve
 
 		// State before
 		assertIsStateBefore
@@ -90,22 +89,21 @@ class ReplaceSingleValuedEAttributeTest extends EChangeTest {
 	@Test
 	def void invalidAttributeTest() {
 		// NonRoot element has no int attribute.
-		val affectedNonRootEObject = aet.NonRoot.withUuid
+		val affectedNonRootEObject = aet.NonRoot
 		resource.contents.add(affectedNonRootEObject)
 		val affectedRootFeature = AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_EATTRIBUTE
 		val oldIntValue = DEFAULT_SINGLE_VALUED_EATTRIBUTE_VALUE
 		val newIntValue = 500
 
 		// Resolving the change will be tested in EFeatureChange
-		val resolvedChange = atomicFactory.<NonRoot, Integer>createReplaceSingleAttributeChange(affectedNonRootEObject,
-			affectedRootFeature, oldIntValue, newIntValue).resolveBefore
+		val resolvedChange = atomicFactory.<EObject, Integer>createReplaceSingleAttributeChange(affectedNonRootEObject,
+			affectedRootFeature, oldIntValue, newIntValue)
 
 		// NonRoot has no such feature
 		assertEquals(affectedNonRootEObject.eClass.getFeatureID(affectedRootFeature), -1)
 
 		// Apply
-		assertThrows(IllegalStateException) [resolvedChange.applyForward]
-		assertThrows(IllegalStateException) [resolvedChange.applyBackward]
+		assertThrows(IllegalStateException) [resolvedChange.applyBackwardAndUnresolve]
 	}
 
 	/**
@@ -117,16 +115,14 @@ class ReplaceSingleValuedEAttributeTest extends EChangeTest {
 		val newIntValue = 500
 
 		// Create and resolve change
-		val resolvedChange = atomicFactory.<Root, Integer>createReplaceSingleAttributeChange(affectedEObject,
-			affectedFeature, oldIntValue, newIntValue).resolveBefore
-		assertTrue(resolvedChange.isResolved)
+		val resolvedChange = atomicFactory.<EObject, Integer>createReplaceSingleAttributeChange(affectedEObject,
+			affectedFeature, oldIntValue, newIntValue)
 
 		// Type of attribute is String not Integer
 		assertEquals(affectedFeature.EAttributeType.name, "EString")
 
 		// Apply
-		assertThrows(IllegalStateException) [resolvedChange.applyForward]
-		assertThrows(IllegalStateException) [resolvedChange.applyBackward]
+		assertThrows(IllegalStateException) [resolvedChange.applyBackwardAndUnresolve]
 	}
 
 	/**
@@ -162,8 +158,8 @@ class ReplaceSingleValuedEAttributeTest extends EChangeTest {
 	/**
 	 * Creates new unresolved change.
 	 */
-	def private ReplaceSingleValuedEAttribute<Root, String> createUnresolvedChange() {
+	def private EChange<Uuid> createUnresolvedChange() {
 		// The concrete change type ReplaceSingleEAttributeChange will be used for the tests.
-		return atomicFactory.createReplaceSingleAttributeChange(affectedEObject, affectedFeature, oldValue, newValue)
+		return atomicFactory.createReplaceSingleAttributeChange(affectedEObject, affectedFeature, oldValue, newValue).unresolve
 	}
 }

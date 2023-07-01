@@ -24,6 +24,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
+import tools.vitruv.change.atomic.id.Id;
 import tools.vitruv.change.atomic.id.IdResolver;
 
 class UuidResolverImpl implements UuidResolver {
@@ -33,7 +34,7 @@ class UuidResolverImpl implements UuidResolver {
 	private static final String SERIALIZATION_SEPARATOR = "|";
 
 	private final ResourceSet resourceSet;
-	private final BiMap<EObject, String> eObjectToUuid = HashBiMap.create();
+	private final BiMap<EObject, Uuid> eObjectToUuid = HashBiMap.create();
 
 	public UuidResolverImpl(ResourceSet resourceSet) {
 		checkArgument(resourceSet != null, "Resource set may not be null");
@@ -41,21 +42,21 @@ class UuidResolverImpl implements UuidResolver {
 	}
 
 	@Override
-	public String getUuid(EObject eObject) throws IllegalStateException {
-		String uuid = getUuidOrNull(eObject);
+	public Uuid getUuid(EObject eObject) throws IllegalStateException {
+		Uuid uuid = getUuidOrNull(eObject);
 		checkState(uuid != null, "no UUID could be found for EObject: %s", eObject);
 		return uuid;
 	}
 
 	@Override
-	public EObject getEObject(String uuid) throws IllegalStateException {
+	public EObject getEObject(Uuid uuid) throws IllegalStateException {
 		EObject eObject = getEObjectOrNull(uuid);
 		checkState(eObject != null, "no EObject could be found for UUID: %s", uuid);
 		return eObject;
 	}
 
 	@Override
-	public void registerEObject(String uuid, EObject eObject) throws IllegalStateException {
+	public void registerEObject(Uuid uuid, EObject eObject) throws IllegalStateException {
 		checkState(uuid != null, "uuid must not be null");
 		checkState(eObject != null, "object must not be null");
 		if (eObject.eResource() != null && eObject.eResource().getResourceSet() != null) {
@@ -68,7 +69,7 @@ class UuidResolverImpl implements UuidResolver {
 				"UUID %s is already registered for element %s, was trying to register %s", uuid,
 				eObjectToUuid.inverse().get(uuid), eObject);
 		if (isReadOnlyEObject(eObject)) {
-			String expectedUuid = getUuidForReadOnlyEObject(eObject);
+			Uuid expectedUuid = getUuidForReadOnlyEObject(eObject);
 			checkState(uuid.equals(expectedUuid), "read-only object %s must be registered for UUID %s but was %s",
 					eObject, expectedUuid, uuid);
 			return;
@@ -80,12 +81,12 @@ class UuidResolverImpl implements UuidResolver {
 	}
 
 	@Override
-	public String generateUuid(EObject eObject) {
+	public Uuid generateUuid(EObject eObject) {
 		checkState(!eObject.eIsProxy(), "Cannot generate UUID for proxy object %s", eObject);
 		if (isReadOnlyEObject(eObject)) {
 			return getUuidForReadOnlyEObject(eObject);
 		}
-		return NON_READONLY_PREFIX + EcoreUtil.generateUUID();
+		return new Uuid(NON_READONLY_PREFIX + EcoreUtil.generateUUID());
 	}
 
 	@Override
@@ -112,7 +113,7 @@ class UuidResolverImpl implements UuidResolver {
 		sourceToTargetResourceMapping.values()
 				.forEach(resource -> checkState(resource.getResourceSet() == targetResourceSet,
 						"trying to resolve resource %s from different resource set", resource));
-		Map<String, String> uuidToIdMapping = generateUuidToIdMapping(sourceToTargetResourceMapping.keySet());
+		Map<Uuid, Id> uuidToIdMapping = generateUuidToIdMapping(sourceToTargetResourceMapping.keySet());
 		applyUuidToIdMapping(uuidToIdMapping, targetUuidResolver, targetResourceSet, sourceToTargetResourceMapping);
 	}
 
@@ -125,14 +126,14 @@ class UuidResolverImpl implements UuidResolver {
 		if (!file.exists()) {
 			return;
 		}
-		Map<String, String> uuidToIdMapping = new HashMap<>();
+		Map<Uuid, Id> uuidToIdMapping = new HashMap<>();
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line = reader.readLine();
 			while (line != null) {
 				String[] components = line.split("\\" + SERIALIZATION_SEPARATOR);
 				checkState(components.length == 2, "invalid UUID resolver serialization (line %s) found at %s", line,
 						uri);
-				uuidToIdMapping.put(components[0], components[1]);
+				uuidToIdMapping.put(new Uuid(components[0]), new Id(components[1]));
 				line = reader.readLine();
 			}
 		}
@@ -142,39 +143,39 @@ class UuidResolverImpl implements UuidResolver {
 	@Override
 	public void storeAtUri(URI uri) throws IOException {
 		checkState(uri.isFile(), "Storing UUID resolver requires a file uri but was %s", uri);
-		Map<String, String> uuidToIdMapping = generateUuidToIdMapping(null);
+		Map<Uuid, Id> uuidToIdMapping = generateUuidToIdMapping(null);
 		File file = new File(uri.toFileString());
 		try (FileWriter writer = new FileWriter(file)) {
 			for (var entry : uuidToIdMapping.entrySet()) {
-				String uuid = entry.getKey();
-				String id = entry.getValue();
+				String uuid = entry.getKey().getUuid();
+				String id = entry.getValue().getId();
 				writer.write(uuid + SERIALIZATION_SEPARATOR + id);
 				writer.write(System.lineSeparator());
 			}
 		}
 	}
 
-	private String getUuidOrNull(EObject eObject) {
+	private Uuid getUuidOrNull(EObject eObject) {
 		if (isReadOnlyEObject(eObject)) {
 			return getUuidForReadOnlyEObject(eObject);
 		}
-		String uuid = eObjectToUuid.get(eObject);
+		Uuid uuid = eObjectToUuid.get(eObject);
 		return uuid;
 	}
 
-	private String getUuidForReadOnlyEObject(EObject eObject) {
-		return EcoreUtil.getURI(eObject).toString();
+	private Uuid getUuidForReadOnlyEObject(EObject eObject) {
+		return new Uuid(EcoreUtil.getURI(eObject).toString());
 	}
 
-	private EObject getEObjectOrNull(String uuid) {
+	private EObject getEObjectOrNull(Uuid uuid) {
 		if (isReadOnlyUuid(uuid)) {
 			return getEObjectForReadOnlyUuid(uuid);
 		}
 		return eObjectToUuid.inverse().get(uuid);
 	}
 
-	private EObject getEObjectForReadOnlyUuid(String uuid) {
-		URI uri = URI.createURI(uuid);
+	private EObject getEObjectForReadOnlyUuid(Uuid uuid) {
+		URI uri = URI.createURI(uuid.getUuid());
 		return uri.hasFragment() ? resourceSet.getEObject(uri, true) : null;
 	}
 
@@ -187,8 +188,8 @@ class UuidResolverImpl implements UuidResolver {
 		return isPathmap(uri) || uri.isArchive();
 	}
 
-	private boolean isReadOnlyUuid(String uuid) {
-		return !uuid.startsWith(NON_READONLY_PREFIX);
+	private boolean isReadOnlyUuid(Uuid uuid) {
+		return !uuid.getUuid().startsWith(NON_READONLY_PREFIX);
 	}
 
 	private void cleanupRemovedElements() {
@@ -211,9 +212,9 @@ class UuidResolverImpl implements UuidResolver {
 	 * @param resourcesFilter is the filter for the resources to consider, or
 	 *                        <code>null<code> if all resources shall be considered.
 	 */
-	private Map<String, String> generateUuidToIdMapping(Collection<Resource> resourcesFilter) {
+	private Map<Uuid, Id> generateUuidToIdMapping(Collection<Resource> resourcesFilter) {
 		IdResolver idUnresolver = IdResolver.create(resourceSet);
-		Map<String, String> uuidToIdMapping = new HashMap<>();
+		Map<Uuid, Id> uuidToIdMapping = new HashMap<>();
 		for (var entry : eObjectToUuid.entrySet()) {
 			EObject eObject = entry.getKey();
 			checkState(eObject.eResource() != null && eObject.eResource().getResourceSet() != null,
@@ -221,8 +222,8 @@ class UuidResolverImpl implements UuidResolver {
 			if (resourcesFilter != null && !resourcesFilter.contains(eObject.eResource())) {
 				continue;
 			}
-			String id = idUnresolver.getAndUpdateId(eObject);
-			String uuid = entry.getValue();
+			Id id = idUnresolver.getAndUpdateId(eObject);
+			Uuid uuid = entry.getValue();
 			uuidToIdMapping.put(uuid, id);
 		}
 		return uuidToIdMapping;
@@ -246,13 +247,13 @@ class UuidResolverImpl implements UuidResolver {
 	 *                                      <code>null</code> if the mapping shall
 	 *                                      not be validated.
 	 */
-	private void applyUuidToIdMapping(Map<String, String> uuidToIdMapping, UuidResolver targetUuidResolver,
+	private void applyUuidToIdMapping(Map<Uuid, Id> uuidToIdMapping, UuidResolver targetUuidResolver,
 			ResourceSet targetResourceSet, Map<Resource, Resource> sourceToTargetResourceMapping)
 			throws IllegalStateException {
 		var idResolver = IdResolver.create(targetResourceSet);
 		for (var entry : uuidToIdMapping.entrySet()) {
-			String uuid = entry.getKey();
-			String id = entry.getValue();
+			Uuid uuid = entry.getKey();
+			Id id = entry.getValue();
 			EObject targetEObject = idResolver.getEObject(id);
 			checkState(targetEObject != null, "could not find object corresponding to %s in resource set %s", uuid,
 					targetResourceSet);

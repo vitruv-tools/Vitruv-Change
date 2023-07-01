@@ -1,20 +1,18 @@
 package tools.vitruv.change.atomic.root
 
 import allElementTypes.Root
-import org.eclipse.emf.ecore.resource.Resource
-import tools.vitruv.change.atomic.root.RemoveRootEObject
-
+import org.eclipse.emf.ecore.EObject
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import static org.junit.jupiter.api.Assertions.assertTrue
-import static org.junit.jupiter.api.Assertions.assertFalse
-import static org.junit.jupiter.api.Assertions.assertEquals
-import static org.junit.jupiter.api.Assertions.assertNull
-import static org.junit.jupiter.api.Assertions.assertSame
-import static org.junit.jupiter.api.Assertions.assertNotSame
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.uuid.Uuid
+
+import static org.hamcrest.CoreMatchers.is
 import static org.hamcrest.MatcherAssert.assertThat
-import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
+import static org.junit.jupiter.api.Assertions.assertEquals
 import static org.junit.jupiter.api.Assertions.assertThrows
+import static org.junit.jupiter.api.Assertions.assertTrue
+import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
 
 /**
  * Test class for the concrete {@link RemoveRootEObject} EChange,
@@ -31,24 +29,6 @@ class RemoveRootEObjectTest extends RootEChangeTest {
 	}
 
 	/**
-	 * Test resolves a {@link RemoveRootEObject} EChange, with a root 
-	 * object already in the resource. This happens when the model is
-	 * in state before the change is applied forward.
-	 */
-	@Test
-	def void resolveBeforeTest() {
-		// Create change
-		val unresolvedChange = createUnresolvedChange(newRootObject, 1)
-		unresolvedChange.assertIsNotResolved(newRootObject)
-		assertIsStateBefore
-
-		// Resolve
-		val resolvedChange = unresolvedChange.resolveBefore as RemoveRootEObject<Root>
-		resolvedChange.assertIsResolved(newRootObject, resource)
-		assertIsStateBefore
-	}
-
-	/**
 	 * Tests whether resolving the {@link RemoveRootEObject} EChange
 	 * returns the same class.
 	 */
@@ -56,11 +36,12 @@ class RemoveRootEObjectTest extends RootEChangeTest {
 	def void resolveToCorrectType() {
 		// Create change
 		val unresolvedChange = createUnresolvedChange(newRootObject, 1)
-		unresolvedChange.assertIsNotResolved(newRootObject)
 
 		// Resolve
-		val resolvedChange = unresolvedChange.resolveBefore as RemoveRootEObject<Root>
+		val resolvedChange = unresolvedChange.applyForwardAndResolve as RemoveRootEObject<EObject>
 		unresolvedChange.assertDifferentChangeSameClass(resolvedChange)
+		assertThat(resolvedChange.resource, is(rootObject.eResource))
+		assertEquals(resolvedChange.uri, rootObject.eResource.URI.toString)
 	}
 
 	/**
@@ -70,21 +51,15 @@ class RemoveRootEObjectTest extends RootEChangeTest {
 	@Test
 	def void applyForwardTest() {
 		// Create and resolve change 1
-		val resolvedChange = createUnresolvedChange(newRootObject, 1).resolveBefore as RemoveRootEObject<Root>
-		resolvedChange.assertIsResolved(newRootObject, resource)
-
-		// Apply forward 1
-		resolvedChange.assertApplyForward
+		val unresolvedChange = createUnresolvedChange(newRootObject, 1)
+		unresolvedChange.applyForwardAndResolve
 
 		assertEquals(resourceContent.size, 2)
 		assertThat(newRootObject2, equalsDeeply(resourceContent.get(1)))
 
 		// Create and resolve change 2
-		val resolvedChange2 = createUnresolvedChange(newRootObject2, 1).resolveBefore as RemoveRootEObject<Root>
-		resolvedChange2.assertIsResolved(newRootObject2, resource)
-
-		// Apply forward 2
-		resolvedChange2.assertApplyForward
+		val unresolvedChange2 = createUnresolvedChange(newRootObject2, 1)
+		unresolvedChange2.applyForwardAndResolve
 
 		// State after
 		assertIsStateAfter
@@ -97,25 +72,23 @@ class RemoveRootEObjectTest extends RootEChangeTest {
 	@Test
 	def void applyBackwardTest() {
 		// Create and resolve and apply forward 1
-		val resolvedChange = createUnresolvedChange(newRootObject, 1).resolveBefore as RemoveRootEObject<Root>
-		resolvedChange.assertApplyForward
+		val resolvedChange = createUnresolvedChange(newRootObject, 1).applyForwardAndResolve
 
 
 		// Create and resolve and apply forward 2
-		val resolvedChange2 = createUnresolvedChange(newRootObject2, 1).resolveBefore as RemoveRootEObject<Root>
-		resolvedChange2.assertApplyForward
+		val resolvedChange2 = createUnresolvedChange(newRootObject2, 1).applyForwardAndResolve
 
 		// State after
 		assertIsStateAfter
 
 		// Apply backward 2
-		resolvedChange2.assertApplyBackward
+		resolvedChange2.applyBackwardAndUnresolve
 
 		assertEquals(resourceContent.size, 2)
 		assertTrue(resourceContent.contains(newRootObject2))
 
 		// Apply backward 1
-		resolvedChange.assertApplyBackward
+		resolvedChange.applyBackwardAndUnresolve
 
 		// State before
 		assertIsStateBefore
@@ -127,9 +100,10 @@ class RemoveRootEObjectTest extends RootEChangeTest {
 	@Test
 	def void invalidIndexTest() {
 		val index = 5
-
-		// Create and resolve change
-		assertThrows(IllegalStateException) [createUnresolvedChange(newRootObject, index).resolveBefore as RemoveRootEObject<Root>]
+		assertTrue(resourceContent.size < index)
+		
+		val invalidChange = createUnresolvedChange(newRootObject, index)
+		assertThrows(IllegalStateException) [invalidChange.applyForwardAndResolve]
 	}
 
 	/**
@@ -159,27 +133,9 @@ class RemoveRootEObjectTest extends RootEChangeTest {
 	}
 
 	/**
-	 * Change is not resolved.
-	 */
-	def private static void assertIsNotResolved(RemoveRootEObject<Root> change, Root oldValue) {
-		assertFalse(change.isResolved)
-		assertNotSame(change.oldValue, oldValue)
-		assertNull(change.resource)
-	}
-
-	/**
-	 * Change is resolved.
-	 */
-	def private static void assertIsResolved(RemoveRootEObject<Root> change, Root oldValue, Resource resource) {
-		assertTrue(change.isResolved)
-		assertSame(change.oldValue, oldValue)
-		assertSame(change.resource, resource)
-	}
-
-	/**
 	 * Creates new unresolved change.
 	 */
-	def private RemoveRootEObject<Root> createUnresolvedChange(Root rootObject, int index) {
-		return atomicFactory.createRemoveRootChange(rootObject, resource, index)
+	def private EChange<Uuid> createUnresolvedChange(Root rootObject, int index) {
+		return atomicFactory.createRemoveRootChange(rootObject, resource, index).unresolve
 	}
 }

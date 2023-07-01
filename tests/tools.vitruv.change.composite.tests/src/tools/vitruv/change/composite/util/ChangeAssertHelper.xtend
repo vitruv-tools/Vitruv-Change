@@ -25,23 +25,23 @@ import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
 @Utility
 class ChangeAssertHelper {
 
-	static def <T extends AdditiveEChange<?>, SubtractiveEChange> assertOldAndNewValue(T eChange, Object oldValue,
+	static def <T extends AdditiveEChange<?, ?>, SubtractiveEChange> assertOldAndNewValue(T eChange, Object oldValue,
 		Object newValue) {
 		eChange.assertOldValue(oldValue)
 		eChange.assertNewValue(newValue)
 	}
 
-	static def assertOldValue(EChange eChange, Object oldValue) {
+	static def assertOldValue(EChange<?> eChange, Object oldValue) {
 		if (oldValue instanceof EObject) {
 			assertThat("old value must be the same or a copy as the given old value", oldValue,
-				equalsDeeply((eChange as SubtractiveEChange<?>).oldValue as EObject))
+				equalsDeeply((eChange as SubtractiveEChange<?, ?>).oldValue as EObject))
 		} else {
-			assertEquals(oldValue, (eChange as SubtractiveEChange<?>).oldValue,
+			assertEquals(oldValue, (eChange as SubtractiveEChange<?, ?>).oldValue,
 				"old value must be the same as the given old value")
 		}
 	}
 
-	static def assertNewValue(AdditiveEChange<?> eChange, Object newValue) {
+	static def assertNewValue(AdditiveEChange<?, ?> eChange, Object newValue) {
 		val newValueInChange = eChange.newValue
 		var condition = newValue === null && newValueInChange === null
 		if (newValue instanceof EObject && newValueInChange instanceof EObject) {
@@ -59,19 +59,20 @@ class ChangeAssertHelper {
 		}
 	}
 
-	static def void assertAffectedEObject(EChange eChange, EObject expectedAffectedEObject) {
-		if (eChange instanceof FeatureEChange<?, ?>) {
-			assertThat("The actual affected EObject is a different one than the expected affected EObject or its copy",
-				expectedAffectedEObject, equalsDeeply(eChange.affectedEObject))
-		} else if (eChange instanceof EObjectExistenceEChange<?>) {
-			assertThat("The actual affected EObject is a different one than the expected affected EObject or its copy",
-				expectedAffectedEObject, equalsDeeply(eChange.affectedEObject))
-		} else {
-			throw new IllegalArgumentException()
+	static def void assertAffectedEObject(EChange<EObject> eChange, EObject expectedAffectedEObject) {
+		switch eChange {
+			FeatureEChange<EObject, ?>:
+				assertThat("The actual affected EObject is a different one than the expected affected EObject or its copy",
+				expectedAffectedEObject, equalsDeeply(eChange.affectedElement))
+			EObjectExistenceEChange<EObject>:
+				assertThat("The actual affected EObject is a different one than the expected affected EObject or its copy",
+				expectedAffectedEObject, equalsDeeply(eChange.affectedElement))
+			default:
+				throw new IllegalArgumentException()
 		}
 	}
 
-	static def assertAffectedEFeature(EChange eChange, EStructuralFeature expectedEFeature) {
+	static def assertAffectedEFeature(EChange<?> eChange, EStructuralFeature expectedEFeature) {
 		assertEquals(expectedEFeature, (eChange as FeatureEChange<?, ?>).affectedFeature,
 			"The actual affected EStructuralFeature is a different one than the expected EStructuralFeature")
 	}
@@ -81,12 +82,12 @@ class ChangeAssertHelper {
 			updateEReference.isContainment, '''The containment information of the change «updateEReference» is wrong''')
 	}
 
-	def static void assertUri(RootEChange rootChange, String expectedValue) {
+	def static void assertUri(RootEChange<?> rootChange, String expectedValue) {
 		assertEquals(URI.createFileURI(expectedValue).toString,
 			rootChange.uri, '''Change «rootChange» shall have the uri «URI.createFileURI(expectedValue)»''')
 	}
 
-	def static void assertResource(RootEChange rootChange, Resource resource) {
+	def static void assertResource(RootEChange<?> rootChange, Resource resource) {
 		assertEquals(rootChange.resource, resource, '''Change «rootChange» shall have the resource «resource»''')
 	}
 

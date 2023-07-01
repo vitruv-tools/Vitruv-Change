@@ -1,10 +1,11 @@
 package tools.vitruv.change.atomic.eobject
 
-import allElementTypes.Root
-import tools.vitruv.change.atomic.eobject.CreateEObject
-
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.uuid.Uuid
+
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet
 
 /**
  * Test class for the concrete {@link CreateEObject} EChange,
@@ -23,10 +24,10 @@ class CreateEObjectTest extends EObjectTest {
 	@Test
 	def void resolveToCorrectType() {
 		// Create change
-		val unresolvedChange = createUnresolvedChange(createdObject)
+		val unresolvedChange = createUnresolvedChange()
 
 		// Resolve		
-		val resolvedChange = unresolvedChange.resolveBefore
+		val resolvedChange = unresolvedChange.applyForwardAndResolve
 		unresolvedChange.assertDifferentChangeSameClass(resolvedChange)
 	}
 
@@ -37,25 +38,21 @@ class CreateEObjectTest extends EObjectTest {
 	@Test
 	def void applyForwardTest() {
 		// Create change and resolve
-		val resolvedChange = createUnresolvedChange(createdObject).resolveBefore as CreateEObject<Root>
-
-		// Apply forward
-		resolvedChange.assertApplyForward
+		val unresolvedChange = createUnresolvedChange()
+		unresolvedChange.applyForwardAndResolve
 
 		// State after
-		assertIsStateAfter(createdObject)
+		assertIsStateAfter()
 
 		// Now another change would take the object and inserts it in a resource
 		prepareStateBefore
 
 		// Create change and resolve 2
-		val resolvedChange2 = createUnresolvedChange(createdObject2).resolveBefore as CreateEObject<Root>
-
-		// Apply forward 2
-		resolvedChange2.assertApplyForward
+		val unresolvedChange2 = createUnresolvedChange()
+		unresolvedChange2.applyForwardAndResolve
 
 		// State after
-		assertIsStateAfter(createdObject2)
+		assertIsStateAfter()
 	}
 
 	/**
@@ -65,11 +62,11 @@ class CreateEObjectTest extends EObjectTest {
 	@Test
 	def void applyBackwardTest() {
 		// Create change, resolve it and apply it forward
-		val resolvedChange = createUnresolvedChange(createdObject).resolveBefore as CreateEObject<Root>
-		resolvedChange.assertApplyForward
+		val resolvedChange = createUnresolvedChange().applyForwardAndResolve
 
 		// Apply backward
-		resolvedChange.assertApplyBackward
+		resolvedChange.applyBackwardAndUnresolve
+		assertIsStateAfter()
 	}
 
 	/**
@@ -88,14 +85,14 @@ class CreateEObjectTest extends EObjectTest {
 	/**
 	 * Model is in state after the change.
 	 */
-	def private void assertIsStateAfter(Root object) {
+	def private void assertIsStateAfter() {
 	}
 
 	/**
 	 * Creates new unresolved change.
 	 */
-	def private CreateEObject<Root> createUnresolvedChange(Root newObject) {
-		return atomicFactory.createCreateEObjectChange(newObject)
+	def private EChange<Uuid> createUnresolvedChange() {
+		return atomicFactory.createCreateEObjectChange(aet.Root).unresolve
 	}
 
 }

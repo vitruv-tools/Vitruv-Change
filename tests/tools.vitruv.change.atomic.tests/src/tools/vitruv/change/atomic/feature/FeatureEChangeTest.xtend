@@ -12,18 +12,14 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.EChangeTest
+import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.atomic.uuid.UuidResolver
 
-import static org.junit.jupiter.api.Assertions.assertFalse
-import static org.junit.jupiter.api.Assertions.assertNotSame
 import static org.junit.jupiter.api.Assertions.assertNull
-import static org.junit.jupiter.api.Assertions.assertSame
 import static org.junit.jupiter.api.Assertions.assertThrows
-import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
-import static extension tools.vitruv.change.atomic.resolve.EChangeUuidResolverAndApplicator.*
 
 /**
  * Test class for {@link FeatureEChange} which is used by every {@link EChange} which modifies {@link EStructuralFeature}s 
@@ -46,23 +42,7 @@ class FeatureEChangeTest extends EChangeTest {
 		val resourceSet2 = new ResourceSetImpl().withGlobalFactories
 		resource2 = resourceSet2.getResource(resource.URI, true)
 		uuidResolver2 = UuidResolver.create(resourceSet2)
-		uuidResolver.resolveResource(resource, resource2, uuidResolver2)
-	}
-
-	/**
-	 * Tests if a feature change, which affected object and feature references 
-	 * to the changed model instance, resolved correctly to the same model instance, 
-	 * after unresolving the object. 
-	 */
-	@Test
-	def void resolveBeforeTest() {
-		// Create change 		
-		val unresolvedChange = createUnresolvedChange()
-		unresolvedChange.assertIsNotResolved(affectedEObject, affectedFeature)
-
-		// Resolve
-		val resolvedChange = unresolvedChange.resolveBefore as FeatureEChange<Root, EAttribute>
-		resolvedChange.assertIsResolved(affectedEObject, affectedFeature)
+		resource2.allContents.forEach[uuidResolver2.registerEObject(it)]
 	}
 
 	/**
@@ -78,23 +58,9 @@ class FeatureEChangeTest extends EChangeTest {
 
 		// Create change
 		val unresolvedChange = createUnresolvedChange()
-		unresolvedChange.assertIsNotResolved(affectedEObject, affectedFeature)
 
 		// Resolve
-		assertThrows(IllegalStateException)[unresolvedChange.resolveBefore(uuidResolver2)]
-	}
-
-	/**
-	 * Tests whether resolving an already resolved EFeatureChange throws an exception.
-	 */
-	@Test
-	def void resolveResolvedEFeatureChange() {
-		// Create change and resolve	
-		val resolvedChange = createUnresolvedChange().resolveBefore as FeatureEChange<Root, EAttribute>
-		resolvedChange.assertIsResolved(affectedEObject, affectedFeature)
-
-		// Resolve again
-		assertThrows(IllegalArgumentException, [resolvedChange.resolveBefore])
+		assertThrows(IllegalStateException)[unresolvedChange.applyForwardAndResolve]
 	}
 
 	/**
@@ -105,58 +71,32 @@ class FeatureEChangeTest extends EChangeTest {
 		affectedEObject = null
 
 		// Create change	
-		assertThrows(IllegalArgumentException) [createUnresolvedChange()]
+		assertThrows(IllegalArgumentException)[createUnresolvedChange()]
 	}
 
 	/**
-	 * Tests whether resolving the EFeatureChange fails by giving a null EFeature
+	 * Tests whether creating the EFeatureChange fails by giving a null EFeature
 	 */
 	@Test
-	def void resolveEFeatureAffectedFeatureNull() {
-		affectedFeature = null
-
-		// Create change	
-		val unresolvedChange = createUnresolvedChange()
-		unresolvedChange.assertIsNotResolved(affectedEObject, null)
-
-		// Resolve
-		assertThrows(IllegalArgumentException) [unresolvedChange.resolveBefore]
+	def void createEFeatureAffectedFeatureNull() {
+		affectedFeature = null	
+		assertThrows(IllegalArgumentException)[createUnresolvedChange()]
 	}
 
 	/**
 	 * Creates and inserts a new root element in the resource 1.
 	 */
 	def private Root prepareSecondRoot() {
-		val root = aet.Root.withUuid
+		val root = aet.Root
 		resource.contents.add(root)
 		return root
 	}
 
 	/**
-	 * Change is not resolved.
-	 */
-	def private static void assertIsNotResolved(FeatureEChange<Root, EAttribute> change, Root affectedEObject,
-		EAttribute affectedFeature) {
-		assertFalse(change.isResolved)
-		assertNotSame(change.affectedEObject, affectedEObject)
-		assertSame(change.affectedFeature, affectedFeature)
-	}
-
-	/**
-	 * Change is resolved.
-	 */
-	def private static void assertIsResolved(FeatureEChange<Root, EAttribute> change, Root affectedEObject,
-		EAttribute affectedFeature) {
-		assertTrue(change.isResolved)
-		assertSame(change.affectedEObject, affectedEObject)
-		assertSame(change.affectedFeature, affectedFeature)
-	}
-
-	/**
 	 * Creates new unresolved change.
 	 */
-	def private FeatureEChange<Root, EAttribute> createUnresolvedChange() {
+	def private EChange<Uuid> createUnresolvedChange() {
 		// The concrete change type ReplaceSingleEAttributeChange will be used for the tests.
-		return atomicFactory.createReplaceSingleAttributeChange(affectedEObject, affectedFeature, null, null)
+		return atomicFactory.createReplaceSingleAttributeChange(affectedEObject, affectedFeature, null, null).unresolve
 	}
 }

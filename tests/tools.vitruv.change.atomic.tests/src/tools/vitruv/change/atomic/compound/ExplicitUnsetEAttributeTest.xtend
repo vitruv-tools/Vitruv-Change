@@ -5,17 +5,16 @@ import allElementTypes.Root
 import java.util.List
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.ecore.EAttribute
-import tools.vitruv.change.atomic.feature.attribute.SubtractiveAttributeEChange
-import tools.vitruv.change.atomic.EChangeTest
-
-import static extension tools.vitruv.change.atomic.util.EChangeAssertHelper.*
-import tools.vitruv.change.atomic.EChange
-import tools.vitruv.change.atomic.feature.UnsetFeature
+import org.eclipse.emf.ecore.EObject
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import static org.junit.jupiter.api.Assertions.assertTrue
-import static org.junit.jupiter.api.Assertions.assertFalse
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.EChangeTest
+import tools.vitruv.change.atomic.uuid.Uuid
+
 import static org.junit.jupiter.api.Assertions.assertEquals
+import static org.junit.jupiter.api.Assertions.assertFalse
+import static org.junit.jupiter.api.Assertions.assertTrue
 
 /**
  * Test class for the concrete {@link ExplicitUnsetEAttribute} EChange,
@@ -36,32 +35,6 @@ class ExplicitUnsetEAttributeTest extends EChangeTest {
 	}
 
 	/**
-	 * Resolves a {@link ExplicitUnsetEAttribute} EChange. The feature is a single
-	 * valued attribute and the model is in state before the change.
-	 */
-	@Test
-	def void resolveBeforeSingleValuedAttributeTest() {
-		// Set state before
-		isSingleValuedAttributeTest
-
-		// Test
-		resolveBeforeTest
-	}
-
-	/**
-	 * Resolves a {@link ExplicitUnsetEAttribute} EChange. The feature is a multi
-	 * valued attribute and the model is in state before the change.
-	 */
-	@Test
-	def void resolveBeforeUnsetMultiValuedAttributeTest() {
-		// Set state before
-		isMultiValuedAttributeTest
-
-		// Test
-		resolveBeforeTest
-	}
-
-	/**
 	 * Tests whether resolving the {@link ExplicitUnsetEAttribute} EChange
 	 * returns the same class.
 	 */
@@ -74,7 +47,7 @@ class ExplicitUnsetEAttributeTest extends EChangeTest {
 		val unresolvedChange = createUnresolvedChange()
 
 		// Resolve		
-		val resolvedChange = unresolvedChange.resolveBefore
+		val resolvedChange = unresolvedChange.applyForwardAndResolve
 		unresolvedChange.assertDifferentChangeSameClass(resolvedChange)
 	}
 
@@ -161,14 +134,6 @@ class ExplicitUnsetEAttributeTest extends EChangeTest {
 	}
 
 	/**
-	 * Sets the state after the change.
-	 */
-	def private void prepareStateAfter() {
-		affectedEObject.eUnset(affectedFeature)
-		assertIsStateAfter
-	}
-
-	/**
 	 * Model is in state before the single or multi valued unset change.
 	 */
 	def private void assertIsStateBefore() {
@@ -190,26 +155,10 @@ class ExplicitUnsetEAttributeTest extends EChangeTest {
 	}
 
 	/**
-	 * Change is not resolved.
-	 */
-	def protected static assertIsNotResolved(List<? extends EChange> changes) {
-		EChangeTest.assertIsNotResolved(changes)
-	}
-
-	/**
-	 * Change is resolved.
-	 */
-	def private static void assertIsResolved(List<? extends EChange> changes, Root affectedRootObject) {
-		assertIsResolved(changes)
-		assertType(changes.get(changes.size - 2), SubtractiveAttributeEChange)
-		assertType(changes.last, UnsetFeature)
-	}
-
-	/**
 	 * Creates new unresolved change.
 	 */
-	def private List<? extends EChange> createUnresolvedChange() {
-		var List<EChange> subtractiveChanges = newArrayList()
+	def private List<? extends EChange<Uuid>> createUnresolvedChange() {
+		var List<EChange<EObject>> subtractiveChanges = newArrayList()
 		if (!affectedFeature.many) {
 			subtractiveChanges.add(
 				atomicFactory.createReplaceSingleAttributeChange(affectedEObject, affectedFeature, OLD_VALUE,
@@ -222,34 +171,7 @@ class ExplicitUnsetEAttributeTest extends EChangeTest {
 			subtractiveChanges.add(
 				atomicFactory.createRemoveAttributeChange(affectedEObject, affectedFeature, 0, OLD_VALUE))
 		}
-		return (subtractiveChanges + #[atomicFactory.createUnsetFeatureChange(affectedEObject, affectedFeature)]).toList
-	}
-
-	/**
-	 * Starts a test with resolving a change before the change is applied.
-	 */
-	def private void resolveBeforeTest() {
-		// State before
-		assertIsStateBefore
-
-		// Create change
-		val unresolvedChange = createUnresolvedChange()
-		unresolvedChange.assertIsNotResolved
-
-		// Resolve 1
-		var resolvedChange = unresolvedChange.resolveBefore
-		resolvedChange.assertIsResolved(affectedEObject)
-
-		// Model should be unaffected.
-		assertIsStateBefore
-
-		// Resolve 2
-		var resolvedAndAppliedChange = unresolvedChange.resolveBefore
-		resolvedAndAppliedChange.applyForward
-		resolvedAndAppliedChange.assertIsResolved(affectedEObject)
-
-		// State after
-		assertIsStateAfter
+		return (subtractiveChanges + #[atomicFactory.createUnsetFeatureChange(affectedEObject, affectedFeature)]).toList.unresolve
 	}
 
 	/**
@@ -260,10 +182,8 @@ class ExplicitUnsetEAttributeTest extends EChangeTest {
 		assertIsStateBefore
 
 		// Create and resolve change
-		val resolvedChange = createUnresolvedChange().resolveBefore
-
-		// Apply forward
-		resolvedChange.assertApplyForward
+		val unresolvedChange = createUnresolvedChange()
+		unresolvedChange.applyForwardAndResolve
 
 		// State after
 		assertIsStateAfter
@@ -277,13 +197,13 @@ class ExplicitUnsetEAttributeTest extends EChangeTest {
 		assertIsStateBefore
 
 		// Create and resolve change
-		val resolvedChange = createUnresolvedChange().resolveBefore
+		val resolvedChange = createUnresolvedChange().applyForwardAndResolve
 
 		// Set state after
-		prepareStateAfter
+		assertIsStateAfter
 
 		// Apply forward
-		resolvedChange.assertApplyBackward
+		resolvedChange.applyBackwardAndUnresolve
 
 		// State before
 		assertIsStateBefore
