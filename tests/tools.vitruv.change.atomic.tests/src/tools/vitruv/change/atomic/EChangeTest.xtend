@@ -10,8 +10,9 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.io.TempDir
-import tools.vitruv.change.atomic.resolve.AtomicEChangeUnresolver
-import tools.vitruv.change.atomic.resolve.EChangeUuidResolverAndApplicator
+import tools.vitruv.change.atomic.resolve.AtomicEChangeResolver
+import tools.vitruv.change.atomic.resolve.AtomicEChangeUuidResolver
+import tools.vitruv.change.atomic.resolve.internal.AtomicEChangeUnresolver
 import tools.vitruv.change.atomic.util.EChangeAssertHelper
 import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.atomic.uuid.UuidResolver
@@ -37,6 +38,7 @@ abstract class EChangeTest {
 	var Resource resource
 	var ResourceSet resourceSet
 	var UuidResolver uuidResolver
+	var AtomicEChangeResolver<Uuid> atomicChangeResolver
 
 	var AtomicEChangeUnresolver changeUnresolver;
 	@Accessors(PROTECTED_GETTER)
@@ -61,6 +63,7 @@ abstract class EChangeTest {
 		// Create model
 		resourceSet = new ResourceSetImpl().withGlobalFactories
 		uuidResolver = UuidResolver.create(resourceSet)
+		atomicChangeResolver = new AtomicEChangeUuidResolver(uuidResolver)
 		resource = resourceSet.createResource(fileUri)
 
 		rootObject = aet.Root
@@ -84,7 +87,7 @@ abstract class EChangeTest {
 	}
 	
 	def protected EChange<Uuid> applyBackwardAndUnresolve(EChange<EObject> change) {
-		return EChangeUuidResolverAndApplicator.unresolveAndApplyBackward(change, uuidResolver)
+		return atomicChangeResolver.unresolveAndApplyBackward(change)
 	}
 
 	def protected List<EChange<EObject>> applyForwardAndResolve(List<? extends EChange<Uuid>> changes) {
@@ -92,7 +95,7 @@ abstract class EChangeTest {
 	}
 	
 	def protected EChange<EObject> applyForwardAndResolve(EChange<Uuid> change) {
-		return EChangeUuidResolverAndApplicator.resolveAndApplyForward(change, uuidResolver)
+		return atomicChangeResolver.resolveAndApplyForward(change)
 	}
 	
 	def protected EChange<Uuid> unresolve(EChange<? extends EObject> eChange) {

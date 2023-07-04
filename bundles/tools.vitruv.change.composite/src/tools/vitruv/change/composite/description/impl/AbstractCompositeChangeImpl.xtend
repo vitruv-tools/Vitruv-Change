@@ -1,13 +1,15 @@
 package tools.vitruv.change.composite.description.impl
 
+import java.util.HashSet
+import java.util.LinkedHashSet
 import java.util.List
+import java.util.Set
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.composite.MetamodelDescriptor
 import tools.vitruv.change.composite.description.CompositeChange
 import tools.vitruv.change.composite.description.VitruviusChange
+
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.*
-import java.util.LinkedHashSet
-import java.util.Set
-import java.util.HashSet
-import tools.vitruv.change.composite.MetamodelDescriptor
 
 abstract class AbstractCompositeChangeImpl<Element, ContanedChange extends VitruviusChange<Element>> implements CompositeChange<Element, ContanedChange> {
 	List<ContanedChange> changes
@@ -32,7 +34,7 @@ abstract class AbstractCompositeChangeImpl<Element, ContanedChange extends Vitru
 		changes.flatMapFixedTo(new HashSet) [affectedEObjectsMetamodelDescriptors]
 	}
 
-	override getEChanges() {
+	override List<EChange<Element>> getEChanges() {
 		return changes.flatMapFixed [EChanges]
 	}
 	

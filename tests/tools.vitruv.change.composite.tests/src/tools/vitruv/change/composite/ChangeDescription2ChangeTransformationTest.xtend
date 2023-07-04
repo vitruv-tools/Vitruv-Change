@@ -3,7 +3,6 @@ package tools.vitruv.change.composite
 import allElementTypes.Root
 import java.nio.file.Path
 import java.util.HashMap
-import java.util.List
 import java.util.function.Consumer
 import org.eclipse.emf.common.notify.Notifier
 import org.eclipse.emf.ecore.EObject
@@ -15,8 +14,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.^extension.ExtendWith
 import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.EChangeUuidManager
+import tools.vitruv.change.atomic.resolve.AtomicEChangeUuidResolver
+import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.TransactionalChange
+import tools.vitruv.change.composite.description.VitruviusChangeResolver
 import tools.vitruv.change.composite.recording.ChangeRecorder
 import tools.vitruv.testutils.RegisterMetamodelsInStandalone
 import tools.vitruv.testutils.TestProject
@@ -34,12 +36,12 @@ import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.loadOrCreateResource
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceUtil.getFirstRootEObject
-import static extension tools.vitruv.change.atomic.resolve.EChangeUuidResolverAndApplicator.*
 
 @ExtendWith(TestProjectManager, RegisterMetamodelsInStandalone)
 abstract class ChangeDescription2ChangeTransformationTest {
 	var ChangeRecorder changeRecorder
 	var UuidResolver uuidResolver
+	var VitruviusChangeResolver<Uuid> changeResolver
 	var ResourceSet resourceSet
 	var Path tempFolder
 	
@@ -52,6 +54,7 @@ abstract class ChangeDescription2ChangeTransformationTest {
 		this.resourceSet = new ResourceSetImpl().withGlobalFactories()
 		this.uuidResolver = UuidResolver.create(resourceSet)
 		this.changeRecorder = new ChangeRecorder(resourceSet)
+		this.changeResolver = new VitruviusChangeResolver(new AtomicEChangeUuidResolver(uuidResolver))
 		this.resourceSet.startRecording
 	}
 
@@ -61,8 +64,8 @@ abstract class ChangeDescription2ChangeTransformationTest {
 	}
 
 	protected def <T extends Notifier> record(T objectToRecord, Consumer<T> operationToRecord) {
-		val recordedChanges = objectToRecord.recordComposite(operationToRecord)
-		return validateChange(recordedChanges)
+		val recordedChange = objectToRecord.recordComposite(operationToRecord)
+		return recordedChange.EChanges
 	}
 	
 	protected def <T extends Notifier> recordComposite(T objectToRecord, Consumer<T> operationToRecord) {
@@ -73,8 +76,9 @@ abstract class ChangeDescription2ChangeTransformationTest {
 		objectToRecord.stopRecording
 		val recordedChange = changeRecorder.change
 		EChangeUuidManager.setOrGenerateIds(recordedChange.EChanges, uuidResolver)
+		val resolvedChange = validateChange(recordedChange)
 		resourceSet.startRecording
-		return recordedChange
+		return resolvedChange
 	}
 
 	protected def resourceAt(String name) {
@@ -108,30 +112,21 @@ abstract class ChangeDescription2ChangeTransformationTest {
 		this.changeRecorder.removeFromRecording(notifier)
 	}
 
-	private def List<EChange> validateChange(TransactionalChange<EObject> change) {
+	private def validateChange(TransactionalChange<EObject> change) {
 		// Rollback changes, copy the state before their execution, reapply the changes to restore the state
 		// and re-resolve the changes for the copied state and apply them to check whether they can properly
 		// be applied to a different state
-		val monitoredChanges = change.EChanges
-		monitoredChanges.reverseView.forEach[monitoredChange|
-			monitoredChange.applyBackward(uuidResolver)
-		]
+		val unresolvedChanges = changeResolver.unresolveAndUnapply(change)
 		uuidResolver.endTransaction
 		val comparisonResourceSet = new ResourceSetImpl().withGlobalFactories()
 		val originalToComparisonResourceMapping = resourceSet.copyTo(comparisonResourceSet)
 		val comparisonUuidResolver = UuidResolver.create(comparisonResourceSet)
 		uuidResolver.resolveResources(originalToComparisonResourceMapping, comparisonUuidResolver)
-		monitoredChanges.map[
-			applyForward(uuidResolver)
-			EcoreUtil.copy(it)
-		].forEach[
-			val unresolvedChange = it.unresolve()
-			val resolvedChange = unresolvedChange.resolveBefore(comparisonUuidResolver)
-			resolvedChange.applyForward(comparisonUuidResolver)
-		]
+		val resolvedChange = changeResolver.resolveAndApply(unresolvedChanges)
+		new VitruviusChangeResolver(new AtomicEChangeUuidResolver(comparisonUuidResolver)).resolveAndApply(unresolvedChanges)
 		resourceSet.assertContains(comparisonResourceSet)
 		comparisonResourceSet.assertContains(resourceSet)
-		return monitoredChanges
+		return resolvedChange
 	}
 	
 	private static def copyTo(ResourceSet original, ResourceSet target) {
@@ -158,7 +153,7 @@ abstract class ChangeDescription2ChangeTransformationTest {
 		}
 	}
 
-	static def assertChangeCount(Iterable<? extends EChange> changes, int expectedCount) {
+	static def <E> assertChangeCount(Iterable<? extends EChange<E>> changes, int expectedCount) {
 		assertEquals(
 			expectedCount,
 			changes.size,

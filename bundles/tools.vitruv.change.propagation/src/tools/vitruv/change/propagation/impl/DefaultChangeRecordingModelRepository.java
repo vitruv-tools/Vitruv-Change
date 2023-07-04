@@ -19,6 +19,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 
 import tools.vitruv.change.atomic.EChangeUuidManager;
+import tools.vitruv.change.atomic.resolve.AtomicEChangeUuidResolver;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.atomic.uuid.UuidResolver;
 import tools.vitruv.change.composite.description.TransactionalChange;
@@ -47,6 +48,7 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 	private final ChangeRecorder changeRecorder;
 	private final Path consistencyMetadataFolder;
 	private final UuidResolver uuidResolver;
+	private final VitruviusChangeResolver<Uuid> changeResolver;
 
 	private boolean isLoading = false;
 
@@ -62,6 +64,7 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 		this.consistencyMetadataFolder = consistencyMetadataFolder;
 		this.modelsResourceSet = withGlobalFactories(new ResourceSetImpl());
 		this.uuidResolver = UuidResolver.create(modelsResourceSet);
+		this.changeResolver = new VitruviusChangeResolver<>(new AtomicEChangeUuidResolver(uuidResolver));
 		this.correspondenceModel = createPersistableCorrespondenceModel(correspondencesURI);
 		this.modelsResourceSet.eAdapters().add(new ResourceRegistrationAdapter((resource) -> {
 			if (!isLoading) {
@@ -168,7 +171,7 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 
 	@Override
 	public VitruviusChange<EObject> applyChange(VitruviusChange<Uuid> change) {
-		return VitruviusChangeResolver.resolveAndApply(change, uuidResolver);
+		return changeResolver.resolveAndApply(change);
 	}
 
 	@Override

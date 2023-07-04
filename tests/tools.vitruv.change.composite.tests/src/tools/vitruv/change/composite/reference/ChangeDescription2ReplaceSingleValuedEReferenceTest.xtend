@@ -1,13 +1,14 @@
 package tools.vitruv.change.composite.reference
 
 import org.eclipse.emf.ecore.util.EcoreUtil
+import org.junit.jupiter.api.Test
+import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
+
+import static allElementTypes.AllElementTypesPackage.Literals.*
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 
 import static extension tools.vitruv.change.composite.util.AtomicEChangeAssertHelper.*
 import static extension tools.vitruv.change.composite.util.CompoundEChangeAssertHelper.*
-import static allElementTypes.AllElementTypesPackage.Literals.*
-import org.junit.jupiter.api.Test
-import static extension tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
-import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
 
 class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeDescription2ChangeTransformationTest {
 
@@ -18,14 +19,15 @@ class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeDescript
 		
 		// test
 		val nonRoot = aet.NonRoot
+		val nonRootId = nonRoot.id
 		val result = uniquePersistedRoot.record [
-			singleValuedContainmentEReference = nonRoot
+			singleValuedContainmentEReference = EcoreUtil.copy(nonRoot)
 		]
 
 		// assert
 		result.assertChangeCount(3)
 			.assertSetSingleValuedEReference(uniquePersistedRoot, ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE, nonRoot, true, true, false)
-			.assertReplaceSingleValuedEAttribute(nonRoot, IDENTIFIED__ID, null, nonRoot.id, false, false)
+			.assertReplaceSingleValuedEAttribute(nonRoot, IDENTIFIED__ID, null, nonRootId, false, false)
 			.assertEmpty
 	}
 
@@ -40,7 +42,7 @@ class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeDescript
 
 		// test
 		val result = uniquePersistedRoot.record [
-			singleValuedContainmentEReference = replaceNonRoot
+			singleValuedContainmentEReference = EcoreUtil.copy(replaceNonRoot)
 		]
 
 		// assert

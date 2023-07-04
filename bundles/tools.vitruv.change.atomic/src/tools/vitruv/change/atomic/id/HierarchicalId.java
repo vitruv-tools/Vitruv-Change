@@ -1,9 +1,9 @@
 package tools.vitruv.change.atomic.id;
 
-public final class Id {
+public final class HierarchicalId implements Comparable<HierarchicalId> {
 	private String id;
 	
-	Id(String id) {
+	public HierarchicalId(String id) {
 		this.id = id;
 	}
 	
@@ -13,7 +13,7 @@ public final class Id {
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof Id other) {
+		if (obj instanceof HierarchicalId other) {
 			return other.getId().equals(id);
 		}
 		return false;
@@ -22,6 +22,11 @@ public final class Id {
 	@Override
 	public int hashCode() {
 		return id.hashCode();
+	}
+	
+	@Override
+	public int compareTo(HierarchicalId o) {
+		return id.compareTo(o.getId());
 	}
 	
 	@Override

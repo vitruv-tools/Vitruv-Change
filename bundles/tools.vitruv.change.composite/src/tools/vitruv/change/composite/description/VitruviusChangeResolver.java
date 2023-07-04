@@ -1,97 +1,69 @@
 package tools.vitruv.change.composite.description;
 
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
 
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.change.atomic.id.Id;
-import tools.vitruv.change.atomic.id.IdResolver;
-import tools.vitruv.change.atomic.resolve.EChangeIdResolverAndApplicator;
-import tools.vitruv.change.atomic.resolve.EChangeUuidResolverAndApplicator;
-import tools.vitruv.change.atomic.uuid.Uuid;
-import tools.vitruv.change.atomic.uuid.UuidResolver;
+import tools.vitruv.change.atomic.resolve.AtomicEChangeResolver;
 import tools.vitruv.change.composite.description.impl.CompositeContainerChangeImpl;
 import tools.vitruv.change.composite.description.impl.TransactionalChangeImpl;
 
-public final class VitruviusChangeResolver {
-	private VitruviusChangeResolver() { }
-	
-	/**
-	 * Resolves the change and applies it forward so that the model is in the state
-	 * after the change afterwards. It has to be ensured that the model is in a
-	 * state the change can be applied to before calling this method and that the
-	 * changes use UUIDs. Returns the resolved change.
-	 * 
-	 * @throws IllegalStateException if the change cannot be resolved or is already
-	 *                               resolved.
-	 */
-	public static VitruviusChange<EObject> resolveAndApply(VitruviusChange<Uuid> change, UuidResolver uuidResolver) {
-		if (change instanceof CompositeContainerChangeImpl<Uuid> compositeChange) {
-			return new CompositeContainerChangeImpl<>(compositeChange.getChanges().stream().map(it -> resolveAndApply(change, uuidResolver)).toList());
-		}
-		else if (change instanceof TransactionalChangeImpl<Uuid> transactionalChange) {
-			List<EChange> resolvedChanges = transactionalChange.getEChanges().stream().map(eChange -> {
-				EChange resolvedEChange = EChangeUuidResolverAndApplicator.resolveBefore(eChange, uuidResolver);
-				EChangeUuidResolverAndApplicator.applyForward(resolvedEChange, uuidResolver);
-				return resolvedEChange;
-			}).toList();
-			return new TransactionalChangeImpl<>(resolvedChanges);
-		}
-		throw new IllegalStateException("trying to resolve unknown change of class " + change.getClass().getSimpleName());
+public final class VitruviusChangeResolver<Id> {
+	private AtomicEChangeResolver<Id> atomicChangeResolver;
+
+	public VitruviusChangeResolver(AtomicEChangeResolver<Id> atomicChangeResolver) {
+		this.atomicChangeResolver = atomicChangeResolver;
 	}
 
 	/**
 	 * Resolves the change and applies it forward so that the model is in the state
 	 * after the change afterwards. It has to be ensured that the model is in a
-	 * state the change can be applied to before calling this method and that the
-	 * changes use hierarchical IDs. Returns the resolved change.
+	 * state the change can be applied to before calling this method. Returns the
+	 * resolved change.
 	 * 
-	 * @throws IllegalStateException if the change cannot be resolved or is already
-	 *                               resolved.
+	 * @throws IllegalStateException if the change cannot be resolved or applied.
 	 */
-	public static VitruviusChange<EObject> resolveAndApply(VitruviusChange<Id> change, IdResolver idResolver) {
+	public VitruviusChange<EObject> resolveAndApply(VitruviusChange<Id> change) {
 		if (change instanceof CompositeContainerChangeImpl<Id> compositeChange) {
-			return new CompositeContainerChangeImpl<>(compositeChange.getChanges().stream().map(it -> resolveAndApply(it, idResolver)).toList());
-		}
-		else if (change instanceof TransactionalChangeImpl<Id> transactionalChange) {
-			List<EChange> resolvedChanges = transactionalChange.getEChanges().stream().map(eChange -> {
-				EChange resolvedEChange = EChangeIdResolverAndApplicator.resolveBefore(eChange, idResolver);
-				EChangeIdResolverAndApplicator.applyForward(resolvedEChange, idResolver);
-				return resolvedEChange;
-			}).toList();
+			return new CompositeContainerChangeImpl<>(
+					compositeChange.getChanges().stream().map(it -> resolveAndApply(it)).toList());
+		} else if (change instanceof TransactionalChangeImpl<Id> transactionalChange) {
+			List<EChange<EObject>> resolvedChanges = transactionalChange.getEChanges().stream()
+					.map(eChange -> atomicChangeResolver.resolveAndApplyForward(eChange)).toList();
 			return new TransactionalChangeImpl<>(resolvedChanges);
 		}
-		throw new IllegalStateException("trying to resolve unknown change of class " + change.getClass().getSimpleName());
+		throw new IllegalStateException(
+				"trying to resolve unknown change of class " + change.getClass().getSimpleName());
 	}
-	
+
 	/**
-	 * Returns an unresolved change, such that all its affected and referenced
-	 * {@link EObjects} are removed.
+	 * Unresolved the change and applies it backward so that the model is in the
+	 * state before the change afterwards. It has to be ensured that the model is in
+	 * a state after the change has been applied before calling this method. Returns
+	 * the unresolved change.
+	 * 
+	 * @throws IllegalStateException if the change cannot be applied backwards.
 	 */
-	public static VitruviusChange<Uuid> unresolve(VitruviusChange<EObject> change, UuidResolver uuidResolver) {
+	public VitruviusChange<Id> unresolveAndUnapply(VitruviusChange<EObject> change) {
 		if (change instanceof CompositeContainerChangeImpl<EObject> containerChange) {
-			return new CompositeContainerChangeImpl<>(containerChange.getChanges().stream().map(c -> unresolve(c,  uuidResolver)).toList());
-		}
-		else if (change instanceof TransactionalChangeImpl<EObject> transactionalChange) {
-			List<EChange> unresolvedEChanges = transactionalChange.getEChanges().stream().map(EChangeUuidResolverAndApplicator::unresolve).toList();
+			List<VitruviusChange<EObject>> reversedResolvedChanges = new LinkedList<>(containerChange.getChanges());
+			Collections.reverse(reversedResolvedChanges);
+			List<VitruviusChange<Id>> unresolvedChanges = new LinkedList<>(
+					reversedResolvedChanges.stream().map(c -> unresolveAndUnapply(c)).toList());
+			Collections.reverse(unresolvedChanges);
+			return new CompositeContainerChangeImpl<>(unresolvedChanges);
+		} else if (change instanceof TransactionalChangeImpl<EObject> transactionalChange) {
+			List<EChange<EObject>> reversedResolvedEChanges = new LinkedList<>(transactionalChange.getEChanges());
+			Collections.reverse(reversedResolvedEChanges);
+			List<EChange<Id>> unresolvedEChanges = new LinkedList<>(reversedResolvedEChanges.stream()
+					.map(c -> atomicChangeResolver.unresolveAndApplyBackward(c)).toList());
+			Collections.reverse(unresolvedEChanges);
 			return new TransactionalChangeImpl<>(unresolvedEChanges);
 		}
-		throw new IllegalStateException("trying to unresolve unknown change of class " + change.getClass().getSimpleName());
-	}
-	
-	/**
-	 * Returns an unresolved change, such that all its affected and referenced
-	 * {@link EObjects} are removed.
-	 */
-	public static VitruviusChange<Id> unresolve(VitruviusChange<EObject> change, IdResolver idResolver) {
-		if (change instanceof CompositeContainerChangeImpl<EObject> containerChange) {
-			return new CompositeContainerChangeImpl<>(containerChange.getChanges().stream().map(c -> unresolve(c, idResolver)).toList());
-		}
-		else if (change instanceof TransactionalChangeImpl<EObject> transactionalChange) {
-			List<EChange> unresolvedEChanges = transactionalChange.getEChanges().stream().map(EChangeUuidResolverAndApplicator::unresolve).toList();
-			return new TransactionalChangeImpl<>(unresolvedEChanges);
-		}
-		throw new IllegalStateException("trying to unresolve unknown change of class " + change.getClass().getSimpleName());
+		throw new IllegalStateException(
+				"trying to unresolve unknown change of class " + change.getClass().getSimpleName());
 	}
 }

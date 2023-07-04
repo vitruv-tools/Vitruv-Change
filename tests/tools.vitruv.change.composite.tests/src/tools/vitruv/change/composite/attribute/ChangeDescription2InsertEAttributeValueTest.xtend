@@ -1,12 +1,14 @@
 package tools.vitruv.change.composite.attribute
 
+import org.eclipse.emf.ecore.util.EcoreUtil
+import org.junit.jupiter.api.Test
+import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
+
 import static allElementTypes.AllElementTypesPackage.Literals.*
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 
 import static extension tools.vitruv.change.composite.util.AtomicEChangeAssertHelper.*
 import static extension tools.vitruv.change.composite.util.CompoundEChangeAssertHelper.*
-import org.junit.jupiter.api.Test
-import static extension tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
-import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
 
 class ChangeDescription2InsertEAttributeValueTest extends ChangeDescription2ChangeTransformationTest {
 	
@@ -61,7 +63,7 @@ class ChangeDescription2InsertEAttributeValueTest extends ChangeDescription2Chan
 
 		// test
 		val result = uniquePersistedRoot.record [
-			recursiveRoot = innerRoot		
+			recursiveRoot = EcoreUtil.copy(innerRoot)
 		]
 
 		// assert

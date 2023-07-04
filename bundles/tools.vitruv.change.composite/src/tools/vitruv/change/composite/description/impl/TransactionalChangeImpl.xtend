@@ -13,20 +13,16 @@ import org.eclipse.emf.ecore.util.EcoreUtil
 import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.eobject.CreateEObject
 import tools.vitruv.change.atomic.eobject.DeleteEObject
-import tools.vitruv.change.atomic.eobject.EObjectAddedEChange
 import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange
-import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange
 import tools.vitruv.change.atomic.feature.FeatureEChange
 import tools.vitruv.change.atomic.feature.UnsetFeature
 import tools.vitruv.change.atomic.feature.attribute.InsertEAttributeValue
 import tools.vitruv.change.atomic.feature.attribute.RemoveEAttributeValue
 import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute
 import tools.vitruv.change.atomic.feature.attribute.UpdateAttributeEChange
-import tools.vitruv.change.atomic.feature.reference.AdditiveReferenceEChange
 import tools.vitruv.change.atomic.feature.reference.InsertEReference
 import tools.vitruv.change.atomic.feature.reference.RemoveEReference
 import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
-import tools.vitruv.change.atomic.feature.reference.SubtractiveReferenceEChange
 import tools.vitruv.change.atomic.root.InsertRootEObject
 import tools.vitruv.change.atomic.root.RemoveRootEObject
 import tools.vitruv.change.atomic.root.RootEChange
@@ -40,10 +36,10 @@ import static com.google.common.base.Preconditions.checkState
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.mapFixed
 
 class TransactionalChangeImpl<Element> implements TransactionalChange<Element> {
-	var List<? extends EChange> eChanges
+	var List<? extends EChange<Element>> eChanges
 	val List<UserInteractionBase> userInteractions = new ArrayList()
 
-	new(Iterable<? extends EChange> eChanges) {
+	new(Iterable<? extends EChange<Element>> eChanges) {
 		this.eChanges = checkNotNull(eChanges, "eChanges").toList
 	}
 	
@@ -55,11 +51,11 @@ class TransactionalChangeImpl<Element> implements TransactionalChange<Element> {
 		return !eChanges.empty
 	}
 	
-	private static def getChangedURI(EChange eChange) {
+	private static def getChangedURI(EChange<?> eChange) {
 		switch(eChange) {
-			FeatureEChange<?, ?>: eChange.affectedEObject?.objectUri
-			EObjectExistenceEChange<?>: eChange.affectedEObject?.objectUri
-			RootEChange: URI.createURI(eChange.uri)
+			FeatureEChange<EObject, ?>: eChange.affectedElement?.objectUri
+			EObjectExistenceEChange<EObject>: eChange.affectedElement?.objectUri
+			RootEChange<?>: URI.createURI(eChange.uri)
 		}
 	}
 	
@@ -90,25 +86,25 @@ class TransactionalChangeImpl<Element> implements TransactionalChange<Element> {
 		eChanges.flatMap[it.affectedAndReferencedEObjects].toSet
 	}
 
-	private static def getAffectedEObjects(EChange eChange) {
+	private static def getAffectedEObjects(EChange<?> eChange) {
 		switch (eChange) {
-			FeatureEChange<?, ?>: Set.of(eChange.affectedEObject)
-			EObjectExistenceEChange<?>: Set.of(eChange.affectedEObject)
-			InsertRootEObject<?>: Set.of(eChange.newValue)
-			RemoveRootEObject<?>: Set.of(eChange.oldValue)
+			FeatureEChange<EObject, ?>: Set.of(eChange.affectedElement)
+			EObjectExistenceEChange<EObject>: Set.of(eChange.affectedElement)
+			InsertRootEObject<EObject>: Set.of(eChange.newValue)
+			RemoveRootEObject<EObject>: Set.of(eChange.oldValue)
 		}
 	}
 	
-	private static def getAffectedAndReferencedEObjects(EChange eChange) {
+	private static def getAffectedAndReferencedEObjects(EChange<?> eChange) {
 		switch (eChange) {
-			UpdateAttributeEChange<?>: Set.of(eChange.affectedEObject)
-			ReplaceSingleValuedEReference<?, ?>:
-				setOfNotNull(eChange.affectedEObject, eChange.oldValue, eChange.newValue)
-			InsertEReference<?, ?>: Set.of(eChange.affectedEObject, eChange.newValue)
-			RemoveEReference<?, ?>: Set.of(eChange.affectedEObject, eChange.oldValue)
-			EObjectExistenceEChange<?>: Set.of(eChange.affectedEObject)
-			InsertRootEObject<?>: Set.of(eChange.newValue)
-			RemoveRootEObject<?>: Set.of(eChange.oldValue)
+			UpdateAttributeEChange<EObject>: Set.of(eChange.affectedElement)
+			ReplaceSingleValuedEReference<EObject>:
+				setOfNotNull(eChange.affectedElement, eChange.oldValue, eChange.newValue)
+			InsertEReference<EObject>: Set.of(eChange.affectedElement, eChange.newValue)
+			RemoveEReference<EObject>: Set.of(eChange.affectedElement, eChange.oldValue)
+			EObjectExistenceEChange<EObject>: Set.of(eChange.affectedElement)
+			InsertRootEObject<EObject>: Set.of(eChange.newValue)
+			RemoveRootEObject<EObject>: Set.of(eChange.oldValue)
 		}
 	}
 	
@@ -178,68 +174,35 @@ class TransactionalChangeImpl<Element> implements TransactionalChange<Element> {
 		else '''
 			«class.simpleName»: [
 				«FOR eChange : eChanges»
-					«eChange.stringRepresetation»
+					«eChange.stringRepresentation»
 				«ENDFOR»
 			]
 			'''
     }
     
-    private def getStringRepresetation(EChange change) {
+    private def getStringRepresentation(EChange<?> change) {
     	switch (change) {
-    		InsertRootEObject<?>: '''insert «change.newValueString» at «change.uri» (index «change.index»)'''
-    		RemoveRootEObject<?>: '''remove «change.oldValueString» from «change.uri» (index «change.index»)'''
-    		CreateEObject<?>: '''create «change.affectedObjectString»'''
-    		DeleteEObject<?>: '''delete «change.affectedObjectString»'''
+    		InsertRootEObject<?>: '''insert «change.newValue» at «change.uri» (index «change.index»)'''
+    		RemoveRootEObject<?>: '''remove «change.oldValue» from «change.uri» (index «change.index»)'''
+    		CreateEObject<?>: '''create «change.affectedElement»'''
+    		DeleteEObject<?>: '''delete «change.affectedElement»'''
     		UnsetFeature<?, ?>: '''«change.affectedFeatureString» = «'\u2205' /* empty set */»'''
     		ReplaceSingleValuedEAttribute<?, ?>:
     			'''«change.affectedFeatureString» = «change.newValue» (was «change.oldValue»)'''
-    		ReplaceSingleValuedEReference<?, ?>: 
-    			'''«change.affectedFeatureString» = «change.newValueString» (was «change.oldValueString»)'''
+    		ReplaceSingleValuedEReference<?>: 
+    			'''«change.affectedFeatureString» = «change.newValue» (was «change.oldValue»)'''
     		InsertEAttributeValue<?, ?>:
 	    		'''«change.affectedFeatureString» += «change.newValue» (index «change.index»)'''
-	    	InsertEReference<?, ?>:
-	    		'''«change.affectedFeatureString» += «change.newValueString» (index «change.index»)'''
+	    	InsertEReference<?>:
+	    		'''«change.affectedFeatureString» += «change.newValue» (index «change.index»)'''
 	    	RemoveEAttributeValue<?, ?>:
 		    	'''«change.affectedFeatureString» -= «change.oldValue» (index «change.index»)'''
-		    RemoveEReference<?, ?>:
-		    	'''«change.affectedFeatureString» -= «change.oldValueString» (index «change.index»)'''
+		    RemoveEReference<?>:
+		    	'''«change.affectedFeatureString» -= «change.oldValue» (index «change.index»)'''
     	}
     }
-    
-	def private getNewValueString(EObjectAddedEChange<?> change) {
-		formatValueString(change.newValue, change.newValueID)
-	}
-	
-	def private getOldValueString(EObjectSubtractedEChange<?> change) {
-		formatValueString(change.oldValue, change.oldValueID)
-	}
-	
-	def private getAffectedObjectString(EObjectExistenceEChange<?> change) {
-		formatValueString(change.affectedEObject, change.affectedEObjectID)
-	}
-	
-	def private getAffectedObjectString(FeatureEChange<?, ?> change) {
-		formatValueString(change.affectedEObject, change.affectedEObjectID)
-	}
 	
 	def private getAffectedFeatureString(FeatureEChange<?, ?> change) {
-		'''«change.affectedObjectString».«change.affectedFeature.name»'''
+		'''«change.affectedElement».«change.affectedFeature.name»'''
 	}
-	
-	def private newValueString(AdditiveReferenceEChange<?, ?> change) {
-		formatValueString(change.newValue, change.newValueID)
-	}
-	
-	def private oldValueString(SubtractiveReferenceEChange<?, ?> change) {
-		formatValueString(change.oldValue, change.oldValueID)
-	}
-	
-	def private formatValueString(Object value, String id) {
-		if (value !== null) {
-			'''«value» (id=«id»)'''
-		} else {
-			'''id=«id»'''
-		}
-	}
-
 }

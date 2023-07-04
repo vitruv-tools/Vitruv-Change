@@ -16,7 +16,7 @@ class VitruviusChangeFactory {
 		return instance;
 	}
 	
-	 def <Element> TransactionalChange<Element> createTransactionalChange(Iterable<? extends EChange> changes) {
+	 def <Element> TransactionalChange<Element> createTransactionalChange(Iterable<? extends EChange<Element>> changes) {
 		return new TransactionalChangeImpl(changes);
 	}
 	

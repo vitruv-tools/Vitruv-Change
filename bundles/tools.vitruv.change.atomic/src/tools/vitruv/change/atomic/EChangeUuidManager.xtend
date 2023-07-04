@@ -2,11 +2,12 @@ package tools.vitruv.change.atomic
 
 import org.eclipse.emf.ecore.EObject
 import tools.vitruv.change.atomic.eobject.CreateEObject
+import tools.vitruv.change.atomic.eobject.DeleteEObject
 import tools.vitruv.change.atomic.eobject.EObjectAddedEChange
 import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange
 import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange
 import tools.vitruv.change.atomic.feature.FeatureEChange
-import tools.vitruv.change.atomic.resolve.AtomicEChangeCopier
+import tools.vitruv.change.atomic.resolve.internal.AtomicEChangeCopier
 import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.atomic.uuid.UuidResolver
 
@@ -38,8 +39,13 @@ class EChangeUuidManager {
 	
 	def static Iterable<EChange<Uuid>> setOrGenerateIds(Iterable<EChange<EObject>> eChanges, UuidResolver uuidResolver, boolean endTransaction) {
 		val manager = new EChangeUuidManager(uuidResolver)
-		val idAssignedChanges = eChanges.mapFixed [ eChange |
-			manager.setOrGenerateIds(eChange)
+		val idAssignedChanges = eChanges.mapFixed [ resolvedChange |
+			val unresolvedChange = manager.setOrGenerateIds(resolvedChange)
+			switch resolvedChange {
+				DeleteEObject<EObject>:
+				uuidResolver.unregisterEObject((unresolvedChange as DeleteEObject<Uuid>).affectedElement, resolvedChange.affectedElement)
+			}
+			unresolvedChange
 		]
 		if (endTransaction) {
 			uuidResolver.endTransaction

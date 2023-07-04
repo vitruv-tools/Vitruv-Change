@@ -1,7 +1,8 @@
 package tools.vitruv.change.composite.reference
 
 import java.util.stream.Stream
-import static java.util.stream.StreamSupport.stream
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.util.EcoreUtil
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -10,6 +11,7 @@ import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
 
 import static allElementTypes.AllElementTypesPackage.Literals.*
+import static java.util.stream.StreamSupport.stream
 import static org.junit.jupiter.api.Assertions.assertEquals
 import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 
@@ -32,8 +34,8 @@ class ChangeDescription2InsertEReferenceTest extends ChangeDescription2ChangeTra
 			element.id = it.toString()
 			return element
 		]
-		var Iterable<? extends EChange> actualChanges = uniquePersistedRoot.record [
-			multiValuedContainmentEReference.addAll(insertAt, nonRootElements)
+		var Iterable<? extends EChange<EObject>> actualChanges = uniquePersistedRoot.record [
+			multiValuedContainmentEReference.addAll(insertAt, nonRootElements.mapFixed[EcoreUtil.copy(it)])
 		]
 
 		// assert
@@ -59,7 +61,7 @@ class ChangeDescription2InsertEReferenceTest extends ChangeDescription2ChangeTra
 		// test
 		val nonRootElements = (0 ..< count).mapFixed[aet.NonRoot()]
 		uniquePersistedRoot.multiValuedContainmentEReference.addAll(nonRootElements)
-		var Iterable<? extends EChange> actualChanges = uniquePersistedRoot.record [
+		var Iterable<? extends EChange<EObject>> actualChanges = uniquePersistedRoot.record [
 			multiValuedNonContainmentEReference.addAll(insertAt, nonRootElements)
 		]
 
@@ -113,7 +115,7 @@ class ChangeDescription2InsertEReferenceTest extends ChangeDescription2ChangeTra
 		// test
 		val nonRoot = aet.NonRoot
 		val result = uniquePersistedRoot.record [
-			multiValuedContainmentEReference.add(expectedIndex, nonRoot)
+			multiValuedContainmentEReference.add(expectedIndex, EcoreUtil.copy(nonRoot))
 		]
 
 		// assert

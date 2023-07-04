@@ -91,6 +91,8 @@ public interface UuidResolver {
 		registerEObject(uuid, eObject);
 		return uuid;
 	}
+	
+	public void unregisterEObject(Uuid uuid, EObject eObject) throws IllegalStateException;
 
 	/**
 	 * Returns the {@link Resource} for the given {@link URI}. If the resource does

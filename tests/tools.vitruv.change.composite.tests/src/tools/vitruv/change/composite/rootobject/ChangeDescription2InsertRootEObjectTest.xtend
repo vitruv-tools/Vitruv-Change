@@ -1,10 +1,13 @@
 package tools.vitruv.change.composite.rootobject
 
-import static allElementTypes.AllElementTypesPackage.Literals.*
+import org.eclipse.emf.ecore.util.EcoreUtil
 import org.junit.jupiter.api.Test
-import static extension tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
-import static extension tools.vitruv.change.composite.util.AtomicEChangeAssertHelper.*
 import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
+
+import static allElementTypes.AllElementTypesPackage.Literals.*
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+
+import static extension tools.vitruv.change.composite.util.AtomicEChangeAssertHelper.*
 
 class ChangeDescription2InsertRootEObjectTest extends ChangeDescription2ChangeTransformationTest {
 
@@ -16,7 +19,7 @@ class ChangeDescription2InsertRootEObjectTest extends ChangeDescription2ChangeTr
 		// test
 		val root = aet.Root
 		val result = resource.record [
-			contents += root
+			contents += EcoreUtil.copy(root)
 		]
 		
 		// assert
@@ -36,7 +39,7 @@ class ChangeDescription2InsertRootEObjectTest extends ChangeDescription2ChangeTr
 		// test
 		val root = aet.Root
 		val result1 = resource1.record [
-			contents += root
+			contents += EcoreUtil.copy(root)
 		]
 				
 		// assert
@@ -49,7 +52,7 @@ class ChangeDescription2InsertRootEObjectTest extends ChangeDescription2ChangeTr
 		// test
 		val root2 = aet.Root
 		val result2 = resource2.record [
-			contents += root2
+			contents += EcoreUtil.copy(root2)
 		]
 				
 		// assert

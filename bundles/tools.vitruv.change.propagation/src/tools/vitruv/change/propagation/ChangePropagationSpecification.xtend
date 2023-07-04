@@ -1,11 +1,11 @@
 package tools.vitruv.change.propagation
 
-import tools.vitruv.change.interaction.UserInteractor
-import tools.vitruv.change.propagation.ResourceAccess
+import org.eclipse.emf.ecore.EObject
 import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.composite.MetamodelDescriptor
 import tools.vitruv.change.correspondence.Correspondence
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView
+import tools.vitruv.change.interaction.UserInteractor
 
 /**
  * A specification of change propagation, which is able to process changes
@@ -51,7 +51,7 @@ interface ChangePropagationSpecification extends ChangePropagationObservable {
 	 * @return	<code>true</code> if {@link #propagateChange} will perform modifications in response to the
 	 * 			given change, <code>false</code> otherwise
 	 */
-	def boolean doesHandleChange(EChange change, EditableCorrespondenceModelView<Correspondence> correspondenceModel)
+	def boolean doesHandleChange(EChange<EObject> change, EditableCorrespondenceModelView<Correspondence> correspondenceModel)
 
 	/**
 	 * Performs modifications in target models identified by accessing the given <code>CorrespondenceModel</code>
@@ -66,5 +66,5 @@ interface ChangePropagationSpecification extends ChangePropagationObservable {
 	 * @param resourceAccess		an object for resource access, in particular to create new model files.
 	 * 								Must not be <code>null</code>.
 	 */
-	def void propagateChange(EChange change, EditableCorrespondenceModelView<Correspondence> correspondenceModel, ResourceAccess resourceAccess)
+	def void propagateChange(EChange<EObject> change, EditableCorrespondenceModelView<Correspondence> correspondenceModel, ResourceAccess resourceAccess)
 }

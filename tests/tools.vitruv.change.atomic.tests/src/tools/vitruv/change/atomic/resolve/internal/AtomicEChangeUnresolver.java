@@ -1,4 +1,4 @@
-package tools.vitruv.change.atomic.resolve;
+package tools.vitruv.change.atomic.resolve.internal;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class AtomicEChangeUnresolver {
 	}
 
 	private EChange<Uuid> unresolve(EChange<? extends EObject> eChange, UuidResolver temporaryUuidResolver) {
-		return AtomicEChangeResolver.resolveChange(eChange, eObject -> {
+		return AtomicEChangeResolverHelper.resolveChange(eChange, eObject -> {
 			if (uuidResolver.hasUuid(eObject)) {
 				return uuidResolver.getUuid(eObject);
 			} else if (temporaryUuidResolver.hasUuid(eObject)) {
@@ -43,6 +43,6 @@ public class AtomicEChangeUnresolver {
 			} else {
 				return temporaryUuidResolver.registerEObject(eObject);
 			}
-		});
+		}, resource -> uuidResolver.getResource(resource.getURI()));
 	}
 }

@@ -23,12 +23,12 @@ import edu.kit.ipd.sdq.activextendannotations.Utility
  */
 @Utility
 package class EChangeCreationUtil {
-	def static <A extends EObject> List<AdditiveAttributeEChange<?, Object>> createAdditiveEChangeForAttribute(
+	def static <A extends EObject> List<AdditiveAttributeEChange<EObject, ?>> createAdditiveEChangeForAttribute(
 		A affectedEObject, EAttribute affectedAttribute) {
 		if (affectedAttribute.many) {
 			affectedEObject.getFeatureValues(affectedAttribute).mapFixedIndexed [ index, value |
 				TypeInferringAtomicEChangeFactory.instance.createInsertAttributeChange(affectedEObject,
-					affectedAttribute, index, value)
+					affectedAttribute, index, value) as AdditiveAttributeEChange<EObject, ?>
 			]
 		} else {
 			val oldValue = affectedAttribute.defaultValue
@@ -36,15 +36,15 @@ package class EChangeCreationUtil {
 
 			return List.of(
 				TypeInferringAtomicEChangeFactory.instance.createReplaceSingleAttributeChange(affectedEObject,
-					affectedAttribute, oldValue, newValue))
+					affectedAttribute, oldValue, newValue) as AdditiveAttributeEChange<EObject, ?>)
 		}
 	}
 
-	def static EList<EObject> getReferenceValueList(EObject eObject, EReference reference) {
+	def static EList<? extends EObject> getReferenceValueList(EObject eObject, EReference reference) {
 		return getValueList(eObject, reference) as EList<EObject>
 	}
 
-	def static List<EChange> createAdditiveEChangeForReferencedObject(EObject referencingEObject, EReference reference,
+	def static List<? extends EChange<EObject>> createAdditiveEChangeForReferencedObject(EObject referencingEObject, EReference reference,
 		(EObject)=>boolean isCreate) {
 		return if (reference.isMany) {
 			referencingEObject.getReferenceValueList(reference).flatMapFixed [ referenceValue |
@@ -90,7 +90,7 @@ package class EChangeCreationUtil {
 		return (newContainer === null || newContainer instanceof ChangeDescription) && newResource === null
 	}
 
-	def static List<EChange> createInsertReferenceChange(EObject affectedEObject, EReference affectedReference,
+	def static List<? extends EChange<EObject>> createInsertReferenceChange(EObject affectedEObject, EReference affectedReference,
 		int index, EObject referenceValue, boolean forceCreate) {
 		val isContainment = affectedReference.containment
 
@@ -107,7 +107,7 @@ package class EChangeCreationUtil {
 		}
 	}
 
-	def static List<EChange> createRemoveReferenceChange(EObject affectedEObject, EReference affectedReference,
+	def static List<? extends EChange<EObject>> createRemoveReferenceChange(EObject affectedEObject, EReference affectedReference,
 		int index, EObject referenceValue, EObject newContainer, Resource newResource, boolean forceDelete) {
 		val isContainment = affectedReference.containment
 
@@ -122,7 +122,7 @@ package class EChangeCreationUtil {
 		}
 	}
 
-	def static List<EChange> createReplaceSingleValuedReferenceChange(EObject affectedEObject,
+	def static List<? extends EChange<EObject>> createReplaceSingleValuedReferenceChange(EObject affectedEObject,
 		EReference affectedReference, EObject oldReferenceValue, EObject newReferenceValue, boolean forceCreate) {
 		val isContainment = affectedReference.containment
 

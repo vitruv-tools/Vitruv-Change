@@ -52,7 +52,7 @@ class ChangeRecorder implements AutoCloseable {
 	// not recording: unmodifiable list with results of last recording.
 	// recording: modifiable list collecting the changes. Must never be handed out.
 	// closed: null
-	List<EChange> resultChanges = emptyList
+	List<EChange<EObject>> resultChanges = emptyList
 	val NotificationToEChangeConverter converter
 	val Set<EObject> existingObjects = new HashSet
 	val Set<Notifier> toDesinfect = new HashSet
@@ -154,19 +154,23 @@ class ChangeRecorder implements AutoCloseable {
 	 * sequence and all of its contained elements. The delete changes are appended at the end 
 	 * of the list. Contained elements are deleted before their container.
 	 */
-	def private postprocessRemovals(List<EChange> changes) {
+	def private postprocessRemovals(List<EChange<EObject>> changes) {
 		if(changes.isEmpty) return changes
 
 		val Set<EObject> removedElements = new HashSet
 		for (eChange : changes) {
-			if (eChange instanceof EObjectSubtractedEChange<?>) {
-				if (eChange.isContainmentRemoval) {
-					removedElements += eChange.oldValue
+			switch eChange {
+				EObjectSubtractedEChange<EObject>: {
+					if (eChange.isContainmentRemoval) {
+						removedElements += eChange.oldValue
+					}
 				}
 			}
-			if (eChange instanceof EObjectAddedEChange<?>) {
-				if (eChange.isContainmentInsertion) {
-					removedElements -= eChange.newValue
+			switch eChange {
+				EObjectAddedEChange<EObject>: {
+					if (eChange.isContainmentInsertion) {
+						removedElements -= eChange.newValue
+					}
 				}
 			}
 		}
@@ -303,7 +307,7 @@ class ChangeRecorder implements AutoCloseable {
 			}
 		}
 
-		private def Iterable<? extends EChange> extractRelevantChanges(Notification notification) {
+		private def Iterable<? extends EChange<EObject>> extractRelevantChanges(Notification notification) {
 			val changes = if (notification.affectsLoadingResource || notification.affectsUnloadingResource) {
 					// If resource is being loaded or unloaded, do not process the changes 
 					emptyList
@@ -313,9 +317,13 @@ class ChangeRecorder implements AutoCloseable {
 			if (!changes.isEmpty) {
  				// Register any added object as existing, even if we are not recording
  				changes.forEach [
- 					if (it instanceof EObjectAddedEChange<?>) {
- 						existingObjects += newValue
- 						if(it instanceof UpdateReferenceEChange<?>) existingObjects += affectedEObject
+ 					switch it {
+ 						EObjectAddedEChange<EObject>: {
+ 							existingObjects += newValue
+ 							switch it {
+ 								UpdateReferenceEChange<EObject>: existingObjects += affectedElement
+ 							}
+ 						}
  					}
  				]
  			}

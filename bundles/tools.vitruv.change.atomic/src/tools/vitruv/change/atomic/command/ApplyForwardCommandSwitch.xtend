@@ -6,7 +6,6 @@ import org.apache.log4j.Logger
 import org.eclipse.emf.common.command.Command
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.edit.command.AddCommand
-import org.eclipse.emf.edit.command.RemoveCommand
 import org.eclipse.emf.edit.command.SetCommand
 import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.eobject.CreateEObject

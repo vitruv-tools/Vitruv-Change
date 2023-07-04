@@ -5,12 +5,12 @@ import tools.vitruv.change.atomic.eobject.DeleteEObject
 import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
 
 import static allElementTypes.AllElementTypesPackage.Literals.*
+import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.change.composite.util.ChangeAssertHelper.*
 import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 
 import static extension tools.vitruv.change.composite.util.AtomicEChangeAssertHelper.*
 import static extension tools.vitruv.change.composite.util.CompoundEChangeAssertHelper.*
-import static org.junit.jupiter.api.Assertions.assertTrue
 
 class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2ChangeTransformationTest {
 
@@ -175,7 +175,7 @@ class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2ChangeTra
 			.assertChangeCount(2)
 		// order of delete changes is random, thus use custom assertions
 		deleteChanges.forEach[assertType(it, DeleteEObject)]
-		val deletedObjects = deleteChanges.map[(it as DeleteEObject<?>).affectedEObject]
+		val deletedObjects = deleteChanges.map[(it as DeleteEObject<?>).affectedElement]
 		assertTrue(deletedObjects.contains(nonRoot1), "deleted objects are missing " + nonRoot1)
 		assertTrue(deletedObjects.contains(nonRoot2), "deleted objects are missing " + nonRoot2)
 	}

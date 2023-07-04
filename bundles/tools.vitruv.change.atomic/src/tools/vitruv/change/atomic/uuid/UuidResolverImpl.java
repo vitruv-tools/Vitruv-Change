@@ -24,7 +24,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import tools.vitruv.change.atomic.id.Id;
+import tools.vitruv.change.atomic.id.HierarchicalId;
 import tools.vitruv.change.atomic.id.IdResolver;
 
 class UuidResolverImpl implements UuidResolver {
@@ -79,6 +79,14 @@ class UuidResolverImpl implements UuidResolver {
 		}
 		eObjectToUuid.put(eObject, uuid);
 	}
+	
+	@Override
+	public void unregisterEObject(Uuid uuid, EObject eObject) throws IllegalStateException {
+		checkState(uuid != null, "uuid must not be null");
+		checkState(eObject != null, "object must not be null");
+		checkState(eObjectToUuid.get(eObject).equals(uuid), "trying to unregister element %s but is not registered for uuid %s", eObject, uuid);
+		eObjectToUuid.remove(eObject);
+	}
 
 	@Override
 	public Uuid generateUuid(EObject eObject) {
@@ -113,7 +121,7 @@ class UuidResolverImpl implements UuidResolver {
 		sourceToTargetResourceMapping.values()
 				.forEach(resource -> checkState(resource.getResourceSet() == targetResourceSet,
 						"trying to resolve resource %s from different resource set", resource));
-		Map<Uuid, Id> uuidToIdMapping = generateUuidToIdMapping(sourceToTargetResourceMapping.keySet());
+		Map<Uuid, HierarchicalId> uuidToIdMapping = generateUuidToIdMapping(sourceToTargetResourceMapping.keySet());
 		applyUuidToIdMapping(uuidToIdMapping, targetUuidResolver, targetResourceSet, sourceToTargetResourceMapping);
 	}
 
@@ -126,14 +134,14 @@ class UuidResolverImpl implements UuidResolver {
 		if (!file.exists()) {
 			return;
 		}
-		Map<Uuid, Id> uuidToIdMapping = new HashMap<>();
+		Map<Uuid, HierarchicalId> uuidToIdMapping = new HashMap<>();
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line = reader.readLine();
 			while (line != null) {
 				String[] components = line.split("\\" + SERIALIZATION_SEPARATOR);
 				checkState(components.length == 2, "invalid UUID resolver serialization (line %s) found at %s", line,
 						uri);
-				uuidToIdMapping.put(new Uuid(components[0]), new Id(components[1]));
+				uuidToIdMapping.put(new Uuid(components[0]), new HierarchicalId(components[1]));
 				line = reader.readLine();
 			}
 		}
@@ -143,7 +151,7 @@ class UuidResolverImpl implements UuidResolver {
 	@Override
 	public void storeAtUri(URI uri) throws IOException {
 		checkState(uri.isFile(), "Storing UUID resolver requires a file uri but was %s", uri);
-		Map<Uuid, Id> uuidToIdMapping = generateUuidToIdMapping(null);
+		Map<Uuid, HierarchicalId> uuidToIdMapping = generateUuidToIdMapping(null);
 		File file = new File(uri.toFileString());
 		try (FileWriter writer = new FileWriter(file)) {
 			for (var entry : uuidToIdMapping.entrySet()) {
@@ -196,9 +204,7 @@ class UuidResolverImpl implements UuidResolver {
 		var iterator = eObjectToUuid.keySet().iterator();
 		while (iterator.hasNext()) {
 			EObject object = iterator.next();
-			if (object.eResource() == null || object.eResource().getResourceSet() == null) {
-				iterator.remove();
-			}
+			checkState(object.eResource() != null && object.eResource().getResourceSet() != null, "dangling object %s detected", object);
 		}
 	}
 
@@ -212,9 +218,9 @@ class UuidResolverImpl implements UuidResolver {
 	 * @param resourcesFilter is the filter for the resources to consider, or
 	 *                        <code>null<code> if all resources shall be considered.
 	 */
-	private Map<Uuid, Id> generateUuidToIdMapping(Collection<Resource> resourcesFilter) {
+	private Map<Uuid, HierarchicalId> generateUuidToIdMapping(Collection<Resource> resourcesFilter) {
 		IdResolver idUnresolver = IdResolver.create(resourceSet);
-		Map<Uuid, Id> uuidToIdMapping = new HashMap<>();
+		Map<Uuid, HierarchicalId> uuidToIdMapping = new HashMap<>();
 		for (var entry : eObjectToUuid.entrySet()) {
 			EObject eObject = entry.getKey();
 			checkState(eObject.eResource() != null && eObject.eResource().getResourceSet() != null,
@@ -222,7 +228,7 @@ class UuidResolverImpl implements UuidResolver {
 			if (resourcesFilter != null && !resourcesFilter.contains(eObject.eResource())) {
 				continue;
 			}
-			Id id = idUnresolver.getAndUpdateId(eObject);
+			HierarchicalId id = idUnresolver.getAndUpdateId(eObject);
 			Uuid uuid = entry.getValue();
 			uuidToIdMapping.put(uuid, id);
 		}
@@ -247,13 +253,13 @@ class UuidResolverImpl implements UuidResolver {
 	 *                                      <code>null</code> if the mapping shall
 	 *                                      not be validated.
 	 */
-	private void applyUuidToIdMapping(Map<Uuid, Id> uuidToIdMapping, UuidResolver targetUuidResolver,
+	private void applyUuidToIdMapping(Map<Uuid, HierarchicalId> uuidToIdMapping, UuidResolver targetUuidResolver,
 			ResourceSet targetResourceSet, Map<Resource, Resource> sourceToTargetResourceMapping)
 			throws IllegalStateException {
 		var idResolver = IdResolver.create(targetResourceSet);
 		for (var entry : uuidToIdMapping.entrySet()) {
 			Uuid uuid = entry.getKey();
-			Id id = entry.getValue();
+			HierarchicalId id = entry.getValue();
 			EObject targetEObject = idResolver.getEObject(id);
 			checkState(targetEObject != null, "could not find object corresponding to %s in resource set %s", uuid,
 					targetResourceSet);

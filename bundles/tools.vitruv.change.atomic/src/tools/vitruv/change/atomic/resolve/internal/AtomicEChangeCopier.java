@@ -1,4 +1,4 @@
-package tools.vitruv.change.atomic.resolve;
+package tools.vitruv.change.atomic.resolve.internal;
 
 import org.eclipse.emf.ecore.EStructuralFeature;
 

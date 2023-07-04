@@ -1,11 +1,14 @@
 package tools.vitruv.change.composite.integration
 
-import static allElementTypes.AllElementTypesPackage.Literals.*
-import static extension tools.vitruv.change.composite.util.AtomicEChangeAssertHelper.*
-import static extension tools.vitruv.change.composite.util.CompoundEChangeAssertHelper.*
+import org.eclipse.emf.ecore.util.EcoreUtil
 import org.junit.jupiter.api.Test
 import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
-import static extension tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+
+import static allElementTypes.AllElementTypesPackage.Literals.*
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+
+import static extension tools.vitruv.change.composite.util.AtomicEChangeAssertHelper.*
+import static extension tools.vitruv.change.composite.util.CompoundEChangeAssertHelper.*
 
 class ChangeDescriptionComplexSequencesTest extends ChangeDescription2ChangeTransformationTest {
 
@@ -20,9 +23,10 @@ class ChangeDescriptionComplexSequencesTest extends ChangeDescription2ChangeTran
 		// test
 		val nonRoot = aet.NonRoot
 		val result = uniquePersistedRoot.record [
-			singleValuedContainmentEReference = nonRoot
+			val recordNonRoot = EcoreUtil.copy(nonRoot)
+			singleValuedContainmentEReference = recordNonRoot
 			singleValuedContainmentEReference = null
-			singleValuedContainmentEReference = nonRoot
+			singleValuedContainmentEReference = recordNonRoot
 		]
 
 		// assert
@@ -44,9 +48,14 @@ class ChangeDescriptionComplexSequencesTest extends ChangeDescription2ChangeTran
 		val nonRootObjectsContainer = aet.NonRootObjectContainerHelper
 		val nonRoot = aet.NonRoot
 		val result = uniquePersistedRoot.record [
-			nonRootObjectContainerHelper = nonRootObjectsContainer => [
-				nonRootObjectsContainment += nonRoot
+			nonRootObjectContainerHelper = EcoreUtil.copy(nonRootObjectsContainer) => [
+				nonRootObjectsContainment += EcoreUtil.copy(nonRoot)
 			] 
+		]
+		
+		// replay changes in copied elements
+		nonRootObjectsContainer => [
+			nonRootObjectsContainment += nonRoot
 		]
 
 		// assert
@@ -68,12 +77,21 @@ class ChangeDescriptionComplexSequencesTest extends ChangeDescription2ChangeTran
 		val nonRootObjectsContainer = aet.NonRootObjectContainerHelper
 		val nonRoot = aet.NonRoot
 		val result = uniquePersistedRoot.record [
-			recursiveRoot = secondRoot => [
-				singleValuedNonContainmentEReference = nonRoot
-				nonRootObjectContainerHelper = nonRootObjectsContainer => [
-					nonRootObjectsContainment += nonRoot
+			val recordNonRoot = EcoreUtil.copy(nonRoot)
+			recursiveRoot = EcoreUtil.copy(secondRoot) => [
+				singleValuedNonContainmentEReference = recordNonRoot
+				nonRootObjectContainerHelper = EcoreUtil.copy(nonRootObjectsContainer) => [
+					nonRootObjectsContainment += recordNonRoot
 				]
 
+			]
+		]
+		
+		// replay changes in copied elements
+		secondRoot => [
+			singleValuedNonContainmentEReference = nonRoot
+			nonRootObjectContainerHelper = nonRootObjectsContainer => [
+				nonRootObjectsContainment += nonRoot
 			]
 		]
 

@@ -95,7 +95,7 @@ class UuidResolvingTest {
 		var root = aet.Root();
 		Uuid uuid = uuidResolver.registerEObject(root);
 
-		assertThrows(IllegalStateException.class, () -> uuidResolver.registerEObject(uuid + "modified", root));
+		assertThrows(IllegalStateException.class, () -> uuidResolver.registerEObject(new Uuid(uuid + "modified"), root));
 	}
 
 	@Test
@@ -146,20 +146,16 @@ class UuidResolvingTest {
 	}
 
 	@Test
-	@DisplayName("cleanup resolver when saving after element removal")
-	void cleanupAfterElementRemovalRemovesUuid() {
+	@DisplayName("register dangling element")
+	void registerDanglingElement() {
 		var root = aet.Root();
-		Uuid uuid = uuidResolver.registerEObject(root);
-		uuidResolver.endTransaction();
-		assertThrows(IllegalStateException.class, () -> uuidResolver.getEObject(uuid));
-		assertThrows(IllegalStateException.class, () -> uuidResolver.getUuid(root));
-		assertFalse(uuidResolver.hasUuid(root));
-		assertFalse(uuidResolver.hasEObject(uuid));
+		uuidResolver.registerEObject(root);
+		assertThrows(IllegalStateException.class, () -> uuidResolver.endTransaction());
 	}
 
 	@Test
-	@DisplayName("cleanup resolver when saving resource after element removal")
-	void cleanupAfterElementRemovalRemovesUuidWithResource() {
+	@DisplayName("incorrectly clear resource")
+	void incorrectlyClearResource() {
 		var root = aet.Root();
 		URI resourceUri = URI.createFileURI(testProjectPath.resolve("root.aet").toString());
 		Resource rootResource = resourceSet.createResource(resourceUri);
@@ -170,10 +166,6 @@ class UuidResolvingTest {
 		assertEquals(root, uuidResolver.getEObject(uuid));
 
 		rootResource.getContents().clear();
-		uuidResolver.endTransaction();
-		assertThrows(IllegalStateException.class, () -> uuidResolver.getEObject(uuid));
-		assertThrows(IllegalStateException.class, () -> uuidResolver.getUuid(root));
-		assertFalse(uuidResolver.hasUuid(root));
-		assertFalse(uuidResolver.hasEObject(uuid));
+		assertThrows(IllegalStateException.class, () -> uuidResolver.endTransaction());
 	}
 }

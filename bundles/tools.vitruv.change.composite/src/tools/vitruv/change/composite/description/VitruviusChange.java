@@ -26,7 +26,7 @@ public interface VitruviusChange<Element> {
 	 * to be prepared so that the original change information is transformed into
 	 * {@link EChange}s.
 	 */
-	public List<EChange> getEChanges();
+	public List<EChange<Element>> getEChanges();
 
 	/**
 	 * Returns all {@link EObject}s directly affected by this change. This does not
