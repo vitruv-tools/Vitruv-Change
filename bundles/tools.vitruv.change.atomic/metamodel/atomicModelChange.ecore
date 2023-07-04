@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="atomic" nsURI="http://vitruv.tools/metamodels/change/atomic/1.0"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="atomic" nsURI="http://vitruv.tools/metamodels/change/atomic/2.0"
     nsPrefix="atomic">
   <eClassifiers xsi:type="ecore:EClass" name="EChange" abstract="true">
     <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
@@ -50,7 +50,7 @@
       <eTypeArguments eTypeParameter="#//SubtractiveEChange/Element"/>
     </eGenericSuperTypes>
   </eClassifiers>
-  <eSubpackages name="eobject" nsURI="http://vitruv.tools/metamodels/change/atomic/eobject/1.0"
+  <eSubpackages name="eobject" nsURI="http://vitruv.tools/metamodels/change/atomic/eobject/2.0"
       nsPrefix="eobject">
     <eClassifiers xsi:type="ecore:EClass" name="EObjectAddedEChange" abstract="true">
       <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
@@ -125,7 +125,7 @@
       </eGenericSuperTypes>
     </eClassifiers>
   </eSubpackages>
-  <eSubpackages name="root" nsURI="http://vitruv.tools/metamodels/change/atomic/root/1.0"
+  <eSubpackages name="root" nsURI="http://vitruv.tools/metamodels/change/atomic/root/2.0"
       nsPrefix="root">
     <eClassifiers xsi:type="ecore:EDataType" name="Resource" instanceClassName="org.eclipse.emf.ecore.resource.Resource"/>
     <eClassifiers xsi:type="ecore:EClass" name="RootEChange" abstract="true">
@@ -185,7 +185,7 @@
       </eGenericSuperTypes>
     </eClassifiers>
   </eSubpackages>
-  <eSubpackages name="feature" nsURI="http://vitruv.tools/metamodels/change/atomic//feature/1.0"
+  <eSubpackages name="feature" nsURI="http://vitruv.tools/metamodels/change/atomic//feature/2.0"
       nsPrefix="feature">
     <eClassifiers xsi:type="ecore:EClass" name="FeatureEChange" abstract="true">
       <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
@@ -256,7 +256,7 @@
         <eTypeArguments eTypeParameter="#//feature/UnsetFeature/Feature"/>
       </eGenericSuperTypes>
     </eClassifiers>
-    <eSubpackages name="single" nsURI="http://vitruv.tools/metamodels/change/atomic/feature/single/1.0"
+    <eSubpackages name="single" nsURI="http://vitruv.tools/metamodels/change/atomic/feature/single/2.0"
         nsPrefix="single">
       <eClassifiers xsi:type="ecore:EClass" name="ReplaceSingleValuedFeatureEChange"
           abstract="true">
@@ -299,7 +299,7 @@
         </eGenericSuperTypes>
       </eClassifiers>
     </eSubpackages>
-    <eSubpackages name="list" nsURI="http://vitruv.tools/metamodels/change/atomic/feature/list/1.0"
+    <eSubpackages name="list" nsURI="http://vitruv.tools/metamodels/change/atomic/feature/list/2.0"
         nsPrefix="list">
       <eClassifiers xsi:type="ecore:EClass" name="UpdateSingleListEntryEChange" abstract="true">
         <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
@@ -364,7 +364,7 @@
         </eGenericSuperTypes>
       </eClassifiers>
     </eSubpackages>
-    <eSubpackages name="attribute" nsURI="http://vitruv.tools/metamodels/change/atomic/feature/attribute/1.0"
+    <eSubpackages name="attribute" nsURI="http://vitruv.tools/metamodels/change/atomic/feature/attribute/2.0"
         nsPrefix="attribute">
       <eClassifiers xsi:type="ecore:EClass" name="UpdateAttributeEChange" abstract="true">
         <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
@@ -494,7 +494,7 @@
         </eGenericSuperTypes>
       </eClassifiers>
     </eSubpackages>
-    <eSubpackages name="reference" nsURI="http://vitruv.tools/metamodels/change/atomic/feature/reference/1.0"
+    <eSubpackages name="reference" nsURI="http://vitruv.tools/metamodels/change/atomic/feature/reference/2.0"
         nsPrefix="reference">
       <eClassifiers xsi:type="ecore:EClass" name="UpdateReferenceEChange" abstract="true">
         <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
