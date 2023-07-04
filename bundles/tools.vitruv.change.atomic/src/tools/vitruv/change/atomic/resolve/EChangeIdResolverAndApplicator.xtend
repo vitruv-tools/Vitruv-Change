@@ -1,41 +1,41 @@
 package tools.vitruv.change.atomic.resolve
 
-import org.eclipse.emf.ecore.util.EcoreUtil
-import tools.vitruv.change.atomic.EChange
-import static com.google.common.base.Preconditions.checkArgument
 import edu.kit.ipd.sdq.activextendannotations.Utility
+import org.eclipse.emf.ecore.EObject
+import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.command.ApplyEChangeSwitch
-import tools.vitruv.change.atomic.feature.FeatureEChange
 import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange
+import tools.vitruv.change.atomic.feature.FeatureEChange
+import tools.vitruv.change.atomic.feature.reference.SubtractiveReferenceEChange
+import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
+import tools.vitruv.change.atomic.id.HierarchicalId
+import tools.vitruv.change.atomic.id.IdResolver
+import tools.vitruv.change.atomic.resolve.internal.AtomicEChangeResolverHelper
 import tools.vitruv.change.atomic.root.InsertRootEObject
 import tools.vitruv.change.atomic.root.RemoveRootEObject
-import org.eclipse.emf.ecore.EObject
-import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
-import tools.vitruv.change.atomic.feature.reference.SubtractiveReferenceEChange
-import tools.vitruv.change.atomic.id.IdResolver
 
 /**
  * Utility class for applying and resolving a given EChange.
  */
 @Utility
 class EChangeIdResolverAndApplicator {
-	static def EChange resolveBefore(EChange eChange, IdResolver idResolver) {
+	static def EChange<EObject> resolveBefore(EChange<HierarchicalId> eChange, IdResolver idResolver) {
 		return resolveCopy(eChange, idResolver)
 	}
 
-	static def void applyForward(EChange eChange, IdResolver idResolver) {
+	static def void applyForward(EChange<EObject> eChange, IdResolver idResolver) {
 		executeUpdatingIds(eChange, idResolver, true)
 	}
 
-	static def void applyBackward(EChange eChange, IdResolver idResolver) {
+	static def void applyBackward(EChange<EObject> eChange, IdResolver idResolver) {
 		executeUpdatingIds(eChange, idResolver, false)
 	}
 
-	static def void applyBackward(EChange eChange) {
+	static def void applyBackward(EChange<EObject> eChange) {
 		ApplyEChangeSwitch.applyEChange(eChange, false)
 	}
 	
-	static def void executeUpdatingIds(EChange eChange, IdResolver idResolver, boolean forward) {
+	static def void executeUpdatingIds(EChange<EObject> eChange, IdResolver idResolver, boolean forward) {
 		val affectedObject = eChange.affectedEObject
 		val affectedId = idResolver.getAndUpdateId(affectedObject)
 		val oldObject = eChange.oldContainedEObject
@@ -48,25 +48,25 @@ class EChangeIdResolverAndApplicator {
 		}
 	}
 	
-	private static def boolean isContainmentChange(EChange eChange) {
+	private static def boolean isContainmentChange(EChange<?> eChange) {
 		if (eChange instanceof UpdateReferenceEChange) {
 			return eChange.containment
 		}
 		return false
 	}
 	
-	private static def getAffectedEObject(EChange eChange) {
+	private static def EObject getAffectedEObject(EChange<EObject> eChange) {
 		switch (eChange) {
-			FeatureEChange<?, ?>: eChange.affectedEObject
-			EObjectExistenceEChange<?>: eChange.affectedEObject
-			InsertRootEObject<?>: eChange.newValue
-			RemoveRootEObject<?>: eChange.oldValue
+			FeatureEChange<EObject, ?>: eChange.affectedElement
+			EObjectExistenceEChange<EObject>: eChange.affectedElement
+			InsertRootEObject<EObject>: eChange.newValue
+			RemoveRootEObject<EObject>: eChange.oldValue
 		}
 	}
 	
-	private static def EObject getOldContainedEObject(EChange eChange) {
+	private static def EObject getOldContainedEObject(EChange<EObject> eChange) {
 		switch (eChange) {
-			SubtractiveReferenceEChange<?, ?>: if (eChange.affectedFeature.containment) eChange.oldValue
+			SubtractiveReferenceEChange<EObject>: if (eChange.affectedFeature.containment) eChange.oldValue
 		}
 	}
 	
@@ -85,11 +85,8 @@ class EChangeIdResolverAndApplicator {
 	 * @throws IllegalArgumentException The change is already resolved.
 	 * @throws IllegalStateException 	The change cannot be resolved.
 	 */
-	def private static EChange resolveCopy(EChange change, IdResolver idResolver) {
-		checkArgument(!change.isResolved, "change must not be resolved when trying to resolve")
-		var EChange copy = EcoreUtil.copy(change)
-		new AtomicEChangeIdResolver(idResolver).resolve(copy)
-		return copy
+	def private static EChange<EObject> resolveCopy(EChange<HierarchicalId> change, IdResolver idResolver) {
+		return AtomicEChangeResolverHelper.resolveChange(change, [ idResolver.getEObject(it) ]) [ idResolver.getResource(it.URI) ]
 	}
 	
 }

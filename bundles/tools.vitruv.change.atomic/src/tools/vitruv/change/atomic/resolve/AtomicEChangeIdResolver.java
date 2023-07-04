@@ -13,39 +13,40 @@ import tools.vitruv.change.atomic.resolve.internal.AtomicEChangeResolverHelper;
 /**
  * Static class for resolving EChanges internally.
  */
-public class AtomicEChangeIdResolver implements AtomicEChangeResolver<HierarchicalId> {
+public class AtomicEChangeIdResolver {
 	private IdResolver idResolver;
 
 	public AtomicEChangeIdResolver(IdResolver idResolver) {
 		this.idResolver = idResolver;
 	}
 
-	@Override
 	public EChange<EObject> resolveAndApplyForward(EChange<HierarchicalId> unresolvedEChange) {
 		EChange<EObject> resolvedChange = resolve(unresolvedEChange);
 		ApplyEChangeSwitch.applyEChange(resolvedChange, true);
 		return resolvedChange;
 	}
-
-	@Override
-	public EChange<HierarchicalId> unresolveAndApplyBackward(EChange<EObject> resolvedEChange) {
+	
+	public EChange<HierarchicalId> applyForwardAndAssignIds(EChange<EObject> resolvedEChange) {
 		EChange<HierarchicalId> unresolvedChange = unresolve(resolvedEChange);
-		ApplyEChangeSwitch.applyEChange(resolvedEChange, false);
+		EChangeIdResolverAndApplicator.applyForward(resolvedEChange, idResolver);
 		return unresolvedChange;
 	}
 
 	private EChange<EObject> resolve(EChange<HierarchicalId> unresolvedChange) {
-		return AtomicEChangeResolverHelper.resolveChange(unresolvedChange, id -> {
+		return AtomicEChangeResolverHelper.resolveChange(unresolvedChange, 
+				id -> {
 			if (unresolvedChange instanceof CreateEObject<HierarchicalId> createChange) {
 				return EcoreUtil.create(createChange.getAffectedEObjectType());
 			} else {
 				return idResolver.getEObject(id);
 			}
-		});
+		}, resource -> idResolver.getResource(resource.getURI()));
 	}
 
 	private EChange<HierarchicalId> unresolve(EChange<EObject> resolvedChange) {
-		return AtomicEChangeResolverHelper.resolveChange(resolvedChange, eObject -> idResolver.getAndUpdateId(eObject));
+		return AtomicEChangeResolverHelper.resolveChange(resolvedChange, 
+				eObject -> idResolver.getAndUpdateId(eObject), 
+				resource -> idResolver.getResource(resource.getURI()));
 	}
 //	val IdResolver idResolver
 //	

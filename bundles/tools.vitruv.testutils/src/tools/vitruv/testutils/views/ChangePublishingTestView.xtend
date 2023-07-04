@@ -14,7 +14,7 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.xtend.lib.annotations.Delegate
-import tools.vitruv.change.atomic.EChangeUuidManager
+import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.PropagatedChange
 import tools.vitruv.change.composite.description.TransactionalChange
@@ -40,6 +40,7 @@ import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resou
 class ChangePublishingTestView implements NonTransactionalTestView {
 	val ResourceSet resourceSet
 	val UuidResolver uuidResolver
+	val VitruviusChangeResolver<Uuid> changeResolver
 	@Delegate
 	val TestView delegate
 	val ChangeRecorder changeRecorder
@@ -70,6 +71,7 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 		this.modelRepository = changeableModelRepository
 		this.delegate = new BasicTestView(persistenceDirectory, resourceSet, userInteraction, uriMode)
 		this.changeRecorder = new ChangeRecorder(resourceSet)
+		this.changeResolver = VitruviusChangeResolver.forUuids(uuidResolver)
 		this.uuidResolution = uuidResolution
 		changeRecorder.beginRecording()
 	}
@@ -141,8 +143,7 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	}
 
 	def private propagateChanges(TransactionalChange<EObject> change) {
-		EChangeUuidManager.setOrGenerateIds(change.EChanges, uuidResolver)
-		val unresolvedChange = VitruviusChangeResolver.unresolve(change, uuidResolver)
+		val unresolvedChange = changeResolver.assignIds(change)
 		val propagationResult = modelRepository.propagateChange(unresolvedChange)
 		if (disposeViewResourcesAfterPropagation) {
 			disposeViewResources()

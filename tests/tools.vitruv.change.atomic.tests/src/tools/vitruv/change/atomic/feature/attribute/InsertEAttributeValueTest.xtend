@@ -71,13 +71,13 @@ class InsertEAttributeValueTest extends InsertRemoveEAttributeTest {
 		assertIsStateAfter
 
 		// Apply backward 2
-		resolvedChange2.applyBackwardAndUnresolve
+		resolvedChange2.applyBackward
 
 		assertEquals(attributeContent.size, 1)
 		assertEquals(attributeContent.get(0), NEW_VALUE)
 
 		// Apply backward 1
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore
@@ -114,7 +114,7 @@ class InsertEAttributeValueTest extends InsertRemoveEAttributeTest {
 		// NonRoot has no such feature
 		assertEquals(affectedNonRootEObject.eClass.getFeatureID(affectedFeature), -1)
 
-		assertThrows(IllegalStateException) [resolvedChange.applyBackwardAndUnresolve]
+		assertThrows(IllegalStateException) [resolvedChange.applyBackward]
 	}
 
 	/**
@@ -130,7 +130,7 @@ class InsertEAttributeValueTest extends InsertRemoveEAttributeTest {
 		// Type of attribute is Integer not String
 		assertEquals(affectedFeature.EAttributeType.name, "EIntegerObject")
 
-		assertThrows(IllegalStateException) [resolvedChange.applyBackwardAndUnresolve]
+		assertThrows(IllegalStateException) [resolvedChange.applyBackward]
 	}
 
 	/**

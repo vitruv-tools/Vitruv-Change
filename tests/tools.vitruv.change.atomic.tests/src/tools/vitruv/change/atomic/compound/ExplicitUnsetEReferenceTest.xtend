@@ -297,7 +297,7 @@ class ExplicitUnsetEReferenceTest extends EChangeTest {
 		assertIsStateAfter
 
 		// Apply forward
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore

@@ -65,7 +65,7 @@ class CreateEObjectTest extends EObjectTest {
 		val resolvedChange = createUnresolvedChange().applyForwardAndResolve
 
 		// Apply backward
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 		assertIsStateAfter()
 	}
 

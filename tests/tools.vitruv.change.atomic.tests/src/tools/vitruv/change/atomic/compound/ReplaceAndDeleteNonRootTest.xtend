@@ -76,7 +76,7 @@ class ReplaceAndDeleteNonRootTest extends EChangeTest {
 		prepareStateAfter
 
 		// Apply
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore

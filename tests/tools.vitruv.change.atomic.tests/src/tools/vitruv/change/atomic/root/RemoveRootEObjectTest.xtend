@@ -82,13 +82,13 @@ class RemoveRootEObjectTest extends RootEChangeTest {
 		assertIsStateAfter
 
 		// Apply backward 2
-		resolvedChange2.applyBackwardAndUnresolve
+		resolvedChange2.applyBackward
 
 		assertEquals(resourceContent.size, 2)
 		assertTrue(resourceContent.contains(newRootObject2))
 
 		// Apply backward 1
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore

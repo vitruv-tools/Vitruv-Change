@@ -77,7 +77,7 @@ class ReplaceSingleValuedEAttributeTest extends EChangeTest {
 		prepareStateAfter
 
 		// Apply backward
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore
@@ -103,7 +103,7 @@ class ReplaceSingleValuedEAttributeTest extends EChangeTest {
 		assertEquals(affectedNonRootEObject.eClass.getFeatureID(affectedRootFeature), -1)
 
 		// Apply
-		assertThrows(IllegalStateException) [resolvedChange.applyBackwardAndUnresolve]
+		assertThrows(IllegalStateException) [resolvedChange.applyBackward]
 	}
 
 	/**
@@ -122,7 +122,7 @@ class ReplaceSingleValuedEAttributeTest extends EChangeTest {
 		assertEquals(affectedFeature.EAttributeType.name, "EString")
 
 		// Apply
-		assertThrows(IllegalStateException) [resolvedChange.applyBackwardAndUnresolve]
+		assertThrows(IllegalStateException) [resolvedChange.applyBackward]
 	}
 
 	/**

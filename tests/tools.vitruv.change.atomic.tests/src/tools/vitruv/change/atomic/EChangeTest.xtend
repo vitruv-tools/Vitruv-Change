@@ -10,7 +10,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.io.TempDir
-import tools.vitruv.change.atomic.resolve.AtomicEChangeResolver
+import tools.vitruv.change.atomic.command.ApplyEChangeSwitch
 import tools.vitruv.change.atomic.resolve.AtomicEChangeUuidResolver
 import tools.vitruv.change.atomic.resolve.internal.AtomicEChangeUnresolver
 import tools.vitruv.change.atomic.util.EChangeAssertHelper
@@ -38,7 +38,7 @@ abstract class EChangeTest {
 	var Resource resource
 	var ResourceSet resourceSet
 	var UuidResolver uuidResolver
-	var AtomicEChangeResolver<Uuid> atomicChangeResolver
+	var AtomicEChangeUuidResolver atomicChangeResolver
 
 	var AtomicEChangeUnresolver changeUnresolver;
 	@Accessors(PROTECTED_GETTER)
@@ -82,12 +82,12 @@ abstract class EChangeTest {
 		resource.contents
 	}
 
-	def protected List<EChange<Uuid>> applyBackwardAndUnresolve(List<? extends EChange<EObject>> changes) {
-		return changes.reverseView.mapFixed[applyBackwardAndUnresolve].reverseView
+	def protected void applyBackward(List<? extends EChange<EObject>> changes) {
+		changes.reverseView.forEach[applyBackward]
 	}
 	
-	def protected EChange<Uuid> applyBackwardAndUnresolve(EChange<EObject> change) {
-		return atomicChangeResolver.unresolveAndApplyBackward(change)
+	def protected void applyBackward(EChange<EObject> change) {
+		ApplyEChangeSwitch.applyEChange(change, false)
 	}
 
 	def protected List<EChange<EObject>> applyForwardAndResolve(List<? extends EChange<Uuid>> changes) {

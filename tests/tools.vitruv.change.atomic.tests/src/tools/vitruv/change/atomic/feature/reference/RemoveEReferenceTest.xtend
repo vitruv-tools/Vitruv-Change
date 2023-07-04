@@ -111,12 +111,12 @@ class RemoveEReferenceTest extends ReferenceEChangeTest {
 		assertIsStateAfter
 
 		// apply backward 2
-		resolvedChange2.applyBackwardAndUnresolve
+		resolvedChange2.applyBackward
 		assertEquals(referenceContent.size, 1)
 		assertEquals(referenceContent.get(0), newValue2)
 
 		// apply backward 1
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore
@@ -142,13 +142,13 @@ class RemoveEReferenceTest extends ReferenceEChangeTest {
 		assertIsStateAfter
 
 		// apply backward 2
-		resolvedChange2.applyBackwardAndUnresolve
+		resolvedChange2.applyBackward
 
 		assertEquals(referenceContent.size, 1)
 		assertEquals(referenceContent.get(0), newValue2)
 
 		// apply backward 1
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore
@@ -188,7 +188,7 @@ class RemoveEReferenceTest extends ReferenceEChangeTest {
 		assertEquals(invalidAffectedEObject.eClass.getFeatureID(affectedFeature), -1)
 
 		// Apply
-		assertThrows(IllegalStateException) [resolvedChange.applyBackwardAndUnresolve]
+		assertThrows(IllegalStateException) [resolvedChange.applyBackward]
 	}
 
 	/**

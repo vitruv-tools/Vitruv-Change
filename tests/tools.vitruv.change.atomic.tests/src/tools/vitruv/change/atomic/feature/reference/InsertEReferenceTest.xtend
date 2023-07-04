@@ -113,13 +113,13 @@ class InsertEReferenceTest extends ReferenceEChangeTest {
 		assertIsStateAfter
 
 		// Apply backward 2
-		resolvedChange2.applyBackwardAndUnresolve
+		resolvedChange2.applyBackward
 
 		assertEquals(referenceContent.size, 1)
 		assertSame(referenceContent.get(0), newValue)
 
 		// Apply backward 1
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore
@@ -146,13 +146,13 @@ class InsertEReferenceTest extends ReferenceEChangeTest {
 		assertIsStateAfter
 
 		// Apply backward 2
-		resolvedChange2.applyBackwardAndUnresolve
+		resolvedChange2.applyBackward
 
 		assertEquals(referenceContent.size, 1)
 		assertSame(referenceContent.get(0), newValue)
 
 		// Apply backward 1
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore
@@ -191,7 +191,7 @@ class InsertEReferenceTest extends ReferenceEChangeTest {
 		assertEquals(invalidAffectedEObject.eClass.getFeatureID(affectedFeature), -1)
 
 		// Apply
-		assertThrows(IllegalStateException) [resolvedChange.applyBackwardAndUnresolve]
+		assertThrows(IllegalStateException) [resolvedChange.applyBackward]
 	}
 
 	/**

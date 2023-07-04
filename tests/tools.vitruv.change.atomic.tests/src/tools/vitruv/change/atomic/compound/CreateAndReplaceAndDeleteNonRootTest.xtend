@@ -61,7 +61,7 @@ class CreateAndReplaceAndDeleteNonRootTest extends EObjectTest {
 		assertIsStateAfter
 
 		// Apply backward
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore

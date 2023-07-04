@@ -93,7 +93,7 @@ class ReplaceSingleValuedEReferenceTest extends ReferenceEChangeTest {
 		assertIsStateAfter(null)
 
 		// Apply backward
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore(null)
@@ -118,7 +118,7 @@ class ReplaceSingleValuedEReferenceTest extends ReferenceEChangeTest {
 		assertIsStateAfter(null)
 
 		// Apply backward
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore(newValue)

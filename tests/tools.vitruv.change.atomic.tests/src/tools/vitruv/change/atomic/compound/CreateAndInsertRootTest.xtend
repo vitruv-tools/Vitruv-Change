@@ -87,7 +87,7 @@ class CreateAndInsertRootTest extends EChangeTest {
 		assertIsStateAfter
 
 		// Apply backward 2
-		resolvedChange2.applyBackwardAndUnresolve
+		resolvedChange2.applyBackward
 
 		assertEquals(resourceContent.size, 2)
 		val createChange = assertType(resolvedChange.get(0), CreateEObject)
@@ -96,7 +96,7 @@ class CreateAndInsertRootTest extends EChangeTest {
 		assertFalse(resourceContent.contains(createChange2.affectedElement))
 
 		// Apply backward 1
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore

@@ -64,7 +64,7 @@ class DeleteEObjectTest extends EObjectTest {
 		val resolvedChange = createUnresolvedChange(createdObject).applyForwardAndResolve
 
 		// Apply backward 1
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore(createdObject)
@@ -76,7 +76,7 @@ class DeleteEObjectTest extends EObjectTest {
 		val resolvedChange2 = createUnresolvedChange(createdObject2).applyForwardAndResolve
 		
 		// Apply backward 2
-		resolvedChange2.applyBackwardAndUnresolve
+		resolvedChange2.applyBackward
 
 		// State before
 		assertIsStateBefore(createdObject2)

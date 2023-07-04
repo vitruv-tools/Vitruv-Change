@@ -91,7 +91,7 @@ class CreateAndInsertNonRootTest extends EObjectTest {
 		assertIsStateAfter
 
 		// Apply backward 2
-		resolvedChange2.applyBackwardAndUnresolve
+		resolvedChange2.applyBackward
 
 		val createChange = assertType(resolvedChange.get(0), CreateEObject)
 		val createChange2 = assertType(resolvedChange2.get(0), CreateEObject)
@@ -100,7 +100,7 @@ class CreateAndInsertNonRootTest extends EObjectTest {
 		assertEquals(referenceContent.size, 1)
 
 		// Apply backward 1	
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State after
 		assertIsStateBefore

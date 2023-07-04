@@ -86,13 +86,13 @@ class RemoveAndDeleteNonRootTest extends ReferenceEChangeTest {
 		assertIsStateAfter
 
 		// Apply backward 2
-		resolvedChange2.applyBackwardAndUnresolve
+		resolvedChange2.applyBackward
 
 		assertEquals(referenceContent.size, 1)
 		assertTrue(referenceContent.contains(newValue2))
 
 		// Apply backward 1
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore

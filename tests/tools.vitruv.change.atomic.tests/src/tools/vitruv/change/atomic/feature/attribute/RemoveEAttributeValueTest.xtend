@@ -72,13 +72,13 @@ class RemoveEAttributeValueTest extends InsertRemoveEAttributeTest {
 		assertIsStateAfter
 
 		// Apply backward 2
-		resolvedChange2.applyBackwardAndUnresolve
+		resolvedChange2.applyBackward
 
 		assertEquals(attributeContent.size, 1)
 		assertEquals(attributeContent.get(0), NEW_VALUE_2)
 
 		// Apply backward 1
-		resolvedChange.applyBackwardAndUnresolve
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore
@@ -113,7 +113,7 @@ class RemoveEAttributeValueTest extends InsertRemoveEAttributeTest {
 		assertEquals(affectedNonRootEObject.eClass.getFeatureID(affectedFeature), -1)
 
 		// Apply
-		assertThrows(IllegalStateException) [resolvedChange.applyBackwardAndUnresolve]
+		assertThrows(IllegalStateException) [resolvedChange.applyBackward]
 	}
 
 	/**
@@ -130,7 +130,7 @@ class RemoveEAttributeValueTest extends InsertRemoveEAttributeTest {
 		assertEquals(affectedFeature.EAttributeType.name, "EIntegerObject")
 
 		// Apply
-		assertThrows(IllegalStateException) [resolvedChange.applyBackwardAndUnresolve]
+		assertThrows(IllegalStateException) [resolvedChange.applyBackward]
 	}
 
 	/**

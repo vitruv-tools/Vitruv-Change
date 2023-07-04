@@ -1,10 +1,13 @@
 package tools.vitruv.change.atomic.resolve;
 
+import java.util.List;
+
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.change.atomic.EChangeUuidManager;
 import tools.vitruv.change.atomic.command.ApplyEChangeSwitch;
 import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.eobject.DeleteEObject;
@@ -12,27 +15,18 @@ import tools.vitruv.change.atomic.resolve.internal.AtomicEChangeResolverHelper;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.atomic.uuid.UuidResolver;
 
-public class AtomicEChangeUuidResolver implements AtomicEChangeResolver<Uuid> {
+public class AtomicEChangeUuidResolver {
 	private UuidResolver uuidResolver;
 
 	public AtomicEChangeUuidResolver(UuidResolver uuidResolver) {
 		this.uuidResolver = uuidResolver;
 	}
 
-	@Override
 	public EChange<EObject> resolveAndApplyForward(EChange<Uuid> unresolvedEChange) {
 		EChange<EObject> resolvedEChange = resolve(unresolvedEChange);
 		ApplyEChangeSwitch.applyEChange(resolvedEChange, true);
 		updateUuidResolver(resolvedEChange, unresolvedEChange, true);
 		return resolvedEChange;
-	}
-
-	@Override
-	public EChange<Uuid> unresolveAndApplyBackward(EChange<EObject> resolvedEChange) {
-		ApplyEChangeSwitch.applyEChange(resolvedEChange, false);
-		EChange<Uuid> unresolvedEChange = unresolve(resolvedEChange);
-		updateUuidResolver(resolvedEChange, unresolvedEChange, false);
-		return unresolvedEChange;
 	}
 
 	private EChange<EObject> resolve(EChange<Uuid> unresolvedChange) {
@@ -43,6 +37,11 @@ public class AtomicEChangeUuidResolver implements AtomicEChangeResolver<Uuid> {
 				return uuidResolver.getEObject(uuid);
 			}
 		}, this::resourceResolver);
+	}
+	
+	public EChange<Uuid> assignIds(EChange<EObject> resolvedEChange) {
+		EChange<Uuid> unresolvedEChange = EChangeUuidManager.setOrGenerateIds(List.of(resolvedEChange), uuidResolver, false).iterator().next();
+		return unresolvedEChange;
 	}
 
 	private EChange<Uuid> unresolve(EChange<EObject> resolvedChange) {
