@@ -10,10 +10,10 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.io.TempDir
-import tools.vitruv.change.atomic.command.ApplyEChangeSwitch
-import tools.vitruv.change.atomic.resolve.AtomicEChangeUuidResolver
+import tools.vitruv.change.atomic.command.internal.ApplyEChangeSwitch
 import tools.vitruv.change.atomic.resolve.internal.AtomicEChangeUnresolver
 import tools.vitruv.change.atomic.util.EChangeAssertHelper
+import tools.vitruv.change.atomic.uuid.AtomicEChangeUuidResolver
 import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.atomic.uuid.UuidResolver
 

@@ -5,7 +5,7 @@ import java.util.List;
 import org.eclipse.emf.ecore.EObject;
 
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.change.atomic.resolve.AtomicEChangeUuidResolver;
+import tools.vitruv.change.atomic.uuid.AtomicEChangeUuidResolver;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.composite.description.VitruviusChange;
 

@@ -1,4 +1,4 @@
-package tools.vitruv.change.atomic.id
+package tools.vitruv.change.atomic.hid.impl
 
 import java.nio.file.Path
 import org.eclipse.emf.common.util.URI
@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.^extension.ExtendWith
+import tools.vitruv.change.atomic.hid.internal.HierarchicalIdResolver
 import tools.vitruv.testutils.RegisterMetamodelsInStandalone
 import tools.vitruv.testutils.TestProject
 import tools.vitruv.testutils.TestProjectManager
@@ -23,16 +24,16 @@ import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resou
 import static extension org.eclipse.emf.ecore.util.EcoreUtil.getURI
 
 @ExtendWith(#[TestProjectManager, RegisterMetamodelsInStandalone])
-class IdResolverTest {
+class HierarchicalIdResolverTest {
 	var ResourceSet resourceSet
-	var IdResolver idResolver
+	var HierarchicalIdResolver idResolver
 	var Path testProjectPath
 
 	@BeforeEach
 	def void setup(@TestProject Path testProjectPath) {
 		this.testProjectPath = testProjectPath
 		this.resourceSet = new ResourceSetImpl().withGlobalFactories()
-		this.idResolver = IdResolver.create(resourceSet)
+		this.idResolver = HierarchicalIdResolver.create(resourceSet)
 	}
 	
 	@Test
@@ -155,7 +156,7 @@ class IdResolverTest {
 		val generatedNonRootId = idResolver.getAndUpdateId(nonRoot)
 
 		val childResourceSet = new ResourceSetImpl().withGlobalFactories()
-		val childidResolver = IdResolver.create(childResourceSet)
+		val childidResolver = HierarchicalIdResolver.create(childResourceSet)
 		childResourceSet.getResource(resourceUri, true)
 
 		val childResolverRoot = resourceSet.getEObject(root.URI, true)
@@ -210,7 +211,7 @@ class IdResolverTest {
 		elements.forEach[idResolver.getAndUpdateId(it)]
 
 		val additionalResourceSet = new ResourceSetImpl().withGlobalFactories()
-		val additionalidResolver = IdResolver.create(additionalResourceSet)
+		val additionalidResolver = HierarchicalIdResolver.create(additionalResourceSet)
 
 		elements.forEach[
 			val elementId = idResolver.getAndUpdateId(it)

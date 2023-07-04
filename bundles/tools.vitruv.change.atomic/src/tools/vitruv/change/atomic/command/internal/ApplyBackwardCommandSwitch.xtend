@@ -1,13 +1,18 @@
-package tools.vitruv.change.atomic.command
+package tools.vitruv.change.atomic.command.internal
 
+import edu.kit.ipd.sdq.activextendannotations.Utility
 import java.util.List
+import org.apache.log4j.Logger
 import org.eclipse.emf.common.command.Command
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.edit.command.AddCommand
+import org.eclipse.emf.edit.command.RemoveCommand
 import org.eclipse.emf.edit.command.SetCommand
+import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.command.RemoveAtCommand
 import tools.vitruv.change.atomic.eobject.CreateEObject
 import tools.vitruv.change.atomic.eobject.DeleteEObject
+import tools.vitruv.change.atomic.feature.UnsetFeature
 import tools.vitruv.change.atomic.feature.attribute.InsertEAttributeValue
 import tools.vitruv.change.atomic.feature.attribute.RemoveEAttributeValue
 import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute
@@ -16,13 +21,9 @@ import tools.vitruv.change.atomic.feature.reference.RemoveEReference
 import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
 import tools.vitruv.change.atomic.root.InsertRootEObject
 import tools.vitruv.change.atomic.root.RemoveRootEObject
-import org.eclipse.emf.edit.command.RemoveCommand
-import org.apache.log4j.Logger
-import tools.vitruv.change.atomic.EChange
-import tools.vitruv.change.atomic.feature.UnsetFeature
-import edu.kit.ipd.sdq.activextendannotations.Utility
-import static extension tools.vitruv.change.atomic.command.ChangeCommandUtil.getEditingDomain
-import static extension tools.vitruv.change.atomic.command.ChangeCommandUtil.alreadyContainsObject
+
+import static extension tools.vitruv.change.atomic.command.internal.ChangeCommandUtil.alreadyContainsObject
+import static extension tools.vitruv.change.atomic.command.internal.ChangeCommandUtil.getEditingDomain
 
 /**
  * Switch to create commands for all EChange classes.

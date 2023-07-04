@@ -24,8 +24,8 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import tools.vitruv.change.atomic.id.HierarchicalId;
-import tools.vitruv.change.atomic.id.IdResolver;
+import tools.vitruv.change.atomic.hid.HierarchicalId;
+import tools.vitruv.change.atomic.hid.internal.HierarchicalIdResolver;
 
 class UuidResolverImpl implements UuidResolver {
 	static private final Logger LOGGER = Logger.getLogger(UuidResolverImpl.class);
@@ -219,7 +219,7 @@ class UuidResolverImpl implements UuidResolver {
 	 *                        <code>null<code> if all resources shall be considered.
 	 */
 	private Map<Uuid, HierarchicalId> generateUuidToIdMapping(Collection<Resource> resourcesFilter) {
-		IdResolver idUnresolver = IdResolver.create(resourceSet);
+		HierarchicalIdResolver idUnresolver = HierarchicalIdResolver.create(resourceSet);
 		Map<Uuid, HierarchicalId> uuidToIdMapping = new HashMap<>();
 		for (var entry : eObjectToUuid.entrySet()) {
 			EObject eObject = entry.getKey();
@@ -256,7 +256,7 @@ class UuidResolverImpl implements UuidResolver {
 	private void applyUuidToIdMapping(Map<Uuid, HierarchicalId> uuidToIdMapping, UuidResolver targetUuidResolver,
 			ResourceSet targetResourceSet, Map<Resource, Resource> sourceToTargetResourceMapping)
 			throws IllegalStateException {
-		var idResolver = IdResolver.create(targetResourceSet);
+		var idResolver = HierarchicalIdResolver.create(targetResourceSet);
 		for (var entry : uuidToIdMapping.entrySet()) {
 			Uuid uuid = entry.getKey();
 			HierarchicalId id = entry.getValue();

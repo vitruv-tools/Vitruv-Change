@@ -1,11 +1,12 @@
-package tools.vitruv.change.atomic.id
+package tools.vitruv.change.atomic.hid.internal
 
-import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
+import tools.vitruv.change.atomic.hid.HierarchicalId
 
-interface IdResolver {
+interface HierarchicalIdResolver {
 	/**
 	 * Returns whether an {@link EObject} is registered for the given ID or not. 
 	 */
@@ -43,7 +44,7 @@ interface IdResolver {
 	 * 		the {@link ResourceSet} to load model elements from, may not be {@code null}
 	 * @throws IllegalArgumentException if given {@link ResourceSet} is {@code null}
 	 */
-	static def IdResolver create(ResourceSet resourceSet) {
-		return new IdResolverImpl(resourceSet)
+	static def HierarchicalIdResolver create(ResourceSet resourceSet) {
+		return new HierarchicalIdResolverImpl(resourceSet)
 	}
 }

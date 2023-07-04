@@ -7,8 +7,8 @@ import java.util.List;
 import org.eclipse.emf.ecore.EObject;
 
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.change.atomic.id.HierarchicalId;
-import tools.vitruv.change.atomic.resolve.AtomicEChangeIdResolver;
+import tools.vitruv.change.atomic.hid.AtomicEChangeIdResolver;
+import tools.vitruv.change.atomic.hid.HierarchicalId;
 import tools.vitruv.change.composite.description.VitruviusChange;
 
 public class VitruviusChangeIdResolver extends AbstractVitruviusChangeResolver<HierarchicalId> {

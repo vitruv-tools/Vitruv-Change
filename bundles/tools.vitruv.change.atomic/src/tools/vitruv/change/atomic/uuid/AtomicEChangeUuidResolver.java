@@ -1,17 +1,15 @@
-package tools.vitruv.change.atomic.resolve;
+package tools.vitruv.change.atomic.uuid;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.change.atomic.command.ApplyEChangeSwitch;
+import tools.vitruv.change.atomic.command.internal.ApplyEChangeSwitch;
 import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.eobject.DeleteEObject;
 import tools.vitruv.change.atomic.eobject.EObjectAddedEChange;
-import tools.vitruv.change.atomic.resolve.internal.AtomicEChangeResolverHelper;
-import tools.vitruv.change.atomic.uuid.Uuid;
-import tools.vitruv.change.atomic.uuid.UuidResolver;
+import tools.vitruv.change.atomic.resolve.AtomicEChangeResolverHelper;
 
 public class AtomicEChangeUuidResolver {
 	private UuidResolver uuidResolver;

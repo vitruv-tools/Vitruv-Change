@@ -1,24 +1,26 @@
-package tools.vitruv.change.atomic.id
+package tools.vitruv.change.atomic.hid.internal
 
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.apache.log4j.Logger
-import org.eclipse.emf.common.util.URI
-import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.*
-import static com.google.common.base.Preconditions.checkArgument
-import static com.google.common.base.Preconditions.checkState
-import static com.google.common.base.Preconditions.checkNotNull
-import java.util.PriorityQueue
-import static extension tools.vitruv.change.atomic.id.ObjectResolutionUtil.getHierarchicUriFragment
-import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.getOrCreateResource
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
+import java.util.PriorityQueue
+import org.apache.log4j.Logger
+import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.resource.ResourceSet
+import tools.vitruv.change.atomic.hid.HierarchicalId
+
+import static com.google.common.base.Preconditions.checkArgument
+import static com.google.common.base.Preconditions.checkState
+
+import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.*
+import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.getOrCreateResource
+import static extension tools.vitruv.change.atomic.hid.ObjectResolutionUtil.getHierarchicUriFragment
 
 /**
- * {@link IdResolver}
+ * {@link HierarchicalIdResolver}
  */
-package class IdResolverImpl implements IdResolver {
-	static val logger = Logger.getLogger(IdResolverImpl)
+class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
+	static val logger = Logger.getLogger(HierarchicalIdResolverImpl)
 	static val CACHE_PREFIX = "cache:/"
 	
 	val ResourceSet resourceSet

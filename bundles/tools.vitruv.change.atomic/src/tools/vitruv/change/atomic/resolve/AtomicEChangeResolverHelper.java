@@ -1,4 +1,4 @@
-package tools.vitruv.change.atomic.resolve.internal;
+package tools.vitruv.change.atomic.resolve;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;

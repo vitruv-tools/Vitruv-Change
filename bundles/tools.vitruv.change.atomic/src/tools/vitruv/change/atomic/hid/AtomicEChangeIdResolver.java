@@ -1,20 +1,20 @@
-package tools.vitruv.change.atomic.resolve;
+package tools.vitruv.change.atomic.hid;
 
 import static com.google.common.base.Preconditions.checkState;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.change.atomic.command.ApplyEChangeSwitch;
+import tools.vitruv.change.atomic.command.internal.ApplyEChangeSwitch;
 import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange;
 import tools.vitruv.change.atomic.feature.FeatureEChange;
 import tools.vitruv.change.atomic.feature.reference.SubtractiveReferenceEChange;
 import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange;
-import tools.vitruv.change.atomic.id.HierarchicalId;
-import tools.vitruv.change.atomic.id.IdResolver;
-import tools.vitruv.change.atomic.resolve.internal.AtomicEChangeResolverHelper;
+import tools.vitruv.change.atomic.hid.internal.HierarchicalIdResolver;
+import tools.vitruv.change.atomic.resolve.AtomicEChangeResolverHelper;
 import tools.vitruv.change.atomic.root.InsertRootEObject;
 import tools.vitruv.change.atomic.root.RemoveRootEObject;
 
@@ -22,10 +22,10 @@ import tools.vitruv.change.atomic.root.RemoveRootEObject;
  * Static class for resolving EChanges internally.
  */
 public class AtomicEChangeIdResolver {
-	private IdResolver idResolver;
+	private HierarchicalIdResolver idResolver;
 
-	public AtomicEChangeIdResolver(IdResolver idResolver) {
-		this.idResolver = idResolver;
+	public AtomicEChangeIdResolver(ResourceSet resourceSet) {
+		this.idResolver = HierarchicalIdResolver.create(resourceSet);
 	}
 	
 	public void applyBackward(EChange<EObject> resolvedEChange) {

@@ -6,6 +6,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
 import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.change.atomic.resolve.AtomicEChangeResolverHelper;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.atomic.uuid.UuidResolver;
 

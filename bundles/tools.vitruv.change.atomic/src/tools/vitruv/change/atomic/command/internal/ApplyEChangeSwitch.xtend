@@ -1,4 +1,4 @@
-package tools.vitruv.change.atomic.command
+package tools.vitruv.change.atomic.command.internal
 
 import edu.kit.ipd.sdq.activextendannotations.Utility
 import org.eclipse.emf.common.command.Command

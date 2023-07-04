@@ -1,4 +1,4 @@
-package tools.vitruv.change.atomic.id;
+package tools.vitruv.change.atomic.hid;
 
 public final class HierarchicalId implements Comparable<HierarchicalId> {
 	private String id;

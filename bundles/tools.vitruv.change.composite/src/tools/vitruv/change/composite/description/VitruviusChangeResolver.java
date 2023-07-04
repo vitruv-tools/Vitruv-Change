@@ -3,10 +3,9 @@ package tools.vitruv.change.composite.description;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
-import tools.vitruv.change.atomic.id.HierarchicalId;
-import tools.vitruv.change.atomic.id.IdResolver;
-import tools.vitruv.change.atomic.resolve.AtomicEChangeIdResolver;
-import tools.vitruv.change.atomic.resolve.AtomicEChangeUuidResolver;
+import tools.vitruv.change.atomic.hid.AtomicEChangeIdResolver;
+import tools.vitruv.change.atomic.hid.HierarchicalId;
+import tools.vitruv.change.atomic.uuid.AtomicEChangeUuidResolver;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.atomic.uuid.UuidResolver;
 import tools.vitruv.change.composite.description.impl.VitruviusChangeIdResolver;
@@ -31,8 +30,7 @@ public interface VitruviusChangeResolver<Id> {
 	}
 	
 	public static VitruviusChangeResolver<HierarchicalId> forHierarchicalIds(ResourceSet resourceSet) {
-		IdResolver idResolver = IdResolver.create(resourceSet);
-		AtomicEChangeIdResolver resolver = new AtomicEChangeIdResolver(idResolver);
+		AtomicEChangeIdResolver resolver = new AtomicEChangeIdResolver(resourceSet);
 		return new VitruviusChangeIdResolver(resolver);
 	}
 }

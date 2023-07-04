@@ -1,4 +1,4 @@
-package tools.vitruv.change.atomic.id
+package tools.vitruv.change.atomic.hid
 
 import edu.kit.ipd.sdq.activextendannotations.Utility
 import org.eclipse.emf.ecore.util.EcoreUtil

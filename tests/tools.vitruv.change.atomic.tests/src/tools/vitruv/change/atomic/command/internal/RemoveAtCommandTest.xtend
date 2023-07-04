@@ -1,4 +1,4 @@
-package tools.vitruv.change.atomic.command
+package tools.vitruv.change.atomic.command.internal
 
 import allElementTypes.AllElementTypesPackage
 import org.eclipse.emf.common.command.Command
@@ -6,15 +6,17 @@ import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.edit.domain.EditingDomain
-import static org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import tools.vitruv.change.atomic.command.RemoveAtCommand
+
 import static org.junit.jupiter.api.Assertions.assertEquals
 import static org.junit.jupiter.api.Assertions.assertFalse
 import static org.junit.jupiter.api.Assertions.assertSame
-import tools.vitruv.change.atomic.command.RemoveAtCommand
-import static extension tools.vitruv.change.atomic.command.ChangeCommandUtil.getEditingDomain
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+
+import static extension tools.vitruv.change.atomic.command.internal.ChangeCommandUtil.getEditingDomain
 
 /**
  * Test class for the {@link RemoveAtCommand} which removes 
