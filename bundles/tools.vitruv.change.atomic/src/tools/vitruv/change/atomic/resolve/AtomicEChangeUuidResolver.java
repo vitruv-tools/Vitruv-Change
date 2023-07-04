@@ -1,16 +1,14 @@
 package tools.vitruv.change.atomic.resolve;
 
-import java.util.List;
-
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.change.atomic.EChangeUuidManager;
 import tools.vitruv.change.atomic.command.ApplyEChangeSwitch;
 import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.eobject.DeleteEObject;
+import tools.vitruv.change.atomic.eobject.EObjectAddedEChange;
 import tools.vitruv.change.atomic.resolve.internal.AtomicEChangeResolverHelper;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.atomic.uuid.UuidResolver;
@@ -25,7 +23,7 @@ public class AtomicEChangeUuidResolver {
 	public EChange<EObject> resolveAndApplyForward(EChange<Uuid> unresolvedEChange) {
 		EChange<EObject> resolvedEChange = resolve(unresolvedEChange);
 		ApplyEChangeSwitch.applyEChange(resolvedEChange, true);
-		updateUuidResolver(resolvedEChange, unresolvedEChange, true);
+		updateUuidResolver(resolvedEChange, unresolvedEChange);
 		return resolvedEChange;
 	}
 
@@ -40,28 +38,35 @@ public class AtomicEChangeUuidResolver {
 	}
 	
 	public EChange<Uuid> assignIds(EChange<EObject> resolvedEChange) {
-		EChange<Uuid> unresolvedEChange = EChangeUuidManager.setOrGenerateIds(List.of(resolvedEChange), uuidResolver, false).iterator().next();
+		EChange<Uuid> unresolvedEChange = AtomicEChangeResolverHelper.resolveChange(resolvedEChange, eObject -> {
+			if (uuidResolver.hasUuid(eObject)) {
+				return uuidResolver.getUuid(eObject);
+			}
+			else {
+				if (resolvedEChange instanceof CreateEObject<EObject> createChange && createChange.getAffectedElement() == eObject) {
+					return uuidResolver.registerEObject(eObject);
+				}
+				else if (resolvedEChange instanceof EObjectAddedEChange<EObject> addedChange && addedChange.getNewValue() == eObject) {
+					return uuidResolver.registerEObject(eObject);
+				}
+				else {
+					throw new IllegalStateException("trying to assign UUID for unknown element %s of change %s".formatted(eObject, resolvedEChange));
+				}
+			}
+		}, this::resourceResolver);
+		updateUuidResolver(resolvedEChange, unresolvedEChange);
 		return unresolvedEChange;
 	}
 
-	private EChange<Uuid> unresolve(EChange<EObject> resolvedChange) {
-		return AtomicEChangeResolverHelper.resolveChange(resolvedChange, eObject -> {
-			if (resolvedChange instanceof DeleteEObject<EObject> deleteChange) {
-				return uuidResolver.generateUuid(EcoreUtil.create(deleteChange.getAffectedEObjectType()));
-			}
-			return uuidResolver.getUuid(eObject);
-		}, this::resourceResolver);
-	}
-
-	private void updateUuidResolver(EChange<EObject> resolvedChange, EChange<Uuid> unresolvedChange, boolean forward) {
+	private void updateUuidResolver(EChange<EObject> resolvedChange, EChange<Uuid> unresolvedChange) {
 		if (resolvedChange instanceof CreateEObject<EObject> createResolvedChange
 				&& unresolvedChange instanceof CreateEObject<Uuid> createUnresolvedChange) {
 			registerOrUnregisterEObject(createUnresolvedChange.getAffectedElement(),
-					createResolvedChange.getAffectedElement(), forward);
+					createResolvedChange.getAffectedElement(), true);
 		} else if (resolvedChange instanceof DeleteEObject<EObject> deleteResolvedChange
 				&& unresolvedChange instanceof DeleteEObject<Uuid> deleteUnresolvedChange) {
 			registerOrUnregisterEObject(deleteUnresolvedChange.getAffectedElement(),
-					deleteResolvedChange.getAffectedElement(), !forward);
+					deleteResolvedChange.getAffectedElement(), false);
 		}
 	}
 

@@ -155,7 +155,7 @@ class UuidResolverImpl implements UuidResolver {
 		File file = new File(uri.toFileString());
 		try (FileWriter writer = new FileWriter(file)) {
 			for (var entry : uuidToIdMapping.entrySet()) {
-				String uuid = entry.getKey().getUuid();
+				String uuid = entry.getKey().getRawValue();
 				String id = entry.getValue().getId();
 				writer.write(uuid + SERIALIZATION_SEPARATOR + id);
 				writer.write(System.lineSeparator());
@@ -183,7 +183,7 @@ class UuidResolverImpl implements UuidResolver {
 	}
 
 	private EObject getEObjectForReadOnlyUuid(Uuid uuid) {
-		URI uri = URI.createURI(uuid.getUuid());
+		URI uri = URI.createURI(uuid.getRawValue());
 		return uri.hasFragment() ? resourceSet.getEObject(uri, true) : null;
 	}
 
@@ -197,7 +197,7 @@ class UuidResolverImpl implements UuidResolver {
 	}
 
 	private boolean isReadOnlyUuid(Uuid uuid) {
-		return !uuid.getUuid().startsWith(NON_READONLY_PREFIX);
+		return !uuid.getRawValue().startsWith(NON_READONLY_PREFIX);
 	}
 
 	private void cleanupRemovedElements() {

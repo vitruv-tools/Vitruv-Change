@@ -1,31 +1,31 @@
 package tools.vitruv.change.atomic.uuid;
 
 public final class Uuid {
-	private String uuid;
+	private String rawValue;
 	
-	Uuid(String uuid) {
-		this.uuid = uuid;
+	Uuid(String rawValue) {
+		this.rawValue = rawValue;
 	}
 	
-	public String getUuid() {
-		return uuid;
+	String getRawValue() {
+		return rawValue;
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Uuid other) {
-			return other.getUuid().equals(uuid);
+			return other.getRawValue().equals(rawValue);
 		}
 		return false;
 	}
 	
 	@Override
 	public int hashCode() {
-		return uuid.hashCode();
+		return rawValue.hashCode();
 	}
 	
 	@Override
 	public String toString() {
-		return "Uuid(" + uuid + ")";
+		return "Uuid(" + rawValue + ")";
 	}
 }
