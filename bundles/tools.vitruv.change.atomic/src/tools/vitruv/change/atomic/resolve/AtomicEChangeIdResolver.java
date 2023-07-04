@@ -1,14 +1,22 @@
 package tools.vitruv.change.atomic.resolve;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.command.ApplyEChangeSwitch;
 import tools.vitruv.change.atomic.eobject.CreateEObject;
+import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange;
+import tools.vitruv.change.atomic.feature.FeatureEChange;
+import tools.vitruv.change.atomic.feature.reference.SubtractiveReferenceEChange;
+import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange;
 import tools.vitruv.change.atomic.id.HierarchicalId;
 import tools.vitruv.change.atomic.id.IdResolver;
 import tools.vitruv.change.atomic.resolve.internal.AtomicEChangeResolverHelper;
+import tools.vitruv.change.atomic.root.InsertRootEObject;
+import tools.vitruv.change.atomic.root.RemoveRootEObject;
 
 /**
  * Static class for resolving EChanges internally.
@@ -19,16 +27,20 @@ public class AtomicEChangeIdResolver {
 	public AtomicEChangeIdResolver(IdResolver idResolver) {
 		this.idResolver = idResolver;
 	}
+	
+	public void applyBackward(EChange<EObject> resolvedEChange) {
+		ApplyEChangeSwitch.applyEChange(resolvedEChange, false);
+	}
 
 	public EChange<EObject> resolveAndApplyForward(EChange<HierarchicalId> unresolvedEChange) {
 		EChange<EObject> resolvedChange = resolve(unresolvedEChange);
-		ApplyEChangeSwitch.applyEChange(resolvedChange, true);
+		applyForward(resolvedChange);
 		return resolvedChange;
 	}
 	
 	public EChange<HierarchicalId> applyForwardAndAssignIds(EChange<EObject> resolvedEChange) {
 		EChange<HierarchicalId> unresolvedChange = unresolve(resolvedEChange);
-		EChangeIdResolverAndApplicator.applyForward(resolvedEChange, idResolver);
+		applyForward(resolvedEChange);
 		return unresolvedChange;
 	}
 
@@ -36,7 +48,10 @@ public class AtomicEChangeIdResolver {
 		return AtomicEChangeResolverHelper.resolveChange(unresolvedChange, 
 				id -> {
 			if (unresolvedChange instanceof CreateEObject<HierarchicalId> createChange) {
-				return EcoreUtil.create(createChange.getAffectedEObjectType());
+				EObject createdElement = EcoreUtil.create(createChange.getAffectedEObjectType());
+				HierarchicalId createdId = idResolver.getAndUpdateId(createdElement);
+				checkState(createdId.equals(id), "generated ID %s does not match the original ID %s on element creation", createdId, id);
+				return createdElement;
 			} else {
 				return idResolver.getEObject(id);
 			}
@@ -48,191 +63,55 @@ public class AtomicEChangeIdResolver {
 				eObject -> idResolver.getAndUpdateId(eObject), 
 				resource -> idResolver.getResource(resource.getURI()));
 	}
-//	val IdResolver idResolver
-//	
-//	new (IdResolver idResolver) {
-//		checkArgument(idResolver !== null, "id resolver must not be null")
-//		this.idResolver = idResolver
-//	}
-//	
-//	/**
-//	 * Resolves {@link FeatureEChange} attributes {@code affectedEObject} and {@code affectedFeature}.
-//	 * @param change 		The change which should be resolved.
-//	 */
-//	def private <A extends EObject, F extends EStructuralFeature> void resolveFeatureEChange(FeatureEChange<A, F> change) {
-//		checkArgument(change.affectedEObjectID !== null, "change %s must have an affected EObject ID", change)
-//		checkArgument(change.affectedFeature !== null, "change %s must have an affected feature", change)
-//		if (idResolver.hasEObject(change.affectedEObjectID)) {
-//			change.affectedEObject = idResolver.getEObject(change.affectedEObjectID) as A		
-//		}
-//		change.affectedEObject.checkNotNullAndNotProxy(change, "affected object")
-//	}
-//
-//	def private EObject resolveObject(String valueId) {
-//		if (valueId === null) {
-//			return null
-//		}
-//		return idResolver.getEObject(valueId)
-//	}
-//
-//	/**
-//	 * Resolves {@link EObjectExistenceEChange} attribute {@code affectedEObject}.
-//	 * @param change 			The change which should be resolved.
-//	 */
-//	def private <A extends EObject> void resolveEObjectExistenceEChange(EObjectExistenceEChange<A> change, boolean isNewObject) {
-//		checkArgument(change.affectedEObjectID !== null, "change %s must have an affected EObject ID", change)
-//
-//		// Resolve the affected object
-//		if (isNewObject) {
-//			// Check if ID resolver may still contain the removed object
-//			if (idResolver.hasEObject(change.affectedEObjectID)) {
-//				val stillExistingObject = idResolver.getEObject(change.affectedEObjectID) as A
-//				change.affectedEObject = stillExistingObject
-//				change.affectedEObject.checkNotNullAndNotProxy(change, "affected object")
-//			} else {
-//				// Create new one
-//				val newObject = EcoreUtil.create(change.affectedEObjectType) as A
-//				change.affectedEObject = newObject
-//				val id = idResolver.getAndUpdateId(newObject).id
-//				checkState(id == change.affectedEObjectID, "generated ID %s does not match the original ID %s on element creation", id, change.affectedEObjectID)
-//			}
-//		} else {
-//			// Object still exists
-//			change.affectedEObject = idResolver.getEObject(change.affectedEObjectID) as A
-//			change.affectedEObject.checkNotNullAndNotProxy(change, "affected object")
-//		}
-//		
-//		if (change.idAttributeValue !== null) {
-//			EcoreUtil.setID(change.affectedEObject, change.idAttributeValue)
-//		}
-//	}
-//
-//	/**
-//	 * Resolves {@link RootEChange} attribute {@code resource}.
-//	 * @param change 			The change which should be resolved.
-//	 */
-//	def private void resolveRootEChange(RootEChange change) {
-//		// Get resource where the root object will be inserted / removed.
-//		change.resource = idResolver.getResource(URI.createURI(change.uri))
-//	}
-//
-//	/**
-//	 * Resolves the value of an {@link RootEChange}.
-//	 * @param change		The change whose value shall be resolved.
-//	 * @param isInserted	{@code true} if the concrete value is already inserted into the resource.
-//	 * 						Depends on the kind of the change and the model state.
-//	 * @returns				The resolved value.
-//	 */
-//	def private <T extends EObject> resolveRootValue(RootEChange change, T value, boolean isInserted) {
-//		// Resolve the root object
-//		if (isInserted) {
-//			// Root object is in resource
-//			if (0 <= change.index && change.index < change.resource.contents.size) {
-//				return change.resource.contents.get(change.index)				
-//			}
-//		} else {
-//			// Root object is in staging area
-//			if (change instanceof InsertRootEObject<?>) {
-//				return idResolver.getEObject(change.newValueID)	
-//			} else if (change instanceof RemoveRootEObject<?>) {
-//				return idResolver.getEObject(change.oldValueID)	
-//			}
-//		}
-//		return value		
-//	}
-//	
-//	/**
-//	 * Dispatch method for resolving the {@link EChange}.
-//	 * @param change 			The change which should be resolved.
-//	 */
-//	def package dispatch void resolve(EChange change) {
-//		// If an EChange reaches this point, there is a dispatch method missing for the concrete type.
-//		throw new UnsupportedOperationException("change of type " + change?.eClass + " is not supported")
-//	}
-//
-//	/**
-//	 * Dispatch method for resolving the {@link FeatureEChange} EChange.
-//	 * @param change 			The change which should be resolved.
-//	 */
-//	def package dispatch void resolve(FeatureEChange<EObject, EStructuralFeature> change) {
-//		change.resolveFeatureEChange()
-//	}
-//
-//	/**
-//	 * Dispatch method for resolving the {@link InsertEReference} EChange.
-//	 * @param change 			The change which should be resolved.
-//	 */
-//	def package dispatch void resolve(InsertEReference<EObject, EObject> change) {
-//		change.resolveFeatureEChange()
-//		change.newValue = change.newValueID.resolveObject()
-//		change.newValue.checkNotNullAndNotProxy(change, "new value")
-//	}
-//
-//	/**
-//	 * Dispatch method for resolving the {@link RemoveEReference} EChange.
-//	 * @param change 			The change which should be resolved.
-//	 */
-//	def package dispatch void resolve(RemoveEReference<EObject, EObject> change) {
-//		change.resolveFeatureEChange()		
-//		change.oldValue = change.oldValueID.resolveObject()
-//		change.oldValue.checkNotNullAndNotProxy(change, "old value")
-//	}
-//
-//	/**
-//	 * Dispatch method for resolving the {@link ReplaceSingleValuedEReferenceEReference} EChange.
-//	 * @param change 			The change which should be resolved.
-//	 */
-//	def package dispatch void resolve(ReplaceSingleValuedEReference<EObject, EObject> change) {
-//		change.resolveFeatureEChange()
-//		change.newValue = change.newValueID.resolveObject()
-//		change.oldValue = change.oldValueID.resolveObject()
-//		change.oldValue.checkEitherNullOrNotProxy(change, "old value")
-//		change.newValue.checkEitherNullOrNotProxy(change, "new value")
-//	}
-//
-//	/**
-//	 * Dispatch method for resolving the {@link InsertRootEObject} EChange.
-//	 * @param change 			The change which should be resolved.
-//	 */
-//	def package dispatch void resolve(InsertRootEObject<EObject> change) {
-//		change.resolveRootEChange()
-//		change.newValue = change.resolveRootValue(change.newValue, false)
-//		change.newValue.checkNotNullAndNotProxy(change, "new value")
-//	}
-//
-//	/**
-//	 * Dispatch method for resolving the {@link RemoveRootEObject} EChange.
-//	 * @param change 			The change which should be resolved.
-//	 */
-//	def package dispatch void resolve(RemoveRootEObject<EObject> change) {
-//		change.resolveRootEChange()
-//		change.oldValue = change.resolveRootValue(change.oldValue, true)
-//		change.oldValue.checkNotNullAndNotProxy(change, "old value")
-//	}
-//	
-//	/**
-//	 * Dispatch method for resolving the {@link CreateEObject} EChange.
-//	 * @param change 			The change which should be resolved.
-//	 */
-//	def package dispatch void resolve(CreateEObject<EObject> change) {
-//		change.resolveEObjectExistenceEChange(true)
-//	}
-//
-//	/**
-//	 * Dispatch method for resolving the {@link DeleteEObject} EChange.
-//	 * @param change 			The change which should be resolved.
-//	 */
-//	def package dispatch void resolve(DeleteEObject<EObject> change) {
-//		change.resolveEObjectExistenceEChange(false)
-//	}
-//	
-//	def private static void checkNotNullAndNotProxy(EObject object, EChange change, String nameOfElementInChange) {
-//		checkState(object !== null, "%s of change %s was resolved to null", nameOfElementInChange, change)
-//		checkState(!object.eIsProxy, "%s of change %s was resolved to a proxy", nameOfElementInChange, object)
-//	}
-//	
-//	def private static void checkEitherNullOrNotProxy(EObject object, EChange change, String nameOfElementInChange) {
-//		checkState(object === null || !object.eIsProxy, "%s of change %s was resolved to a proxy", nameOfElementInChange, object)
-//	}
+	
+	private void applyForward(EChange<EObject> resolvedChange) {
+		EObject affectedEObject = getAffectedEObject(resolvedChange);
+		HierarchicalId affectedId = idResolver.getAndUpdateId(affectedEObject);
+		EObject oldObject = getOldContainedEObject(resolvedChange);
+		ApplyEChangeSwitch.applyEChange(resolvedChange, true);
+		if (isContainmentChange(resolvedChange) || affectedId != idResolver.getAndUpdateId(affectedEObject)) {
+			refreshIds(affectedEObject);
+		}
+		if (oldObject != null) {
+			refreshIds(oldObject);
+		}
+	}
+	
+	private static EObject getAffectedEObject(EChange<EObject> eChange) {
+		if (eChange instanceof FeatureEChange<EObject, ?> featureChange) {
+			return featureChange.getAffectedElement();
+		}
+		else if (eChange instanceof EObjectExistenceEChange<EObject> existenceChange) {
+			return existenceChange.getAffectedElement();
+		}
+		else if (eChange instanceof InsertRootEObject<EObject> insertChange) {
+			return insertChange.getNewValue();
+		}
+		else if (eChange instanceof RemoveRootEObject<EObject> removeChange) {
+			return removeChange.getOldValue();
+		}
+		throw new IllegalArgumentException("can not identify affected EObject of change %s".formatted(eChange));
+	}
+	
+	private static EObject getOldContainedEObject(EChange<EObject> eChange) {
+		if (eChange instanceof SubtractiveReferenceEChange<EObject> subtractiveChange) {
+			if (subtractiveChange.isContainment()) {
+				return subtractiveChange.getOldValue();
+			}
+		}
+		return null;
+	}
+	
+	private static boolean isContainmentChange(EChange<EObject> eChange) {
+		if (eChange instanceof UpdateReferenceEChange<EObject> referenceChange) {
+			return referenceChange.isContainment();
+		}
+		return false;
+	}
+	
+	private void refreshIds(EObject eObject) {
+		idResolver.getAndUpdateId(eObject);
+		eObject.eContents().forEach(this::refreshIds);
+	}
 }
 	

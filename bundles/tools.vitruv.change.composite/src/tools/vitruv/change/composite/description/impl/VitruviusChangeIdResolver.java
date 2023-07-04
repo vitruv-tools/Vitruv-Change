@@ -9,7 +9,6 @@ import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.id.HierarchicalId;
 import tools.vitruv.change.atomic.resolve.AtomicEChangeIdResolver;
-import tools.vitruv.change.atomic.resolve.EChangeIdResolverAndApplicator;
 import tools.vitruv.change.composite.description.VitruviusChange;
 
 public class VitruviusChangeIdResolver extends AbstractVitruviusChangeResolver<HierarchicalId> {
@@ -38,7 +37,7 @@ public class VitruviusChangeIdResolver extends AbstractVitruviusChangeResolver<H
 		} else if (change instanceof TransactionalChangeImpl<EObject> transactionalChange) {
 			List<EChange<EObject>> changes = new LinkedList<>(transactionalChange.getEChanges());
 			Collections.reverse(changes);
-			changes.forEach(EChangeIdResolverAndApplicator::applyBackward);
+			changes.forEach(atomicChangeResolver::applyBackward);
 		}
 		else {
 			throw new IllegalStateException("trying to apply unknown change of class " + change.getClass().getSimpleName());
