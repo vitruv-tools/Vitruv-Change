@@ -18,7 +18,8 @@ public class VitruviusChangeUuidResolver extends AbstractVitruviusChangeResolver
 
 	@Override
 	public VitruviusChange<EObject> resolveAndApply(VitruviusChange<Uuid> change) {
-		return resolveAndApply(change, atomicChangeResolver::resolveAndApplyForward);
+		return resolveAndApply(change, atomicChangeResolver::resolveAndApplyForward,
+				transactionalChange -> atomicChangeResolver.endTransaction());
 	}
 
 	@Override
@@ -29,6 +30,7 @@ public class VitruviusChangeUuidResolver extends AbstractVitruviusChangeResolver
 		} else if (change instanceof TransactionalChangeImpl<EObject> transactionalChange) {
 			List<EChange<Uuid>> resolvedChanges = transactionalChange.getEChanges().stream()
 					.map(atomicChangeResolver::assignIds).toList();
+			atomicChangeResolver.endTransaction();
 			return new TransactionalChangeImpl<>(resolvedChanges);
 		}
 		throw new IllegalStateException(

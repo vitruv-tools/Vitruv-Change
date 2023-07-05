@@ -20,13 +20,24 @@ public class VitruviusChangeIdResolver extends AbstractVitruviusChangeResolver<H
 
 	@Override
 	public VitruviusChange<EObject> resolveAndApply(VitruviusChange<HierarchicalId> change) {
-		return resolveAndApply(change, atomicChangeResolver::resolveAndApplyForward);
+		return resolveAndApply(change, atomicChangeResolver::resolveAndApplyForward,
+				transactionalChange -> atomicChangeResolver.endTransaction());
 	}
 
 	@Override
 	public VitruviusChange<HierarchicalId> assignIds(VitruviusChange<EObject> change) {
 		applyBackward(change);
-		return applyForwardAndAssignIds(change);
+		VitruviusChange<HierarchicalId> result = applyForwardAndAssignIds(change);
+		/**
+		 * TODO: the correct handling would be to call endTransaction() each time after
+		 * a transactional change is applied forward or backward. Due to incomplete
+		 * change recording (https://github.com/vitruv-tools/Vitruv-Change/issues/71)
+		 * this would result in failures when handling a composite change with multiple
+		 * transactional changes as containment information of cascade deleted elements
+		 * would be lost.
+		 */
+		atomicChangeResolver.endTransaction();
+		return result;
 	}
 
 	private void applyBackward(VitruviusChange<EObject> change) {
@@ -38,9 +49,9 @@ public class VitruviusChangeIdResolver extends AbstractVitruviusChangeResolver<H
 			List<EChange<EObject>> changes = new LinkedList<>(transactionalChange.getEChanges());
 			Collections.reverse(changes);
 			changes.forEach(atomicChangeResolver::applyBackward);
-		}
-		else {
-			throw new IllegalStateException("trying to apply unknown change of class " + change.getClass().getSimpleName());
+		} else {
+			throw new IllegalStateException(
+					"trying to apply unknown change of class " + change.getClass().getSimpleName());
 		}
 	}
 

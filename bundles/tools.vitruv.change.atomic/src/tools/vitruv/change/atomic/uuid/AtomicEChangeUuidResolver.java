@@ -56,6 +56,15 @@ public class AtomicEChangeUuidResolver {
 		return unresolvedEChange;
 	}
 
+	/**
+	 * Ends a transactions such that all {@link EObject}s not being contained in a
+	 * resource, which is contained in a resource set, are removed from the UUID
+	 * mapping.
+	 */
+	public void endTransaction() {
+		uuidResolver.endTransaction();
+	}
+
 	private void updateUuidResolver(EChange<EObject> resolvedChange, EChange<Uuid> unresolvedChange) {
 		if (resolvedChange instanceof CreateEObject<EObject> createResolvedChange
 				&& unresolvedChange instanceof CreateEObject<Uuid> createUnresolvedChange) {

@@ -44,6 +44,15 @@ public class AtomicEChangeIdResolver {
 		return unresolvedChange;
 	}
 
+	/**
+	 * Ends a transactions such that all {@link EObject}s not being contained in a
+	 * resource, which is contained in a resource set, are removed from the
+	 * hierarchical ID mapping.
+	 */
+	public void endTransaction() {
+		idResolver.endTransaction();
+	}
+
 	private EChange<EObject> resolve(EChange<HierarchicalId> unresolvedChange) {
 		return AtomicEChangeResolverHelper.resolveChange(unresolvedChange, 
 				id -> {
