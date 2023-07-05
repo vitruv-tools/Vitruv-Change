@@ -39,16 +39,13 @@ public class AtomicEChangeUuidResolver {
 		EChange<Uuid> unresolvedEChange = AtomicEChangeResolverHelper.resolveChange(resolvedEChange, eObject -> {
 			if (uuidResolver.hasUuid(eObject)) {
 				return uuidResolver.getUuid(eObject);
-			}
-			else {
-				if (resolvedEChange instanceof CreateEObject<EObject> createChange && createChange.getAffectedElement() == eObject) {
+			} else {
+				if (resolvedEChange instanceof CreateEObject<EObject> createChange
+						&& createChange.getAffectedElement() == eObject) {
 					return uuidResolver.registerEObject(eObject);
-				}
-				else if (resolvedEChange instanceof EObjectAddedEChange<EObject> addedChange && addedChange.getNewValue() == eObject) {
-					return uuidResolver.registerEObject(eObject);
-				}
-				else {
-					throw new IllegalStateException("trying to assign UUID for unknown element %s of change %s".formatted(eObject, resolvedEChange));
+				} else {
+					throw new IllegalStateException("trying to assign UUID for unknown element %s of change %s"
+							.formatted(eObject, resolvedEChange));
 				}
 			}
 		}, this::resourceResolver);
