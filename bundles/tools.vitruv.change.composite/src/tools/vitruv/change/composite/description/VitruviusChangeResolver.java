@@ -22,13 +22,28 @@ public interface VitruviusChangeResolver<Id> {
 	 */
 	public VitruviusChange<EObject> resolveAndApply(VitruviusChange<Id> change);
 
+	/**
+	 * Unresolves the change and assigns Ids to it. It has to be ensured that the
+	 * model is in the state after the change has been applied. Returns the
+	 * Id-assigned change.
+	 */
 	public VitruviusChange<Id> assignIds(VitruviusChange<EObject> change);
-	
+
+	/**
+	 * Instantiates a new resolver that uses {@link Uuid UUIDs}.
+	 * 
+	 * @param uuidResolver the {@link UuidResolver} to resolve UUIDs with.
+	 */
 	public static VitruviusChangeResolver<Uuid> forUuids(UuidResolver uuidResolver) {
 		AtomicEChangeUuidResolver resolver = new AtomicEChangeUuidResolver(uuidResolver);
 		return new VitruviusChangeUuidResolver(resolver);
 	}
-	
+
+	/**
+	 * Instantiates a new resolver that uses {@link HierarchicalId HierarchicalIds}.
+	 * 
+	 * @param resourceSet the {@link ResourceSet} to use with this resolver.
+	 */
 	public static VitruviusChangeResolver<HierarchicalId> forHierarchicalIds(ResourceSet resourceSet) {
 		AtomicEChangeIdResolver resolver = new AtomicEChangeIdResolver(resourceSet);
 		return new VitruviusChangeIdResolver(resolver);

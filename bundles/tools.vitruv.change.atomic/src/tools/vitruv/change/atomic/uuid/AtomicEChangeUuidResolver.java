@@ -8,9 +8,12 @@ import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.command.internal.ApplyEChangeSwitch;
 import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.eobject.DeleteEObject;
-import tools.vitruv.change.atomic.eobject.EObjectAddedEChange;
 import tools.vitruv.change.atomic.resolve.AtomicEChangeResolverHelper;
 
+/**
+ * A resolver for resolving a change with {@link Uuid} to {@link EObject} or
+ * vice versa.
+ */
 public class AtomicEChangeUuidResolver {
 	private UuidResolver uuidResolver;
 
@@ -18,6 +21,14 @@ public class AtomicEChangeUuidResolver {
 		this.uuidResolver = uuidResolver;
 	}
 
+	/**
+	 * Resolves the given change using its {@link UuidResolver} and applies it
+	 * forward. The associated resource set must be in the state before the change
+	 * has been applied.
+	 * 
+	 * @param unresolvedEChange the change to resolve and apply.
+	 * @return Returns the resolved change.
+	 */
 	public EChange<EObject> resolveAndApplyForward(EChange<Uuid> unresolvedEChange) {
 		EChange<EObject> resolvedEChange = resolve(unresolvedEChange);
 		ApplyEChangeSwitch.applyEChange(resolvedEChange, true);
@@ -34,7 +45,15 @@ public class AtomicEChangeUuidResolver {
 			}
 		}, this::resourceResolver);
 	}
-	
+
+	/**
+	 * Gets or registers {@link Uuid Uuids} for all elements of the given change and
+	 * returns the Uuid-assigned change. The associated resource set must be in the
+	 * state after the change has been applied.
+	 * 
+	 * @param resolvedEChange the change to assign Uuids for.
+	 * @return Returns the Uuid-assigned change.
+	 */
 	public EChange<Uuid> assignIds(EChange<EObject> resolvedEChange) {
 		EChange<Uuid> unresolvedEChange = AtomicEChangeResolverHelper.resolveChange(resolvedEChange, eObject -> {
 			if (uuidResolver.hasUuid(eObject)) {
@@ -65,23 +84,15 @@ public class AtomicEChangeUuidResolver {
 	private void updateUuidResolver(EChange<EObject> resolvedChange, EChange<Uuid> unresolvedChange) {
 		if (resolvedChange instanceof CreateEObject<EObject> createResolvedChange
 				&& unresolvedChange instanceof CreateEObject<Uuid> createUnresolvedChange) {
-			registerOrUnregisterEObject(createUnresolvedChange.getAffectedElement(),
-					createResolvedChange.getAffectedElement(), true);
+			uuidResolver.registerEObject(createUnresolvedChange.getAffectedElement(),
+					createResolvedChange.getAffectedElement());
 		} else if (resolvedChange instanceof DeleteEObject<EObject> deleteResolvedChange
 				&& unresolvedChange instanceof DeleteEObject<Uuid> deleteUnresolvedChange) {
-			registerOrUnregisterEObject(deleteUnresolvedChange.getAffectedElement(),
-					deleteResolvedChange.getAffectedElement(), false);
+			uuidResolver.unregisterEObject(deleteUnresolvedChange.getAffectedElement(),
+					deleteResolvedChange.getAffectedElement());
 		}
 	}
 
-	private void registerOrUnregisterEObject(Uuid uuid, EObject eObject, boolean register) {
-		if (register) {
-			uuidResolver.registerEObject(uuid, eObject);
-		} else {
-			uuidResolver.unregisterEObject(uuid, eObject);
-		}
-	}
-	
 	private Resource resourceResolver(Resource sourceResource) {
 		return uuidResolver.getResource(sourceResource.getURI());
 	}
