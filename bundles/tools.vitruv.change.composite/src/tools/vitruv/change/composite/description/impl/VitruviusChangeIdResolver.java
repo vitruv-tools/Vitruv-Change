@@ -20,14 +20,14 @@ public class VitruviusChangeIdResolver extends AbstractVitruviusChangeResolver<H
 
 	@Override
 	public VitruviusChange<EObject> resolveAndApply(VitruviusChange<HierarchicalId> change) {
-		return resolveAndApply(change, atomicChangeResolver::resolveAndApplyForward,
+		return transformVitruviusChange(change, atomicChangeResolver::resolveAndApplyForward,
 				transactionalChange -> atomicChangeResolver.endTransaction());
 	}
 
 	@Override
 	public VitruviusChange<HierarchicalId> assignIds(VitruviusChange<EObject> change) {
 		applyBackward(change);
-		VitruviusChange<HierarchicalId> result = applyForwardAndAssignIds(change);
+		VitruviusChange<HierarchicalId> result = transformVitruviusChange(change, atomicChangeResolver::applyForwardAndAssignIds, transactionalChange -> {});
 		/**
 		 * TODO: the correct handling would be to call endTransaction() each time after
 		 * a transactional change is applied forward or backward. Due to incomplete
@@ -54,17 +54,4 @@ public class VitruviusChangeIdResolver extends AbstractVitruviusChangeResolver<H
 					"trying to apply unknown change of class " + change.getClass().getSimpleName());
 		}
 	}
-
-	private VitruviusChange<HierarchicalId> applyForwardAndAssignIds(VitruviusChange<EObject> change) {
-		if (change instanceof CompositeContainerChangeImpl<EObject> compositeChange) {
-			return new CompositeContainerChangeImpl<>(
-					compositeChange.getChanges().stream().map(this::applyForwardAndAssignIds).toList());
-		} else if (change instanceof TransactionalChangeImpl<EObject> transactionalChange) {
-			List<EChange<HierarchicalId>> unresolvedChanges = transactionalChange.getEChanges().stream()
-					.map(atomicChangeResolver::applyForwardAndAssignIds).toList();
-			return new TransactionalChangeImpl<>(unresolvedChanges);
-		}
-		throw new IllegalStateException("trying to apply unknown change of class " + change.getClass().getSimpleName());
-	}
-
 }
