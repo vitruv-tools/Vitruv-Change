@@ -32,7 +32,7 @@ public class AtomicEChangeResolverHelper<Source, Target> {
 	}
 
 	/**
-	 * Dispatch method for resolving the {@link EChange}.
+	 * Method for resolving the {@link EChange}.
 	 * 
 	 * @param change The change which should be resolved.
 	 */
@@ -61,7 +61,6 @@ public class AtomicEChangeResolverHelper<Source, Target> {
 		if (sourceChange instanceof RootEChange<Source> sourceRootChange
 				&& targetChange instanceof RootEChange<Target> targetRootChange) {
 			resolve(sourceRootChange, targetRootChange);
-			// TODO: check root value index
 		}
 		return targetChange;
 	}
@@ -118,7 +117,6 @@ public class AtomicEChangeResolverHelper<Source, Target> {
 	}
 
 	private void resolve(EObjectExistenceEChange<Source> sourceChange, EObjectExistenceEChange<Target> targetChange) {
-		// TODO: what happens with deleted elements / newly created elements?
 		targetChange.setAffectedElement(elementResolver.apply(sourceChange.getAffectedElement()));
 		checkNotNullAndNotProxy(targetChange.getAffectedElement(), sourceChange, "affected element");
 	}
