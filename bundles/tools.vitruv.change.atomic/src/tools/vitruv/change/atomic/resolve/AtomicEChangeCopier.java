@@ -6,33 +6,53 @@ import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory;
 import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.eobject.DeleteEObject;
+import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange;
 import tools.vitruv.change.atomic.eobject.EobjectFactory;
 import tools.vitruv.change.atomic.feature.FeatureFactory;
 import tools.vitruv.change.atomic.feature.UnsetFeature;
+import tools.vitruv.change.atomic.feature.attribute.AdditiveAttributeEChange;
 import tools.vitruv.change.atomic.feature.attribute.InsertEAttributeValue;
 import tools.vitruv.change.atomic.feature.attribute.RemoveEAttributeValue;
 import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute;
+import tools.vitruv.change.atomic.feature.reference.AdditiveReferenceEChange;
 import tools.vitruv.change.atomic.feature.reference.InsertEReference;
 import tools.vitruv.change.atomic.feature.reference.RemoveEReference;
 import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference;
+import tools.vitruv.change.atomic.feature.single.ReplaceSingleValuedFeatureEChange;
 import tools.vitruv.change.atomic.root.InsertRootEObject;
 import tools.vitruv.change.atomic.root.RemoveRootEObject;
+import tools.vitruv.change.atomic.root.RootEChange;
+import tools.vitruv.change.atomic.root.RootFactory;
 
 public class AtomicEChangeCopier {
 	public static <Source, Target> EChange<Target> copy(EChange<Source> change) {
+		EChange<Target> result = _copy(change);
+		if (change instanceof EObjectExistenceEChange<Source> existenceChange && result instanceof EObjectExistenceEChange<Target> existenceTarget) {
+			existenceTarget.setIdAttributeValue(existenceChange.getIdAttributeValue());
+			existenceTarget.setAffectedEObjectType(existenceChange.getAffectedEObjectType());
+		}
+		if (change instanceof RootEChange<Source> rootChange && result instanceof RootEChange<Target> rootResult) {
+			rootResult.setUri(rootChange.getUri());
+			rootResult.setIndex(rootChange.getIndex());
+		}
+		if (change instanceof ReplaceSingleValuedFeatureEChange<Source, ?, ?> featureChange && result instanceof ReplaceSingleValuedFeatureEChange<Target, ?, ?> featureResult) {
+			featureResult.setIsUnset(featureChange.isIsUnset());
+		}
+		if (change instanceof AdditiveAttributeEChange<Source, ?> additiveChange && result instanceof AdditiveAttributeEChange<Target, ?> additiveResult) {
+			additiveResult.setWasUnset(additiveChange.isWasUnset());
+		}
+		if (change instanceof AdditiveReferenceEChange<Source> additiveChange && result instanceof AdditiveReferenceEChange<Target> additiveResult) {
+			additiveResult.setWasUnset(additiveChange.isWasUnset());
+		}
+		return result;
+	}
+	
+	private static <Source, Target> EChange<Target> _copy(EChange<Source> change) {
 		if (change instanceof InsertRootEObject<Source> c) {
-			InsertRootEObject<Target> result = getChangeFactory().createInsertRootChange(null, c.getResource(), c.getIndex());
-			if (c.getUri() != null) {
-				result.setUri(c.getUri());
-			}
-			return result;
+			return RootFactory.eINSTANCE.createInsertRootEObject();
 		}
 		else if (change instanceof RemoveRootEObject<Source> c) {
-			RemoveRootEObject<Target> result = getChangeFactory().createRemoveRootChange(null, c.getResource(), null, c.getIndex());
-			if (c.getUri() != null) {
-				result.setUri(c.getUri());
-			}
-			return result;
+			return RootFactory.eINSTANCE.createRemoveRootEObject();
 		}
 		
 		else if (change instanceof InsertEAttributeValue<Source, ?> c) {
@@ -56,16 +76,10 @@ public class AtomicEChangeCopier {
 		}
 		
 		else if (change instanceof CreateEObject<Source> c) {
-			CreateEObject<Target> result = EobjectFactory.eINSTANCE.createCreateEObject();
-			result.setAffectedEObjectType(c.getAffectedEObjectType());
-			result.setIdAttributeValue(c.getIdAttributeValue());
-			return result;
+			return EobjectFactory.eINSTANCE.createCreateEObject();
 		}
 		else if (change instanceof DeleteEObject<Source> c) {
-			DeleteEObject<Target> result = EobjectFactory.eINSTANCE.createDeleteEObject();
-			result.setAffectedEObjectType(c.getAffectedEObjectType());
-			result.setIdAttributeValue(c.getIdAttributeValue());
-			return result;
+			return EobjectFactory.eINSTANCE.createDeleteEObject();
 		}
 		
 		else if (change instanceof UnsetFeature<Source, ?> c) {
