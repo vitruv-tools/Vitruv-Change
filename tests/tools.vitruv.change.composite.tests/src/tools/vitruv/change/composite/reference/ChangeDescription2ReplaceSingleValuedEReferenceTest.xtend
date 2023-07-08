@@ -19,15 +19,14 @@ class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeDescript
 		
 		// test
 		val nonRoot = aet.NonRoot
-		val nonRootId = nonRoot.id
 		val result = uniquePersistedRoot.record [
-			singleValuedContainmentEReference = EcoreUtil.copy(nonRoot)
+			singleValuedContainmentEReference = nonRoot
 		]
 
 		// assert
 		result.assertChangeCount(3)
 			.assertSetSingleValuedEReference(uniquePersistedRoot, ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE, nonRoot, true, true, false)
-			.assertReplaceSingleValuedEAttribute(nonRoot, IDENTIFIED__ID, null, nonRootId, false, false)
+			.assertReplaceSingleValuedEAttribute(nonRoot, IDENTIFIED__ID, null, nonRoot.id, false, false)
 			.assertEmpty
 	}
 
@@ -42,7 +41,7 @@ class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeDescript
 
 		// test
 		val result = uniquePersistedRoot.record [
-			singleValuedContainmentEReference = EcoreUtil.copy(replaceNonRoot)
+			singleValuedContainmentEReference = replaceNonRoot
 		]
 
 		// assert

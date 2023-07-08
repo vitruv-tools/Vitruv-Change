@@ -2,7 +2,6 @@ package tools.vitruv.change.composite.reference
 
 import java.util.stream.Stream
 import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.util.EcoreUtil
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -35,7 +34,7 @@ class ChangeDescription2InsertEReferenceTest extends ChangeDescription2ChangeTra
 			return element
 		]
 		var Iterable<? extends EChange<EObject>> actualChanges = uniquePersistedRoot.record [
-			multiValuedContainmentEReference.addAll(insertAt, nonRootElements.mapFixed[EcoreUtil.copy(it)])
+			multiValuedContainmentEReference.addAll(insertAt, nonRootElements)
 		]
 
 		// assert
@@ -115,7 +114,7 @@ class ChangeDescription2InsertEReferenceTest extends ChangeDescription2ChangeTra
 		// test
 		val nonRoot = aet.NonRoot
 		val result = uniquePersistedRoot.record [
-			multiValuedContainmentEReference.add(expectedIndex, EcoreUtil.copy(nonRoot))
+			multiValuedContainmentEReference.add(expectedIndex, nonRoot)
 		]
 
 		// assert

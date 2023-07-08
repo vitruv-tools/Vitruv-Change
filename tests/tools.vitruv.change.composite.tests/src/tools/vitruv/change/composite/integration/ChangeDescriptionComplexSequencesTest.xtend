@@ -1,6 +1,5 @@
 package tools.vitruv.change.composite.integration
 
-import org.eclipse.emf.ecore.util.EcoreUtil
 import org.junit.jupiter.api.Test
 import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
 
@@ -23,10 +22,9 @@ class ChangeDescriptionComplexSequencesTest extends ChangeDescription2ChangeTran
 		// test
 		val nonRoot = aet.NonRoot
 		val result = uniquePersistedRoot.record [
-			val recordNonRoot = EcoreUtil.copy(nonRoot)
-			singleValuedContainmentEReference = recordNonRoot
+			singleValuedContainmentEReference = nonRoot
 			singleValuedContainmentEReference = null
-			singleValuedContainmentEReference = recordNonRoot
+			singleValuedContainmentEReference = nonRoot
 		]
 
 		// assert
@@ -48,14 +46,9 @@ class ChangeDescriptionComplexSequencesTest extends ChangeDescription2ChangeTran
 		val nonRootObjectsContainer = aet.NonRootObjectContainerHelper
 		val nonRoot = aet.NonRoot
 		val result = uniquePersistedRoot.record [
-			nonRootObjectContainerHelper = EcoreUtil.copy(nonRootObjectsContainer) => [
-				nonRootObjectsContainment += EcoreUtil.copy(nonRoot)
+			nonRootObjectContainerHelper = nonRootObjectsContainer => [
+				nonRootObjectsContainment += nonRoot
 			] 
-		]
-		
-		// replay changes in copied elements
-		nonRootObjectsContainer => [
-			nonRootObjectsContainment += nonRoot
 		]
 
 		// assert
@@ -77,21 +70,12 @@ class ChangeDescriptionComplexSequencesTest extends ChangeDescription2ChangeTran
 		val nonRootObjectsContainer = aet.NonRootObjectContainerHelper
 		val nonRoot = aet.NonRoot
 		val result = uniquePersistedRoot.record [
-			val recordNonRoot = EcoreUtil.copy(nonRoot)
-			recursiveRoot = EcoreUtil.copy(secondRoot) => [
-				singleValuedNonContainmentEReference = recordNonRoot
-				nonRootObjectContainerHelper = EcoreUtil.copy(nonRootObjectsContainer) => [
-					nonRootObjectsContainment += recordNonRoot
+			recursiveRoot = secondRoot => [
+				singleValuedNonContainmentEReference = nonRoot
+				nonRootObjectContainerHelper = nonRootObjectsContainer => [
+					nonRootObjectsContainment += nonRoot
 				]
 
-			]
-		]
-		
-		// replay changes in copied elements
-		secondRoot => [
-			singleValuedNonContainmentEReference = nonRoot
-			nonRootObjectContainerHelper = nonRootObjectsContainer => [
-				nonRootObjectsContainment += nonRoot
 			]
 		]
 

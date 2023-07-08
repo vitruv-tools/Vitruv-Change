@@ -1,6 +1,5 @@
 package tools.vitruv.change.composite.rootobject
 
-import org.eclipse.emf.ecore.util.EcoreUtil
 import org.junit.jupiter.api.Test
 import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
 
@@ -19,7 +18,7 @@ class ChangeDescription2InsertRootEObjectTest extends ChangeDescription2ChangeTr
 		// test
 		val root = aet.Root
 		val result = resource.record [
-			contents += EcoreUtil.copy(root)
+			contents += root
 		]
 		
 		// assert
@@ -39,7 +38,7 @@ class ChangeDescription2InsertRootEObjectTest extends ChangeDescription2ChangeTr
 		// test
 		val root = aet.Root
 		val result1 = resource1.record [
-			contents += EcoreUtil.copy(root)
+			contents += root
 		]
 				
 		// assert
@@ -52,7 +51,7 @@ class ChangeDescription2InsertRootEObjectTest extends ChangeDescription2ChangeTr
 		// test
 		val root2 = aet.Root
 		val result2 = resource2.record [
-			contents += EcoreUtil.copy(root2)
+			contents += root2
 		]
 				
 		// assert
