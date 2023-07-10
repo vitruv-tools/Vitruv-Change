@@ -9,7 +9,7 @@ import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.composite.description.VitruviusChangeResolver;
 
-public abstract class AbstractVitruviusChangeResolver<Id> implements VitruviusChangeResolver<Id> {
+abstract class AbstractVitruviusChangeResolver<Id> implements VitruviusChangeResolver<Id> {
 	/**
 	 * Generic method for transforming any {@link VitruviusChange}. Changes of a
 	 * container change are transformed sequentially and recursively. Changes of a

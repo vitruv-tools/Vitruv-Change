@@ -7,14 +7,14 @@ import java.util.List;
 import org.eclipse.emf.ecore.EObject;
 
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.change.atomic.hid.AtomicEChangeIdResolver;
+import tools.vitruv.change.atomic.hid.AtomicEChangeHierarchicalIdResolver;
 import tools.vitruv.change.atomic.hid.HierarchicalId;
 import tools.vitruv.change.composite.description.VitruviusChange;
 
-public class VitruviusChangeIdResolver extends AbstractVitruviusChangeResolver<HierarchicalId> {
-	private AtomicEChangeIdResolver atomicChangeResolver;
+public class VitruviusChangeHierarchicalIdResolver extends AbstractVitruviusChangeResolver<HierarchicalId> {
+	private AtomicEChangeHierarchicalIdResolver atomicChangeResolver;
 
-	public VitruviusChangeIdResolver(AtomicEChangeIdResolver atomicChangeResolver) {
+	public VitruviusChangeHierarchicalIdResolver(AtomicEChangeHierarchicalIdResolver atomicChangeResolver) {
 		this.atomicChangeResolver = atomicChangeResolver;
 	}
 

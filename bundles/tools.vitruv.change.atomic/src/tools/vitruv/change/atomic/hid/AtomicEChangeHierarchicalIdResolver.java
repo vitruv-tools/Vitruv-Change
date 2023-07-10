@@ -22,10 +22,10 @@ import tools.vitruv.change.atomic.root.RemoveRootEObject;
  * A resolver for resolving a change with {@link HierarchicalId} to
  * {@link EObject} or vice versa.
  */
-public class AtomicEChangeIdResolver {
+public class AtomicEChangeHierarchicalIdResolver {
 	private HierarchicalIdResolver idResolver;
 
-	public AtomicEChangeIdResolver(ResourceSet resourceSet) {
+	public AtomicEChangeHierarchicalIdResolver(ResourceSet resourceSet) {
 		this.idResolver = HierarchicalIdResolver.create(resourceSet);
 	}
 
@@ -49,7 +49,7 @@ public class AtomicEChangeIdResolver {
 	 * to reverse some change to allow Id assignment.
 	 * 
 	 * @param resolvedEChange the change to reverse.
-	 * @see AtomicEChangeIdResolver#applyForwardAndAssignIds(EChange)
+	 * @see AtomicEChangeHierarchicalIdResolver#applyForwardAndAssignIds(EChange)
 	 */
 	public void applyBackward(EChange<EObject> resolvedEChange) {
 		ApplyEChangeSwitch.applyEChange(resolvedEChange, false);
@@ -63,7 +63,7 @@ public class AtomicEChangeIdResolver {
 	 * 
 	 * @param resolvedEChange the change to assign hierarchical Ids for.
 	 * @return Returns the Id-assigned change.
-	 * @see AtomicEChangeIdResolver#applyBackward(EChange)
+	 * @see AtomicEChangeHierarchicalIdResolver#applyBackward(EChange)
 	 */
 	public EChange<HierarchicalId> applyForwardAndAssignIds(EChange<EObject> resolvedEChange) {
 		EChange<HierarchicalId> unresolvedChange = unresolve(resolvedEChange);
