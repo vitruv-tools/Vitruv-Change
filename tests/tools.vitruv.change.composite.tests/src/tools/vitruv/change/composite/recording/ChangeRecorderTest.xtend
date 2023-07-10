@@ -1,45 +1,46 @@
 package tools.vitruv.change.composite.recording
 
-import org.junit.jupiter.api.Test
-import tools.vitruv.change.composite.recording.ChangeRecorder
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.junit.jupiter.api.DisplayName
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet
-import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.CoreMatchers.is
-import static org.junit.jupiter.api.Assertions.assertThrows
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import allElementTypes.Root
+import java.nio.file.Path
+import java.util.List
 import org.eclipse.emf.common.util.URI
-import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
-import tools.vitruv.change.atomic.EChange
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.InternalEObject
+import org.eclipse.emf.ecore.resource.ResourceSet
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
+import org.eclipse.emf.ecore.util.EcoreUtil
+import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
-import tools.vitruv.change.composite.description.TransactionalChange
-import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute
-import tools.vitruv.change.atomic.eobject.CreateEObject
-import tools.vitruv.change.atomic.root.InsertRootEObject
-import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
-import java.util.List
-import tools.vitruv.change.atomic.root.RemoveRootEObject
-import tools.vitruv.change.atomic.eobject.DeleteEObject
-import tools.vitruv.change.atomic.feature.reference.InsertEReference
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.^extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import tools.vitruv.testutils.TestProject
-import java.nio.file.Path
-import allElementTypes.Root
-import org.junit.jupiter.api.^extension.ExtendWith
-import tools.vitruv.testutils.TestProjectManager
-import tools.vitruv.testutils.RegisterMetamodelsInStandalone
-import static extension org.eclipse.emf.ecore.util.EcoreUtil.*
-import org.eclipse.emf.ecore.InternalEObject
-import org.eclipse.emf.ecore.EObject
-import static tools.vitruv.testutils.matchers.ModelMatchers.*
-import org.eclipse.emf.ecore.util.EcoreUtil
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.eobject.CreateEObject
+import tools.vitruv.change.atomic.eobject.DeleteEObject
+import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute
+import tools.vitruv.change.atomic.feature.reference.InsertEReference
 import tools.vitruv.change.atomic.feature.reference.RemoveEReference
 import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
+import tools.vitruv.change.atomic.root.InsertRootEObject
+import tools.vitruv.change.atomic.root.RemoveRootEObject
 import tools.vitruv.change.atomic.uuid.UuidResolver
+import tools.vitruv.change.composite.description.TransactionalChange
+import tools.vitruv.testutils.RegisterMetamodelsInStandalone
+import tools.vitruv.testutils.TestProject
+import tools.vitruv.testutils.TestProjectManager
+
+import static org.hamcrest.CoreMatchers.is
+import static org.hamcrest.MatcherAssert.assertThat
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import static org.junit.jupiter.api.Assertions.assertThrows
+import static tools.vitruv.testutils.matchers.ModelMatchers.*
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet
+
+import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
+import static extension org.eclipse.emf.ecore.util.EcoreUtil.*
 
 @ExtendWith(TestProjectManager, RegisterMetamodelsInStandalone)
 class ChangeRecorderTest {
@@ -841,7 +842,7 @@ class ChangeRecorderTest {
 	}
 
 	@FinalFieldsConstructor
-	private static class EChangeSequenceMatcher extends TypeSafeMatcher<TransactionalChange> {
+	private static class EChangeSequenceMatcher extends TypeSafeMatcher<TransactionalChange<EObject>> {
 		val List<Class<? extends EChange>> expectedTypes
 
 		override describeTo(Description description) {
@@ -853,7 +854,7 @@ class ChangeRecorderTest {
 			}
 		}
 
-		override protected matchesSafely(TransactionalChange item) {
+		override protected matchesSafely(TransactionalChange<EObject> item) {
 			val actualTypes = item.EChanges.map[class].iterator
 			for (val expectedTypesIt = expectedTypes.iterator; expectedTypesIt.hasNext;) {
 				if (!actualTypes.hasNext || !expectedTypesIt.next.isAssignableFrom(actualTypes.next)) {

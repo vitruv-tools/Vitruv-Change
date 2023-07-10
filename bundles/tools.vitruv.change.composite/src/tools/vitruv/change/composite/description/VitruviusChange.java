@@ -8,15 +8,13 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.change.atomic.id.IdResolver;
-import tools.vitruv.change.atomic.uuid.UuidResolver;
 import tools.vitruv.change.composite.MetamodelDescriptor;
 import tools.vitruv.change.interaction.UserInteractionBase;
 
 /**
  * Base interface for all kinds of changes in Vitruvius.
  */
-public interface VitruviusChange {
+public interface VitruviusChange<Element> {
 	/**
 	 * Returns whether the change contains any concrete change or consists only of
 	 * composite ones.
@@ -28,35 +26,7 @@ public interface VitruviusChange {
 	 * to be prepared so that the original change information is transformed into
 	 * {@link EChange}s.
 	 */
-	public List<EChange> getEChanges();
-
-	/**
-	 * Resolves the change and applies it forward so that the model is in the state
-	 * after the change afterwards. It has to be ensured that the model is in a
-	 * state the change can be applied to before calling this method and that the
-	 * changes use UUIDs. Returns the resolved change.
-	 * 
-	 * @throws IllegalStateException if the change cannot be resolved or is already
-	 *                               resolved.
-	 */
-	public VitruviusChange resolveAndApply(UuidResolver uuidResolver);
-
-	/**
-	 * Resolves the change and applies it forward so that the model is in the state
-	 * after the change afterwards. It has to be ensured that the model is in a
-	 * state the change can be applied to before calling this method and that the
-	 * changes use hierarchical IDs. Returns the resolved change.
-	 * 
-	 * @throws IllegalStateException if the change cannot be resolved or is already
-	 *                               resolved.
-	 */
-	public VitruviusChange resolveAndApply(IdResolver idResolver);
-
-	/**
-	 * Returns an unresolved change, such that all its affected and referenced
-	 * {@link EObjects} are removed.
-	 */
-	public VitruviusChange unresolve();
+	public List<EChange<Element>> getEChanges();
 
 	/**
 	 * Returns all {@link EObject}s directly affected by this change. This does not
@@ -92,5 +62,5 @@ public interface VitruviusChange {
 	 */
 	public Iterable<UserInteractionBase> getUserInteractions();
 
-	public VitruviusChange copy();
+	public VitruviusChange<Element> copy();
 }

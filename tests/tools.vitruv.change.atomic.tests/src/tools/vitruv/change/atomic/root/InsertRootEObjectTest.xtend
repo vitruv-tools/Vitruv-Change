@@ -1,18 +1,16 @@
 package tools.vitruv.change.atomic.root
 
 import allElementTypes.Root
-import org.eclipse.emf.ecore.resource.Resource
-import tools.vitruv.change.atomic.root.InsertRootEObject
-
+import org.eclipse.emf.ecore.EObject
 import org.junit.jupiter.api.Test
-import static org.junit.jupiter.api.Assertions.assertTrue
-import static org.junit.jupiter.api.Assertions.assertFalse
-import static org.junit.jupiter.api.Assertions.assertEquals
-import static org.junit.jupiter.api.Assertions.assertNull
-import static org.junit.jupiter.api.Assertions.assertSame
-import static org.junit.jupiter.api.Assertions.assertNotSame
-import static org.junit.jupiter.api.Assertions.assertThrows
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.uuid.Uuid
+
+import static org.hamcrest.CoreMatchers.is
 import static org.hamcrest.MatcherAssert.assertThat
+import static org.junit.jupiter.api.Assertions.assertEquals
+import static org.junit.jupiter.api.Assertions.assertThrows
+import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
 
 /**
@@ -20,24 +18,7 @@ import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
  * which inserts a new root element into a resource.
  */
 class InsertRootEObjectTest extends RootEChangeTest {
-	/**
-	 * Test resolves a {@link InsertRootEObject} EChange with a new root which is
-	 * in the staging area and not in the new resource. This happens
-	 * when the model is in state before the change and the change will be applied forward.
-	 */
-	@Test
-	def void resolveBefore() {
-		// Create change
-		val unresolvedChange = createUnresolvedChange(newRootObject, 1)
-		unresolvedChange.assertIsNotResolved(newRootObject)
-		assertIsStateBefore
-
-		// Resolve
-		val resolvedChange = unresolvedChange.resolveBefore as InsertRootEObject<Root>
-		resolvedChange.assertIsResolved(newRootObject, resource)
-		assertIsStateBefore
-	}
-
+	
 	/**
 	 * Tests whether resolving the {@link InsertRootEObject} EChange
 	 * returns the same class.
@@ -48,8 +29,10 @@ class InsertRootEObjectTest extends RootEChangeTest {
 		val unresolvedChange = createUnresolvedChange(newRootObject, 1)
 
 		// Resolve
-		val resolvedChange = unresolvedChange.resolveBefore
+		val resolvedChange = unresolvedChange.applyForwardAndResolve as InsertRootEObject<EObject>
 		unresolvedChange.assertDifferentChangeSameClass(resolvedChange)
+		assertThat(resolvedChange.resource, is(rootObject.eResource))
+		assertEquals(resolvedChange.uri, rootObject.eResource.URI.toString)
 	}
 
 	/**
@@ -61,21 +44,15 @@ class InsertRootEObjectTest extends RootEChangeTest {
 		assertIsStateBefore
 
 		// Create change and resolve 1
-		val resolvedChange = createUnresolvedChange(newRootObject, 1).resolveBefore as InsertRootEObject<Root>
-		resolvedChange.assertIsResolved(newRootObject, resource)
-
-		// Apply forward 1
-		resolvedChange.assertApplyForward
+		val unresolvedChange = createUnresolvedChange(newRootObject, 1)
+		unresolvedChange.applyForwardAndResolve
 
 		assertEquals(resourceContent.size, 2)
 		assertTrue(newRootObject == resourceContent.get(1))
 
 		// Create change and resolve 2
-		val resolvedChange2 = createUnresolvedChange(newRootObject2, 2).resolveBefore as InsertRootEObject<Root>
-		resolvedChange2.assertIsResolved(newRootObject2, resource)
-
-		// Apply forward 2
-		resolvedChange2.assertApplyForward
+		val unresolvedChange2 = createUnresolvedChange(newRootObject2, 2)
+		unresolvedChange2.applyForwardAndResolve
 
 		// State after
 		assertIsStateAfter
@@ -91,24 +68,22 @@ class InsertRootEObjectTest extends RootEChangeTest {
 		assertIsStateBefore
 
 		// Create change and resolve and apply forward 1
-		val resolvedChange = createUnresolvedChange(newRootObject, 1).resolveBefore as InsertRootEObject<Root>
-		resolvedChange.assertApplyForward
+		val resolvedChange = createUnresolvedChange(newRootObject, 1).applyForwardAndResolve
 
 		// Create change and resolve and apply forward 2
-		val resolvedChange2 = createUnresolvedChange(newRootObject2, 2).resolveBefore as InsertRootEObject<Root>
-		resolvedChange2.assertApplyForward
+		val resolvedChange2 = createUnresolvedChange(newRootObject2, 2).applyForwardAndResolve
 
 		// State after
 		assertIsStateAfter
 
 		// Apply backward 2
-		resolvedChange2.assertApplyBackward
+		resolvedChange2.applyBackward
 
 		assertEquals(resourceContent.size, 2)
 		assertThat(newRootObject, equalsDeeply(resourceContent.get(1)))
 
 		// Apply backward 1
-		resolvedChange.assertApplyBackward
+		resolvedChange.applyBackward
 
 		// State before
 		assertIsStateBefore
@@ -120,15 +95,13 @@ class InsertRootEObjectTest extends RootEChangeTest {
 	@Test
 	def void invalidIndexTest() {
 		// Set state before
-		var index = 5
+		val index = 5
 		assertTrue(resourceContent.size < index)
-
-		// Create change and resolve
-		val resolvedChange = createUnresolvedChange(newRootObject, index).resolveBefore as InsertRootEObject<Root>
-		resolvedChange.assertIsResolved(newRootObject, resource)
+		
+		val invalidChange = createUnresolvedChange(newRootObject, index)
 
 		// Apply		
-		assertThrows(IllegalStateException) [resolvedChange.applyForward]
+		assertThrows(IllegalStateException) [invalidChange.applyForwardAndResolve]
 	}
 
 	/**
@@ -148,27 +121,9 @@ class InsertRootEObjectTest extends RootEChangeTest {
 	}
 
 	/**
-	 * Change is not resolved.
-	 */
-	def private static void assertIsNotResolved(InsertRootEObject<Root> change, Root newValue) {
-		assertFalse(change.isResolved)
-		assertNotSame(change.newValue, newValue)
-		assertNull(change.resource)
-	}
-
-	/**
-	 * Change is resolved.
-	 */
-	def private static void assertIsResolved(InsertRootEObject<Root> change, Root newValue, Resource resource) {
-		assertTrue(change.isResolved)
-		assertSame(change.newValue, newValue)
-		assertSame(change.resource, resource)
-	}
-
-	/**
 	 * Creates new unresolved change.
 	 */
-	def private InsertRootEObject<Root> createUnresolvedChange(Root rootObject, int index) {
-		return atomicFactory.createInsertRootChange(rootObject, resource, index)
+	def private EChange<Uuid> createUnresolvedChange(Root rootObject, int index) {
+		return atomicFactory.createInsertRootChange(rootObject, resource, index).unresolve
 	}
 }

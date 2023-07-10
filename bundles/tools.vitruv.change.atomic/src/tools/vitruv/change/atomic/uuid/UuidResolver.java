@@ -22,7 +22,7 @@ public interface UuidResolver {
 	 */
 	public default boolean hasUuid(EObject eObject) {
 		try {
-			String uuid = getUuid(eObject);
+			Uuid uuid = getUuid(eObject);
 			return uuid != null;
 		} catch (IllegalStateException e) {
 			return false;
@@ -32,7 +32,7 @@ public interface UuidResolver {
 	/**
 	 * Returns whether an {@link EObject} is registered for the given UUID or not.
 	 */
-	public default boolean hasEObject(String uuid) {
+	public default boolean hasEObject(Uuid uuid) {
 		try {
 			EObject eObject = getEObject(uuid);
 			return eObject != null;
@@ -45,7 +45,7 @@ public interface UuidResolver {
 	 * Returns the UUID for the given {@link EObject}. If no UUID is registered for
 	 * it, an {@link IllegalStateException} is thrown.
 	 */
-	public String getUuid(EObject eObject) throws IllegalStateException;
+	public Uuid getUuid(EObject eObject) throws IllegalStateException;
 
 	/**
 	 * Returns the {@link EObject} for the given UUID. If more than one object was
@@ -54,7 +54,7 @@ public interface UuidResolver {
 	 * @throws IllegalStateException if no {@link EObject} was registered for the
 	 *                               UUID
 	 */
-	public EObject getEObject(String uuid) throws IllegalStateException;
+	public EObject getEObject(Uuid uuid) throws IllegalStateException;
 
 	/**
 	 * Generates a new UUID for the given {@link EObject}.
@@ -62,7 +62,7 @@ public interface UuidResolver {
 	 * @param eObject is the object to generate a UUID for. Must not be
 	 *                <code>null</code> or a proxy.
 	 */
-	public String generateUuid(EObject eObject);
+	public Uuid generateUuid(EObject eObject);
 
 	/**
 	 * Registers the given {@link EObject} for the given UUID.
@@ -74,7 +74,7 @@ public interface UuidResolver {
 	 * @throws IllegalStateException if there is already another UUID registered for
 	 *                               the given {@link EObject} or vice versa.
 	 */
-	public void registerEObject(String uuid, EObject eObject) throws IllegalStateException;
+	public void registerEObject(Uuid uuid, EObject eObject) throws IllegalStateException;
 
 	/**
 	 * Registers the given {@link EObjecty} for a newly generated UUID and returns
@@ -86,11 +86,13 @@ public interface UuidResolver {
 	 *                               the given {@link EObject}.
 	 * @return the UUID registered for the given {@link EObject}.
 	 */
-	public default String registerEObject(EObject eObject) throws IllegalStateException {
-		String uuid = generateUuid(eObject);
+	public default Uuid registerEObject(EObject eObject) throws IllegalStateException {
+		Uuid uuid = generateUuid(eObject);
 		registerEObject(uuid, eObject);
 		return uuid;
 	}
+	
+	public void unregisterEObject(Uuid uuid, EObject eObject) throws IllegalStateException;
 
 	/**
 	 * Returns the {@link Resource} for the given {@link URI}. If the resource does

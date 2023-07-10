@@ -8,8 +8,10 @@ import java.util.stream.Collectors;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
+import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.composite.description.PropagatedChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.testutils.changevisualization.common.ChangeDataSet;
@@ -17,7 +19,6 @@ import tools.vitruv.testutils.changevisualization.common.ChangeDataSet.ChangeTyp
 import tools.vitruv.testutils.changevisualization.tree.TreeChangeDataSet;
 import tools.vitruv.testutils.changevisualization.tree.decoder.feature.MultipleFeatureProcessor;
 import tools.vitruv.testutils.changevisualization.tree.decoder.feature.OldValueNewValueProcessor;
-import tools.vitruv.change.atomic.EChange;
 
 /**
  * Helper class to generate {@link TreeChangeDataSets}s from propagation results and
@@ -205,7 +206,7 @@ public class TreeChangeDataSetDecoder {
 	 * @param change The vitruvius change that gets encoded
 	 * @return A TreeNode representing the given arguments
 	 */
-	private DefaultMutableTreeNode encodeTree(ChangeType changeType, VitruviusChange change) {
+	private DefaultMutableTreeNode encodeTree(ChangeType changeType, VitruviusChange<EObject> change) {
 		//Create the change-node
 		DefaultMutableTreeNode node=new DefaultMutableTreeNode();
 

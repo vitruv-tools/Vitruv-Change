@@ -1,4 +1,4 @@
-package tools.vitruv.change.atomic.command
+package tools.vitruv.change.atomic.command.internal
 
 import org.eclipse.emf.common.command.Command
 import static org.junit.jupiter.api.Assertions.assertTrue

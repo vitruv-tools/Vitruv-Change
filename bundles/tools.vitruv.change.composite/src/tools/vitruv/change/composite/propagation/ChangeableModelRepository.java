@@ -2,6 +2,7 @@ package tools.vitruv.change.composite.propagation;
 
 import java.util.List;
 
+import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.composite.description.PropagatedChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 
@@ -20,7 +21,7 @@ public interface ChangeableModelRepository {
 	 * @param change the {@link VitruviusChange} to be applied, not
 	 *               <code>null</code>
 	 */
-	List<PropagatedChange> propagateChange(VitruviusChange change);
+	List<PropagatedChange> propagateChange(VitruviusChange<Uuid> change);
 
 	void addChangePropagationListener(ChangePropagationListener propagationListener);
 

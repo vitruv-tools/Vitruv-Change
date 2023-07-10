@@ -49,7 +49,7 @@ class MultiResourceSetUuidResolvingTest {
 	@ValueSource(ints = { 1, 2, 5, 10 })
 	@DisplayName("resolve resource(s)")
 	void resolveResources(int resourcesCount) {
-		Map<EObject, String> uuidMapping = new HashMap<>();
+		Map<EObject, Uuid> uuidMapping = new HashMap<>();
 		Map<EObject, EObject> targetToSourceElementMapping = new HashMap<>();
 		Map<Resource, Resource> sourceToTargetResourceMap = new HashMap<>();
 		for (int i = 0; i < resourcesCount; i++) {
@@ -71,14 +71,14 @@ class MultiResourceSetUuidResolvingTest {
 			targetToSourceElementMapping.put(targetNonRoot, sourceNonRoot);
 
 			List.of(sourceRoot, sourceNonRoot).forEach(element -> {
-				String uuid = sourceUuidResolver.registerEObject(element);
+				Uuid uuid = sourceUuidResolver.registerEObject(element);
 				uuidMapping.put(element, uuid);
 			});
 		}
 
 		sourceUuidResolver.resolveResources(sourceToTargetResourceMap, targetUuidResolver);
 		targetToSourceElementMapping.forEach((targetElement, sourceElement) -> {
-			String uuid = uuidMapping.get(sourceElement);
+			Uuid uuid = uuidMapping.get(sourceElement);
 
 			assertEquals(sourceElement, sourceUuidResolver.getEObject(uuid), "source element does not match UUID");
 			assertEquals(uuid, sourceUuidResolver.getUuid(sourceElement), "source UUID does not match element");
@@ -125,7 +125,7 @@ class MultiResourceSetUuidResolvingTest {
 		var targetRoot = aet.Root();
 		sourceResource.getContents().add(sourceRoot);
 		targetResource.getContents().add(targetRoot);
-		String uuid = sourceUuidResolver.registerEObject(sourceRoot);
+		Uuid uuid = sourceUuidResolver.registerEObject(sourceRoot);
 
 		sourceUuidResolver.resolveResource(sourceResource, targetResource, targetUuidResolver);
 		assertEquals(uuid, targetUuidResolver.getUuid(targetRoot));
@@ -143,7 +143,7 @@ class MultiResourceSetUuidResolvingTest {
 		Resource sourceResource = sourceResourceSet.createResource(uri);
 		Resource targetResource = targetResourceSet.createResource(uri);
 		var danglingElement = aet.Root();
-		String danglingUuid = sourceUuidResolver.registerEObject(danglingElement);
+		Uuid danglingUuid = sourceUuidResolver.registerEObject(danglingElement);
 
 		Map<Resource, Resource> sourceToTargetMapping = Map.of(sourceResource, targetResource);
 		assertThrows(IllegalStateException.class,

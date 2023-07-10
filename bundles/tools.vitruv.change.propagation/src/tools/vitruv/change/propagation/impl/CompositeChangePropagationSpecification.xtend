@@ -57,12 +57,12 @@ class CompositeChangePropagationSpecification extends AbstractChangePropagationS
 		}
 	}
 
-	override propagateChange(EChange change, EditableCorrespondenceModelView<Correspondence> correspondenceModel, ResourceAccess resourceAccess) {
+	override propagateChange(EChange<EObject> change, EditableCorrespondenceModelView<Correspondence> correspondenceModel, ResourceAccess resourceAccess) {
 		propagateChangeViaPreprocessors(change, correspondenceModel, resourceAccess);
 		propagateChangeViaMainprocessors(change, correspondenceModel, resourceAccess);
 	}
 
-	protected def propagateChangeViaPreprocessors(EChange change, EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+	protected def propagateChangeViaPreprocessors(EChange<EObject> change, EditableCorrespondenceModelView<Correspondence> correspondenceModel,
 		ResourceAccess resourceAccess) {
 		for (changeProcessor : changePreprocessors) {
 			logger.trace('''Calling change preprocessor «changeProcessor» for change event «change»''');
@@ -70,7 +70,7 @@ class CompositeChangePropagationSpecification extends AbstractChangePropagationS
 		}
 	}
 
-	protected def propagateChangeViaMainprocessors(EChange change, EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+	protected def propagateChangeViaMainprocessors(EChange<EObject> change, EditableCorrespondenceModelView<Correspondence> correspondenceModel,
 		ResourceAccess resourceAccess) {
 		for (changeProcessor : changeMainprocessors) {
 			logger.trace('''Calling change mainprocessor «changeProcessor» for change event «change»''');
@@ -78,7 +78,7 @@ class CompositeChangePropagationSpecification extends AbstractChangePropagationS
 		}
 	}
 
-	override doesHandleChange(EChange change, EditableCorrespondenceModelView<Correspondence> correspondenceModel) {
+	override doesHandleChange(EChange<EObject> change, EditableCorrespondenceModelView<Correspondence> correspondenceModel) {
 		for (changeProcessor : allProcessors) {
 			if (changeProcessor.doesHandleChange(change, correspondenceModel)) {
 				return true;

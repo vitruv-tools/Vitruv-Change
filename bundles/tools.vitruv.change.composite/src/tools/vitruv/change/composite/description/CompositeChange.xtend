@@ -5,7 +5,7 @@ import tools.vitruv.change.composite.description.VitruviusChange
 import tools.vitruv.change.composite.MetamodelDescriptor
 import java.util.Set
 
-interface CompositeChange<C extends VitruviusChange> extends VitruviusChange {
+interface CompositeChange<Element, ContainedChange extends VitruviusChange<Element>> extends VitruviusChange<Element> {
 	/**
 	 * Returns the metamodel descriptors for the metamodels of the elements whose instances 
 	 * have been modified in this change. It collects the metamodel descriptors for all composed 
@@ -20,7 +20,7 @@ interface CompositeChange<C extends VitruviusChange> extends VitruviusChange {
 	 * 
 	 * @return the composed changes
 	 */
-	def List<C> getChanges()
+	def List<ContainedChange> getChanges()
 
-	override CompositeChange<C> copy()
+	override CompositeChange<Element, ContainedChange> copy()
 }

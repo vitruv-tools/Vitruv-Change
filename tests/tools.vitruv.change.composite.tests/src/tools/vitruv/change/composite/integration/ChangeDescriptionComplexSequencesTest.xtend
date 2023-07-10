@@ -1,11 +1,13 @@
 package tools.vitruv.change.composite.integration
 
-import static allElementTypes.AllElementTypesPackage.Literals.*
-import static extension tools.vitruv.change.composite.util.AtomicEChangeAssertHelper.*
-import static extension tools.vitruv.change.composite.util.CompoundEChangeAssertHelper.*
 import org.junit.jupiter.api.Test
 import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
-import static extension tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+
+import static allElementTypes.AllElementTypesPackage.Literals.*
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+
+import static extension tools.vitruv.change.composite.util.AtomicEChangeAssertHelper.*
+import static extension tools.vitruv.change.composite.util.CompoundEChangeAssertHelper.*
 
 class ChangeDescriptionComplexSequencesTest extends ChangeDescription2ChangeTransformationTest {
 

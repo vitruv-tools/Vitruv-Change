@@ -51,7 +51,7 @@ class UuidSerializationTest {
 	@ValueSource(ints = { 1, 2, 5, 10, 100 })
 	@DisplayName("store and load elements")
 	void storeAndLoadElements(int count) {
-		Map<EObject, String> uuidMapping = new HashMap<>();
+		Map<EObject, Uuid> uuidMapping = new HashMap<>();
 		Map<EObject, EObject> loadToStoreElementsMapping = new HashMap<>();
 		for (int i = 0; i < count; i++) {
 			URI uri = URI.createFileURI(testProjectPath.resolve("root" + i + ".aet").toString());
@@ -59,7 +59,7 @@ class UuidSerializationTest {
 			Resource storeResource = storeResourceSet.createResource(uri);
 			var storeRoot = aet.Root();
 			storeResource.getContents().add(storeRoot);
-			String uuid = storeUuidResolver.registerEObject(storeRoot);
+			Uuid uuid = storeUuidResolver.registerEObject(storeRoot);
 			uuidMapping.put(storeRoot, uuid);
 
 			Resource loadResource = loadResourceSet.createResource(uri);
@@ -73,7 +73,7 @@ class UuidSerializationTest {
 		assertDoesNotThrow(() -> loadUuidResolver.loadFromUri(serializationUri));
 
 		loadToStoreElementsMapping.forEach((loadElement, storeElement) -> {
-			String uuid = uuidMapping.get(storeElement);
+			Uuid uuid = uuidMapping.get(storeElement);
 			assertEquals(storeElement, storeUuidResolver.getEObject(uuid), "stored element does not match UUID");
 			assertEquals(uuid, storeUuidResolver.getUuid(storeElement), "stored UUID does not match element");
 			assertEquals(loadElement, loadUuidResolver.getEObject(uuid), "loaded element does not match UUID");

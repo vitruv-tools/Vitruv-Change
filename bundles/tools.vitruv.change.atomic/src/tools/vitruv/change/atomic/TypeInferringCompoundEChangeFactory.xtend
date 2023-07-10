@@ -4,6 +4,8 @@ import java.util.List
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.resource.Resource
+import tools.vitruv.change.atomic.eobject.CreateEObject
+import tools.vitruv.change.atomic.eobject.DeleteEObject
 
 class TypeInferringCompoundEChangeFactory {
 	protected TypeInferringAtomicEChangeFactory atomicFactory
@@ -31,7 +33,7 @@ class TypeInferringCompoundEChangeFactory {
 	 * @param index The index at which the root object will be inserted into the resource.
 	 * @return The created change.
 	 */
-	def <T extends EObject> List<EChange> createCreateAndInsertRootChange(T affectedEObject, Resource resource,
+	def <T extends EObject> List<EChange<T>> createCreateAndInsertRootChange(T affectedEObject, Resource resource,
 		int index) {
 		val createChange = atomicFactory.createCreateEObjectChange(affectedEObject);
 		val insertChange = atomicFactory.createInsertRootChange(affectedEObject, resource, index);
@@ -45,7 +47,7 @@ class TypeInferringCompoundEChangeFactory {
 	 * @param index The index at which the root object will be removed from the resource.
 	 * @return The created change.
 	 */
-	def <T extends EObject> List<EChange> createRemoveAndDeleteRootChange(T affectedEObject, Resource resource,
+	def <T extends EObject> List<EChange<T>> createRemoveAndDeleteRootChange(T affectedEObject, Resource resource,
 		int index) {
 		val deleteChange = atomicFactory.createDeleteEObjectChange(affectedEObject);
 		val removeChange = atomicFactory.createRemoveRootChange(affectedEObject, resource, index);
@@ -60,9 +62,9 @@ class TypeInferringCompoundEChangeFactory {
 	 * @param index The index at which the non root element will be inserted into the reference.
 	 * @return The created change.
 	 */
-	def <A extends EObject, T extends EObject> List<EChange> createCreateAndInsertNonRootChange(
+	def <A extends EObject, T extends EObject> List<EChange<EObject>> createCreateAndInsertNonRootChange(
 		A affectedEObject, EReference reference, T newValue, int index) {
-		val createChange = atomicFactory.createCreateEObjectChange(newValue);
+		val CreateEObject<EObject> createChange = atomicFactory.createCreateEObjectChange(newValue);
 		val insertChange = atomicFactory.createInsertReferenceChange(affectedEObject, reference, newValue, index);
 		return #[createChange, insertChange]
 	}
@@ -75,9 +77,9 @@ class TypeInferringCompoundEChangeFactory {
 	 * @param index The index at which the non root element will be removed from the reference.
 	 * @return The created change.
 	 */
-	def <A extends EObject, T extends EObject> List<EChange> createRemoveAndDeleteNonRootChange(
+	def <A extends EObject, T extends EObject> List<EChange<EObject>> createRemoveAndDeleteNonRootChange(
 		A affectedEObject, EReference reference, T oldValue, int index) {
-		val deleteChange = atomicFactory.createDeleteEObjectChange(oldValue)
+		val DeleteEObject<EObject> deleteChange = atomicFactory.createDeleteEObjectChange(oldValue)
 		val removeChange = atomicFactory.createRemoveReferenceChange(affectedEObject, reference, oldValue, index)
 		return #[removeChange, deleteChange]
 	}
@@ -89,9 +91,9 @@ class TypeInferringCompoundEChangeFactory {
 	 * @param newValue The new value which replaces null.
 	 * @return The created change.
 	 */
-	def <A extends EObject, T extends EObject> List<EChange> createCreateAndReplaceNonRootChange(
+	def <A extends EObject, T extends EObject> List<EChange<EObject>> createCreateAndReplaceNonRootChange(
 		A affectedEObject, EReference reference, T newValue) {
-		val createChange = atomicFactory.createCreateEObjectChange(newValue)
+		val CreateEObject<EObject> createChange = atomicFactory.createCreateEObjectChange(newValue)
 		val insertChange = atomicFactory.createReplaceSingleReferenceChange(affectedEObject, reference, null, newValue)
 		return #[createChange, insertChange]
 	}
@@ -103,10 +105,10 @@ class TypeInferringCompoundEChangeFactory {
 	 * @param oldValue The old value which will be replaced by null.
 	 * @return The created change.
 	 */
-	def <A extends EObject, T extends EObject> List<EChange> createReplaceAndDeleteNonRootChange(
+	def <A extends EObject, T extends EObject> List<EChange<EObject>> createReplaceAndDeleteNonRootChange(
 		A affectedEObject, EReference reference, T oldValue) {
 		val removeChange = atomicFactory.createReplaceSingleReferenceChange(affectedEObject, reference, oldValue, null)
-		val deleteChange = atomicFactory.createDeleteEObjectChange(oldValue)
+		val DeleteEObject<EObject> deleteChange = atomicFactory.createDeleteEObjectChange(oldValue)
 		return #[removeChange, deleteChange]
 	}
 
@@ -118,10 +120,10 @@ class TypeInferringCompoundEChangeFactory {
 	 * @param newValue The created and replacing non root element.
 	 * @return The created change.
 	 */
-	def <A extends EObject, T extends EObject> List<EChange> createCreateAndReplaceAndDeleteNonRootChange(
+	def <A extends EObject, T extends EObject> List<EChange<EObject>> createCreateAndReplaceAndDeleteNonRootChange(
 		A affectedEObject, EReference reference, T oldValue, T newValue) {
-		val deleteChange = atomicFactory.createDeleteEObjectChange(oldValue);
-		val createChange = atomicFactory.createCreateEObjectChange(newValue);
+		val DeleteEObject<EObject> deleteChange = atomicFactory.createDeleteEObjectChange(oldValue);
+		val CreateEObject<EObject> createChange = atomicFactory.createCreateEObjectChange(newValue);
 		val replaceChange = atomicFactory.createReplaceSingleReferenceChange(affectedEObject, reference, oldValue,
 			newValue);
 		return #[createChange, replaceChange, deleteChange]

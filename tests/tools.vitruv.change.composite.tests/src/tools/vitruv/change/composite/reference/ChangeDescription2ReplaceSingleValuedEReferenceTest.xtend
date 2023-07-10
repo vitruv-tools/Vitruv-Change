@@ -1,13 +1,14 @@
 package tools.vitruv.change.composite.reference
 
 import org.eclipse.emf.ecore.util.EcoreUtil
+import org.junit.jupiter.api.Test
+import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
+
+import static allElementTypes.AllElementTypesPackage.Literals.*
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 
 import static extension tools.vitruv.change.composite.util.AtomicEChangeAssertHelper.*
 import static extension tools.vitruv.change.composite.util.CompoundEChangeAssertHelper.*
-import static allElementTypes.AllElementTypesPackage.Literals.*
-import org.junit.jupiter.api.Test
-import static extension tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
-import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
 
 class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeDescription2ChangeTransformationTest {
 

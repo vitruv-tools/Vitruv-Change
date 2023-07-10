@@ -1,28 +1,30 @@
-package tools.vitruv.change.atomic.id
+package tools.vitruv.change.atomic.hid.internal
 
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.apache.log4j.Logger
-import org.eclipse.emf.common.util.URI
-import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.*
-import static com.google.common.base.Preconditions.checkArgument
-import static com.google.common.base.Preconditions.checkState
-import static com.google.common.base.Preconditions.checkNotNull
-import java.util.PriorityQueue
-import static extension tools.vitruv.change.atomic.id.ObjectResolutionUtil.getHierarchicUriFragment
-import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.getOrCreateResource
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
+import java.util.PriorityQueue
+import org.apache.log4j.Logger
+import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.resource.ResourceSet
+import tools.vitruv.change.atomic.hid.HierarchicalId
+
+import static com.google.common.base.Preconditions.checkArgument
+import static com.google.common.base.Preconditions.checkState
+
+import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.*
+import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.getOrCreateResource
+import static extension tools.vitruv.change.atomic.hid.ObjectResolutionUtil.getHierarchicUriFragment
 
 /**
- * {@link IdResolver}
+ * {@link HierarchicalIdResolver}
  */
-package class IdResolverImpl implements IdResolver {
-	static val logger = Logger.getLogger(IdResolverImpl)
+class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
+	static val logger = Logger.getLogger(HierarchicalIdResolverImpl)
 	static val CACHE_PREFIX = "cache:/"
 	
 	val ResourceSet resourceSet
-	val BiMap<EObject, String> eObjectToId = HashBiMap.create()
+	val BiMap<EObject, HierarchicalId> eObjectToId = HashBiMap.create()
 	
 
 	/**
@@ -59,7 +61,7 @@ package class IdResolverImpl implements IdResolver {
 		return resourceSet.getOrCreateResource(uri)
 	}
 	
-	override String getAndUpdateId(EObject eObject) {
+	override HierarchicalId getAndUpdateId(EObject eObject) {
 		return if (eObject.eResource !== null) {
 			eObject.registerObjectInResource()
 		} else {
@@ -67,8 +69,8 @@ package class IdResolverImpl implements IdResolver {
 		}
 	}
 	
-	private def String registerObjectInResource(EObject eObject) {
-		val id = eObject.eResource.URI.appendFragment(eObject.hierarchicUriFragment).toString
+	private def HierarchicalId registerObjectInResource(EObject eObject) {
+		val id = new HierarchicalId(eObject.eResource.URI.appendFragment(eObject.hierarchicUriFragment).toString)
 		register(id, eObject)
 		return id
 	}
@@ -84,14 +86,14 @@ package class IdResolverImpl implements IdResolver {
 		}
 	}
 	
-	override getEObject(String id) {
+	override getEObject(HierarchicalId id) {
 		val eObject = id.getEObjectOrNull()
 		checkState(eObject !== null, "no EObject could be found for ID: %s", id)
 		return eObject
 	}
 
-	private def EObject getEObjectOrNull(String id) {
-		val uri = URI.createURI(id)
+	private def EObject getEObjectOrNull(HierarchicalId id) {
+		val uri = URI.createURI(id.getId)
 		return uri.getEObjectIfReadonlyUri()
 			?: uri.getStoredEObject()
 			?: uri.getAndRegisterNonStoredEObject()
@@ -107,7 +109,7 @@ package class IdResolverImpl implements IdResolver {
 	}
 	
 	private def getStoredEObject(URI uri) {
-		return eObjectToId.inverse.get(uri.toString)
+		return eObjectToId.inverse.get(new HierarchicalId(uri.toString))
 	}
 	
 	private def getAndRegisterNonStoredEObject(URI uri) {
@@ -116,7 +118,7 @@ package class IdResolverImpl implements IdResolver {
 		return candidate
 	}
 	
-	private def register(String id, EObject eObject) {
+	private def register(HierarchicalId id, EObject eObject) {
 		checkState(eObject !== null, "object must not be null")
 		if(logger.isTraceEnabled) logger.trace('''Adding ID «id» for EObject: «eObject»''')
 
@@ -138,7 +140,7 @@ package class IdResolverImpl implements IdResolver {
 		}
 	}
 
-	override hasEObject(String id) {
+	override hasEObject(HierarchicalId id) {
 		return id.getEObjectOrNull() !== null
 	}
 
@@ -146,8 +148,8 @@ package class IdResolverImpl implements IdResolver {
 		uri !== null && (uri.isPathmap || uri.isArchive)
 	}
 	
-	private static def isCache(String id) {
-		id !== null && id.startsWith(CACHE_PREFIX)
+	private static def isCache(HierarchicalId id) {
+		id !== null && id.getId.startsWith(CACHE_PREFIX)
 	}
 	
 	val cacheIds = new CacheIdsRepository()
@@ -158,25 +160,25 @@ package class IdResolverImpl implements IdResolver {
 	 * always gives the same values.
 	 */
 	static class CacheIdsRepository {
-		val entries = new PriorityQueue<String>
+		val entries = new PriorityQueue<HierarchicalId>
 		var int maxValue
 		
 		def pop() {
 			if (entries.isEmpty) {
-				push(CACHE_PREFIX + maxValue++)
+				push(new HierarchicalId(CACHE_PREFIX + maxValue++))
 			}
 			entries.poll()
 		}
 		
 		def peek() {
 			if (entries.isEmpty) {
-				return CACHE_PREFIX + maxValue
+				return new HierarchicalId(CACHE_PREFIX + maxValue)
 			} else {
 				entries.peek()
 			}
 		}
 		
-		def push(String value) {
+		def push(HierarchicalId value) {
 			checkState(value.isCache, "%s is a not a cache ID", value)
 			entries.add(value)
 		}

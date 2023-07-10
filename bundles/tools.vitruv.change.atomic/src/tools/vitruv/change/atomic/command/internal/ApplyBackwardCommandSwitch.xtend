@@ -1,13 +1,18 @@
-package tools.vitruv.change.atomic.command
+package tools.vitruv.change.atomic.command.internal
 
+import edu.kit.ipd.sdq.activextendannotations.Utility
 import java.util.List
+import org.apache.log4j.Logger
 import org.eclipse.emf.common.command.Command
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.edit.command.AddCommand
+import org.eclipse.emf.edit.command.RemoveCommand
 import org.eclipse.emf.edit.command.SetCommand
+import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.command.RemoveAtCommand
 import tools.vitruv.change.atomic.eobject.CreateEObject
 import tools.vitruv.change.atomic.eobject.DeleteEObject
+import tools.vitruv.change.atomic.feature.UnsetFeature
 import tools.vitruv.change.atomic.feature.attribute.InsertEAttributeValue
 import tools.vitruv.change.atomic.feature.attribute.RemoveEAttributeValue
 import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute
@@ -16,13 +21,9 @@ import tools.vitruv.change.atomic.feature.reference.RemoveEReference
 import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
 import tools.vitruv.change.atomic.root.InsertRootEObject
 import tools.vitruv.change.atomic.root.RemoveRootEObject
-import org.eclipse.emf.edit.command.RemoveCommand
-import org.apache.log4j.Logger
-import tools.vitruv.change.atomic.EChange
-import tools.vitruv.change.atomic.feature.UnsetFeature
-import edu.kit.ipd.sdq.activextendannotations.Utility
-import static extension tools.vitruv.change.atomic.command.ChangeCommandUtil.getEditingDomain
-import static extension tools.vitruv.change.atomic.command.ChangeCommandUtil.alreadyContainsObject
+
+import static extension tools.vitruv.change.atomic.command.internal.ChangeCommandUtil.alreadyContainsObject
+import static extension tools.vitruv.change.atomic.command.internal.ChangeCommandUtil.getEditingDomain
 
 /**
  * Switch to create commands for all EChange classes.
@@ -32,7 +33,7 @@ import static extension tools.vitruv.change.atomic.command.ChangeCommandUtil.alr
 package class ApplyBackwardCommandSwitch {
 	static val Logger logger = Logger.getLogger(ApplyBackwardCommandSwitch)
 	
-	def package dispatch static List<Command> getCommands(EChange change) {
+	def package dispatch static List<Command> getCommands(EChange<EObject> change) {
 		#[]
 	}
 	
@@ -48,12 +49,12 @@ package class ApplyBackwardCommandSwitch {
 	 * Dispatch method to create commands to apply a {@link InsertEAttributeValue} change backward.
 	 * @param object The change which commands should be created.
 	 */
-	def package dispatch static List<Command> getCommands(InsertEAttributeValue<EObject, Object> change) {
-		val editingDomain = change.affectedEObject.editingDomain
+	def package dispatch static List<Command> getCommands(InsertEAttributeValue<EObject, ?> change) {
+		val editingDomain = change.affectedElement.editingDomain
 		if (change.wasUnset) {
-			return #[new SetCommand(editingDomain, change.affectedEObject, change.affectedFeature, SetCommand.UNSET_VALUE)]
+			return #[new SetCommand(editingDomain, change.affectedElement, change.affectedFeature, SetCommand.UNSET_VALUE)]
 		} else {
-			return #[new RemoveAtCommand(editingDomain, change.affectedEObject, change.affectedFeature, change.newValue, change.index)]
+			return #[new RemoveAtCommand(editingDomain, change.affectedElement, change.affectedFeature, change.newValue, change.index)]
 		}
 	}
 
@@ -61,9 +62,9 @@ package class ApplyBackwardCommandSwitch {
 	 * Dispatch method to create commands to apply a {@link RemoveEAttributeValue} change backward.
 	 * @param object The change which commands should be created.
 	 */
-	def package dispatch static List<Command> getCommands(RemoveEAttributeValue<EObject, Object> change) {
-		val editingDomain = change.affectedEObject.editingDomain
-		return #[new AddCommand(editingDomain, change.affectedEObject, change.affectedFeature, change.oldValue,
+	def package dispatch static List<Command> getCommands(RemoveEAttributeValue<EObject, ?> change) {
+		val editingDomain = change.affectedElement.editingDomain
+		return #[new AddCommand(editingDomain, change.affectedElement, change.affectedFeature, change.oldValue,
 				change.index)]
 	}
 
@@ -71,27 +72,27 @@ package class ApplyBackwardCommandSwitch {
 	 * Dispatch method to create commands to apply a {@link ReplaceSingleValuedEAttribute} change backward.
 	 * @param object The change which commands should be created.
 	 */
-	def package dispatch static List<Command> getCommands(ReplaceSingleValuedEAttribute<EObject, Object> change) {
-		val editingDomain = change.affectedEObject.editingDomain
-		return #[new SetCommand(editingDomain, change.affectedEObject, change.affectedFeature, if (change.isWasUnset) SetCommand.UNSET_VALUE else change.oldValue)]
+	def package dispatch static List<Command> getCommands(ReplaceSingleValuedEAttribute<EObject, ?> change) {
+		val editingDomain = change.affectedElement.editingDomain
+		return #[new SetCommand(editingDomain, change.affectedElement, change.affectedFeature, if (change.isWasUnset) SetCommand.UNSET_VALUE else change.oldValue)]
 	}
 
 	/**
 	 * Dispatch method to create commands to apply a {@link InsertEReference} change backward.
 	 * @param object The change which commands should be created.
 	 */
-	def package dispatch static List<Command> getCommands(InsertEReference<EObject, EObject> change) {
-		val editingDomain = change.affectedEObject.editingDomain
-		if(!change.affectedEObject.alreadyContainsObject(change.affectedFeature, change.newValue)) {
+	def package dispatch static List<Command> getCommands(InsertEReference<EObject> change) {
+		val editingDomain = change.affectedElement.editingDomain
+		if(!change.affectedElement.alreadyContainsObject(change.affectedFeature, change.newValue)) {
 			if (change.affectedFeature.EOpposite === null) {
-				logger.warn("Tried to remove value " + change.newValue + ", but although there is no opposite feature it was not contained in " + change.affectedEObject);
+				logger.warn("Tried to remove value " + change.newValue + ", but although there is no opposite feature it was not contained in " + change.affectedElement);
 			} 
 			return #[];
 		}
 		if (change.wasUnset) {
-			return #[new SetCommand(editingDomain, change.affectedEObject, change.affectedFeature, SetCommand.UNSET_VALUE)]
+			return #[new SetCommand(editingDomain, change.affectedElement, change.affectedFeature, SetCommand.UNSET_VALUE)]
 		} else {
-			return #[new RemoveAtCommand(editingDomain, change.affectedEObject, change.affectedFeature, change.newValue, change.index)]
+			return #[new RemoveAtCommand(editingDomain, change.affectedElement, change.affectedFeature, change.newValue, change.index)]
 		}
 	}
 
@@ -99,30 +100,30 @@ package class ApplyBackwardCommandSwitch {
 	 * Dispatch method to create commands to apply a {@link RemoveEReference} change backward.
 	 * @param object The change which commands should be created.
 	 */
-	def package dispatch static List<Command> getCommands(RemoveEReference<EObject, EObject> change) {
-		val editingDomain = change.affectedEObject.editingDomain
-		if(change.affectedEObject.alreadyContainsObject(change.affectedFeature, change.oldValue)) {
+	def package dispatch static List<Command> getCommands(RemoveEReference<EObject> change) {
+		val editingDomain = change.affectedElement.editingDomain
+		if(change.affectedElement.alreadyContainsObject(change.affectedFeature, change.oldValue)) {
 			if (change.affectedFeature.EOpposite === null) {
-				logger.warn("Tried to add value " + change.oldValue + ", but although there is no opposite feature it was already contained in " + change.affectedEObject);
+				logger.warn("Tried to add value " + change.oldValue + ", but although there is no opposite feature it was already contained in " + change.affectedElement);
 			} 
 			return #[];
 		}
-		return #[new AddCommand(editingDomain, change.affectedEObject, change.affectedFeature, change.oldValue, change.index)]
+		return #[new AddCommand(editingDomain, change.affectedElement, change.affectedFeature, change.oldValue, change.index)]
 	}
 	
 	/**
 	 * Dispatch method to create commands to apply a {@link ReplaceSingleValuedEReference} change backward.
 	 * @param object The change which commands should be created.
 	 */
-	def package dispatch static List<Command> getCommands(ReplaceSingleValuedEReference<EObject, EObject> change) {
-		val editingDomain = change.affectedEObject.editingDomain
-		if(change.affectedEObject.alreadyContainsObject(change.affectedFeature, change.oldValue)) {
+	def package dispatch static List<Command> getCommands(ReplaceSingleValuedEReference<EObject> change) {
+		val editingDomain = change.affectedElement.editingDomain
+		if(change.affectedElement.alreadyContainsObject(change.affectedFeature, change.oldValue)) {
 			if (change.affectedFeature.EOpposite === null) {
-				logger.warn("Tried to add value " + change.oldValue + ", but although there is no opposite feature it was already contained in " + change.affectedEObject);
+				logger.warn("Tried to add value " + change.oldValue + ", but although there is no opposite feature it was already contained in " + change.affectedElement);
 			} 
 			return #[];
 		}
-		return #[new SetCommand(editingDomain, change.affectedEObject, change.affectedFeature, if (change.isWasUnset) SetCommand.UNSET_VALUE else change.oldValue)]
+		return #[new SetCommand(editingDomain, change.affectedElement, change.affectedFeature, if (change.isWasUnset) SetCommand.UNSET_VALUE else change.oldValue)]
 	}
 
 	/**

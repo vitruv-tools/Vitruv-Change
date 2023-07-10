@@ -3,57 +3,35 @@ package tools.vitruv.change.atomic.compound
 import allElementTypes.AllElementTypesPackage
 import allElementTypes.NonRoot
 import allElementTypes.Root
-import org.eclipse.emf.ecore.EReference
-import tools.vitruv.change.atomic.feature.reference.ReferenceEChangeTest
-
-import static extension tools.vitruv.change.atomic.util.EChangeAssertHelper.*
-import tools.vitruv.change.atomic.EChange
 import java.util.List
-import tools.vitruv.change.atomic.eobject.CreateEObject
-import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
-import tools.vitruv.change.atomic.eobject.DeleteEObject
-import tools.vitruv.change.atomic.EChangeTest
+import org.eclipse.emf.ecore.EReference
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import static org.junit.jupiter.api.Assertions.assertTrue
-import static org.junit.jupiter.api.Assertions.assertEquals
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.eobject.EObjectTest
+import tools.vitruv.change.atomic.uuid.Uuid
+
+import static org.hamcrest.CoreMatchers.instanceOf
 import static org.hamcrest.MatcherAssert.assertThat
 import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet
 
 /**
  * Test class for the concrete {@link CreateAndReplaceAndDeleteNonRoot} EChange,
  * which creates a new non root EObject and replaces an existing non root object
  * in a single value containment reference. The existing one will be deleted.
  */
-class CreateAndReplaceAndDeleteNonRootTest extends ReferenceEChangeTest {
+class CreateAndReplaceAndDeleteNonRootTest extends EObjectTest {
+	var Root affectedEObject
 	var NonRoot oldValue
 	var EReference affectedFeature
 
 	@BeforeEach
 	def void prepareState() {
 		oldValue = aet.NonRoot.withUuid
+		affectedEObject = rootObject
 		affectedFeature = AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE
 		prepareStateBefore
-	}
-
-	/**
-	 * Resolves a {@link CreateAndReplaceAndDeleteNonRoot} EChange. The 
-	 * model is in state before the change, so new value doesn't exist and 
-	 * the old value is in the containment reference.
-	 */
-	@Test
-	def void resolveBeforeTest() {
-		// Create change
-		val unresolvedChange = createUnresolvedChange(newValue)
-		unresolvedChange.assertIsNotResolved()
-
-		// Resolve
-		val resolvedChange = unresolvedChange.resolveBefore
-		resolvedChange.assertIsResolved(affectedEObject, oldValue, newValue)
-
-		// Resolving applies all changes and reverts them, so the model should be unaffected.			
-		assertIsStateBefore
 	}
 
 	/**
@@ -63,10 +41,8 @@ class CreateAndReplaceAndDeleteNonRootTest extends ReferenceEChangeTest {
 	@Test
 	def void applyForwardTest() {
 		// Create and resolve 1
-		val resolvedChange = createUnresolvedChange(newValue).resolveBefore
-
-		// Apply change 1 forward
-		resolvedChange.assertApplyForward
+		val unresolvedChange = createUnresolvedChange()
+		unresolvedChange.applyForwardAndResolve
 
 		// State after
 		assertIsStateAfter
@@ -79,10 +55,10 @@ class CreateAndReplaceAndDeleteNonRootTest extends ReferenceEChangeTest {
 	@Test
 	def void applyBackwardTest() {
 		// Create change 
-		val resolvedChange = createUnresolvedChange(newValue).resolveBefore
+		val resolvedChange = createUnresolvedChange().applyForwardAndResolve
 
-		// Set state after change 
-		prepareStateAfter
+		// State after 
+		assertIsStateAfter
 
 		// Apply backward
 		resolvedChange.applyBackward
@@ -97,14 +73,6 @@ class CreateAndReplaceAndDeleteNonRootTest extends ReferenceEChangeTest {
 	}
 
 	/**
-	 * Sets the model after the change
-	 */
-	def private void prepareStateAfter() {
-		affectedEObject.eSet(affectedFeature, newValue)
-		assertIsStateAfter
-	}
-
-	/**
 	 * Model is in state before the changes.
 	 */
 	def private void assertIsStateBefore() {
@@ -115,45 +83,14 @@ class CreateAndReplaceAndDeleteNonRootTest extends ReferenceEChangeTest {
 	 * Model is in state after the changes.
 	 */
 	def private void assertIsStateAfter() {
-		assertThat(newValue, equalsDeeply(affectedEObject.eGet(affectedFeature) as NonRoot))
-	}
-
-	/**
-	 * Change is not resolved.
-	 */
-	def protected static void assertIsNotResolved(List<? extends EChange> changes) {
-		EChangeTest.assertIsNotResolved(changes)
-		assertEquals(3, changes.size)
-		val createChange = assertType(changes.get(0), CreateEObject)
-		val replaceChange = assertType(changes.get(1), ReplaceSingleValuedEReference)
-		val deleteChange = assertType(changes.get(2), DeleteEObject)
-		assertEquals(replaceChange.newValueID, createChange.affectedEObjectID)
-		assertEquals(replaceChange.oldValueID, deleteChange.affectedEObjectID)
-	}
-
-	/**
-	 * Change is resolved.
-	 */
-	def private static void assertIsResolved(List<EChange> changes, Root affectedRootObject, NonRoot oldNonRootObject,
-		NonRoot newNonRootObject) {
-		changes.assertIsResolved
-		assertEquals(3, changes.size)
-		val createChange = assertType(changes.get(0), CreateEObject)
-		val ReplaceSingleValuedEReference<?,?> replaceChange = assertType(changes.get(1), ReplaceSingleValuedEReference)
-		val deleteChange = assertType(changes.get(2), DeleteEObject)
-
-		assertThat(createChange.affectedEObject, equalsDeeply(newNonRootObject))
-		assertThat(replaceChange.oldValue, equalsDeeply(oldNonRootObject))
-		assertThat(replaceChange.newValue, equalsDeeply(newNonRootObject))
-		assertThat(deleteChange.affectedEObject, equalsDeeply(oldNonRootObject))
-		assertThat(replaceChange.affectedEObject, equalsDeeply(affectedRootObject))
+		assertThat(affectedEObject.eGet(affectedFeature), instanceOf(NonRoot))
 	}
 
 	/**
 	 * Creates new unresolved change.
 	 */
-	def private List<EChange> createUnresolvedChange(NonRoot newNonRootValue) {
+	def private List<EChange<Uuid>> createUnresolvedChange() {
 		return compoundFactory.createCreateAndReplaceAndDeleteNonRootChange(affectedEObject, affectedFeature, oldValue,
-			newNonRootValue)
+			aet.NonRoot).unresolve
 	}
 }

@@ -6,28 +6,27 @@ import allElementTypes.NonRoot
 import allElementTypes.Root
 import java.util.ArrayList
 import java.util.List
+import java.util.stream.Stream
 import org.eclipse.emf.common.util.EList
-import org.eclipse.emf.ecore.EReference
-import tools.vitruv.change.atomic.EChange
-import tools.vitruv.change.atomic.feature.reference.SubtractiveReferenceEChange
-import tools.vitruv.change.atomic.EChangeTest
-
-import static extension tools.vitruv.change.atomic.util.EChangeAssertHelper.*
-import tools.vitruv.change.atomic.feature.reference.RemoveEReference
-import tools.vitruv.change.atomic.eobject.DeleteEObject
 import org.eclipse.emf.ecore.EObject
-import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
+import org.eclipse.emf.ecore.EReference
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Test
-import static org.junit.jupiter.api.Assertions.assertTrue
-import static org.junit.jupiter.api.Assertions.assertFalse
-import static org.junit.jupiter.api.Assertions.assertEquals
-import static org.junit.jupiter.api.Assertions.assertNull
-import static org.junit.jupiter.api.Assertions.assertSame
-import static org.junit.jupiter.api.Assertions.assertNotSame
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.atomic.EChangeTest
+import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
+import tools.vitruv.change.atomic.uuid.Uuid
+
 import static org.hamcrest.MatcherAssert.assertThat
+import static org.junit.jupiter.api.Assertions.assertEquals
+import static org.junit.jupiter.api.Assertions.assertFalse
+import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
+import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 
 /**
  * Test class for the concrete {@link ExplicitUnsetEReference} EChange,
@@ -49,58 +48,6 @@ class ExplicitUnsetEReferenceTest extends EChangeTest {
 		oldValue2 = aet.NonRoot.withUuid
 		oldValue3 = aet.NonRoot.withUuid
 	}
-	
-	/**
-	 * Resolves a {@link ExplicitUnsetEReference} EChange. The feature is a single 
-	 * valued non containment reference and the model is in state before the change.
-	 */
-	@Test
-	def void resolveBeforeSingleValuedNonContainmentReferenceTest() {
-		// Set state before
-		isSingleValuedNonContainmentTest
-
-		// Test
-		resolveBeforeTest
-	}
-
-	/**
-	 * Resolves a {@link ExplicitUnsetEReference} EChange. The feature is a single 
-	 * valued containment reference and the model is in state before the change.
-	 */
-	@Test
-	def void resolveBeforeSingleValuedContainmentReferenceTest() {
-		// Set state before
-		isSingleValuedContainmentTest
-
-		// Test
-		resolveBeforeTest
-	}
-
-	/**
-	 * Resolves a {@link ExplicitUnsetEReference} EChange. The feature is a multi 
-	 * valued non containment reference and the model is in state before the change.
-	 */
-	@Test
-	def void resolveBeforeMultiValuedNonContainmentReferenceTest() {
-		// Set state before
-		isMultiValuedNonContainmentTest
-
-		// Test
-		resolveBeforeTest
-	}
-
-	/**
-	 * Resolves a {@link ExplicitUnsetEReference} EChange. The feature is a multi 
-	 * valued containment reference and the model is in state before the change.
-	 */
-	@Test
-	def void resolveBeforeMultiValuedContainmentReferenceTest() {
-		// Set state before
-		isMultiValuedContainmentTest
-
-		// Test
-		resolveBeforeTest
-	}
 
 	/**
 	 * Tests whether the {@link ExplicitUnsetEReference} EChange resolves to the correct type.
@@ -114,109 +61,35 @@ class ExplicitUnsetEReferenceTest extends EChangeTest {
 		val unresolvedChange = createUnresolvedChange()
 
 		// Resolve
-		val resolvedChange = unresolvedChange.resolveBefore
+		val resolvedChange = unresolvedChange.applyForwardAndResolve
 		unresolvedChange.assertDifferentChangeSameClass(resolvedChange)
 	}
 
-	/**
-	 * Tests a {@link ExplicitUnsetEReference} EChange by applying it forward.
-	 * Unsets a single valued non containment reference.
-	 */
-	@Test
-	def void applyForwardSingleValuedNonContainmentReferenceTest() {
+	@ParameterizedTest
+	@MethodSource("testConfigurations")
+	def void applyForwardTest(boolean isContainment, boolean isSingleValued) {
 		// Set state before
-		isSingleValuedNonContainmentTest
+		if (isSingleValued) {
+			isContainment ? isSingleValuedContainmentTest : isSingleValuedNonContainmentTest
+		}
+		else {
+			isContainment ? isMultiValuedContainmentTest : isMultiValuedNonContainmentTest
+		}
 
 		// Test
 		applyForwardTest
 	}
 
-	/**
-	 * Tests a {@link ExplicitUnsetEReference} EChange by applying it forward.
-	 * Unsets a single valued non containment reference.
-	 */
-	@Test
-	def void applyForwardSingleValuedContainmentReferenceTest() {
+	@ParameterizedTest
+	@MethodSource("testConfigurations")
+	def void applyBackwardTest(boolean isContainment, boolean isSingleValued) {
 		// Set state before
-		isSingleValuedContainmentTest
-
-		// Test
-		applyForwardTest
-	}
-
-	/**
-	 * Tests a {@link ExplicitUnsetEReference} EChange by applying it forward.
-	 * Unsets a multi valued non containment reference.
-	 */
-	@Test
-	def void applyForwardMultiValuedNonContainmentReferenceTest() {
-		// Set state before
-		isMultiValuedContainmentTest
-
-		// Test
-		applyForwardTest
-	}
-
-	/**
-	 * Tests a {@link ExplicitUnsetEReference} EChange by applying it forward.
-	 * Unsets a multi valued containment reference.
-	 */
-	@Test
-	def void applyForwardMultiValuedNContainmentReferenceTest() {
-		// Set state before
-		isMultiValuedContainmentTest
-
-		// Test
-		applyForwardTest
-	}
-
-	/**
-	 * Tests a {@link ExplicitUnsetEReference} EChange by applying it backward.
-	 * Unsets a single valued non containment reference.
-	 */
-	@Test
-	def void applyBackwardSingleValuedNonContainmentReferenceTest() {
-		// Set state before
-		isSingleValuedNonContainmentTest
-
-		// Test
-		applyBackwardTest
-	}
-
-	/**
-	 * Tests a {@link ExplicitUnsetEReference} EChange by applying it backward.
-	 * Unsets a single valued non containment reference.
-	 */
-	@Test
-	def void applyBackwardSingleValuedContainmentReferenceTest() {
-		// Set state before
-		isSingleValuedContainmentTest
-
-		// Test
-		applyBackwardTest
-	}
-
-	/**
-	 * Tests a {@link ExplicitUnsetEReference} EChange by applying it backward.
-	 * Unsets a multi valued non containment reference.
-	 */
-	@Test
-	def void applyBackwardMultiValuedNonContainmentReferenceTest() {
-		// Set state before
-		isMultiValuedNonContainmentTest
-
-		// Test
-		applyBackwardTest
-	}
-
-	/**
-	 * Tests a {@link ExplicitUnsetEReference} EChange by applying it backward.
-	 * Unsets a multi valued containment reference.
-	 */
-	@Test
-	def void applyBackwardMultiValuedNContainmentReferenceTest() {
-		// Set state before
-		isMultiValuedContainmentTest
+		if (isSingleValued) {
+			isContainment ? isSingleValuedContainmentTest : isSingleValuedNonContainmentTest
+		}
+		else {
+			isContainment ? isMultiValuedContainmentTest : isMultiValuedNonContainmentTest
+		}
 
 		// Test
 		applyBackwardTest
@@ -296,13 +169,6 @@ class ExplicitUnsetEReferenceTest extends EChangeTest {
 	}
 
 	/**
-	 * Sets the state after change.
-	 */
-	def private void prepareStateAfter() {
-		affectedEObject.eUnset(affectedFeature)
-	}
-
-	/**
 	 * The model is in state before the change.
 	 */
 	def private void assertIsStateBefore() {
@@ -366,91 +232,10 @@ class ExplicitUnsetEReferenceTest extends EChangeTest {
 	}
 
 	/**
-	 * Change is not resolved.
-	 */
-	def protected void localAssertIsNotResolved(List<? extends EChange> changes) {
-		EChangeTest.assertIsNotResolved(changes)
-		if (!affectedFeature.containment) {
-			if (!affectedFeature.many) {
-				assertNotSame((changes.get(0) as SubtractiveReferenceEChange<Root, NonRoot>).affectedEObject, oldValue)
-			} else {
-				assertNotSame((changes.get(0) as SubtractiveReferenceEChange<Root, NonRoot>).affectedEObject, oldValue3)
-				assertNotSame((changes.get(1) as SubtractiveReferenceEChange<Root, NonRoot>).affectedEObject, oldValue2)
-				assertNotSame((changes.get(2) as SubtractiveReferenceEChange<Root, NonRoot>).affectedEObject, oldValue)
-			}
-		} else {
-			if (!affectedFeature.many) {
-				assertUnresolvedRemoveAndDelete(changes.get(0), true, changes.get(1))
-			} else {
-				assertUnresolvedRemoveAndDelete(changes.get(0), false, changes.get(1))
-				assertUnresolvedRemoveAndDelete(changes.get(2), false, changes.get(3))
-				assertUnresolvedRemoveAndDelete(changes.get(4), false, changes.get(5))
-			}
-		}
-	}
-
-	private def assertUnresolvedRemoveAndDelete(
-		EChange removeChange,
-		boolean replace,
-		EChange deleteChange
-	) {
-		assertIsNotResolved(#[removeChange, deleteChange])
-		val typedRemoveChange = if (replace) {
-				assertType(removeChange, ReplaceSingleValuedEReference)
-			} else {
-				assertType(removeChange, RemoveEReference)
-			}
-
-		val typedDeleteChange = assertType(deleteChange, DeleteEObject)
-		assertEquals(typedRemoveChange.oldValueID, typedDeleteChange.affectedEObjectID)
-	}
-
-	/**
-	 * Change is resolved.
-	 */
-	def protected void localAssertIsResolved(List<EChange> changes) {
-		EChangeTest.assertIsResolved(changes)
-		if (!affectedFeature.containment) {
-			if (!affectedFeature.many) {
-				assertSame((changes.get(0) as SubtractiveReferenceEChange<Root, NonRoot>).oldValue, oldValue)
-			} else {
-				assertSame((changes.get(0) as SubtractiveReferenceEChange<Root, NonRoot>).oldValue, oldValue3)
-				assertSame((changes.get(1) as SubtractiveReferenceEChange<Root, NonRoot>).oldValue, oldValue2)
-				assertSame((changes.get(2) as SubtractiveReferenceEChange<Root, NonRoot>).oldValue, oldValue)
-			}
-		} else {
-			if (!affectedFeature.many) {
-				assertResolvedRemoveAndDelete(changes.get(0), true, changes.get(1), oldValue)
-			} else {
-				assertResolvedRemoveAndDelete(changes.get(0), false, changes.get(1), oldValue3)
-				assertResolvedRemoveAndDelete(changes.get(2), false, changes.get(3), oldValue2)
-				assertResolvedRemoveAndDelete(changes.get(4), false, changes.get(5), oldValue)
-			}
-		}
-	}
-
-	private def assertResolvedRemoveAndDelete(
-		EChange removeChange,
-		boolean replace,
-		EChange deleteChange,
-		EObject oldValue
-	) {
-		assertIsResolved(#[removeChange, deleteChange])
-		val typedRemoveChange = if (replace) {
-				assertType(removeChange, ReplaceSingleValuedEReference)
-			} else {
-				assertType(removeChange, RemoveEReference)
-			}
-		val typedDeleteChange = assertType(deleteChange, DeleteEObject)
-		assertThat(oldValue, equalsDeeply(typedRemoveChange.oldValue))
-		assertThat(oldValue, equalsDeeply(typedDeleteChange.affectedEObject))
-	}
-
-	/**
 	 * Creates new unresolved change.
 	 */
-	def private List<? extends EChange> createUnresolvedChange() {
-		var List<EChange> changes = new ArrayList<EChange>
+	def private List<EChange<Uuid>> createUnresolvedChange() {
+		var List<EChange<? extends EObject>> changes = new ArrayList<EChange<? extends EObject>>()
 		if (!affectedFeature.containment) {
 			if (!affectedFeature.many) {
 				val change = atomicFactory.createReplaceSingleReferenceChange(affectedEObject, affectedFeature,
@@ -467,7 +252,7 @@ class ExplicitUnsetEReferenceTest extends EChangeTest {
 			if (!affectedFeature.many) {
 				val change = compoundFactory.createReplaceAndDeleteNonRootChange(affectedEObject, affectedFeature,
 					oldValue)
-				(change.get(0) as ReplaceSingleValuedEReference<?, ?>).isUnset = true
+				(change.get(0) as ReplaceSingleValuedEReference<?>).isUnset = true
 				changes.addAll(change)
 			} else {
 				changes.addAll(
@@ -480,34 +265,7 @@ class ExplicitUnsetEReferenceTest extends EChangeTest {
 			}
 		}
 
-		return changes
-	}
-
-	/**
-	 * Starts a test with resolving a change before the change is applied.
-	 */
-	def private void resolveBeforeTest() {
-		// State before
-		assertIsStateBefore
-
-		// Create change
-		val unresolvedChange = createUnresolvedChange()
-		unresolvedChange.localAssertIsNotResolved()
-
-		// Resolve 1
-		val resolvedChange = unresolvedChange.resolveBefore
-		resolvedChange.localAssertIsResolved()
-
-		// Model should be unaffected
-		assertIsStateBefore
-
-		// Resolve 2
-		var resolvedAndAppliedChange = unresolvedChange.resolveBefore
-		resolvedAndAppliedChange.applyForward
-		resolvedAndAppliedChange.localAssertIsResolved()
-
-		// State after
-		assertIsStateAfter
+		return changes.unresolve
 	}
 
 	/**
@@ -518,10 +276,8 @@ class ExplicitUnsetEReferenceTest extends EChangeTest {
 		assertIsStateBefore
 
 		// Create and resolve change
-		val resolvedChange = createUnresolvedChange().resolveBefore
-
-		// Apply forward
-		resolvedChange.applyForward
+		val unresolvedChange = createUnresolvedChange()
+		unresolvedChange.applyForwardAndResolve
 
 		// State after
 		assertIsStateAfter
@@ -535,10 +291,9 @@ class ExplicitUnsetEReferenceTest extends EChangeTest {
 		assertIsStateBefore
 
 		// Create and resolve change
-		val resolvedChange = createUnresolvedChange().resolveBefore
+		val resolvedChange = createUnresolvedChange().applyForwardAndResolve
 
-		// Set state after
-		prepareStateAfter
+		// State after
 		assertIsStateAfter
 
 		// Apply forward
@@ -546,5 +301,14 @@ class ExplicitUnsetEReferenceTest extends EChangeTest {
 
 		// State before
 		assertIsStateBefore
+	}
+	
+	static def testConfigurations() {
+		return Stream.of(
+			Arguments.of(Named.of("containment", true), Named.of("single-valued", true)),
+			Arguments.of(Named.of("non-containment", false), Named.of("single-valued", true)),
+			Arguments.of(Named.of("containment", true), Named.of("multi-valued", false)),
+			Arguments.of(Named.of("non-containment", false), Named.of("multi-valued", false))
+		);
 	}
 }

@@ -1,5 +1,8 @@
 package tools.vitruv.change.propagation;
 
+import org.eclipse.emf.ecore.EObject;
+
+import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.atomic.uuid.UuidResolver;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
@@ -29,7 +32,7 @@ public interface ChangeRecordingModelRepository extends ResourceAccess, AutoClos
 	 * @return the resolved and applied {@link VitruviusChange}
 	 * @throws IllegalStateException if the the given change is resolved
 	 */
-	VitruviusChange applyChange(VitruviusChange change);
+	VitruviusChange<EObject> applyChange(VitruviusChange<Uuid> change);
 
 	/**
 	 * Records the changes performed to the models in the repository while executing
@@ -40,5 +43,5 @@ public interface ChangeRecordingModelRepository extends ResourceAccess, AutoClos
 	 * @return the list of {@link TransactionalChange} containing the performed
 	 *         changes, one for each metamodel
 	 */
-	Iterable<TransactionalChange> recordChanges(Runnable changeApplicator);
+	Iterable<TransactionalChange<EObject>> recordChanges(Runnable changeApplicator);
 }

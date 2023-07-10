@@ -1,22 +1,24 @@
 package tools.vitruv.change.composite.description.impl
 
+import java.util.HashSet
+import java.util.LinkedHashSet
 import java.util.List
+import java.util.Set
+import tools.vitruv.change.atomic.EChange
+import tools.vitruv.change.composite.MetamodelDescriptor
 import tools.vitruv.change.composite.description.CompositeChange
 import tools.vitruv.change.composite.description.VitruviusChange
+
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.*
-import java.util.LinkedHashSet
-import java.util.Set
-import java.util.HashSet
-import tools.vitruv.change.composite.MetamodelDescriptor
 
-abstract class AbstractCompositeChangeImpl<C extends VitruviusChange> implements CompositeChange<C> {
-	List<C> changes
+abstract class AbstractCompositeChangeImpl<Element, ContanedChange extends VitruviusChange<Element>> implements CompositeChange<Element, ContanedChange> {
+	List<ContanedChange> changes
 
-	new(List<? extends C> changes) {
+	new(List<? extends ContanedChange> changes) {
 		this.changes = List.copyOf(changes)
 	}
 
-	override List<C> getChanges() {
+	override List<ContanedChange> getChanges() {
 		return this.changes
 	}
 
@@ -32,7 +34,7 @@ abstract class AbstractCompositeChangeImpl<C extends VitruviusChange> implements
 		changes.flatMapFixedTo(new HashSet) [affectedEObjectsMetamodelDescriptors]
 	}
 
-	override getEChanges() {
+	override List<EChange<Element>> getEChanges() {
 		return changes.flatMapFixed [EChanges]
 	}
 	
@@ -68,7 +70,7 @@ abstract class AbstractCompositeChangeImpl<C extends VitruviusChange> implements
 	override equals(Object other) {
 		if (other === this) true
 		else if (other === null) false
-		else if (other instanceof CompositeChange<?>) {
+		else if (other instanceof CompositeChange<?, ?>) {
 			changes == other.changes
 		}
 		else false

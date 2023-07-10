@@ -1,4 +1,4 @@
-package tools.vitruv.change.atomic.command
+package tools.vitruv.change.atomic.command.internal
 
 import edu.kit.ipd.sdq.activextendannotations.Utility
 import org.eclipse.emf.edit.domain.EditingDomain
@@ -11,7 +11,7 @@ import java.util.List
 import org.eclipse.emf.ecore.EReference
 
 @Utility
-class ChangeCommandUtil {
+package class ChangeCommandUtil {
 	/**
 	 * Returns the editing domain of the an object. If the object has no 
 	 * editing domain, it returns a new {@code AdapterFactoryEditingDomain}.

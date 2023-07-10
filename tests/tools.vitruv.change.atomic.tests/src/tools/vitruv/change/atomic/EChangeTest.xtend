@@ -3,23 +3,25 @@ package tools.vitruv.change.atomic
 import allElementTypes.Root
 import java.nio.file.Path
 import java.util.List
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.io.TempDir
+import tools.vitruv.change.atomic.command.internal.ApplyEChangeSwitch
+import tools.vitruv.change.atomic.resolve.internal.AtomicEChangeUnresolver
 import tools.vitruv.change.atomic.util.EChangeAssertHelper
+import tools.vitruv.change.atomic.uuid.AtomicEChangeUuidResolver
+import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.atomic.uuid.UuidResolver
 
-import static org.junit.jupiter.api.Assertions.assertFalse
-import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
 
+import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.mapFixed
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.createFileURI
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
-import org.eclipse.emf.ecore.EObject
-import static extension tools.vitruv.change.atomic.resolve.EChangeUuidResolverAndApplicator.*
 
 /**
  * Default class for testing EChange changes.
@@ -35,9 +37,10 @@ abstract class EChangeTest {
 	@Accessors(PROTECTED_GETTER)
 	var Resource resource
 	var ResourceSet resourceSet
-	@Accessors(PROTECTED_GETTER)
 	var UuidResolver uuidResolver
+	var AtomicEChangeUuidResolver atomicChangeResolver
 
+	var AtomicEChangeUnresolver changeUnresolver;
 	@Accessors(PROTECTED_GETTER)
 	var TypeInferringAtomicEChangeFactory atomicFactory
 	@Accessors(PROTECTED_GETTER)
@@ -60,76 +63,52 @@ abstract class EChangeTest {
 		// Create model
 		resourceSet = new ResourceSetImpl().withGlobalFactories
 		uuidResolver = UuidResolver.create(resourceSet)
+		atomicChangeResolver = new AtomicEChangeUuidResolver(uuidResolver)
 		resource = resourceSet.createResource(fileUri)
 
-		rootObject = aet.Root.withUuid
+		rootObject = aet.Root
+		uuidResolver.registerEObject(rootObject)
 		resource.contents += rootObject
 		resource.save(null)
 
 		// Factories for creating changes
-		atomicFactory = new TypeInferringUnresolvingAtomicEChangeFactory(uuidResolver)
-		compoundFactory = new TypeInferringUnresolvingCompoundEChangeFactory(uuidResolver)
-		helper = new EChangeAssertHelper(uuidResolver)
+		changeUnresolver = new AtomicEChangeUnresolver(uuidResolver, resourceSet)
+		atomicFactory = new TypeInferringAtomicEChangeFactory()
+		compoundFactory = new TypeInferringCompoundEChangeFactory(atomicFactory)
+		helper = new EChangeAssertHelper()
 	}
 
 	protected def final getResourceContent() {
 		resource.contents
 	}
 
-	/**
-	 * Assert that change is not resolved.
-	 */
-	def protected static void assertIsNotResolved(List<? extends EChange> changes) {
-		for (change : changes) {
-			assertFalse(change.isResolved)
-		}
-	}
-
-	/**
-	 * Assert that change is resolved.
-	 */
-	def protected static void assertIsResolved(List<? extends EChange> changes) {
-		for (change : changes) {
-			change.assertIsResolved()
-		}
+	def protected void applyBackward(List<? extends EChange<EObject>> changes) {
+		changes.reverseView.forEach[applyBackward]
 	}
 	
-	def protected static void assertIsResolved(EChange change) {
-		assertTrue(change.isResolved)
+	def protected void applyBackward(EChange<EObject> change) {
+		ApplyEChangeSwitch.applyEChange(change, false)
 	}
 
-	def protected EChange resolveBefore(EChange change) {
-		return change.resolveBefore(uuidResolver)
-	}
-
-	def protected List<EChange> resolveBefore(List<? extends EChange> changes) {
-		val result = newArrayList
-		result += changes.map[resolveBefore]
-		return result
-	}
-
-	def protected void applyBackward(List<EChange> changes) {
-		assertIsResolved(changes)
-		changes.reverseView.forEach[applyBackward(uuidResolver)]
+	def protected List<EChange<EObject>> applyForwardAndResolve(List<? extends EChange<Uuid>> changes) {
+		return changes.mapFixed[applyForwardAndResolve]
 	}
 	
-	def protected void applyBackward(EChange change) {
-		assertIsResolved(change)
-		change.assertApplyForward
-	}
-
-	def protected void applyForward(List<EChange> changes) {
-		changes.forEach[applyForward]
+	def protected EChange<EObject> applyForwardAndResolve(EChange<Uuid> change) {
+		return atomicChangeResolver.resolveAndApplyForward(change)
 	}
 	
-	def protected void applyForward(EChange change) {
-		assertIsResolved(change)
-		change.assertApplyForward
+	def protected EChange<Uuid> unresolve(EChange<? extends EObject> eChange) {
+		return changeUnresolver.unresolve(eChange)
 	}
 	
 	def protected <O extends EObject> withUuid(O eObject) {
 		uuidResolver.registerEObject(eObject)
 		return eObject
+	}
+	
+	def protected List<EChange<Uuid>> unresolve(List<? extends EChange<? extends EObject>> eChanges) {
+		return changeUnresolver.unresolve(eChanges)
 	}
 	
 }

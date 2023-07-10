@@ -26,7 +26,7 @@ package final class NotificationToEChangeConverter {
 	
 	val (EObject, EObject)=>boolean isCreateChange
 	
-	def EChange createDeleteChange(EObject eObject) {
+	def EChange<EObject> createDeleteChange(EObject eObject) {
 		return createDeleteEObjectChange(eObject)
 	}
 	
@@ -42,7 +42,7 @@ package final class NotificationToEChangeConverter {
 	 * @param n the notification to convert
 	 * @return the  {@link Iterable} of {@link EChange}s
 	 */
-	def Iterable<? extends EChange> convert(extension NotificationInfo notification) {
+	def Iterable<? extends EChange<EObject>> convert(extension NotificationInfo notification) {
 		return switch (notification) {
 			case isTouch,
 			case isTransient,
@@ -102,21 +102,21 @@ package final class NotificationToEChangeConverter {
 		}
 	}
 	
-	private def Iterable<? extends EChange> handleMoveAttribute(extension NotificationInfo notification) {
+	private def Iterable<? extends EChange<EObject>> handleMoveAttribute(extension NotificationInfo notification) {
 		#[
 			createRemoveAttributeChange(notifierModelElement, attribute, oldValue as Integer, newValue),
 			createInsertAttributeChange(notifierModelElement, attribute, position, newValue)
 		]
 	}
 	
-	private def Iterable<? extends EChange> handleMoveReference(extension NotificationInfo notification) {
+	private def Iterable<? extends EChange<EObject>> handleMoveReference(extension NotificationInfo notification) {
 		#[
 			createRemoveReferenceChange(notifierModelElement, reference, newModelElementValue, oldValue as Integer),
 			createInsertReferenceChange(notifierModelElement, reference, newModelElementValue, position)
 		]
 	}
 
-	def private Iterable<? extends EChange> handleSetAttribute(extension NotificationInfo notification) {
+	def private Iterable<? extends EChange<EObject>> handleSetAttribute(extension NotificationInfo notification) {
 		switch (notification) {
 			case !attribute.isMany:
 				handleReplaceAttribute(notification)
@@ -131,7 +131,7 @@ package final class NotificationToEChangeConverter {
 		}
 	}
 
-	private def Iterable<? extends EChange> handleSetReference(extension NotificationInfo notification) {
+	private def Iterable<? extends EChange<EObject>> handleSetReference(extension NotificationInfo notification) {
 		switch (notification) {
 			case !reference.isMany:
 				handleReplaceReference(notification)
@@ -146,7 +146,7 @@ package final class NotificationToEChangeConverter {
 		}
 	}
 
-	def private Iterable<? extends EChange> handleUnsetAttribute(extension NotificationInfo notification) {
+	def private Iterable<? extends EChange<EObject>> handleUnsetAttribute(extension NotificationInfo notification) {
 		return if (!attribute.isMany) {
 			handleSetAttribute(notification)
 		} else {
@@ -154,7 +154,7 @@ package final class NotificationToEChangeConverter {
 		}
 	}
 
-	private def Iterable<? extends EChange> handleUnsetReference(extension NotificationInfo notification) {
+	private def Iterable<? extends EChange<EObject>> handleUnsetReference(extension NotificationInfo notification) {
 		if (!reference.isMany) {
 			handleSetReference(notification)
 		} else {
@@ -162,17 +162,17 @@ package final class NotificationToEChangeConverter {
 		}
 	}
 
-	private def Iterable<? extends EChange> handleReplaceAttribute(extension NotificationInfo notification) {
+	private def Iterable<? extends EChange<EObject>> handleReplaceAttribute(extension NotificationInfo notification) {
 		val change = AttributeFactory.eINSTANCE.createReplaceSingleValuedEAttribute()
 		change.oldValue = oldValue
 		change.newValue = newValue
 		change.affectedFeature = attribute
-		change.affectedEObject = notifierModelElement
+		change.affectedElement = notifierModelElement
 		change.isUnset = wasUnset
 		return List.of(change)
 	}
 
-	private def Iterable<? extends EChange> handleReplaceReference(extension NotificationInfo notification) {
+	private def Iterable<? extends EChange<EObject>> handleReplaceReference(extension NotificationInfo notification) {
 		val change = createReplaceSingleReferenceChange(notifierModelElement, reference, oldModelElementValue,
 			newModelElementValue)
 		change.isUnset = notification.wasUnset
@@ -197,12 +197,12 @@ package final class NotificationToEChangeConverter {
 		}
 	}
 
-	private def Iterable<? extends EChange> handleRemoveReference(extension NotificationInfo notification) {
+	private def Iterable<? extends EChange<EObject>> handleRemoveReference(extension NotificationInfo notification) {
 		createRemoveReferenceChange(notifierModelElement, reference, oldModelElementValue, position).
 			addUnsetChangeIfNecessary(notification)
 	}
 
-	private def Iterable<? extends EChange> handleMultiRemoveReference(extension NotificationInfo notification) {
+	private def Iterable<? extends EChange<EObject>> handleMultiRemoveReference(extension NotificationInfo notification) {
 		if (newValue === null) {
 			val oldValues = oldValue as List<EObject>
 			oldValues.reverseView.mapFixedIndexed [ index, value |
@@ -224,12 +224,12 @@ package final class NotificationToEChangeConverter {
 		]
 	}
 
-	private def Iterable<? extends EChange> handleInsertReference(extension NotificationInfo notification) {
+	private def Iterable<? extends EChange<EObject>> handleInsertReference(extension NotificationInfo notification) {
 		createInsertReferenceChange(notifierModelElement, reference, newModelElementValue, position).
 			surroundWithCreateAndFeatureChangesIfNecessary()
 	}
 
-	private def Iterable<? extends EChange> handleMultiInsertReference(extension NotificationInfo notification) {
+	private def Iterable<? extends EChange<EObject>> handleMultiInsertReference(extension NotificationInfo notification) {
 		(newValue as List<EObject>).flatMapFixedIndexed [ index, value |
 			createInsertReferenceChange(notifierModelElement, reference, value, initialIndex + index).
 				surroundWithCreateAndFeatureChangesIfNecessary()
@@ -260,7 +260,7 @@ package final class NotificationToEChangeConverter {
 		]
 	}
 
-	private def Iterable<? extends EChange> handleSetUriChange(extension NotificationInfo notification) {
+	private def Iterable<? extends EChange<EObject>> handleSetUriChange(extension NotificationInfo notification) {
 		val oldUri = notification.oldValue as URI
 		notifierResource.contents.mapFixedIndexed [ index, value |
 			val valueIndex = initialIndex + notifierResource.contents.size - 1 - index
@@ -272,7 +272,7 @@ package final class NotificationToEChangeConverter {
 		]
 	}
 
-	def private Iterable<? extends EChange> allAdditiveChangesForChangeRelevantFeatures(EObjectAddedEChange<?> change, EObject eObject) {
+	def private Iterable<? extends EChange<EObject>> allAdditiveChangesForChangeRelevantFeatures(EObjectAddedEChange<EObject> change, EObject eObject) {
 		change.newValue.walkChangeRelevantFeatures(
 			[object, attribute|createAdditiveEChangeForAttribute(object, attribute)],
 			[object, reference|if (reference.isContainment) createAdditiveEChangeForReferencedObject(object, reference, [referencedObject | isCreateChange.apply(object, referencedObject)])]
@@ -281,10 +281,10 @@ package final class NotificationToEChangeConverter {
 		]
 	}
 
-	def private static Iterable<? extends EChange> walkChangeRelevantFeatures(
+	def private static Iterable<? extends EChange<EObject>> walkChangeRelevantFeatures(
 		EObject eObject,
-		(EObject, EAttribute)=>Iterable<? extends EChange> attributeVisitor,
-		(EObject, EReference)=>Iterable<? extends EChange> referenceVisitor
+		(EObject, EAttribute)=>Iterable<? extends EChange<EObject>> attributeVisitor,
+		(EObject, EReference)=>Iterable<? extends EChange<EObject>> referenceVisitor
 	) {
 		val changeRelevantFeatures = eObject.eClass.EAllStructuralFeatures.filter [
 			eObject.hasChangeableUnderivedPersistedNotContainingNonDefaultValue(it)
@@ -317,7 +317,7 @@ package final class NotificationToEChangeConverter {
 			emptyList()
 	}
 
-	def private <T extends EChange> addUnsetChangeIfNecessary(Iterable<T> changes, NotificationInfo notification) {
+	def private <T extends EChange<EObject>> addUnsetChangeIfNecessary(Iterable<T> changes, NotificationInfo notification) {
 		return if (notification.wasUnset)
 			changes +
 				List.of(createUnsetFeatureChange(notification.notifierModelElement, notification.structuralFeature))
@@ -325,16 +325,20 @@ package final class NotificationToEChangeConverter {
 			changes
 	}
 
-	def private addUnsetChangeIfNecessary(EChange change, NotificationInfo notification) {
+	def private addUnsetChangeIfNecessary(EChange<EObject> change, NotificationInfo notification) {
 		return if (notification.wasUnset)
 			List.of(change, createUnsetFeatureChange(notification.notifierModelElement, notification.structuralFeature))
 		else
 			List.of(change)
 	}
 
-	private def Iterable<? extends EChange> surroundWithCreateAndFeatureChangesIfNecessary(
-		EObjectAddedEChange<?> change) {
-		return if (isCreateChange.apply(if (change instanceof UpdateReferenceEChange<?>) change.affectedEObject, change.newValue)) {
+	private def Iterable<? extends EChange<EObject>> surroundWithCreateAndFeatureChangesIfNecessary(
+		EObjectAddedEChange<EObject> change) {
+		val affectedElement = switch change {
+			UpdateReferenceEChange<EObject>: change.affectedElement
+			default: null
+		}
+		return if (isCreateChange.apply(affectedElement, change.newValue)) {
 			val createChange = createCreateEObjectChange(change.newValue)
 			List.of(createChange, change) + allAdditiveChangesForChangeRelevantFeatures(change, change.newValue)
 		} else

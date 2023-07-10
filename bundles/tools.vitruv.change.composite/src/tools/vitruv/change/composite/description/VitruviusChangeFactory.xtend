@@ -16,11 +16,11 @@ class VitruviusChangeFactory {
 		return instance;
 	}
 	
-	def TransactionalChange createTransactionalChange(Iterable<? extends EChange> changes) {
+	 def <Element> TransactionalChange<Element> createTransactionalChange(Iterable<? extends EChange<Element>> changes) {
 		return new TransactionalChangeImpl(changes);
 	}
 	
-	def CompositeContainerChange createCompositeChange(Iterable<? extends VitruviusChange> innerChanges) {
+	def <Element> CompositeContainerChange<Element> createCompositeChange(Iterable<? extends VitruviusChange<Element>> innerChanges) {
 		new CompositeContainerChangeImpl(innerChanges.toList)
 	}
 	
