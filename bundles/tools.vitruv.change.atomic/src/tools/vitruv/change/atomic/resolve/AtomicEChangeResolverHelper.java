@@ -27,6 +27,14 @@ public class AtomicEChangeResolverHelper<Source, Target> {
 		this.resourceResolver = resourceResolver;
 	}
 
+	/**
+	 * Resolves the given change by calling the <code>elementResolver</code> for every element present in the change. Resources are resolved using the <code>resourceResolver</code>.
+	 * @param <Source> the domain of the given change.
+	 * @param <Target> the domain of the resolved change.
+	 * @param eChange the change to resolve.
+	 * @param elementResolver is called for every element of the change to return the corresponding element of the <code>Target</code> domain. Must not return null.
+	 * @param resourceResolver is called for every resource of the change to return the corresponding resource of the <code>Target</code> domain.
+	 */
 	public static <Source, Target> EChange<Target> resolveChange(EChange<Source> eChange, Function<Source, Target> elementResolver, Function<Resource, Resource> resourceResolver) {
 		return new AtomicEChangeResolverHelper<>(elementResolver, resourceResolver).resolve(eChange);
 	}
@@ -73,7 +81,7 @@ public class AtomicEChangeResolverHelper<Source, Target> {
 	 */
 	private <F extends EStructuralFeature> void resolveFeatureEChange(FeatureEChange<Source, ?> sourceChange,
 			FeatureEChange<Target, ?> targetChange) {
-		checkArgument(sourceChange.getAffectedElement() != null, "change %s must have ann affected element",
+		checkArgument(sourceChange.getAffectedElement() != null, "change %s must have an affected element",
 				sourceChange);
 		checkArgument(sourceChange.getAffectedFeature() != null, "change %s must have an affected feature",
 				sourceChange);
