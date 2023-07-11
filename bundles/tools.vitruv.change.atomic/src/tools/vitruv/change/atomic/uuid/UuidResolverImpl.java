@@ -204,11 +204,7 @@ class UuidResolverImpl implements UuidResolver {
 		var iterator = eObjectToUuid.keySet().iterator();
 		while (iterator.hasNext()) {
 			EObject object = iterator.next();
-			//TODO: Hard constraint for dangling elements is currently disabled as Reactions produce incomplete change sequence
-//			checkState(object.eResource() != null && object.eResource().getResourceSet() != null, "dangling object %s detected", object);
-			if (object.eResource() == null || object.eResource().getResourceSet() == null) {
-				iterator.remove();
-			}
+			checkState(object.eResource() != null && object.eResource().getResourceSet() != null, "dangling object %s detected", object);
 		}
 	}
 

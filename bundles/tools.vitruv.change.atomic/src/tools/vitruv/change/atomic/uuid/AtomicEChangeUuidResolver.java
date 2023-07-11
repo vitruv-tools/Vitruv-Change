@@ -73,9 +73,11 @@ public class AtomicEChangeUuidResolver {
 	}
 
 	/**
-	 * Ends a transactions such that all {@link EObject}s not being contained in a
-	 * resource, which is contained in a resource set, are removed from the UUID
-	 * mapping.
+	 * Ends a transactions such that any registered {@link EObject} not being
+	 * contained in a resource throws an error.
+	 * 
+	 * @throws IllegalStateException if an uncontained element is registered in the
+	 *                               {@link UuidResolver}.
 	 */
 	public void endTransaction() {
 		uuidResolver.endTransaction();
