@@ -172,8 +172,14 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	}
 
 	override disposeViewResources() {
+		resourceSet.resources.forEach [ resource |
+			resource.allContents.forEach [
+				if (uuidResolver.hasUuid(it)) {
+					uuidResolver.unregisterEObject(uuidResolver.getUuid(it), it)
+				}
+			]
+		]
 		resourceSet.resources.clear()
-		uuidResolver.endTransaction()
 	}
 
 	override <T extends Notifier> T startRecordingChanges(T notifier) {
@@ -224,6 +230,6 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 		val changeableModelRepository = createTestChangeableModelRepository(modelRepository,
 			changePropagationSpecificationProvider, userInteraction)
 		return new ChangePublishingTestView(persistenceDirectory, userInteraction, UriMode.FILE_URIS,
-			changeableModelRepository, modelRepository.uuidResolver) [ modelRepository.getModelResource(it) ]
+			changeableModelRepository, modelRepository.uuidResolver)[modelRepository.getModelResource(it)]
 	}
 }
