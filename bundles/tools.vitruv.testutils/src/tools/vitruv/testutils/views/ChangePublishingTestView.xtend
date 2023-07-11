@@ -29,6 +29,7 @@ import tools.vitruv.testutils.TestUserInteraction
 
 import static com.google.common.base.Preconditions.checkArgument
 import static com.google.common.base.Preconditions.checkState
+import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.isPathmap
 import static tools.vitruv.testutils.TestModelRepositoryFactory.createTestChangeableModelRepository
 
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.flatMapFixed
@@ -173,11 +174,13 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 
 	override disposeViewResources() {
 		resourceSet.resources.forEach [ resource |
-			resource.allContents.forEach [
-				if (uuidResolver.hasUuid(it)) {
-					uuidResolver.unregisterEObject(uuidResolver.getUuid(it), it)
-				}
-			]
+			if (resource.URI === null || !isPathmap(resource.URI)) {
+				resource.allContents.forEach [
+					if (uuidResolver.hasUuid(it)) {
+						uuidResolver.unregisterEObject(uuidResolver.getUuid(it), it)
+					}
+				]
+			}
 		]
 		resourceSet.resources.clear()
 	}

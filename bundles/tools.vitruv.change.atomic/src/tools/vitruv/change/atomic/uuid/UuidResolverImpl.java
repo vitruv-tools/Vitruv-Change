@@ -84,7 +84,7 @@ class UuidResolverImpl implements UuidResolver {
 	public void unregisterEObject(Uuid uuid, EObject eObject) throws IllegalStateException {
 		checkState(uuid != null, "uuid must not be null");
 		checkState(eObject != null, "object must not be null");
-		checkState(eObjectToUuid.get(eObject).equals(uuid), "trying to unregister element %s but is not registered for uuid %s", eObject, uuid);
+		checkState(uuid.equals(eObjectToUuid.get(eObject)), "trying to unregister element %s but is not registered for uuid %s", eObject, uuid);
 		eObjectToUuid.remove(eObject);
 	}
 
