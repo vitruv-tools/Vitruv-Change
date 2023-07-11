@@ -104,7 +104,12 @@ class UuidResolverImpl implements UuidResolver {
 
 	@Override
 	public void endTransaction() {
-		cleanupRemovedElements();
+		var iterator = eObjectToUuid.keySet().iterator();
+		while (iterator.hasNext()) {
+			EObject object = iterator.next();
+			checkState(object.eResource() != null, "dangling object %s detected", object);
+			checkState(object.eResource().getResourceSet() == resourceSet, "object %s is contained in wrong resource set", object);
+		}
 	}
 
 	@Override
@@ -198,14 +203,6 @@ class UuidResolverImpl implements UuidResolver {
 
 	private boolean isReadOnlyUuid(Uuid uuid) {
 		return !uuid.getRawValue().startsWith(NON_READONLY_PREFIX);
-	}
-
-	private void cleanupRemovedElements() {
-		var iterator = eObjectToUuid.keySet().iterator();
-		while (iterator.hasNext()) {
-			EObject object = iterator.next();
-			checkState(object.eResource() != null && object.eResource().getResourceSet() != null, "dangling object %s detected", object);
-		}
 	}
 
 	/**
