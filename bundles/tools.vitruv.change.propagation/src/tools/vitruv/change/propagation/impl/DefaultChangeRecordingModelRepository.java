@@ -45,7 +45,7 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 	private final PersistableCorrespondenceModel correspondenceModel;
 	private final ChangeRecorder changeRecorder;
 	private final Path consistencyMetadataFolder;
-	private final UuidResolver uuidResolver;
+	private UuidResolver uuidResolver;
 	private final VitruviusChangeResolver<Uuid> changeResolver;
 
 	private boolean isLoading = false;
@@ -175,10 +175,10 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 	@Override
 	public void close() throws Exception {
 		changeRecorder.close();
-		modelsResourceSet.getResources().stream().forEach((resource) -> resource.unload());
+		modelsResourceSet.getResources().forEach(Resource::unload);
 		modelsResourceSet.getResources().clear();
-		uuidResolver.endTransaction();
 		correspondenceModel.close();
+		uuidResolver = null;
 	}
 
 	@Override

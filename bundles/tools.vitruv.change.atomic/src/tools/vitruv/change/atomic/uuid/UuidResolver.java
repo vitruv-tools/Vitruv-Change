@@ -91,7 +91,7 @@ public interface UuidResolver {
 		registerEObject(uuid, eObject);
 		return uuid;
 	}
-	
+
 	public void unregisterEObject(Uuid uuid, EObject eObject) throws IllegalStateException;
 
 	/**
@@ -101,11 +101,12 @@ public interface UuidResolver {
 	public Resource getResource(URI uri);
 
 	/**
-	 * Ends a transactions such that all {@link EObject}s not being contained in a
-	 * resource, which is contained in a resource set, are removed from the UUID
-	 * mapping.
+	 * Ends a transactions such that any registered {@link EObject} not being
+	 * contained in a resource throws an error.
+	 * 
+	 * @throws IllegalStateException if an uncontained element is registered.
 	 */
-	public void endTransaction();
+	public void endTransaction() throws IllegalStateException;
 
 	/**
 	 * Resolves all {@link EObject}s contained in any resource of the given

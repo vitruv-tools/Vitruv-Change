@@ -29,6 +29,7 @@ import tools.vitruv.testutils.TestUserInteraction
 
 import static com.google.common.base.Preconditions.checkArgument
 import static com.google.common.base.Preconditions.checkState
+import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.isPathmap
 import static tools.vitruv.testutils.TestModelRepositoryFactory.createTestChangeableModelRepository
 
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.flatMapFixed
@@ -172,8 +173,16 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 	}
 
 	override disposeViewResources() {
+		resourceSet.resources.forEach [ resource |
+			if (resource.URI === null || !isPathmap(resource.URI)) {
+				resource.allContents.forEach [
+					if (uuidResolver.hasUuid(it)) {
+						uuidResolver.unregisterEObject(uuidResolver.getUuid(it), it)
+					}
+				]
+			}
+		]
 		resourceSet.resources.clear()
-		uuidResolver.endTransaction()
 	}
 
 	override <T extends Notifier> T startRecordingChanges(T notifier) {
@@ -224,6 +233,6 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 		val changeableModelRepository = createTestChangeableModelRepository(modelRepository,
 			changePropagationSpecificationProvider, userInteraction)
 		return new ChangePublishingTestView(persistenceDirectory, userInteraction, UriMode.FILE_URIS,
-			changeableModelRepository, modelRepository.uuidResolver) [ modelRepository.getModelResource(it) ]
+			changeableModelRepository, modelRepository.uuidResolver)[modelRepository.getModelResource(it)]
 	}
 }

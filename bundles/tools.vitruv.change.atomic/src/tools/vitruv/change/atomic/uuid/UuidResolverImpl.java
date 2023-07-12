@@ -84,7 +84,7 @@ class UuidResolverImpl implements UuidResolver {
 	public void unregisterEObject(Uuid uuid, EObject eObject) throws IllegalStateException {
 		checkState(uuid != null, "uuid must not be null");
 		checkState(eObject != null, "object must not be null");
-		checkState(eObjectToUuid.get(eObject).equals(uuid), "trying to unregister element %s but is not registered for uuid %s", eObject, uuid);
+		checkState(uuid.equals(eObjectToUuid.get(eObject)), "trying to unregister element %s but is not registered for uuid %s", eObject, uuid);
 		eObjectToUuid.remove(eObject);
 	}
 
@@ -104,7 +104,12 @@ class UuidResolverImpl implements UuidResolver {
 
 	@Override
 	public void endTransaction() {
-		cleanupRemovedElements();
+		var iterator = eObjectToUuid.keySet().iterator();
+		while (iterator.hasNext()) {
+			EObject object = iterator.next();
+			checkState(object.eResource() != null, "dangling object %s detected", object);
+			checkState(object.eResource().getResourceSet() == resourceSet, "object %s is contained in wrong resource set", object);
+		}
 	}
 
 	@Override
@@ -198,18 +203,6 @@ class UuidResolverImpl implements UuidResolver {
 
 	private boolean isReadOnlyUuid(Uuid uuid) {
 		return !uuid.getRawValue().startsWith(NON_READONLY_PREFIX);
-	}
-
-	private void cleanupRemovedElements() {
-		var iterator = eObjectToUuid.keySet().iterator();
-		while (iterator.hasNext()) {
-			EObject object = iterator.next();
-			//TODO: Hard constraint for dangling elements is currently disabled as Reactions produce incomplete change sequence
-//			checkState(object.eResource() != null && object.eResource().getResourceSet() != null, "dangling object %s detected", object);
-			if (object.eResource() == null || object.eResource().getResourceSet() == null) {
-				iterator.remove();
-			}
-		}
 	}
 
 	/**
