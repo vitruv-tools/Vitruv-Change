@@ -16,6 +16,12 @@ import tools.vitruv.change.composite.description.VitruviusChangeResolver
 
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
 
+/**
+ * This class provides functionality to save and load a resource in a model delta representation.
+ * It uses the {@link DefaultStateBasedChangeResolutionStrategy} to save a state-based resource as a sequence of
+ * {@link EChange}s. The saved delta sequence can be loaded again, and the resulting changes can be
+ * applied to create the state-based resource again.
+**/
 class DeltaBasedResource extends ResourceImpl {
 	
 	new(URI uri) {
