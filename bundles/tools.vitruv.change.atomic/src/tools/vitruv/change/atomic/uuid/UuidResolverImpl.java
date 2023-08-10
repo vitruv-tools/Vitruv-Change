@@ -177,7 +177,7 @@ class UuidResolverImpl implements UuidResolver {
 	}
 
 	private Uuid getUuidForReadOnlyEObject(EObject eObject) {
-		return new Uuid(EcoreUtil.getURI(eObject).toString());
+		return new Uuid(URI.createURI(eObject.eResource().getURI() + "#//" + EcoreUtil.getRelativeURIFragmentPath(eObject.eContainer(), eObject)).toString());
 	}
 
 	private EObject getEObjectOrNull(Uuid uuid) {
