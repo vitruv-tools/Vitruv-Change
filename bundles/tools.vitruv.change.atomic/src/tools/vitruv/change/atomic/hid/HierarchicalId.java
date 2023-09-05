@@ -1,12 +1,14 @@
 package tools.vitruv.change.atomic.hid;
 
+import org.eclipse.emf.ecore.impl.EObjectImpl;
+
 /**
  * A hierarchical id is a volatile identifier which identifies an element based
  * on its hierarchical location in a resource. A hierarchical id is not bound to
  * a resource set, i.e. two elements at the same location in identical resources
  * of different resource sets will have the same hierarchical id.
  */
-public final class HierarchicalId implements Comparable<HierarchicalId> {
+public final class HierarchicalId extends EObjectImpl implements Comparable<HierarchicalId> {
 	private String id;
 
 	public HierarchicalId(String id) {
