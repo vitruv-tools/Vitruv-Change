@@ -37,6 +37,7 @@ abstract class AbstractVitruviusChangeResolver<Id> implements VitruviusChangeRes
 			List<EChange<Target>> resolvedChanges = transactionalChange.getEChanges().stream().map(changeHandler::apply)
 					.toList();
 			TransactionalChange<Target> result = new TransactionalChangeImpl<>(resolvedChanges);
+			result.setUserInteractions(change.getUserInteractions());
 			onTransactionEnd.accept(result);
 			return result;
 		}
