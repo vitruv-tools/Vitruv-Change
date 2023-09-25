@@ -17,6 +17,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -25,6 +26,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import tools.vitruv.change.atomic.hid.HierarchicalId;
+import tools.vitruv.change.atomic.hid.ObjectResolutionUtil;
 import tools.vitruv.change.atomic.hid.internal.HierarchicalIdResolver;
 
 class UuidResolverImpl implements UuidResolver {
@@ -79,12 +81,13 @@ class UuidResolverImpl implements UuidResolver {
 		}
 		eObjectToUuid.put(eObject, uuid);
 	}
-	
+
 	@Override
 	public void unregisterEObject(Uuid uuid, EObject eObject) throws IllegalStateException {
 		checkState(uuid != null, "uuid must not be null");
 		checkState(eObject != null, "object must not be null");
-		checkState(uuid.equals(eObjectToUuid.get(eObject)), "trying to unregister element %s but is not registered for uuid %s", eObject, uuid);
+		checkState(uuid.equals(eObjectToUuid.get(eObject)),
+				"trying to unregister element %s but is not registered for uuid %s", eObject, uuid);
 		eObjectToUuid.remove(eObject);
 	}
 
@@ -108,7 +111,8 @@ class UuidResolverImpl implements UuidResolver {
 		while (iterator.hasNext()) {
 			EObject object = iterator.next();
 			checkState(object.eResource() != null, "dangling object %s detected", object);
-			checkState(object.eResource().getResourceSet() == resourceSet, "object %s is contained in wrong resource set", object);
+			checkState(object.eResource().getResourceSet() == resourceSet,
+					"object %s is contained in wrong resource set", object);
 		}
 	}
 
@@ -177,6 +181,16 @@ class UuidResolverImpl implements UuidResolver {
 	}
 
 	private Uuid getUuidForReadOnlyEObject(EObject eObject) {
+		URI proxyURI = ((InternalEObject) eObject).eProxyURI();
+		Resource resource = eObject.eResource();
+
+		if (proxyURI == null && resource != null) {
+			URI uri = resource.getURI();
+			String uriFragment = ObjectResolutionUtil.getHierarchicUriFragment(eObject);
+			uri = uri == null ? URI.createURI("#" + uriFragment) : uri.appendFragment(uriFragment);
+			return new Uuid(uri.toString());
+		}
+
 		return new Uuid(EcoreUtil.getURI(eObject).toString());
 	}
 
