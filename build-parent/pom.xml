@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- Project Information -->
+  <groupId>tools.vitruv</groupId>
+  <artifactId>parent</artifactId>
+  <version>3.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>Vitruvius Maven Build Parent</name>
+  <description>A common parent POM for all builds of vitruv.tools</description>
+
+  <!-- Organizational Information -->
+  <organization>
+    <name>Vitruvius Tools</name>
+    <url>https://vitruv.tools/</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <name>Vitruvius Developers</name>
+      <email>vitruv-dev@lists.kit.edu</email>
+      <organization>Karlsruhe Institute of Technology (KIT), Germany</organization>
+      <organizationUrl>https://kit.edu</organizationUrl>
+    </developer>
+  </developers>
+
+  <!-- Build Definition -->
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>17</maven.compiler.release>
+  </properties>
+
+  <build>
+    <resources>
+      <!-- add Eclipse-specific files to build artifact -->
+      <resource>
+        <directory>${project.basedir}</directory>
+        <includes>
+          <include>src/main/ecore/**/*</include>
+          <include>plugin.properties</include>
+          <include>plugin.xml</include>
+        </includes>
+      </resource>
+    </resources>
+
+    <pluginManagement>
+      <plugins>
+        <!-- delete `target` folder where all (also intermediate) build results are placed -->
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.3.1</version>
+        </plugin>
+
+        <!-- allow Eclipse update sites as repositories -->
+        <plugin>
+          <groupId>org.openntf.maven</groupId>
+          <artifactId>p2-layout-resolver</artifactId>
+          <version>1.7.0</version>
+          <extensions>true</extensions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>3.4.0</version>
+          <executions>
+            <!-- add Xtend and generated code to classpath -->
+            <execution>
+              <id>add-source</id>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>add-source</goal>
+              </goals>
+              <configuration>
+                <sources>
+                  <source>${project.basedir}/src/main/xtend</source>
+                  <source>${project.build.directory}/generated-sources/ecore</source>
+                  <source>${project.build.directory}/generated-sources/xtend</source>
+                </sources>
+              </configuration>
+            </execution>
+            <!-- add Xtend and generated test code to classpath -->
+            <execution>
+              <id>add-test-source</id>
+              <phase>generate-test-sources</phase>
+              <goals>
+                <goal>add-test-source</goal>
+              </goals>
+              <configuration>
+                <sources>
+                  <source>${project.basedir}/src/test/xtend</source>
+                  <source>${project.build.directory}/generated-test-sources/xtend</source>
+                </sources>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>3.1.0</version>
+          <executions>
+            <!-- generate code from Ecore meta-models -->
+            <execution>
+              <id>execute-mwe2-generate</id>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>java</goal>
+              </goals>
+              <configuration>
+                <mainClass>org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher</mainClass>
+                <arguments>
+                  <!-- worflow file must be placed in `workflow` directory and named `generate.mwe2` -->
+                  <argument>/${project.basedir}/workflow/generate.mwe2</argument>
+                  <argument>-p</argument>
+                  <argument>workspaceRoot=${project.basedir}</argument>
+                </arguments>
+                <classpathScope>compile</classpathScope>
+                <includePluginDependencies>true</includePluginDependencies>
+                <cleanupDaemonThreads>false</cleanupDaemonThreads> <!-- see https://bugs.eclipse.org/bugs/show_bug.cgi?id=475098#c3 -->
+              </configuration>
+            </execution>
+          </executions>
+          <dependencies>
+            <dependency>
+              <groupId>org.eclipse.emf</groupId>
+              <artifactId>org.eclipse.emf.codegen.ecore</artifactId>
+              <version>2.34.0</version>
+            </dependency>
+            <dependency>
+              <groupId>org.eclipse.emf</groupId>
+              <artifactId>org.eclipse.emf.mwe.utils</artifactId>
+              <version>1.8.0</version>
+            </dependency>
+            <dependency>
+              <groupId>org.eclipse.emf</groupId>
+              <artifactId>org.eclipse.emf.mwe2.launch</artifactId>
+              <version>2.14.0</version>
+            </dependency>
+            <dependency>
+              <groupId>org.eclipse.emf</groupId>
+              <artifactId>org.eclipse.emf.mwe2.lib</artifactId>
+              <version>2.14.0</version>
+            </dependency>
+            <dependency>
+              <groupId>org.eclipse.xtext</groupId>
+              <artifactId>org.eclipse.xtext.common.types</artifactId>
+              <version>2.32.0</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+
+        <plugin>
+          <groupId>org.eclipse.xtend</groupId>
+          <artifactId>xtend-maven-plugin</artifactId>
+          <version>2.32.0</version>
+          <executions>
+            <!-- generate Java code from Xtend code -->
+            <execution>
+              <id>compile-xtend</id>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>compile</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.directory}/generated-sources/xtend</outputDirectory>
+              </configuration>
+            </execution>
+            <!-- generate Java test code from Xtend test code -->
+            <execution>
+              <id>compile-test-xtend</id>
+              <phase>generate-test-sources</phase>
+              <goals>
+                <goal>testCompile</goal>
+              </goals>
+              <configuration>
+                <testOutputDirectory>${project.build.directory}/generated-test-sources/xtend</testOutputDirectory>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.3.1</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.11.0</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>3.1.2</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.3.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <!-- Eclipse SWT has different implementations from different platforms, which cannot be resolved automatically -->
+  <profiles>
+    <!-- macOS profile -->
+    <profile>
+      <id>osx</id>
+      <activation>
+        <os>
+          <family>mac</family>
+        </os>
+      </activation>
+      <properties>
+        <swt.platform>cocoa.macosx.${os.arch}</swt.platform>
+      </properties>
+    </profile>
+    <!-- Linux profile-->
+    <profile>
+      <id>unix</id>
+      <activation>
+        <os>
+          <family>unix</family>
+          <name>!mac os x</name>
+        </os>
+      </activation>
+      <properties>
+        <swt.platform>gtk.linux.x86_64</swt.platform>
+      </properties>
+    </profile>
+    <!-- Linux x32 profile -->
+    <profile>
+      <id>unix-x32</id>
+      <activation>
+        <os>
+          <family>unix</family>
+          <name>!mac os x</name>
+          <arch>x86</arch>
+        </os>
+      </activation>
+      <properties>
+        <swt.platform>gtk.linux.${os.arch}</swt.platform>
+      </properties>
+    </profile>
+    <!-- Windows profile -->
+    <profile>
+      <id>windows</id>
+      <activation>
+        <os>
+          <family>windows</family>
+        </os>
+      </activation>
+      <properties>
+        <swt.platform>win32.win32.x86_64</swt.platform>
+      </properties>
+    </profile>
+    <!-- Windows x32 profile -->
+    <profile>
+      <id>windows-x32</id>
+      <activation>
+        <os>
+          <family>windows</family>
+          <arch>x86</arch>
+        </os>
+      </activation>
+      <properties>
+        <swt.platform>win32.win32.${os.arch}</swt.platform>
+      </properties>
+    </profile>
+  </profiles>
+
+  <!-- Dependency and Plugin Repositories -->
+  <repositories>
+    <!-- Maven Central should have priority -->
+    <repository>
+      <id>central</id>
+      <name>Maven Central</name>
+      <url>https://repo1.maven.org/maven2/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+
+    <!-- disable snapshot repositories -->
+    <repository>
+      <id>ossrh-snapshots</id>
+      <name>OSSRH Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>sonatype-snapshots</id>
+      <name>Sonatype Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <!-- Maven Central should have priority over OpenNTF Artifactory -->
+    <pluginRepository>
+      <id>central</id>
+      <name>Maven Central</name>
+      <url>https://repo1.maven.org/maven2/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+
+    <!-- required for the p2-layout-resolver plugin -->
+    <pluginRepository>
+      <id>artifactory.openntf.org</id>
+      <name>artifactory.openntf.org</name>
+      <url>https://artifactory.openntf.org/openntf</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+
+    <!-- disable snapshot repositories -->
+    <pluginRepository>
+      <id>ossrh-snapshots</id>
+      <name>OSSRH Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>sonatype-snapshots</id>
+      <name>Sonatype Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+</project>
