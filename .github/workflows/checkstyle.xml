@@ -1,0 +1,8 @@
+<module name="Checker">
+  <module name="JavadocPackage"/>
+  <module name="TreeWalker">
+    <property name="tabWidth" value="1"/>
+    <module name="AvoidStarImport"/>
+    <module name="ConstantName"/>
+  </module>
+</module>
