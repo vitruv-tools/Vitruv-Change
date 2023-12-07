@@ -33,10 +33,6 @@ jobs:
         java-version: '17'
         check-latest: true
         cache: 'maven'
-
-    # run Maven Checkstyle
-    - name: Maven Checkstyle
-      run: ./mvnw checkstyle:check
     
     - name: Run reviewdog
       #env:
