@@ -11,19 +11,28 @@ on:
     - build/pure-maven
 
 jobs:
-  checkstyle:
-    name: runner / checkstyle
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dbelyaev/action-checkstyle@master
-        with:
-          github_token: ${{ secrets.github_token }}
-          reporter: github-pr-review
-          level: warning
-          checkstyle_config: ./checkstyle.xml
-      - uses: reviewdog/action-setup@v1
-        with:
-          reviewdog_version: latest
+  ci:
+    name: CI on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
     
+    steps:
+    # checkout repository
+    - name: Checkout
+      uses: actions/checkout@v4.1.1
 
+    # setup Java and cache Maven dependencies
+    - name: Setup Java
+      uses: actions/setup-java@v3.13.0
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        check-latest: true
+        cache: 'maven'
+
+    # run Maven build
+    - name: Maven Checkstyle
+      run: ./mvn checkstyle:check
