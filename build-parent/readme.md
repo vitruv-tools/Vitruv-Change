@@ -58,6 +58,11 @@ Remember to replace `x.y.z` with the actual version you want to reference.
 - packages the build results in a jar archive
 - should be disable for test-only projects by setting an empty `phase` for the execution `default-jar`
 
+### `maven-install-plugin`
+
+- copies the packaged build results in the users local repository
+- must be disabled if `maven-jar-plugin` is disabled
+
 ## Expected Project Structure
 
 The expected project structure is an extension of the standard Maven project structure.
