@@ -24,7 +24,7 @@ jobs:
       uses: reviewdog/action-setup@v1
       with:
         reviewdog_version:
-    # run Checkstyle
+    # setup Java and cache Maven dependencies
     - name: Setup Java
       uses: actions/setup-java@v3.13.0
       with:
@@ -33,6 +33,12 @@ jobs:
         check-latest: true
         cache: 'maven'
 
-    # run Maven build
-    - name: Maven Build
+    # run Maven Checkstyle
+    - name: Maven Checkstyle
       run: ./mvnw checkstyle:check
+    
+    - name: Run reviewdog
+      env:
+        REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        reviewdog -reporter=github-pr-check -runners=golint,govet
