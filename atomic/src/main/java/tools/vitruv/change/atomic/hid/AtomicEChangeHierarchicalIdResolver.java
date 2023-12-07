@@ -38,9 +38,7 @@ public class AtomicEChangeHierarchicalIdResolver {
 	 * @return Returns the resolved change.
 	 */
 	public EChange<EObject> resolveAndApplyForward(EChange<HierarchicalId> unresolvedEChange) {
-		EChange<EObject> resolvedChange = resolve(unresolvedEChange);
-		applyForward(resolvedChange);
-		return resolvedChange;
+		EChange<EObject> resolvedChange = resolve(unresolvedEChange); applyForward(resolvedChange); return resolvedChange;
 	}
 
 	/**
@@ -66,9 +64,7 @@ public class AtomicEChangeHierarchicalIdResolver {
 	 * @see AtomicEChangeHierarchicalIdResolver#applyBackward(EChange)
 	 */
 	public EChange<HierarchicalId> applyForwardAndAssignIds(EChange<EObject> resolvedEChange) {
-		EChange<HierarchicalId> unresolvedChange = unresolve(resolvedEChange);
-		applyForward(resolvedEChange);
-		return unresolvedChange;
+		EChange<HierarchicalId> unresolvedChange = unresolve(resolvedEChange);	applyForward(resolvedEChange); 	return unresolvedChange;
 	}
 
 	/**
@@ -82,10 +78,7 @@ public class AtomicEChangeHierarchicalIdResolver {
 
 	private EChange<EObject> resolve(EChange<HierarchicalId> unresolvedChange) {
 		return AtomicEChangeResolverHelper.resolveChange(unresolvedChange, id -> {
-			if (unresolvedChange instanceof CreateEObject<HierarchicalId> createChange) {
-				EObject createdElement = EcoreUtil.create(createChange.getAffectedEObjectType());
-				HierarchicalId createdId = idResolver.getAndUpdateId(createdElement);
-				checkState(createdId.equals(id),
+			if (unresolvedChange instanceof CreateEObject<HierarchicalId> createChange) {	EObject createdElement = EcoreUtil.create(createChange.getAffectedEObjectType()); HierarchicalId createdId = idResolver.getAndUpdateId(createdElement);				checkState(createdId.equals(id),
 						"generated ID %s does not match the original ID %s on element creation", createdId, id);
 				return createdElement;
 			} else {
