@@ -19,7 +19,11 @@ jobs:
     # checkout repository
     - name: Checkout
       uses: actions/checkout@v4.1.1
-
+    
+    - name: setup review dog
+      uses: reviewdog/action-setup@v1
+      with:
+        reviewdog_version:
     # run Checkstyle
     - name: Checkstyle Action
       uses: nikitasavinov/checkstyle-action@master
@@ -27,11 +31,3 @@ jobs:
         github_token: ${{ secrets.github_token }}
         reporter: github-pr-review
         #checkstyle_config: sun_checks.xml
-    - name: review dog
-      uses: reviewdog/action-setup@v1
-      with:
-        reviewdog_version:
-    - name: misspell test
-      uses: reviewdog/action-misspell@v1
-      with:
-        github_token: ${{ secrets.github_token }}
