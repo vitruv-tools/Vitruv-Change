@@ -22,8 +22,8 @@ jobs:
 
     # run Checkstyle
     - name: Checkstyle Action
-      uses: dbelyaev/action-checkstyle@master
+      uses: nikitasavinov/checkstyle-action@master
       with:
         github_token: ${{ secrets.github_token }}
         reporter: github-pr-review
-        checkstyle_config: sun_checks.xml
+        #checkstyle_config: sun_checks.xml
