@@ -35,4 +35,4 @@ jobs:
 
     # run Maven build
     - name: Maven Checkstyle
-      run: ./mvn checkstyle:check
+      run: ./mvnw checkstyle:check
