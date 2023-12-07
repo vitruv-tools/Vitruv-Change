@@ -12,27 +12,18 @@ on:
 
 jobs:
   ci:
-    name: CI on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+    name: Checkstyle
+    runs-on: ubuntu-latest
     
     steps:
     # checkout repository
     - name: Checkout
       uses: actions/checkout@v4.1.1
 
-    # setup Java and cache Maven dependencies
-    - name: Setup Java
-      uses: actions/setup-java@v3.13.0
+    # run Checkstyle
+    - name: Checkstyle Action
+      uses: dbelyaev/action-checkstyle@master
       with:
-        distribution: 'temurin'
-        java-version: '17'
-        check-latest: true
-        cache: 'maven'
-
-    # run Maven build
-    - name: Maven Checkstyle
-      run: ./mvnw checkstyle:check
+        github_token: ${{ secrets.github_token }}
+        reporter: github-pr-review
+        checkstyle_config: sun_checks.xml
