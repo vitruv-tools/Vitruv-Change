@@ -25,9 +25,14 @@ jobs:
       with:
         reviewdog_version:
     # run Checkstyle
-    - name: Checkstyle Action
-      uses: nikitasavinov/checkstyle-action@master
+    - name: Setup Java
+      uses: actions/setup-java@v3.13.0
       with:
-        github_token: ${{ secrets.github_token }}
-        reporter: github-pr-review
-        #checkstyle_config: sun_checks.xml
+        distribution: 'temurin'
+        java-version: '17'
+        check-latest: true
+        cache: 'maven'
+
+    # run Maven build
+    - name: Maven Build
+      run: ./mvnw checkstyle:check
