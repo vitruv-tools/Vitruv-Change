@@ -1,4 +1,4 @@
-name: Static Code Review
+name: Checkstyle
 
 # workflow triggers
 on:
@@ -11,31 +11,18 @@ on:
     - build/pure-maven
 
 jobs:
-  ci:
-    name: Checkstyle
+  checkstyle:
+    name: runner / checkstyle
     runs-on: ubuntu-latest
-    
     steps:
-    # checkout repository
-    - name: Checkout
-      uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4
+      - uses: dbelyaev/action-checkstyle@master
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          level: warning
+      - uses: reviewdog/action-setup@v1
+        with:
+          reviewdog_version: latest
     
-    - name: setup review dog
-      uses: reviewdog/action-setup@v1
-      with:
-        reviewdog_version:
 
-    # setup Java and cache Maven dependencies
-    - name: Setup Java
-      uses: actions/setup-java@v3.13.0
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-        check-latest: true
-        cache: 'maven'
-    
-    - name: Run reviewdog
-      #env:
-        #REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: 
-        ./mvnw checkstyle:check . | reviewdog -f=checkstyle -diff="git diff" -name=eslint" -reporter=github-Check
