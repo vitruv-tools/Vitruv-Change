@@ -1,0 +1,35 @@
+name: Continuous Integration Workflow
+
+# workflow triggers
+on:
+  workflow_dispatch:
+  #push:
+    #branches:
+      #- build/pure-maven
+
+jobs:
+  sonarqube:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build SonarQube Docker image
+      run: docker build -t my-sonarqube .  ##tbd
+
+    - name: Run SonarQube container
+      run: docker run -d --name sonarqube -p 9000:9000 my-sonarqube ##tbd
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    - name: SonarQube Scan
+      run: |
+        docker exec sonarqube sonar-scanner \
+          -Dsonar.host.url=http://localhost:9000 \
+          -Dsonar.login=${SONAR_TOKEN}
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    - name: Stop and remove SonarQube container
+      run: docker stop sonarqube && docker rm sonarqube
