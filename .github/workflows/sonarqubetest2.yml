@@ -28,7 +28,11 @@ jobs:
 
     - name: SonarQube Scan
       run: |
-        mvn clean verify sonar:sonar \ -Dsonar.projectKey=localVitruv \ -Dsonar.projectName='localVitruv' \ -Dsonar.host.url=http://localhost:9000 \ -Dsonar.token=sqp_72900e6256c76923bb0920ebd6a2c6ab52fc0d3d
+        mvn clean verify sonar:sonar \ 
+          -Dsonar.projectKey=localVitruv \ 
+          -Dsonar.projectName='localVitruv' \ 
+          -Dsonar.host.url=http://localhost:9000 \ 
+          -Dsonar.token=sqp_72900e6256c76923bb0920ebd6a2c6ab52fc0d3d
 
     - name: Stop and remove SonarQube container
       run: docker stop sonarqube && docker rm sonarqube
