@@ -1,9 +1,10 @@
-name: Build
+name: SonarBuild
 
 on:
-  push:
-    branches:
-      - build/pure-maven
+  workflow_dispatch:
+  #push:
+    #branches:
+     # - build/pure-maven
 
 
 jobs:
