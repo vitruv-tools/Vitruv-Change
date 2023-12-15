@@ -9,7 +9,6 @@
     <groupId>tools.vitruv</groupId>
     <artifactId>tools.vitruv.change</artifactId>
     <version>3.0.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>tools.vitruv.change.correspondence.tests</artifactId>
