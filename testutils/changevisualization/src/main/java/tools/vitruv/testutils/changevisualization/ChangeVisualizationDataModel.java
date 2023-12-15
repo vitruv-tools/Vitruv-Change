@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization;
+package tools.vitruv.change.testutils.changevisualization;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import tools.vitruv.change.composite.propagation.ChangeableModelRepository;
-import tools.vitruv.testutils.changevisualization.common.ModelRepositoryChanges;
-import tools.vitruv.testutils.changevisualization.persistence.ChangeDataSetPersistenceHelper;
+import tools.vitruv.change.testutils.changevisualization.common.ModelRepositoryChanges;
+import tools.vitruv.change.testutils.changevisualization.persistence.ChangeDataSetPersistenceHelper;
 
 /**
  * This class manages the data used for change visualization.

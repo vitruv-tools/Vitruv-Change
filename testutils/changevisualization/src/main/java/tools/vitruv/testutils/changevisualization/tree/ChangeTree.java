@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.tree;
+package tools.vitruv.change.testutils.changevisualization.tree;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -31,10 +31,10 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import tools.vitruv.testutils.changevisualization.ChangeVisualizationUI;
-import tools.vitruv.testutils.changevisualization.common.ChangeDataSet;
-import tools.vitruv.testutils.changevisualization.ui.ChangeComponent;
-import tools.vitruv.testutils.changevisualization.ui.LabelValuePanel;
+import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
+import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet;
+import tools.vitruv.change.testutils.changevisualization.ui.ChangeComponent;
+import tools.vitruv.change.testutils.changevisualization.ui.LabelValuePanel;
 
 /**
  * A ChangeTree visualizes propagation results in the form of a tree.

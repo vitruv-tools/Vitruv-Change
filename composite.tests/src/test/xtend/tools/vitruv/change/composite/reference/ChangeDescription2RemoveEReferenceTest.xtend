@@ -7,7 +7,7 @@ import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
 import static allElementTypes.AllElementTypesPackage.Literals.*
 import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.change.composite.util.ChangeAssertHelper.*
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.*
 
 import static extension tools.vitruv.change.composite.util.AtomicEChangeAssertHelper.*
 import static extension tools.vitruv.change.composite.util.CompoundEChangeAssertHelper.*

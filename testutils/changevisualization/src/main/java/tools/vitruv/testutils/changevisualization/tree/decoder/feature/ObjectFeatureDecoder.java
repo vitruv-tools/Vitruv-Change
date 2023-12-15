@@ -1,7 +1,7 @@
 /**
  * 
  */
-package tools.vitruv.testutils.changevisualization.tree.decoder.feature;
+package tools.vitruv.change.testutils.changevisualization.tree.decoder.feature;
 
 import java.awt.Component;
 

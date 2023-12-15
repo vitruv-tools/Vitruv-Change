@@ -1,7 +1,7 @@
 /**
  * 
  */
-package tools.vitruv.testutils.changevisualization.tree.decoder;
+package tools.vitruv.change.testutils.changevisualization.tree.decoder;
 
 import java.awt.Component;
 import java.util.Comparator;
@@ -12,10 +12,10 @@ import java.util.Vector;
 
 import org.eclipse.emf.ecore.EStructuralFeature;
 
-import tools.vitruv.testutils.changevisualization.tree.FeatureNode;
-import tools.vitruv.testutils.changevisualization.tree.decoder.feature.EObjectFeatureDecoder;
-import tools.vitruv.testutils.changevisualization.tree.decoder.feature.FeatureDecoder;
-import tools.vitruv.testutils.changevisualization.tree.decoder.feature.ObjectFeatureDecoder;
+import tools.vitruv.change.testutils.changevisualization.tree.FeatureNode;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.feature.EObjectFeatureDecoder;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.feature.FeatureDecoder;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.feature.ObjectFeatureDecoder;
 
 /**
  * Helper class to generate {@link FeatureNode}s from eChanges. Central place to register new {@link FeatureDecoder} 

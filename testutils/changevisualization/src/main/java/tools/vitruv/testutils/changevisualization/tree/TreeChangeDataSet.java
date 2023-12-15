@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.tree;
+package tools.vitruv.change.testutils.changevisualization.tree;
 
 import java.io.Serializable;
 import java.util.Hashtable;
@@ -13,7 +13,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import tools.vitruv.testutils.changevisualization.common.ChangeDataSet;
+import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet;
 
 /**
  * TreeChangeDataSet holds the data necessary for visualization

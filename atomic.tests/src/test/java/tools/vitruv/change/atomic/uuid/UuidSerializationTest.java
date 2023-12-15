@@ -4,7 +4,7 @@ import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.Resour
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet;
+import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.aet;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -22,9 +22,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import tools.vitruv.testutils.RegisterMetamodelsInStandalone;
-import tools.vitruv.testutils.TestProject;
-import tools.vitruv.testutils.TestProjectManager;
+import tools.vitruv.change.testutils.RegisterMetamodelsInStandalone;
+import tools.vitruv.change.testutils.TestProject;
+import tools.vitruv.change.testutils.TestProjectManager;
 
 @ExtendWith({ TestProjectManager.class, RegisterMetamodelsInStandalone.class })
 class UuidSerializationTest {

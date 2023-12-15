@@ -56,13 +56,13 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>tools.vitruv.testutils.base</artifactId>
+      <artifactId>tools.vitruv.change.testutils.base</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>tools.vitruv.testutils.metamodels</artifactId>
+      <artifactId>tools.vitruv.change.testutils.metamodels</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test
 import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
 
 import static allElementTypes.AllElementTypesPackage.Literals.*
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.*
 
 import static extension tools.vitruv.change.composite.util.AtomicEChangeAssertHelper.*
 

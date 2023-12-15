@@ -2,7 +2,7 @@ package tools.vitruv.change.composite
 
 import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
 import org.junit.jupiter.api.Test
-import static extension tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+import static extension tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.*
 import static org.junit.jupiter.api.Assertions.assertEquals
 import static org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName

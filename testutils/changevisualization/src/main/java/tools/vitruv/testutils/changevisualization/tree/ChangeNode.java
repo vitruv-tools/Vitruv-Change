@@ -1,9 +1,9 @@
-package tools.vitruv.testutils.changevisualization.tree;
+package tools.vitruv.change.testutils.changevisualization.tree;
 
 import java.awt.Component;
 import java.io.Serializable;
 
-import tools.vitruv.testutils.changevisualization.ui.LabelValuePanel;
+import tools.vitruv.change.testutils.changevisualization.ui.LabelValuePanel;
 
 /**
  * Collects all information regarding EChange-Nodes

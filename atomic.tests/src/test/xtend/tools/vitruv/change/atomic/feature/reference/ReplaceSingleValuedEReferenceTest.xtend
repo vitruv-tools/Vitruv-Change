@@ -17,8 +17,8 @@ import tools.vitruv.change.atomic.uuid.Uuid
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.junit.jupiter.api.Assertions.assertEquals
 import static org.junit.jupiter.api.Assertions.assertNull
-import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+import static tools.vitruv.change.testutils.matchers.ModelMatchers.equalsDeeply
+import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.*
 
 /**
  * Test class for the concrete {@link ReplaceSingleValuedEReference} EChange,

@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization;
+package tools.vitruv.change.testutils.changevisualization;
 
 import java.awt.Component;
 import java.awt.Font;
@@ -29,10 +29,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
-import tools.vitruv.testutils.changevisualization.common.ModelRepositoryChanges;
-import tools.vitruv.testutils.changevisualization.persistence.ChangeDataSetPersistenceHelper;
-import tools.vitruv.testutils.changevisualization.ui.ChangesTab;
-import tools.vitruv.testutils.changevisualization.ui.CloseableTabComponent;
+import tools.vitruv.change.testutils.changevisualization.common.ModelRepositoryChanges;
+import tools.vitruv.change.testutils.changevisualization.persistence.ChangeDataSetPersistenceHelper;
+import tools.vitruv.change.testutils.changevisualization.ui.ChangesTab;
+import tools.vitruv.change.testutils.changevisualization.ui.CloseableTabComponent;
 
 /**
  * The frame in which the change visualization is displayed. Also holds default fonts.

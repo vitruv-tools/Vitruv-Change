@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.tree.decoder.echange;
+package tools.vitruv.change.testutils.changevisualization.tree.decoder.echange;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -9,7 +9,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.testutils.changevisualization.utils.ModelHelper;
+import tools.vitruv.change.testutils.changevisualization.utils.ModelHelper;
 
 /**
  * A basic change decoder which ensures that only change events of a given eClassName are processed

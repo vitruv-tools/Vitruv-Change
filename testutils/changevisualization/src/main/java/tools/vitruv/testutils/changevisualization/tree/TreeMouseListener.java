@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.tree;
+package tools.vitruv.change.testutils.changevisualization.tree;
 
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -17,7 +17,7 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import tools.vitruv.testutils.changevisualization.ChangeVisualizationUI;
+import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
 
 /**
  * This listener is used to react to mouse events for a {@link ChangeTree}

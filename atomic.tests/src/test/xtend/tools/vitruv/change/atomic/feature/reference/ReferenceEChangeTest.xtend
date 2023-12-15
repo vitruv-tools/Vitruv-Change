@@ -4,7 +4,7 @@ import allElementTypes.NonRoot
 import allElementTypes.Root
 import tools.vitruv.change.atomic.EChangeTest
 import org.junit.jupiter.api.BeforeEach
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.*
 import org.eclipse.xtend.lib.annotations.Accessors
 
 /**

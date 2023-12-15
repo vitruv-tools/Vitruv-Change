@@ -11,7 +11,7 @@
     <version>3.0.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>tools.vitruv.testutils</artifactId>
+  <artifactId>tools.vitruv.change.testutils</artifactId>
   <packaging>pom</packaging>
 
   <name>Vitruv Test Utilities</name>

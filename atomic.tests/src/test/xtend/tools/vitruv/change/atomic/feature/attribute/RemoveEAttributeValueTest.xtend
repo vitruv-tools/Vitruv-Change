@@ -8,7 +8,7 @@ import tools.vitruv.change.atomic.uuid.Uuid
 
 import static org.junit.jupiter.api.Assertions.assertEquals
 import static org.junit.jupiter.api.Assertions.assertThrows
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.*
 
 /**
  * Test class for the concrete {@link RemoveEAttributeValue} EChange,

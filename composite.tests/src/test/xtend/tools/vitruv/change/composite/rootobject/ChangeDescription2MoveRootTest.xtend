@@ -2,7 +2,7 @@ package tools.vitruv.change.composite.rootobject
 
 import org.junit.jupiter.api.Test
 import static extension tools.vitruv.change.composite.util.AtomicEChangeAssertHelper.*
-import static extension tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+import static extension tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.*
 import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest
 
 class ChangeDescription2MoveRootTest extends ChangeDescription2ChangeTransformationTest {

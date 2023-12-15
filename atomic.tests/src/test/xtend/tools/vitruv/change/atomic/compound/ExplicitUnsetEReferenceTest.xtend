@@ -25,8 +25,8 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.junit.jupiter.api.Assertions.assertEquals
 import static org.junit.jupiter.api.Assertions.assertFalse
 import static org.junit.jupiter.api.Assertions.assertTrue
-import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+import static tools.vitruv.change.testutils.matchers.ModelMatchers.equalsDeeply
+import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.*
 
 /**
  * Test class for the concrete {@link ExplicitUnsetEReference} EChange,

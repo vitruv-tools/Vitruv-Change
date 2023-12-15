@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.tree;
+package tools.vitruv.change.testutils.changevisualization.tree;
 
 public interface TabHighlighting {
 	public void setHighlightID(String highlightID);

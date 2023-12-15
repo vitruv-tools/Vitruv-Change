@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet;
+import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.aet;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -26,9 +26,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import tools.vitruv.testutils.RegisterMetamodelsInStandalone;
-import tools.vitruv.testutils.TestProject;
-import tools.vitruv.testutils.TestProjectManager;
+import tools.vitruv.change.testutils.RegisterMetamodelsInStandalone;
+import tools.vitruv.change.testutils.TestProject;
+import tools.vitruv.change.testutils.TestProjectManager;
 
 @ExtendWith({ TestProjectManager.class, RegisterMetamodelsInStandalone.class })
 class UuidResolvingTest {

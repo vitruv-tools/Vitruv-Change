@@ -7,11 +7,11 @@
 
   <parent>
     <groupId>tools.vitruv</groupId>
-    <artifactId>tools.vitruv.testutils</artifactId>
+    <artifactId>tools.vitruv.change.testutils</artifactId>
     <version>3.0.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>tools.vitruv.testutils.metamodels</artifactId>
+  <artifactId>tools.vitruv.change.testutils.metamodels</artifactId>
 
   <name>Vitruv Test Utilities Metamodels</name>
   <description/>
@@ -44,7 +44,7 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>tools.vitruv.testutils.base</artifactId>
+      <artifactId>tools.vitruv.change.testutils.base</artifactId>
       <version>${project.version}</version>
     </dependency>
 

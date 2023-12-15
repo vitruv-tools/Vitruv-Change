@@ -14,10 +14,10 @@ import pcm_mockup.PInterface
 import pcm_mockup.Pcm_mockupFactory
 import pcm_mockup.Repository
 import tools.vitruv.change.correspondence.Correspondence
-import tools.vitruv.testutils.RegisterMetamodelsInStandalone
-import tools.vitruv.testutils.TestLogging
-import tools.vitruv.testutils.TestProject
-import tools.vitruv.testutils.TestProjectManager
+import tools.vitruv.change.testutils.RegisterMetamodelsInStandalone
+import tools.vitruv.change.testutils.TestLogging
+import tools.vitruv.change.testutils.TestProject
+import tools.vitruv.change.testutils.TestProjectManager
 import uml_mockup.UPackage
 import uml_mockup.Uml_mockupFactory
 

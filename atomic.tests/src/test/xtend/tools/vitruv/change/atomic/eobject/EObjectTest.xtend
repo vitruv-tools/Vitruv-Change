@@ -4,7 +4,7 @@ import allElementTypes.Root
 import tools.vitruv.change.atomic.EChangeTest
 import org.junit.jupiter.api.BeforeEach
 import org.eclipse.xtend.lib.annotations.Accessors
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.*
+import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.*
 
 /**
  * Abstract class which is used by the EObject EChange test classes.

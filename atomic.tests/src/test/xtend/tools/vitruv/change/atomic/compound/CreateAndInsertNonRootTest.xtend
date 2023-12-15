@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals
 import static org.junit.jupiter.api.Assertions.assertFalse
 import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.change.atomic.util.EChangeAssertHelper.*
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet
+import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.aet
 
 /**
  * Test class for the concrete {@link CreateAndInsertNonRoot} EChange,

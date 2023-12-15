@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.ui;
+package tools.vitruv.change.testutils.changevisualization.ui;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -14,7 +14,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import tools.vitruv.testutils.changevisualization.ChangeVisualizationUI;
+import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
 
 /**
  * Displays a String array in a scrollable UI. The string array must be of size [x][2].

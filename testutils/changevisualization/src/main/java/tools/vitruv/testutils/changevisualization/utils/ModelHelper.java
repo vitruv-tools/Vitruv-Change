@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.utils;
+package tools.vitruv.change.testutils.changevisualization.utils;
 
 import java.util.List;
 import java.util.Vector;

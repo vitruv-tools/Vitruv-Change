@@ -1,10 +1,10 @@
-package tools.vitruv.testutils.changevisualization.tree.decoder.feature;
+package tools.vitruv.change.testutils.changevisualization.tree.decoder.feature;
 
 import java.awt.Component;
 
 import org.eclipse.emf.ecore.EObject;
 
-import tools.vitruv.testutils.changevisualization.utils.ModelHelper;
+import tools.vitruv.change.testutils.changevisualization.utils.ModelHelper;
 
 /**
  * Feature decoder suitable for EObjects. It creates a detailedArray as detailed visualization.

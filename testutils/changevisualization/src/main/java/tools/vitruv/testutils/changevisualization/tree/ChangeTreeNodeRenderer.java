@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.tree;
+package tools.vitruv.change.testutils.changevisualization.tree;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -14,7 +14,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
 
-import tools.vitruv.testutils.changevisualization.ui.ChangesTab;
+import tools.vitruv.change.testutils.changevisualization.ui.ChangesTab;
 
 /**
  * Used by the {@link ChangeTree} to visualize individual nodes.

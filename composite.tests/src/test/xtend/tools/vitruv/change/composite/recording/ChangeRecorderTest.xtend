@@ -28,16 +28,16 @@ import tools.vitruv.change.atomic.root.InsertRootEObject
 import tools.vitruv.change.atomic.root.RemoveRootEObject
 import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.TransactionalChange
-import tools.vitruv.testutils.RegisterMetamodelsInStandalone
-import tools.vitruv.testutils.TestProject
-import tools.vitruv.testutils.TestProjectManager
+import tools.vitruv.change.testutils.RegisterMetamodelsInStandalone
+import tools.vitruv.change.testutils.TestProject
+import tools.vitruv.change.testutils.TestProjectManager
 
 import static org.hamcrest.CoreMatchers.is
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import static org.junit.jupiter.api.Assertions.assertThrows
-import static tools.vitruv.testutils.matchers.ModelMatchers.*
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet
+import static tools.vitruv.change.testutils.matchers.ModelMatchers.*
+import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.aet
 
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
 import static extension org.eclipse.emf.ecore.util.EcoreUtil.*

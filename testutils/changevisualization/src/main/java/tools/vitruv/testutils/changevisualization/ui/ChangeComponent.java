@@ -1,11 +1,11 @@
-package tools.vitruv.testutils.changevisualization.ui;
+package tools.vitruv.change.testutils.changevisualization.ui;
 
 import java.awt.LayoutManager;
 import java.util.List;
 
 import javax.swing.JPanel;
 
-import tools.vitruv.testutils.changevisualization.common.ChangeDataSet;
+import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet;
 
 /**
  * Base class for different visualization implementations. If additional implementation are needed,

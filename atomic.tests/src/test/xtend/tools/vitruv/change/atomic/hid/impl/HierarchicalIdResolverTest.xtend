@@ -10,15 +10,15 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.^extension.ExtendWith
 import tools.vitruv.change.atomic.hid.internal.HierarchicalIdResolver
-import tools.vitruv.testutils.RegisterMetamodelsInStandalone
-import tools.vitruv.testutils.TestProject
-import tools.vitruv.testutils.TestProjectManager
+import tools.vitruv.change.testutils.RegisterMetamodelsInStandalone
+import tools.vitruv.change.testutils.TestProject
+import tools.vitruv.change.testutils.TestProjectManager
 
 import static org.junit.jupiter.api.Assertions.assertEquals
 import static org.junit.jupiter.api.Assertions.assertNotEquals
 import static org.junit.jupiter.api.Assertions.assertThrows
 import static org.junit.jupiter.api.Assertions.assertTrue
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet
+import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.aet
 
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories
 import static extension org.eclipse.emf.ecore.util.EcoreUtil.getURI

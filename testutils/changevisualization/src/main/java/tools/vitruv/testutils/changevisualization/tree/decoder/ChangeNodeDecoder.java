@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.tree.decoder;
+package tools.vitruv.change.testutils.changevisualization.tree.decoder;
 
 import java.util.Hashtable;
 import java.util.Map;
@@ -6,20 +6,20 @@ import java.util.Map;
 import org.eclipse.emf.ecore.EObject;
 
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.testutils.changevisualization.tree.ChangeNode;
-import tools.vitruv.testutils.changevisualization.tree.ChangeNode.EChangeClass;
-import tools.vitruv.testutils.changevisualization.tree.decoder.echange.ChangeDecoder;
-import tools.vitruv.testutils.changevisualization.tree.decoder.echange.CreateEObjectDecoder;
-import tools.vitruv.testutils.changevisualization.tree.decoder.echange.DeleteEObjectDecoder;
-import tools.vitruv.testutils.changevisualization.tree.decoder.echange.InsertEAttributeValueDecoder;
-import tools.vitruv.testutils.changevisualization.tree.decoder.echange.InsertEReferenceDecoder;
-import tools.vitruv.testutils.changevisualization.tree.decoder.echange.InsertRootEObjectDecoder;
-import tools.vitruv.testutils.changevisualization.tree.decoder.echange.RemoveEAttributeValueDecoder;
-import tools.vitruv.testutils.changevisualization.tree.decoder.echange.RemoveEReferenceDecoder;
-import tools.vitruv.testutils.changevisualization.tree.decoder.echange.RemoveRootEObjectDecoder;
-import tools.vitruv.testutils.changevisualization.tree.decoder.echange.ReplaceSingleValuedEAttributeDecoder;
-import tools.vitruv.testutils.changevisualization.tree.decoder.echange.ReplaceSingleValuedEReferenceDecoder;
-import tools.vitruv.testutils.changevisualization.utils.ModelHelper;
+import tools.vitruv.change.testutils.changevisualization.tree.ChangeNode;
+import tools.vitruv.change.testutils.changevisualization.tree.ChangeNode.EChangeClass;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.echange.ChangeDecoder;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.echange.CreateEObjectDecoder;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.echange.DeleteEObjectDecoder;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.echange.InsertEAttributeValueDecoder;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.echange.InsertEReferenceDecoder;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.echange.InsertRootEObjectDecoder;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.echange.RemoveEAttributeValueDecoder;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.echange.RemoveEReferenceDecoder;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.echange.RemoveRootEObjectDecoder;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.echange.ReplaceSingleValuedEAttributeDecoder;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.echange.ReplaceSingleValuedEReferenceDecoder;
+import tools.vitruv.change.testutils.changevisualization.utils.ModelHelper;
 
 /**
  * Helper class to generate {@link ChangeNode}s from eChanges. Central place to register new {@link ChangeDecoder} 

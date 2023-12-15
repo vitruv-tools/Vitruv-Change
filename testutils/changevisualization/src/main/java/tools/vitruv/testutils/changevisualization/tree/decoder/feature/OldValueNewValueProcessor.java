@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.tree.decoder.feature;
+package tools.vitruv.change.testutils.changevisualization.tree.decoder.feature;
 
 import java.util.List;
 import java.util.Map;
@@ -7,7 +7,7 @@ import java.util.Vector;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.testutils.changevisualization.tree.FeatureNode;
+import tools.vitruv.change.testutils.changevisualization.tree.FeatureNode;
 
 /**
  * This multiple feature processors replaces pairs of oldValue and newValue structural features. 

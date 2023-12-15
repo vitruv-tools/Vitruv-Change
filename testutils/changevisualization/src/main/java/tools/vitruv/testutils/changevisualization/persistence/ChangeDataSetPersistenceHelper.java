@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.persistence;
+package tools.vitruv.change.testutils.changevisualization.persistence;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import tools.vitruv.testutils.changevisualization.common.ModelRepositoryChanges;
+import tools.vitruv.change.testutils.changevisualization.common.ModelRepositoryChanges;
 
 /**
  * This class helps to store and load {@link ModelRepositoryChanges}

@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.common;
+package tools.vitruv.change.testutils.changevisualization.common;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import tools.vitruv.change.composite.description.PropagatedChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.composite.propagation.ChangePropagationListener;
 import tools.vitruv.change.composite.propagation.ChangeableModelRepository;
-import tools.vitruv.testutils.changevisualization.tree.decoder.TreeChangeDataSetDecoder;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.TreeChangeDataSetDecoder;
 
 public class ModelRepositoryChanges implements ChangePropagationListener, Serializable {
 	private static final long serialVersionUID = 4992108309750505218L;

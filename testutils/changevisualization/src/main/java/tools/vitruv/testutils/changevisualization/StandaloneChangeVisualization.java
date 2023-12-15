@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization;
+package tools.vitruv.change.testutils.changevisualization;
 
 public final class StandaloneChangeVisualization {
 	public StandaloneChangeVisualization() {

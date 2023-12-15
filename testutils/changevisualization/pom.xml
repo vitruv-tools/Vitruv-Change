@@ -7,11 +7,11 @@
 
   <parent>
     <groupId>tools.vitruv</groupId>
-    <artifactId>tools.vitruv.testutils</artifactId>
+    <artifactId>tools.vitruv.change.testutils</artifactId>
     <version>3.0.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>tools.vitruv.testutils.changevisualization</artifactId>
+  <artifactId>tools.vitruv.change.testutils.changevisualization</artifactId>
 
   <name>Vitruv Change Visualization</name>
   <description>Utilities for visualization changes on models</description>

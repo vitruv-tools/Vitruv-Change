@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.ui;
+package tools.vitruv.change.testutils.changevisualization.ui;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -10,7 +10,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import tools.vitruv.testutils.changevisualization.ChangeVisualizationUI;
+import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
 
 /**
  * A dialog displaying some information the user can select 

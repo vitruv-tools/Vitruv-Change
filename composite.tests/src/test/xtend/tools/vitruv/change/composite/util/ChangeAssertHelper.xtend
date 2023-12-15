@@ -20,7 +20,7 @@ import edu.kit.ipd.sdq.activextendannotations.Utility
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.core.IsInstanceOf.instanceOf
 import static org.hamcrest.core.Is.is
-import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
+import static tools.vitruv.change.testutils.matchers.ModelMatchers.equalsDeeply
 
 @Utility
 class ChangeAssertHelper {

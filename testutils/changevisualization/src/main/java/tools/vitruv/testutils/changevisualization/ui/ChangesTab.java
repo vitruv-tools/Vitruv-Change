@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.ui;
+package tools.vitruv.change.testutils.changevisualization.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -10,12 +10,12 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import tools.vitruv.testutils.changevisualization.ChangeVisualizationUI;
-import tools.vitruv.testutils.changevisualization.common.ChangeDataSet;
-import tools.vitruv.testutils.changevisualization.common.ChangeDataSetGenerationListener;
-import tools.vitruv.testutils.changevisualization.common.ModelRepositoryChanges;
-import tools.vitruv.testutils.changevisualization.tree.ChangeTree;
-import tools.vitruv.testutils.changevisualization.tree.TabHighlighting;
+import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
+import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet;
+import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSetGenerationListener;
+import tools.vitruv.change.testutils.changevisualization.common.ModelRepositoryChanges;
+import tools.vitruv.change.testutils.changevisualization.tree.ChangeTree;
+import tools.vitruv.change.testutils.changevisualization.tree.TabHighlighting;
 
 /**
  * The changes tab is responsible for displaying the tab of a single model. It storage the added changeDataSets, holds

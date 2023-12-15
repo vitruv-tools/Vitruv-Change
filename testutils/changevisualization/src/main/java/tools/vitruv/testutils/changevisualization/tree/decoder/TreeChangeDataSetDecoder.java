@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.tree.decoder;
+package tools.vitruv.change.testutils.changevisualization.tree.decoder;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -14,11 +14,11 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.composite.description.PropagatedChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
-import tools.vitruv.testutils.changevisualization.common.ChangeDataSet;
-import tools.vitruv.testutils.changevisualization.common.ChangeDataSet.ChangeType;
-import tools.vitruv.testutils.changevisualization.tree.TreeChangeDataSet;
-import tools.vitruv.testutils.changevisualization.tree.decoder.feature.MultipleFeatureProcessor;
-import tools.vitruv.testutils.changevisualization.tree.decoder.feature.OldValueNewValueProcessor;
+import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet;
+import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet.ChangeType;
+import tools.vitruv.change.testutils.changevisualization.tree.TreeChangeDataSet;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.feature.MultipleFeatureProcessor;
+import tools.vitruv.change.testutils.changevisualization.tree.decoder.feature.OldValueNewValueProcessor;
 
 /**
  * Helper class to generate {@link TreeChangeDataSets}s from propagation results and

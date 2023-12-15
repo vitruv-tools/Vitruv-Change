@@ -18,17 +18,17 @@ import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.VitruviusChange
 import tools.vitruv.change.composite.description.VitruviusChangeResolver
 import tools.vitruv.change.composite.recording.ChangeRecorder
-import tools.vitruv.testutils.RegisterMetamodelsInStandalone
-import tools.vitruv.testutils.TestProject
-import tools.vitruv.testutils.TestProjectManager
+import tools.vitruv.change.testutils.RegisterMetamodelsInStandalone
+import tools.vitruv.change.testutils.TestProject
+import tools.vitruv.change.testutils.TestProjectManager
 
 import static com.google.common.base.Preconditions.checkState
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.junit.jupiter.api.Assertions.assertEquals
 import static org.junit.jupiter.api.Assertions.assertNotNull
 import static org.junit.jupiter.api.Assertions.assertTrue
-import static tools.vitruv.testutils.matchers.ModelMatchers.equalsDeeply
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet
+import static tools.vitruv.change.testutils.matchers.ModelMatchers.equalsDeeply
+import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.aet
 
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.createFileURI
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.loadOrCreateResource

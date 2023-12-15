@@ -1,6 +1,6 @@
-package tools.vitruv.testutils.changevisualization;
+package tools.vitruv.change.testutils.changevisualization;
 
-import tools.vitruv.testutils.changevisualization.common.ModelRepositoryChanges;
+import tools.vitruv.change.testutils.changevisualization.common.ModelRepositoryChanges;
 
 public interface MonitoredRepositoryAddedListener {
 	public void addedMonitoredRepository(ModelRepositoryChanges newModelRepositoryChanges);

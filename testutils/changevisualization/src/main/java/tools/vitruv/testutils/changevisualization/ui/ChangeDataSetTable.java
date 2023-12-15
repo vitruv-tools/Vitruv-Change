@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.ui;
+package tools.vitruv.change.testutils.changevisualization.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -19,8 +19,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import tools.vitruv.testutils.changevisualization.ChangeVisualizationUI;
-import tools.vitruv.testutils.changevisualization.common.ChangeDataSet;
+import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
+import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet;
 
 /**
  * A ChangeDataSetTable displays all different ChangeDataSets of a given ChangesTab in a JTable

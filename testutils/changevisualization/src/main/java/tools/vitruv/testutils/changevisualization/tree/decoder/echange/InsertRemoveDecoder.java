@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.tree.decoder.echange;
+package tools.vitruv.change.testutils.changevisualization.tree.decoder.echange;
 
 import java.util.Map;
 

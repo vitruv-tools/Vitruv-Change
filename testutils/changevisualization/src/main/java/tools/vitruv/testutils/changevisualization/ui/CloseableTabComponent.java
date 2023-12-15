@@ -1,4 +1,4 @@
-package tools.vitruv.testutils.changevisualization.ui;
+package tools.vitruv.change.testutils.changevisualization.ui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.uuid.Uuid
 
-import static tools.vitruv.testutils.metamodels.AllElementTypesCreators.aet
+import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.aet
 
 /**
  * Test class for the concrete {@link CreateEObject} EChange,
