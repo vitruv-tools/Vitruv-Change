@@ -70,6 +70,23 @@
         <version>0.8.7</version>
         <configuration>
             <outputDirectory>${project.build.directory}/jacoco-reports</outputDirectory>
+            <!--rules>
+              <rule>
+                <element>BUNDLE</element>
+                <limits>
+                  <limit>
+                    <counter>INSTRUCTION</counter>
+                    <value>COVEREDRATIO</value>
+                    <minimum>0.80</minimum>
+                  </limit>
+                  <limit>
+                    <counter>CLASS</counter>
+                    <value>MISSEDCOUNT</value>
+                    <maximum>0</maximum>
+                  </limit>
+                </limits>
+              </rule>
+            </rules-->
         </configuration>
         <!--executions>
                 <execution>
