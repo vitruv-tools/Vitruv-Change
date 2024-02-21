@@ -14,7 +14,7 @@
   <artifactId>tools.vitruv.change.propagation</artifactId>
 
   <name>Vitruv Framework Change Processing</name>
-  <description/>
+  <description />
 
   <build>
     <plugins>
@@ -30,6 +30,7 @@
   </build>
 
   <dependencies>
+    <!-- project dependencies -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>tools.vitruv.change.atomic</artifactId>
@@ -61,6 +62,7 @@
       <version>${project.version}</version>
     </dependency>
 
+    <!-- external dependencies -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>

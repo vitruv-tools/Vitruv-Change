@@ -14,7 +14,7 @@
   <artifactId>tools.vitruv.change.correspondence</artifactId>
 
   <name>Vitruv Correspondence Metamodel</name>
-  <description/>
+  <description />
 
   <build>
     <plugins>

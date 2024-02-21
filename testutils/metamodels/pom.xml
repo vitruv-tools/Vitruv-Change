@@ -14,7 +14,7 @@
   <artifactId>tools.vitruv.change.testutils.metamodels</artifactId>
 
   <name>Vitruv Change Test Utilities Metamodels</name>
-  <description/>
+  <description />
 
   <build>
     <plugins>
@@ -42,12 +42,14 @@
   </build>
 
   <dependencies>
+    <!-- project dependencies -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>tools.vitruv.change.utils</artifactId>
       <version>${project.version}</version>
     </dependency>
 
+    <!-- external dependencies -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>

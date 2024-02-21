@@ -30,6 +30,7 @@
   </build>
 
   <dependencies>
+    <!-- external dependencies -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>

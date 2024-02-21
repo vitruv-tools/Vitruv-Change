@@ -14,7 +14,7 @@
   <artifactId>tools.vitruv.change.testutils.core</artifactId>
 
   <name>Vitruv Change Test Utilities Core</name>
-  <description/>
+  <description />
 
   <build>
     <plugins>
@@ -74,6 +74,7 @@
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.ecore</artifactId>
     </dependency>
+    <!-- required for having a ResourceFactory during the tests -->
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
