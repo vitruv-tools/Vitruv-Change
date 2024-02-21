@@ -2,7 +2,7 @@ package tools.vitruv.change.testutils.metamodels
 
 import allElementTypes2.Identified2
 import allElementTypes2.impl.AllElementTypes2FactoryImpl
-import tools.vitruv.change.testutils.activeannotations.WithGeneratedRandomIds
+import tools.vitruv.change.utils.activeannotations.WithGeneratedRandomIds
 
 @WithGeneratedRandomIds(identifierMetaclass=Identified2)
 class RandomIdAllElementTypes2Factory extends AllElementTypes2FactoryImpl {

@@ -1,6 +1,6 @@
 package tools.vitruv.change.testutils.metamodels
 
-import tools.vitruv.change.testutils.activeannotations.WithGeneratedRandomIds
+import tools.vitruv.change.utils.activeannotations.WithGeneratedRandomIds
 import uml_mockup.Identified
 import uml_mockup.impl.Uml_mockupFactoryImpl
 

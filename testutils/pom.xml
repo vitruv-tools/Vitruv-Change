@@ -14,13 +14,13 @@
   <artifactId>tools.vitruv.change.testutils</artifactId>
   <packaging>pom</packaging>
 
-  <name>Vitruv Test Utilities</name>
+  <name>Vitruv Change Test Utilities</name>
   <description>Utilities for defining tests using the Vitruv change and propagation specifications</description>
 
   <modules>
-    <module>base</module>
     <module>changevisualization</module>
+    <module>core</module>
+    <module>integration</module>
     <module>metamodels</module>
-    <module>tests</module>
   </modules>
 </project>

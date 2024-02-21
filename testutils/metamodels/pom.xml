@@ -13,7 +13,7 @@
 
   <artifactId>tools.vitruv.change.testutils.metamodels</artifactId>
 
-  <name>Vitruv Test Utilities Metamodels</name>
+  <name>Vitruv Change Test Utilities Metamodels</name>
   <description/>
 
   <build>
@@ -44,7 +44,7 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>tools.vitruv.change.testutils.base</artifactId>
+      <artifactId>tools.vitruv.change.utils</artifactId>
       <version>${project.version}</version>
     </dependency>
 

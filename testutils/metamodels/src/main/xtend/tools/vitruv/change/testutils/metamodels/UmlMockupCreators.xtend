@@ -1,7 +1,7 @@
 package tools.vitruv.change.testutils.metamodels
 
 import uml_mockup.Uml_mockupFactory
-import tools.vitruv.change.testutils.activeannotations.ModelCreators
+import tools.vitruv.change.utils.activeannotations.ModelCreators
 
 @ModelCreators(factory=Uml_mockupFactory, stripPrefix = "U")
 final class UmlMockupCreators {

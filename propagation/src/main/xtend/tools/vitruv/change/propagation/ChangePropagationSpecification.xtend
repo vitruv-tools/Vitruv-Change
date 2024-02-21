@@ -6,6 +6,7 @@ import tools.vitruv.change.composite.MetamodelDescriptor
 import tools.vitruv.change.correspondence.Correspondence
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView
 import tools.vitruv.change.interaction.UserInteractor
+import tools.vitruv.change.utils.ResourceAccess
 
 /**
  * A specification of change propagation, which is able to process changes

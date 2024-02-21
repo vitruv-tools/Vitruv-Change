@@ -7,7 +7,7 @@ import tools.vitruv.change.propagation.ChangePropagationSpecification
 import org.apache.log4j.Logger
 import tools.vitruv.change.propagation.ChangePropagationObserver
 import org.eclipse.emf.ecore.EObject
-import tools.vitruv.change.propagation.ResourceAccess
+import tools.vitruv.change.utils.ResourceAccess
 import org.eclipse.xtend.lib.annotations.Accessors
 import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.composite.MetamodelDescriptor
