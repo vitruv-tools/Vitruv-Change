@@ -75,7 +75,7 @@
       <id>emf-compare</id>
       <name>EMF Compare</name>
       <layout>p2</layout>
-      <url>http://download.eclipse.org/modeling/emf/compare/updates/releases/${repo.emf-compare.version}</url>
+      <url>https://download.eclipse.org/modeling/emf/compare/updates/releases/${repo.emf-compare.version}</url>
     </repository>
     <repository>
       <id>sdq-commons</id>
