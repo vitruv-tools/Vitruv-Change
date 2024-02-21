@@ -31,12 +31,9 @@
   <!-- Modules -->
   <modules>
     <module>atomic</module>
-    <module>atomic.tests</module>
     <module>changederivation</module>
     <module>composite</module>
-    <module>composite.tests</module>
     <module>correspondence</module>
-    <module>correspondence.tests</module>
     <module>interaction</module>
     <module>interaction.model</module>
     <module>propagation</module>
