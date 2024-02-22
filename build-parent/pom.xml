@@ -255,7 +255,7 @@
     </pluginManagement>
   </build>
 
-   <reporting>
+  <!--reporting>
     <plugins>
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -263,14 +263,13 @@
         <reportSets>
           <reportSet>
             <reports>
-              <!-- select non-aggregate reports -->
               <report>report</report>
             </reports>
           </reportSet>
         </reportSets>
       </plugin>
     </plugins>
-  </reporting>
+  </reporting-->
 
   <!-- Eclipse SWT has different implementations from different platforms, which cannot be resolved automatically -->
   <profiles>
