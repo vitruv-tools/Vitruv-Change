@@ -9,13 +9,12 @@
     <groupId>tools.vitruv</groupId>
     <artifactId>tools.vitruv.change</artifactId>
     <version>3.0.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>tools.vitruv.change.interaction.model</artifactId>
 
   <name>Vitruv Change Interactions Metamodel</name>
-  <description/>
+  <description />
 
   <build>
     <plugins>
@@ -39,6 +38,7 @@
   </build>
 
   <dependencies>
+    <!-- external dependencies -->
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.common</artifactId>

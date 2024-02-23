@@ -9,13 +9,12 @@
     <groupId>tools.vitruv</groupId>
     <artifactId>tools.vitruv.change</artifactId>
     <version>3.0.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>tools.vitruv.change.interaction</artifactId>
 
   <name>Vitruv Change Interactions</name>
-  <description/>
+  <description />
 
   <build>
     <plugins>
@@ -31,12 +30,14 @@
   </build>
 
   <dependencies>
+    <!-- project dependencies -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>tools.vitruv.change.interaction.model</artifactId>
       <version>${project.version}</version>
     </dependency>
 
+    <!-- external dependencies -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>

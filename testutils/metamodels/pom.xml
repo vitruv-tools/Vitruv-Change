@@ -7,15 +7,14 @@
 
   <parent>
     <groupId>tools.vitruv</groupId>
-    <artifactId>tools.vitruv.testutils</artifactId>
+    <artifactId>tools.vitruv.change.testutils</artifactId>
     <version>3.0.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>tools.vitruv.testutils.metamodels</artifactId>
+  <artifactId>tools.vitruv.change.testutils.metamodels</artifactId>
 
-  <name>Vitruv Test Utilities Metamodels</name>
-  <description/>
+  <name>Vitruv Change Test Utilities Metamodels</name>
+  <description />
 
   <build>
     <plugins>
@@ -43,12 +42,14 @@
   </build>
 
   <dependencies>
+    <!-- project dependencies -->
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>tools.vitruv.testutils.base</artifactId>
+      <artifactId>tools.vitruv.change.utils</artifactId>
       <version>${project.version}</version>
     </dependency>
 
+    <!-- external dependencies -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>

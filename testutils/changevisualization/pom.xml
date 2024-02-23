@@ -7,17 +7,17 @@
 
   <parent>
     <groupId>tools.vitruv</groupId>
-    <artifactId>tools.vitruv.testutils</artifactId>
+    <artifactId>tools.vitruv.change.testutils</artifactId>
     <version>3.0.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>tools.vitruv.testutils.changevisualization</artifactId>
+  <artifactId>tools.vitruv.change.testutils.changevisualization</artifactId>
 
   <name>Vitruv Change Visualization</name>
   <description>Utilities for visualization changes on models</description>
 
   <dependencies>
+    <!-- project dependencies -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>tools.vitruv.change.atomic</artifactId>
@@ -29,6 +29,7 @@
       <version>${project.version}</version>
     </dependency>
 
+    <!-- external dependencies -->
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.common</artifactId>

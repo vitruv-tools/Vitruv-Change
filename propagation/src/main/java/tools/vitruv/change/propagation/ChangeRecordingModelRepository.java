@@ -9,6 +9,7 @@ import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.model.CorrespondenceModel;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
+import tools.vitruv.change.utils.ResourceAccess;
 
 public interface ChangeRecordingModelRepository extends ResourceAccess, AutoCloseable {
 	/**

@@ -9,13 +9,12 @@
     <groupId>tools.vitruv</groupId>
     <artifactId>tools.vitruv.change</artifactId>
     <version>3.0.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>tools.vitruv.change.composite</artifactId>
 
   <name>Vitruv Composite Change Metamodel</name>
-  <description/>
+  <description />
 
   <build>
     <plugins>
@@ -31,6 +30,7 @@
   </build>
 
   <dependencies>
+    <!-- project compile dependencies -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>tools.vitruv.change.atomic</artifactId>
@@ -42,6 +42,21 @@
       <version>${project.version}</version>
     </dependency>
 
+    <!-- project test dependencies -->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>tools.vitruv.change.testutils.core</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>tools.vitruv.change.testutils.metamodels</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- external compile dependencies -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
@@ -77,6 +92,23 @@
     <dependency>
       <groupId>xannotations</groupId>
       <artifactId>edu.kit.ipd.sdq.activextendannotations</artifactId>
+    </dependency>
+
+    <!-- external test dependencies -->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

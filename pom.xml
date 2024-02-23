@@ -31,16 +31,14 @@
   <!-- Modules -->
   <modules>
     <module>atomic</module>
-    <module>atomic.tests</module>
     <module>changederivation</module>
     <module>composite</module>
-    <module>composite.tests</module>
     <module>correspondence</module>
-    <module>correspondence.tests</module>
     <module>interaction</module>
     <module>interaction.model</module>
     <module>propagation</module>
     <module>testutils</module>
+    <module>utils</module>
   </modules>
 
   <!-- Additional Repositories -->
@@ -64,13 +62,23 @@
     </plugins>
   </build>
 
-  <!-- for p2 dependencies, `groupId` specifies the repository -->
   <repositories>
+    <!-- Maven Central should have priority -->
+    <repository>
+      <id>central</id>
+      <name>Maven Central</name>
+      <url>https://repo1.maven.org/maven2/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+
+    <!-- for p2 dependencies, `groupId` specifies the repository -->
     <repository>
       <id>emf-compare</id>
       <name>EMF Compare</name>
       <layout>p2</layout>
-      <url>http://download.eclipse.org/modeling/emf/compare/updates/releases/${repo.emf-compare.version}</url>
+      <url>https://download.eclipse.org/modeling/emf/compare/updates/releases/${repo.emf-compare.version}</url>
     </repository>
     <repository>
       <id>sdq-commons</id>
@@ -126,13 +134,13 @@
       </dependency>
       <dependency>
         <groupId>org.eclipse.emf</groupId>
-        <artifactId>org.eclipse.emf.ecore.edit</artifactId>
-        <version>2.14.0</version>
+        <artifactId>org.eclipse.emf.ecore.change</artifactId>
+        <version>2.15.0</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.emf</groupId>
-        <artifactId>org.eclipse.emf.ecore.change</artifactId>
-        <version>2.15.0</version>
+        <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+        <version>2.36.0</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.emf</groupId>
