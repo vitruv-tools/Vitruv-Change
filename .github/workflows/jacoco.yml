@@ -42,9 +42,9 @@ jobs:
         uses: madrapps/jacoco-report@v1.6.1
         with:
           paths: |
-            ${{ github.workspace }}/atomic/target/jacoco-reports/jacoco.xml,
-            ${{ github.workspace }}/composite/target/jacoco-reports/jacoco.xml,
-            ${{ github.workspace }}/correspondence/target/jacoco-reports/jacoco.xml,
+            ${{ github.workspace }}/atomic/target/jacoco-reports/jacoco.xml
+          #${{ github.workspace }}/composite/target/jacoco-reports/jacoco.xml,
+          #${{ github.workspace }}/correspondence/target/jacoco-reports/jacoco.xml,
           #${{ github.workspace }}/maintarget/jacoco-reports/jacoco.xml
           #${{ github.workspace }}/**/report/target/jacoco-reports/jacoco.xml
           #${{ github.workspace }}/**/jacoco.xml
@@ -63,15 +63,15 @@ jobs:
           echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
           echo "Changed Files coverage ${{ steps.jacoco.outputs.coverage-changed-files }}"
       
-      - name: Stage Build Results
+      #- name: Stage Build Results
         #run: mkdir staging && cp -r `ls -A | grep -v "staging"` staging/
         #run: mkdir staging && cp -r target/ staging/
-        run: mkdir staging && cp -r ${{ github.workspace }}/**/target/jacoco-reports/* staging/
+        #run: mkdir staging && cp -r ${{ github.workspace }}/**/target/jacoco-reports/* staging/
         #run: mkdir staging && cp ${{ github.workspace }}/maintarget/target/jacoco-reports/jacoco.xml staging/
 
        #upload staged packages
-      - name: Upload Build Results
-        uses: actions/upload-artifact@v3.1.3
-        with:
-          name: Build Results
-          path: staging/
+      #- name: Upload Build Results
+      #  uses: actions/upload-artifact@v3.1.3
+       # with:
+        #  name: Build Results
+         # path: staging/
