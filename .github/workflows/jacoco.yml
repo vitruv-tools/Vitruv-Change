@@ -31,7 +31,7 @@ jobs:
       # run Maven build
       - name: Maven Build
         #run: ./mvn --batch-mode --update-snapshots verify
-        run: mvn clean org.jacoco:jacoco-maven-plugin:0.8.8:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.9:report-aggregate
+        run: mvn clean org.jacoco:jacoco-maven-plugin:0.8.8:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.9:report #-aggregate
       
       #- name: Test moving jacoco reports
         #run:  rm -rf target/ && mkdir maintarget && cp -r report/target/* maintarget/
