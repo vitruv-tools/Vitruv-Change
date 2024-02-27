@@ -20,7 +20,7 @@ public class AtomicEChangeResolverHelper<Source, Target> {
 	private Function<Source, Target> elementResolver;
 	private Function<Resource, Resource> resourceResolver;
 
-	private AtomicEChangeResolverHelper(Function<Source, Target> elementResolver, Function<Resource, Resource> resourceResolver) {
+	protected AtomicEChangeResolverHelper(Function<Source, Target> elementResolver, Function<Resource, Resource> resourceResolver) {
 		checkArgument(elementResolver != null, "resolver must not be null");
 		checkArgument(resourceResolver != null, "resolver must not be null");
 		this.elementResolver = elementResolver;

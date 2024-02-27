@@ -1,6 +1,7 @@
 package tools.vitruv.change.atomic.hid;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -23,8 +24,13 @@ import tools.vitruv.change.atomic.root.RemoveRootEObject;
  * {@link EObject} or vice versa.
  */
 public class AtomicEChangeHierarchicalIdResolver {
-	private HierarchicalIdResolver idResolver;
+	protected HierarchicalIdResolver idResolver;
 
+	protected AtomicEChangeHierarchicalIdResolver(HierarchicalIdResolver idResolver) {
+		checkArgument(idResolver != null, "The given IdResolver must not be null");
+		this.idResolver = idResolver;
+	}
+	
 	public AtomicEChangeHierarchicalIdResolver(ResourceSet resourceSet) {
 		this.idResolver = HierarchicalIdResolver.create(resourceSet);
 	}
@@ -80,7 +86,7 @@ public class AtomicEChangeHierarchicalIdResolver {
 		idResolver.endTransaction();
 	}
 
-	private EChange<EObject> resolve(EChange<HierarchicalId> unresolvedChange) {
+	protected EChange<EObject> resolve(EChange<HierarchicalId> unresolvedChange) {
 		return AtomicEChangeResolverHelper.resolveChange(unresolvedChange, id -> {
 			if (unresolvedChange instanceof CreateEObject<HierarchicalId> createChange) {
 				EObject createdElement = EcoreUtil.create(createChange.getAffectedEObjectType());
