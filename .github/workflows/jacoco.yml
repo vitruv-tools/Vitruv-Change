@@ -42,7 +42,9 @@ jobs:
         uses: madrapps/jacoco-report@v1.6.1
         with:
           paths: |
-            ${{ github.workspace }}/atomic/target/jacoco-reports/jacoco.xml
+            ${{ github.workspace }}/atomic/target/jacoco-reports/jacoco.xml,
+            ${{ github.workspace }}/composite/target/jacoco-reports/jacoco.xml,
+            ${{ github.workspace }}/correspondence/target/jacoco-reports/jacoco.xml
           #${{ github.workspace }}/composite/target/jacoco-reports/jacoco.xml,
           #${{ github.workspace }}/correspondence/target/jacoco-reports/jacoco.xml,
           #${{ github.workspace }}/maintarget/jacoco-reports/jacoco.xml
