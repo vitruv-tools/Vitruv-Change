@@ -162,7 +162,7 @@
           <version>0.8.7</version>
           <configuration>
             <outputDirectory>${project.build.directory}/jacoco-reports</outputDirectory>
-            <!--append>true</append--> <!--brauch man nur wenn man auch die coverage der anderen auf die klasse testen will--> 
+            <append>true</append> <!--brauch man nur wenn man auch die coverage der anderen auf die klasse testen will--> 
           </configuration>
         </plugin>
 
