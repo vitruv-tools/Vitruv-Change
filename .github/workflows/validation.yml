@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Change Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: change
           path: change
@@ -55,7 +55,7 @@ jobs:
         env: 
           MAVEN_OPTS: -Djansi.force=true
       - name: Store Framework Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: framework
           path: framework/releng/tools.vitruv.updatesite/target/repository
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Change Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: change
           path: change
@@ -110,7 +110,7 @@ jobs:
         env: 
           MAVEN_OPTS: -Djansi.force=true
       - name: Store DSLs Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dsls
           path: dsls/releng/tools.vitruv.dsls.updatesite/target/repository
@@ -122,17 +122,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Change Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: change
           path: change
       - name: Download Framework Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: framework
           path: framework
       - name: Download DSLs Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dsls
           path: dsls
