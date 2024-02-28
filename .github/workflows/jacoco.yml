@@ -36,7 +36,7 @@ jobs:
       - name: Test moving jacoco reports
         run:  rm -rf target/ && mkdir maintarget && cp -r report/target/* maintarget/
 
-      - name: Add coverage to PR
+      - name: Add overall coverage to PR
         id: jacoco
         uses: madrapps/jacoco-report@v1.6.1
         with:
@@ -45,20 +45,45 @@ jobs:
           #${{ github.workspace }}/atomic/target/jacoco-reports/jacoco.xml,
           #${{ github.workspace }}/composite/target/jacoco-reports/jacoco.xml,
           #${{ github.workspace }}/correspondence/target/jacoco-reports/jacoco.xml
-          #${{ github.workspace }}/composite/target/jacoco-reports/jacoco.xml,
-          #${{ github.workspace }}/correspondence/target/jacoco-reports/jacoco.xml,
-          #${{ github.workspace }}/maintarget/jacoco-reports/jacoco.xml
-          #${{ github.workspace }}/**/report/target/jacoco-reports/jacoco.xml
-          #${{ github.workspace }}/**/jacoco.xml
-          #${{ github.workspace }}/**/report/target/jacoco-reports/index.xml
-          #paths: |
-           # ${{ github.workspace }}/**/build/reports/jacoco/prodNormalDebugCoverage/prodNormalDebugCoverage.xml,
-            #${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
-          #token: ${{ secrets.github_token }}
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 40
           min-coverage-changed-files: 60
-          #debug-mode: true
+
+      - name: Add atomic coverage to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: |
+            ${{ github.workspace }}/atomic/target/jacoco-reports/jacoco.xml,
+          #${{ github.workspace }}/composite/target/jacoco-reports/jacoco.xml,
+          #${{ github.workspace }}/correspondence/target/jacoco-reports/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
+          title: Atomic Coverage
+      
+       - name: Add atomic coverage to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: |
+            ${{ github.workspace }}/composite/target/jacoco-reports/jacoco.xml,
+          #${{ github.workspace }}/correspondence/target/jacoco-reports/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
+          title: Composite Coverage
+        
+      - name: Add atomic coverage to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: |
+            ${{ github.workspace }}/correspondence/target/jacoco-reports/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
+          title: Correspondence Coverage
 
       - name: Get the Coverage info
         run: |
