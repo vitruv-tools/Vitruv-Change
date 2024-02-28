@@ -60,7 +60,7 @@ jobs:
           min-coverage-changed-files: 60
           title: Atomic Coverage
       
-      - name: Add atomic coverage to PR
+      - name: Add composite coverage to PR
         id: jacoco
         uses: madrapps/jacoco-report@v1.6.1
         with:
@@ -71,7 +71,7 @@ jobs:
           min-coverage-changed-files: 60
           title: Composite Coverage
         
-      - name: Add atomic coverage to PR
+      - name: Add correspondence coverage to PR
         id: jacoco
         uses: madrapps/jacoco-report@v1.6.1
         with:
