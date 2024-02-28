@@ -13,11 +13,14 @@ import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.hid.internal.HierarchicalIdFilterModelResolverImpl;
 import tools.vitruv.change.atomic.resolve.AtomicEChangeResolverHelper;
 
+
 public class AtomicEChangeHierarchicalIdFilteredModelResolver extends AtomicEChangeHierarchicalIdResolver {
 
 	public AtomicEChangeHierarchicalIdFilteredModelResolver(ResourceSet sourceResourceSet, ResourceSet filterResourceSet, Map<EObject, EObject> mapCopy2OriginalObject) {
 		super(new HierarchicalIdFilterModelResolverImpl(sourceResourceSet, filterResourceSet, mapCopy2OriginalObject));
 	}
+	
+	
 	
 	
 //	protected EChange<EObject> resolve(EChange<HierarchicalId> unresolvedChange) {

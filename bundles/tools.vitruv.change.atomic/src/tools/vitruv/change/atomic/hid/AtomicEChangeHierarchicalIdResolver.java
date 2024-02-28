@@ -44,8 +44,8 @@ public class AtomicEChangeHierarchicalIdResolver {
 	 * @return Returns the resolved change.
 	 */
 	public EChange<EObject> resolveAndApplyForward(EChange<HierarchicalId> unresolvedEChange) {
-		EChange<EObject> resolvedChange = resolve(unresolvedEChange);
-		applyForward(resolvedChange);
+		EChange<EObject> resolvedChange = resolve(unresolvedEChange, idResolver);
+		applyForward(resolvedChange, idResolver);
 		return resolvedChange;
 	}
 
@@ -73,7 +73,7 @@ public class AtomicEChangeHierarchicalIdResolver {
 	 */
 	public EChange<HierarchicalId> applyForwardAndAssignIds(EChange<EObject> resolvedEChange) {
 		EChange<HierarchicalId> unresolvedChange = unresolve(resolvedEChange);
-		applyForward(resolvedEChange);
+		applyForward(resolvedEChange, idResolver);
 		return unresolvedChange;
 	}
 
@@ -86,7 +86,7 @@ public class AtomicEChangeHierarchicalIdResolver {
 		idResolver.endTransaction();
 	}
 
-	protected EChange<EObject> resolve(EChange<HierarchicalId> unresolvedChange) {
+	protected EChange<EObject> resolve(EChange<HierarchicalId> unresolvedChange, HierarchicalIdResolver idResolver) {
 		return AtomicEChangeResolverHelper.resolveChange(unresolvedChange, id -> {
 			if (unresolvedChange instanceof CreateEObject<HierarchicalId> createChange) {
 				EObject createdElement = EcoreUtil.create(createChange.getAffectedEObjectType());
@@ -105,16 +105,16 @@ public class AtomicEChangeHierarchicalIdResolver {
 				resource -> idResolver.getResource(resource.getURI()));
 	}
 
-	private void applyForward(EChange<EObject> resolvedChange) {
+	protected void applyForward(EChange<EObject> resolvedChange, HierarchicalIdResolver idResolver) {
 		EObject affectedEObject = getAffectedEObject(resolvedChange);
 		HierarchicalId affectedId = idResolver.getAndUpdateId(affectedEObject);
 		EObject oldObject = getOldContainedEObject(resolvedChange);
 		ApplyEChangeSwitch.applyEChange(resolvedChange, true);
 		if (isContainmentChange(resolvedChange) || affectedId != idResolver.getAndUpdateId(affectedEObject)) {
-			refreshIds(affectedEObject);
+			refreshIds(affectedEObject, idResolver);
 		}
 		if (oldObject != null) {
-			refreshIds(oldObject);
+			refreshIds(oldObject, idResolver);
 		}
 	}
 
@@ -140,15 +140,15 @@ public class AtomicEChangeHierarchicalIdResolver {
 		return null;
 	}
 
-	private static boolean isContainmentChange(EChange<EObject> eChange) {
+	protected static boolean isContainmentChange(EChange<EObject> eChange) {
 		if (eChange instanceof UpdateReferenceEChange<EObject> referenceChange) {
 			return referenceChange.isContainment();
 		}
 		return false;
 	}
 
-	private void refreshIds(EObject eObject) {
+	protected void refreshIds(EObject eObject, HierarchicalIdResolver idResolver) {
 		idResolver.getAndUpdateId(eObject);
-		eObject.eContents().forEach(this::refreshIds);
+		eObject.eContents().forEach(it -> refreshIds(it, idResolver));
 	}
 }

@@ -5,12 +5,14 @@ import java.util.Map;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
+import tools.vitruv.change.atomic.hid.AtomicEChangeFilterResolver;
 import tools.vitruv.change.atomic.hid.AtomicEChangeHierarchicalIdFilteredModelResolver;
 import tools.vitruv.change.atomic.hid.AtomicEChangeHierarchicalIdResolver;
 import tools.vitruv.change.atomic.hid.HierarchicalId;
 import tools.vitruv.change.atomic.uuid.AtomicEChangeUuidResolver;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.atomic.uuid.UuidResolver;
+import tools.vitruv.change.composite.description.impl.VitruviusChangeFilterResolver;
 import tools.vitruv.change.composite.description.impl.VitruviusChangeHierarchicalIdResolver;
 import tools.vitruv.change.composite.description.impl.VitruviusChangeUuidResolver;
 
@@ -64,7 +66,11 @@ public interface VitruviusChangeResolver<Id> {
 	
 	public static VitruviusChangeResolver<HierarchicalId> forHierarchicalIdsAndFilteredModel(ResourceSet sourceResourceSet,
 			ResourceSet filterResourceSet, Map<EObject, EObject> mapCopy2OriginalObject) {
-		AtomicEChangeHierarchicalIdResolver resolver = new AtomicEChangeHierarchicalIdFilteredModelResolver(sourceResourceSet, filterResourceSet, mapCopy2OriginalObject);
-		return new VitruviusChangeHierarchicalIdResolver(resolver);		
+//		AtomicEChangeHierarchicalIdResolver resolver = new AtomicEChangeHierarchicalIdFilteredModelResolver(sourceResourceSet, filterResourceSet, mapCopy2OriginalObject);
+//		return new VitruviusChangeFilterResolver(resolver);		
+		AtomicEChangeFilterResolver resolver = new AtomicEChangeFilterResolver(filterResourceSet, sourceResourceSet, mapCopy2OriginalObject);
+		return new VitruviusChangeFilterResolver(resolver);
 	}
+	
+	
 }

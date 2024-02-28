@@ -12,7 +12,7 @@ import tools.vitruv.change.atomic.hid.AtomicEChangeHierarchicalIdResolver;
 import tools.vitruv.change.atomic.hid.HierarchicalId;
 import tools.vitruv.change.composite.description.VitruviusChange;
 
-public class VitruviusChangeFilterResolver extends AbstractVitruviusChangeResolver<EObject> {
+public class VitruviusChangeFilterResolver extends AbstractVitruviusChangeResolver<HierarchicalId> {
 	
 	private AtomicEChangeFilterResolver atomicChangeResolver;
 
@@ -22,25 +22,25 @@ public class VitruviusChangeFilterResolver extends AbstractVitruviusChangeResolv
 
 	
 	@Override
-	public VitruviusChange<EObject> resolveAndApply(VitruviusChange<EObject> change) {
-		applyBackward(change);
-		VitruviusChange<EObject> result = transformVitruviusChange(change, atomicChangeResolver::applyForwardAndMapToObject, transactionalChange -> {});
-		/**
-		 * TODO: the correct handling would be to call endTransaction() each time after
-		 * a transactional change is applied forward or backward. Due to incomplete
-		 * change recording (https://github.com/vitruv-tools/Vitruv-Change/issues/71)
-		 * this would result in failures when handling a composite change with multiple
-		 * transactional changes as containment information of cascade deleted elements
-		 * would be lost.
-		 */
-		atomicChangeResolver.endTransaction();
-		return result;
+	public VitruviusChange<EObject> resolveAndApply(VitruviusChange<HierarchicalId> change) {
+		return transformVitruviusChange(change, atomicChangeResolver::resolveAndApplyForward,
+				transactionalChange -> atomicChangeResolver.endTransaction());
 	}
 	
 	@Override
-	public VitruviusChange<EObject> assignIds(VitruviusChange<EObject> change) {
-		// TODO Auto-generated method stub
-		return null;
+	public VitruviusChange<HierarchicalId> assignIds(VitruviusChange<EObject> change) {
+		throw new Error("assigning ids is not supported");
+//		VitruviusChange<EObject> result = transformVitruviusChange(change, atomicChangeResolver::applyForwardAndMapToObject, transactionalChange -> {});
+//		/**
+//		 * TODO: the correct handling would be to call endTransaction() each time after
+//		 * a transactional change is applied forward or backward. Due to incomplete
+//		 * change recording (https://github.com/vitruv-tools/Vitruv-Change/issues/71)
+//		 * this would result in failures when handling a composite change with multiple
+//		 * transactional changes as containment information of cascade deleted elements
+//		 * would be lost.
+//		 */
+//		atomicChangeResolver.endTransaction();
+//		return result;
 	}
 
 	
@@ -58,6 +58,8 @@ public class VitruviusChangeFilterResolver extends AbstractVitruviusChangeResolv
 					"trying to apply unknown change of class " + change.getClass().getSimpleName());
 		}
 	}
+
+
 
 
 
