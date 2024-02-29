@@ -48,6 +48,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 40
           min-coverage-changed-files: 60
+          pass-emoji: ':green_circle:'
 
       - name: Add atomic coverage to PR
         id: jacoco2
@@ -59,6 +60,7 @@ jobs:
           min-coverage-overall: 40
           min-coverage-changed-files: 60
           title: Atomic Coverage
+          pass-emoji: ':green_circle:'
       
       - name: Add composite coverage to PR
         id: jacoco3
@@ -70,6 +72,7 @@ jobs:
           min-coverage-overall: 40
           min-coverage-changed-files: 60
           title: Composite Coverage
+          pass-emoji: ':green_circle:'
         
       - name: Add correspondence coverage to PR
         id: jacoco4
@@ -81,6 +84,7 @@ jobs:
           min-coverage-overall: 40
           min-coverage-changed-files: 60
           title: Correspondence Coverage
+          pass-emoji: ':green_circle:'
 
       - name: Get the Coverage info
         run: |

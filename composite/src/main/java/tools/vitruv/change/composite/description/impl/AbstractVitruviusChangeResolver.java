@@ -44,4 +44,22 @@ abstract class AbstractVitruviusChangeResolver<Id> implements VitruviusChangeRes
 		throw new IllegalStateException(
 				"trying to transform unknown change of class " + change.getClass().getSimpleName());
 	}
+
+	protected <Source, Target> VitruviusChange<Target> transformVitruviusChange2(VitruviusChange<Source> change,
+			Function<EChange<Source>, EChange<Target>> changeHandler,
+			Consumer<TransactionalChange<Target>> onTransactionEnd) {
+		if (change instanceof CompositeContainerChangeImpl<Source> compositeChange) {
+			return new CompositeContainerChangeImpl<>(compositeChange.getChanges().stream()
+					.map(c -> transformVitruviusChange(c, changeHandler, onTransactionEnd)).toList());
+		} else if (change instanceof TransactionalChangeImpl<Source> transactionalChange) {
+			List<EChange<Target>> resolvedChanges = transactionalChange.getEChanges().stream().map(changeHandler::apply)
+					.toList();
+			TransactionalChange<Target> result = new TransactionalChangeImpl<>(resolvedChanges);
+			result.setUserInteractions(change.getUserInteractions());
+			onTransactionEnd.accept(result);
+			return result;
+		}
+		throw new IllegalStateException(
+				"trying to transform unknown change of class " + change.getClass().getSimpleName());
+	}
 }
