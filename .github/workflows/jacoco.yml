@@ -36,11 +36,6 @@ jobs:
       - name: Moving jacoco reports
         run:  rm -rf target/ && mkdir maintarget && cp -r report/target/* maintarget/
 
-      - name: Get the Coverage info 1
-        run: |
-          echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
-          echo "Changed Files coverage ${{ steps.jacoco.outputs.coverage-changed-files }}"
-
       - name: Add overall coverage to PR
         id: jacoco1
         uses: madrapps/jacoco-report@v1.6.1
@@ -62,8 +57,8 @@ jobs:
 
       - name: Get the Coverage info
         run: |
-          echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
-          echo "Changed Files coverage ${{ steps.jacoco.outputs.coverage-changed-files }}"
+          echo "Total coverage ${{ steps.jacoco1.outputs.coverage-overall }}"
+          echo "Changed Files coverage ${{ steps.jacoco1.outputs.coverage-changed-files }}"
 
       - name: Fail PR if overall coverage is less than 20%
         if: ${{ steps.jacoco.outputs.coverage-overall < 20.0 }}
@@ -72,6 +67,42 @@ jobs:
           script: |
             core.setFailed('Overall coverage is less than 20%!')
 
+      - name: Add atomic coverage to PR
+        id: jacoco2
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: |
+            ${{ github.workspace }}/atomic/target/jacoco-reports/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
+          title: Atomic Coverage
+          pass-emoji: ':green_circle:'
+      
+      - name: Add composite coverage to PR
+        id: jacoco3
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: |
+            ${{ github.workspace }}/composite/target/jacoco-reports/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
+          title: Composite Coverage
+          pass-emoji: ':green_circle:'
+        
+      - name: Add correspondence coverage to PR
+        id: jacoco4
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: |
+            ${{ github.workspace }}/correspondence/target/jacoco-reports/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
+          title: Correspondence Coverage
+          pass-emoji: ':green_circle:'
+      
       - name: Stage Build Results
         run: mkdir staging && cp -r maintarget/ staging/
         #run: mkdir staging && cp -r `ls -A | grep -v "staging"` staging/
