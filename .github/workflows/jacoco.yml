@@ -33,7 +33,7 @@ jobs:
         #run: ./mvn --batch-mode --update-snapshots verify
         run: mvn clean org.jacoco:jacoco-maven-plugin:0.8.8:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.9:report-aggregate
       
-      - name: Test moving jacoco reports
+      - name: Moving jacoco reports
         run:  rm -rf target/ && mkdir maintarget && cp -r report/target/* maintarget/
 
       - name: Add overall coverage to PR
@@ -103,9 +103,9 @@ jobs:
           echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
           echo "Changed Files coverage ${{ steps.jacoco.outputs.coverage-changed-files }}"
       
-      #- name: Stage Build Results
+      - name: Stage Build Results
+        run: mkdir staging && cp -r maintarget/ staging/
         #run: mkdir staging && cp -r `ls -A | grep -v "staging"` staging/
-        #run: mkdir staging && cp -r target/ staging/
         #run: mkdir staging && cp -r ${{ github.workspace }}/**/target/jacoco-reports/* staging/
         #run: mkdir staging && cp ${{ github.workspace }}/maintarget/target/jacoco-reports/jacoco.xml staging/
 
