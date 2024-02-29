@@ -91,8 +91,8 @@ jobs:
           echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
           echo "Changed Files coverage ${{ steps.jacoco.outputs.coverage-changed-files }}"
       
-      - name: Stage Build Results
-        run: mkdir staging && cp -r `ls -A | grep -v "staging"` staging/
+      #- name: Stage Build Results
+        #run: mkdir staging && cp -r `ls -A | grep -v "staging"` staging/
         #run: mkdir staging && cp -r target/ staging/
         #run: mkdir staging && cp -r ${{ github.workspace }}/**/target/jacoco-reports/* staging/
         #run: mkdir staging && cp ${{ github.workspace }}/maintarget/target/jacoco-reports/jacoco.xml staging/
