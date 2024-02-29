@@ -36,6 +36,11 @@ jobs:
       - name: Moving jacoco reports
         run:  rm -rf target/ && mkdir maintarget && cp -r report/target/* maintarget/
 
+      - name: Get the Coverage info 1
+        run: |
+          echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
+          echo "Changed Files coverage ${{ steps.jacoco.outputs.coverage-changed-files }}"
+
       - name: Add overall coverage to PR
         id: jacoco1
         uses: madrapps/jacoco-report@v1.6.1
@@ -65,7 +70,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            core.setFailed('Overall coverage is less than 80%!')
+            core.setFailed('Overall coverage is less than 20%!')
 
       - name: Add atomic coverage to PR
         id: jacoco2
