@@ -65,7 +65,6 @@ public class FilterModelResolverImpl extends HierarchicalIdResolverImpl {
 		EObject eObjectInFilterResourceSet = filterResourceSet.getEObject(uri, false);
 		EObject eObjectInViewResourceSet = mapCopy2OriginalObject.get(eObjectInFilterResourceSet);
 		if (eObjectInViewResourceSet != null) {
-			//TODO nbr: Is this correct?
 			getAndUpdateId(eObjectInViewResourceSet);
 		}
 		return eObjectInViewResourceSet;

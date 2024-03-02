@@ -21,14 +21,28 @@ import tools.vitruv.change.atomic.resolve.AtomicEChangeResolverHelper;
 import tools.vitruv.change.atomic.root.InsertRootEObject;
 import tools.vitruv.change.atomic.root.RemoveRootEObject;
 
+/**
+ * A resolver for resolving a change with {@link HierarchicalId} which has been executed on 
+ * a filtered model in a specific FilterResourceSet and not the preFilterResourceSet (the resourceSet of the 
+ * unfiltered model). Resolves changes
+ * by searching objects in the given preFilterResourceSet first and if a change refers to an object which is 
+ * not included in the preFilterResourceSet, it searches the HierarchicalId in the filterResourceSet and uses
+ * mapCopy2OriginalObject to map the object in the filterResourceSet to the corresponding object in the 
+ * preFilterResourceSet.
+ * The filterResourceSet must be in the state before the change has been applied.
+ * This Resolver must only be used for resolveAndApplyForward, but not for applyForwardAndAssignIds as it 
+ * might behave unexpected.
+ */
 public class AtomicEChangeFilterResolver extends AtomicEChangeHierarchicalIdResolver {
 	
+	/**
+	 * The resolver which is used to resolve HierarchicalIds
+	 */
 	private HierarchicalIdResolver hierarchicalFilteredModelResolver;
 
 
 	public AtomicEChangeFilterResolver(ResourceSet filterResourceSet, ResourceSet preFilterResourceSet, Map<EObject, EObject> mapCopy2OriginalObject) {
 		super(new FilterModelResolverImpl(filterResourceSet, preFilterResourceSet, mapCopy2OriginalObject));
-		//TODO nbr: Richtiges ResourceSet?
 		hierarchicalFilteredModelResolver = new HierarchicalIdResolverImpl(filterResourceSet);
 	}
 	
@@ -45,16 +59,15 @@ public class AtomicEChangeFilterResolver extends AtomicEChangeHierarchicalIdReso
 		EChange<EObject> resolvedViewResourceChange = resolve(unresolvedEChange, idResolver);
 		EChange<EObject> resolvedFilterResourceChange = resolve(unresolvedEChange, hierarchicalFilteredModelResolver);
 		applyForward(resolvedViewResourceChange, idResolver);
-		//TODO nbr: Hier muss ich wahrscheinlich eigene Methode schreiben, da ansonsten ids überschrieben werden. für eigenen Change resolver
 		applyForward(resolvedFilterResourceChange, hierarchicalFilteredModelResolver);
-		
-		//TODO nbr: Hier weitermachen: Was muss ich hier zurückgeben?
 		return resolvedViewResourceChange;
 	}
 	
-	
+	/**
+	 * 
+	 */
 	public EChange<HierarchicalId> applyForwardAndAssignIds(EChange<EObject> resolvedEChange) {
-		//TODO nbr: Provide better solution
-		throw new NullPointerException("Not implemented yet");
+		//TODO nbr: Check whether this works
+		return super.applyForwardAndAssignIds(resolvedEChange);
 	}	
 }

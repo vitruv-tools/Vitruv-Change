@@ -23,7 +23,6 @@ import tools.vitruv.change.atomic.root.RemoveRootEObject;
  * A resolver for resolving a change with {@link HierarchicalId} to
  * {@link EObject} or vice versa.
  */
-//TODO nbr: Add Javadoc
 public class AtomicEChangeHierarchicalIdResolver {
 	
 	protected HierarchicalIdResolver idResolver;
