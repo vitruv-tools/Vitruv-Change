@@ -12,6 +12,7 @@ import tools.vitruv.change.atomic.hid.AtomicEChangeHierarchicalIdResolver;
 import tools.vitruv.change.atomic.hid.HierarchicalId;
 import tools.vitruv.change.composite.description.VitruviusChange;
 
+//TODO nbr: Add Javadoc
 public class VitruviusChangeFilterResolver extends AbstractVitruviusChangeResolver<HierarchicalId> {
 	
 	private AtomicEChangeFilterResolver atomicChangeResolver;
@@ -30,41 +31,5 @@ public class VitruviusChangeFilterResolver extends AbstractVitruviusChangeResolv
 	@Override
 	public VitruviusChange<HierarchicalId> assignIds(VitruviusChange<EObject> change) {
 		throw new Error("assigning ids is not supported");
-//		VitruviusChange<EObject> result = transformVitruviusChange(change, atomicChangeResolver::applyForwardAndMapToObject, transactionalChange -> {});
-//		/**
-//		 * TODO: the correct handling would be to call endTransaction() each time after
-//		 * a transactional change is applied forward or backward. Due to incomplete
-//		 * change recording (https://github.com/vitruv-tools/Vitruv-Change/issues/71)
-//		 * this would result in failures when handling a composite change with multiple
-//		 * transactional changes as containment information of cascade deleted elements
-//		 * would be lost.
-//		 */
-//		atomicChangeResolver.endTransaction();
-//		return result;
 	}
-
-	
-	private void applyBackward(VitruviusChange<EObject> change) {
-		if (change instanceof CompositeContainerChangeImpl<EObject> compositeChange) {
-			List<VitruviusChange<EObject>> changes = new LinkedList<>(compositeChange.getChanges());
-			Collections.reverse(changes);
-			changes.forEach(this::applyBackward);
-		} else if (change instanceof TransactionalChangeImpl<EObject> transactionalChange) {
-			List<EChange<EObject>> changes = new LinkedList<>(transactionalChange.getEChanges());
-			Collections.reverse(changes);
-			changes.forEach(atomicChangeResolver::applyBackward);
-		} else {
-			throw new IllegalStateException(
-					"trying to apply unknown change of class " + change.getClass().getSimpleName());
-		}
-	}
-
-
-
-
-
-
-
-
-
 }

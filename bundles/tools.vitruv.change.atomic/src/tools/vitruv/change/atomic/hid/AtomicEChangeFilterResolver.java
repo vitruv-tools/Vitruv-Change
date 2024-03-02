@@ -22,8 +22,6 @@ import tools.vitruv.change.atomic.root.InsertRootEObject;
 import tools.vitruv.change.atomic.root.RemoveRootEObject;
 
 public class AtomicEChangeFilterResolver extends AtomicEChangeHierarchicalIdResolver {
-
-	//private FilterModelResolverImpl filterResolver;
 	
 	private HierarchicalIdResolver hierarchicalFilteredModelResolver;
 
@@ -55,81 +53,8 @@ public class AtomicEChangeFilterResolver extends AtomicEChangeHierarchicalIdReso
 	}
 	
 	
-//	public void applyForward(EChange<EObject> resolvedChange, HierarchicalIdResolver idResolver) {
-//		EObject affectedEObject = getAffectedEObject(resolvedChange);
-//		HierarchicalId affectedId = idResolver.getAndUpdateId(affectedEObject);
-//		EObject oldObject = getOldContainedEObject(resolvedChange);
-//		ApplyEChangeSwitch.applyEChange(resolvedChange, true);
-//		if (isContainmentChange(resolvedChange) || affectedId != idResolver.getAndUpdateId(affectedEObject)) {
-//			refreshIds(affectedEObject);
-//		}
-//		if (oldObject != null) {
-//			refreshIds(oldObject);
-//		}
-//	}
-	
-	
-	
-	
-	
-//	protected EChange<EObject> resolveInNonFilteredModel(EChange<HierarchicalId> unresolvedChange) {
-//		return AtomicEChangeResolverHelper.resolveChange(unresolvedChange, id -> {
-//			if (unresolvedChange instanceof CreateEObject<HierarchicalId> createChange) {
-//				//TODO nbr: Implement
-//				EObject createdElement = EcoreUtil.create(createChange.getAffectedEObjectType());
-//				HierarchicalId createdId = idResolver.getAndUpdateId(createdElement);
-//				checkState(createdId.equals(id),
-//						"generated ID %s does not match the original ID %s on element creation", createdId, id);
-//				return createdElement;
-//			} else {
-//				return idResolver.getEObjectInFilteredModel(id);
-//			}
-//			//TODO nbr: resource Handler sollte auch noch überprüft werden, ob das so funktioniert
-//		}, resource -> idResolver.getResource(resource.getURI()));
-//	}
-	
-
-	
-
-	
-//	private EChange<EObject> unresolve(EChange<EObject> resolvedChange) {
-//		return AtomicEChangeResolverHelper.resolveChange(resolvedChange, eObject -> filterResolver.getPreFilterObject(eObject),
-//				resource -> filterResolver.getResource(resource.getURI()));
-//	}
-	
-	
-	//TODO nbr: Wieder einkommentieren
-//	private void applyForward(EChange<EObject> resolvedChange) {
-//		//TODO nbr: Hier müssen beide ResourceSets forward applied werden 
-//		EObject affectedEObject = getAffectedEObject(resolvedChange);
-//		//TODO nbr: was passiert im Folgenden?
-//		HierarchicalId affectedId = filterResolver.getAndUpdateId(affectedEObject);
-//		//funktioniert das auch?
-//		EObject oldObject = getOldContainedEObject(resolvedChange);
-//		ApplyEChangeSwitch.applyEChange(resolvedChange, true);
-//		if (isContainmentChange(resolvedChange) || affectedId != filterResolver.getAndUpdateId(affectedEObject)) {
-//			refreshIds(affectedEObject);
-//		}
-//		if (oldObject != null) {
-//			refreshIds(oldObject);
-//		}
-//	}
-	
 	public EChange<HierarchicalId> applyForwardAndAssignIds(EChange<EObject> resolvedEChange) {
 		//TODO nbr: Provide better solution
 		throw new NullPointerException("Not implemented yet");
-	}
-	
-	
-	
-	
-	private static EObject getOldContainedEObject(EChange<EObject> eChange) {
-		if (eChange instanceof SubtractiveReferenceEChange<EObject> subtractiveChange) {
-			if (subtractiveChange.isContainment()) {
-				return subtractiveChange.getOldValue();
-			}
-		}
-		return null;
-	}
-	
+	}	
 }

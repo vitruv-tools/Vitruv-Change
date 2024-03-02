@@ -11,11 +11,10 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Map;
 
+//TODO nbr: Add Javadoc
 public class FilterModelResolverImpl extends HierarchicalIdResolverImpl {
 	
-	
 	private ResourceSet filterResourceSet;
-
 
 	private Map<EObject, EObject> mapCopy2OriginalObject;
 
@@ -71,18 +70,9 @@ public class FilterModelResolverImpl extends HierarchicalIdResolverImpl {
 		}
 		return eObjectInViewResourceSet;
 	}
-	
-	
-	
-	
-	
-	
+
 	public EObject getPreFilterObject(EObject eObject) {
 		EObject result = mapCopy2OriginalObject.get(eObject);
 		return result;
 	}
-	
-	
-	
-
 }

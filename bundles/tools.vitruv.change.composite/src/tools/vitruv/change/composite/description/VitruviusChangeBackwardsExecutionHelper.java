@@ -13,10 +13,10 @@ import tools.vitruv.change.atomic.hid.AtomicEChangeHierarchicalIdResolver;
 import tools.vitruv.change.composite.description.impl.CompositeContainerChangeImpl;
 import tools.vitruv.change.composite.description.impl.TransactionalChangeImpl;
 
+//TODO nbr: Add Javadoc
 public class VitruviusChangeBackwardsExecutionHelper {
 	
 	private AtomicEChangeHierarchicalIdResolver atomicChangeResolver;
-
 
 	public VitruviusChangeBackwardsExecutionHelper(ResourceSet resourceSet) {
 		atomicChangeResolver = new AtomicEChangeHierarchicalIdResolver(resourceSet);

@@ -6,7 +6,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
 import tools.vitruv.change.atomic.hid.AtomicEChangeFilterResolver;
-import tools.vitruv.change.atomic.hid.AtomicEChangeHierarchicalIdFilteredModelResolver;
 import tools.vitruv.change.atomic.hid.AtomicEChangeHierarchicalIdResolver;
 import tools.vitruv.change.atomic.hid.HierarchicalId;
 import tools.vitruv.change.atomic.uuid.AtomicEChangeUuidResolver;
@@ -55,19 +54,8 @@ public interface VitruviusChangeResolver<Id> {
 	}
 	
 	
-	public static VitruviusChangeResolver<EObject> forMappingFilteredObjects(ResourceSet resourceSet,
-			ResourceSet filterResourceSet, Map<EObject, EObject> mapCopy2OriginalObject) throws Exception {
-		
-		
-		//TODO nbr implement
-		throw new Exception("Not implemented yet");
-	}
-	
-	
 	public static VitruviusChangeResolver<HierarchicalId> forHierarchicalIdsAndFilteredModel(ResourceSet sourceResourceSet,
-			ResourceSet filterResourceSet, Map<EObject, EObject> mapCopy2OriginalObject) {
-//		AtomicEChangeHierarchicalIdResolver resolver = new AtomicEChangeHierarchicalIdFilteredModelResolver(sourceResourceSet, filterResourceSet, mapCopy2OriginalObject);
-//		return new VitruviusChangeFilterResolver(resolver);		
+			ResourceSet filterResourceSet, Map<EObject, EObject> mapCopy2OriginalObject) {	
 		AtomicEChangeFilterResolver resolver = new AtomicEChangeFilterResolver(filterResourceSet, sourceResourceSet, mapCopy2OriginalObject);
 		return new VitruviusChangeFilterResolver(resolver);
 	}
