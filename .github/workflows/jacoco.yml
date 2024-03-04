@@ -31,10 +31,13 @@ jobs:
       # run Maven build
       - name: Maven Build
         #run: ./mvn --batch-mode --update-snapshots verify
-        run: mvn clean org.jacoco:jacoco-maven-plugin:0.8.8:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.9:report-aggregate
+        run: mvn clean org.jacoco:jacoco-maven-plugin:0.8.8:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.9:report
       
+      - name: Delete not needed test reports
+        run: rm report/target/jacoco-reports/jacoco.xml && rm report/testutils/**/jacoco.xml && rm -rf target/
+
       - name: Moving jacoco reports
-        run:  rm -rf target/ && rm report/target/jacoco-reports/jacoco.xml && mkdir maintarget && cp -r report/target/* maintarget/
+        run: mkdir maintarget && cp -r report/target/* maintarget/
 
       - name: Add overall coverage to PR
         id: jacoco1
