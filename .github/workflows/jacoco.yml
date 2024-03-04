@@ -51,18 +51,6 @@ jobs:
           title: Overall Coverage
           pass-emoji: ':green_circle:'
 
-      - name: Add overall coverage to PR2
-        id: jacoco2
-        uses: madrapps/jacoco-report@v1.6.1
-        with:
-          paths: |
-            ${{ github.workspace }}/composite/target/jacoco-reports/jacoco.xml,
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 40
-          min-coverage-changed-files: 60
-          title: comp Coverage
-          pass-emoji: ':green_circle:'
-
       - name: Get the Coverage info
         run: |
           echo "Total coverage ${{ steps.jacoco1.outputs.coverage-overall }}"
