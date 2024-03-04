@@ -39,7 +39,7 @@ jobs:
       - name: Moving jacoco reports
         run: mkdir maintarget && cp -r report/target/* maintarget/
 
-      - name: Add overall coverage to PR
+      - name: Add overall coverage to PR1
         id: jacoco1
         uses: madrapps/jacoco-report@v1.6.1
         with:
@@ -51,16 +51,16 @@ jobs:
           title: Overall Coverage
           pass-emoji: ':green_circle:'
 
-      - name: Add overall coverage to PR
+      - name: Add overall coverage to PR2
         id: jacoco2
         uses: madrapps/jacoco-report@v1.6.1
         with:
           paths: |
-            ${{ github.workspace }}/composite/**/jacoco.xml,
+            ${{ github.workspace }}/composite/target/jacoco-reports/jacoco.xml,
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 40
           min-coverage-changed-files: 60
-          title: Overall Coverage
+          title: comp Coverage
           pass-emoji: ':green_circle:'
 
       - name: Get the Coverage info
