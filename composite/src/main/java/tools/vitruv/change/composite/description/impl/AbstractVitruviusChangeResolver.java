@@ -44,5 +44,4 @@ abstract class AbstractVitruviusChangeResolver<Id> implements VitruviusChangeRes
 		throw new IllegalStateException(
 				"trying to transform unknown change of class " + change.getClass().getSimpleName());
 	}
-
 }
