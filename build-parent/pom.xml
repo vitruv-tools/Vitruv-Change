@@ -162,7 +162,7 @@
           <version>0.8.7</version>
           <configuration>
             <outputDirectory>${project.build.directory}/jacoco-reports</outputDirectory>
-            <!--includeCurrentProject>true</includeCurrentProject-->
+            <includeCurrentProject>true</includeCurrentProject>
           </configuration>
         </plugin>
 

@@ -31,7 +31,7 @@ jobs:
       # run Maven build
       - name: Maven Build
         #run: ./mvn --batch-mode --update-snapshots verify
-        run: mvn clean org.jacoco:jacoco-maven-plugin:0.8.8:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.9:report
+        run: mvn clean org.jacoco:jacoco-maven-plugin:0.8.8:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.9:report-aggregate
       
       - name: Delete not needed test reports
         run: rm report/target/jacoco-reports/jacoco.xml && rm -rf target/ && rm -r testutils/core/target/jacoco-reports/jacoco.xml && rm -r testutils/integration/target/jacoco-reports/jacoco.xml  
