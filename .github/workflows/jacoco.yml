@@ -34,7 +34,7 @@ jobs:
         run: mvn clean org.jacoco:jacoco-maven-plugin:0.8.8:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.9:report-aggregate
       
       - name: Delete not needed test reports
-        run: rm report/target/jacoco-reports/jacoco.xml && rm -rf target/ && rm -r testutils/core/target/jacoco-reports/jacoco.xml && rm -r testutils/integration/target/jacoco-reports/jacoco.xml  
+        run: rm report/target/jacoco-reports/jacoco.xml && rm -rf target/ && rm -rf testutils/ #&& rm -r testutils/core/target/jacoco-reports/jacoco.xml && rm -r testutils/integration/target/jacoco-reports/jacoco.xml && rm -r testutils/changevisualization/target/jacoco-reports/jacoco.xml && rm -r testutils/metamodels/target/jacoco-reports/jacoco.xml && rm -r testutils/target/jacoco-reports/jacoco.xml 
 
       - name: Moving jacoco reports
         run: mkdir maintarget && cp -r report/target/* maintarget/
@@ -44,14 +44,7 @@ jobs:
         uses: madrapps/jacoco-report@v1.6.1
         with:
           paths: |
-            {{ github.workspace }}/atomic/target/jacoco-reports/jacoco.xml,
-            ${{ github.workspace }}/composite/target/jacoco-reports/jacoco.xml,
-            ${{ github.workspace }}/correspondence/target/jacoco-reports/jacoco.xml
-            ${{ github.workspace }}/changederivation/target/jacoco-reports/jacoco.xml
-            ${{ github.workspace }}/interaction/target/jacoco-reports/jacoco.xml
-            ${{ github.workspace }}/interaction.model/target/jacoco-reports/jacoco.xml
-            ${{ github.workspace }}/propagation/target/jacoco-reports/jacoco.xml
-          #${{ github.workspace }}/**/jacoco.xml,
+            ${{ github.workspace }}/**/jacoco.xml,
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 40
           min-coverage-changed-files: 60
