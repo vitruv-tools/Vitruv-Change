@@ -44,7 +44,14 @@ jobs:
         uses: madrapps/jacoco-report@v1.6.1
         with:
           paths: |
-            ${{ github.workspace }}/**/jacoco.xml,
+            {{ github.workspace }}/atomic/target/jacoco-reports/jacoco.xml,
+            ${{ github.workspace }}/composite/target/jacoco-reports/jacoco.xml,
+            ${{ github.workspace }}/correspondence/target/jacoco-reports/jacoco.xml
+            ${{ github.workspace }}/changederivation/target/jacoco-reports/jacoco.xml
+            ${{ github.workspace }}/interaction/target/jacoco-reports/jacoco.xml
+            ${{ github.workspace }}/interaction.model/target/jacoco-reports/jacoco.xml
+            ${{ github.workspace }}/propagation/target/jacoco-reports/jacoco.xml
+          #${{ github.workspace }}/**/jacoco.xml,
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 40
           min-coverage-changed-files: 60
