@@ -36,3 +36,16 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Vitruv -Dsonar.projectName='Vitruv'
+      - name: Make API Request
+        id: api-request
+        uses: muhfaris/request-action@v1
+        with:
+          url: ${{ secrets.SONAR_PROJECT_STATUS_API_URL }}
+          method: GET
+      - name: Show API Response Status
+        run: |
+          echo "Response Status: ${{ steps.api-request.outputs.response-status }}"
+
+      - name: Show API Response Data
+        run: |
+          echo "Response Data: ${{ steps.api-request.outputs.response-data }}"
