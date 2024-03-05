@@ -1,0 +1,77 @@
+name: Jacoco
+
+# workflow triggers
+on:
+  # manually
+  workflow_dispatch:
+  workflow_call:
+  # PRs on `main`
+  pull_request:
+    #branches:
+    #- main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+        
+      # setup Java and cache Maven dependencies
+      - name: Setup Java
+        uses: actions/setup-java@v3.13.0
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          check-latest: true
+          cache: 'maven'
+
+      # run Maven build
+      - name: Maven Build
+        #run: ./mvn --batch-mode --update-snapshots verify
+        run: mvn clean org.jacoco:jacoco-maven-plugin:0.8.8:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.9:report #-aggregate
+      
+      - name: Delete not needed test reports
+        run: rm report/target/jacoco-reports/jacoco.xml && rm -rf target/ && rm -rf testutils/ #&& rm -r testutils/core/target/jacoco-reports/jacoco.xml && rm -r testutils/integration/target/jacoco-reports/jacoco.xml && rm -r testutils/changevisualization/target/jacoco-reports/jacoco.xml && rm -r testutils/metamodels/target/jacoco-reports/jacoco.xml && rm -r testutils/target/jacoco-reports/jacoco.xml 
+
+      - name: Moving jacoco reports
+        run: mkdir maintarget && cp -r report/target/* maintarget/
+
+      - name: Add overall coverage to PR1
+        id: jacoco1
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: |
+            ${{ github.workspace }}/**/jacoco.xml,
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
+          title: Overall Coverage
+          pass-emoji: ':green_circle:'
+
+      - name: Get the Coverage info
+        run: |
+          echo "Total coverage ${{ steps.jacoco1.outputs.coverage-overall }}"
+          echo "Changed Files coverage ${{ steps.jacoco1.outputs.coverage-changed-files }}"
+
+      - name: Fail PR if overall coverage is less than 20%
+        if: ${{ steps.jacoco1.outputs.coverage-overall < 20.0 }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed('Overall coverage is less than 20%!')
+
+      - name: Stage Build Results
+        run: mkdir staging && cp -r maintarget/ staging/
+        #run: mkdir staging && cp -r `ls -A | grep -v "staging"` staging/
+        #run: mkdir staging && cp -r ${{ github.workspace }}/**/target/jacoco-reports/* staging/
+        #run: mkdir staging && cp ${{ github.workspace }}/maintarget/target/jacoco-reports/jacoco.xml staging/
+
+       #upload staged packages
+      - name: Upload Build Results
+        uses: actions/upload-artifact@v3.1.3
+        with:
+          name: Build Results
+          path: staging/

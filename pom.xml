@@ -39,6 +39,7 @@
     <module>propagation</module>
     <module>testutils</module>
     <module>utils</module>
+    <module>report</module>
   </modules>
 
   <!-- Additional Repositories -->
