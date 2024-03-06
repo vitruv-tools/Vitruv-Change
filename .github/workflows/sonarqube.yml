@@ -35,12 +35,14 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Vitruv -Dsonar.projectName='Vitruv'
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Vitruv -Dsonar.projectName='Vitruv' #-Dsonar.jacoco.reportPath='report/target/jacoco-reports/jacoco.exec
       - name: API Request
         id: api-request
         uses: fjogeleit/http-request-action@v1
         with:
           url: ${{ secrets.SONAR_PROJECT_STATUS_API_URL }}
+          customHeaders: '{"Authorization": "application/json"}'
+          bearerToken: ${{ secrets.SONAR_TOKEN }}
           method: 'GET'
       - name: Show API Response Status
         run: |
