@@ -47,4 +47,12 @@ jobs:
       - name: Show API Response Status
         run: |
           echo "Response Status: ${{ steps.api-request.outputs.response }}"
-     
+      - name: Show Error response
+        run: |
+          echo ${{ fromJson(steps.api-request.outputs.response).projectStatus.status }}
+      - name: Fail Pipeline if QualityGate fails
+        if: ${{ fromJson(steps.api-request.outputs.response).projectStatus.status < "Error" }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed('SonarQube Quality Gate Failed!')
