@@ -51,7 +51,7 @@ jobs:
         run: |
           echo ${{ fromJson(steps.api-request.outputs.response).projectStatus.status }}
       - name: Fail Pipeline if QualityGate fails
-        if: ${{ fromJson(steps.api-request.outputs.response).projectStatus.status == "Error" }}
+        if: ${{ fromJson(steps.api-request.outputs.response).projectStatus.status == 'ERROR' }}
         uses: actions/github-script@v6
         with:
           script: |
