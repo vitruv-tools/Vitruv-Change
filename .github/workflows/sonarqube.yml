@@ -47,7 +47,8 @@ jobs:
       - name: Show API Response Status
         run: |
           echo "Response Status: ${{ steps.api-request.outputs.response }}"
-
-      - name: Show API Response Data
+      - name: Show Error response
         run: |
-          echo "Response Data: ${{ steps.api-request.outputs.headers }}"
+          echo ${{ fromJson(steps.api-request.outputs.response).status }}
+      - name: Fail Pipeline if QualityGate fails
+        if: ${{ fromJson(steps.api-request.outputs.response).status < "Error" }}
