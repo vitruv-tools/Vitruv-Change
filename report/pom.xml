@@ -23,9 +23,9 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>0.8.9</version>
-        <!--configuration>
-            <includeCurrentProject>false</includeCurrentProject>
-        </configuration-->
+        <configuration>
+          <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
+        </configuration>
         <executions>
           <execution>
             <id>prepare-agent</id>
