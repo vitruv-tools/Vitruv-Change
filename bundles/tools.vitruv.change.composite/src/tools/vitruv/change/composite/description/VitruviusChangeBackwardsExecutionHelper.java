@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.hid.AtomicEChangeHierarchicalIdResolver;

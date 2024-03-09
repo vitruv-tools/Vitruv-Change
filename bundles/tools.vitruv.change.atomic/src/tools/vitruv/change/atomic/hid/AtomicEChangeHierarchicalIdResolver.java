@@ -1,7 +1,6 @@
 package tools.vitruv.change.atomic.hid;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Preconditions.checkArgument;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.ResourceSet;
