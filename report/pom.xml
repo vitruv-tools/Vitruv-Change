@@ -24,7 +24,7 @@
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>0.8.9</version>
         <configuration>
-          <outputDirectory>${project.build.directory}/jacoco-report</outputDirectory>
+          <outputDirectory>${project.build.directory}/site/jacoco/</outputDirectory>
         </configuration>
         <executions>
           <execution>
