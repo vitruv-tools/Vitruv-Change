@@ -13,7 +13,8 @@ jobs:
     permissions:
       pull-requests: write
     steps:
+        - uses: actions/checkout@v4
         - name: Checkstyle
-          uses: ./.github/workflows/checkstyle.yml
+          uses: ./.github/actions/checkstyle.yml
         - name: Jacoco
-          uses: ./.github/workflows/jacoco.yml
+          uses: ./.github/actions/jacoco.yml
