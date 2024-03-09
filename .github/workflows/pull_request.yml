@@ -15,6 +15,6 @@ jobs:
     steps:
         - uses: actions/checkout@v4
         - name: Checkstyle
-          uses: ./.github/actions/checkstyle.yml
+          uses: ./.github/workflows/checkstyle.yml
         - name: Jacoco
-          uses: ./.github/actions/jacoco.yml
+          uses: ./.github/workflows/jacoco.yml
