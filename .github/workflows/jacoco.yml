@@ -2,10 +2,8 @@ name: Jacoco
 
 # workflow triggers
 on:
-  # manually
   workflow_dispatch:
   workflow_call:
-  # PRs on `main`
 
 jobs:
   build:
