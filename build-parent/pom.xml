@@ -160,7 +160,7 @@
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <configuration>
-            <outputDirectory>${project.build.directory}/jacoco-reports</outputDirectory>
+            <outputDirectory>${project.build.directory}/site/jacoco/</outputDirectory>
             <includeCurrentProject>true</includeCurrentProject>
           </configuration>
         </plugin>

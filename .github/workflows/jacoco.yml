@@ -30,7 +30,7 @@ jobs:
         run: mvn clean org.jacoco:jacoco-maven-plugin:0.8.8:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.9:report #-aggregate
       
       - name: Delete not needed test reports
-        run: rm report/target/jacoco-reports/jacoco.xml && rm -rf target/ && rm -rf testutils/
+        run: rm report/target/site/jacoco/jacoco.xml && rm -rf target/ && rm -rf testutils/
 
       - name: Add overall coverage to PR
         id: jacoco1
@@ -57,7 +57,7 @@ jobs:
             core.setFailed('Overall coverage is less than 20%!')
 
       - name: Stage Test Results
-        run: mkdir staging && cp -r report/target/jacoco-reports/ staging/
+        run: mkdir staging && cp -r report/target/site/jacoco/ staging/
         #run: mkdir staging && cp -r `ls -A | grep -v "staging"` staging/
       - name: Upload Test Results
         uses: actions/upload-artifact@v3.1.3
