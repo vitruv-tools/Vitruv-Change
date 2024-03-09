@@ -7,7 +7,7 @@ import java.util.List;
 import org.eclipse.emf.ecore.EObject;
 
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.change.atomic.hid.AtomicEChangeFilterResolver;
+import tools.vitruv.change.atomic.hid.AtomicEChangeHierarchicalIdFilterResolver;
 import tools.vitruv.change.atomic.hid.AtomicEChangeHierarchicalIdResolver;
 import tools.vitruv.change.atomic.hid.HierarchicalId;
 import tools.vitruv.change.composite.description.VitruviusChange;
@@ -19,9 +19,9 @@ import tools.vitruv.change.composite.description.VitruviusChange;
  */
 public class VitruviusChangeFilterResolver extends AbstractVitruviusChangeResolver<HierarchicalId> {
 	
-	private AtomicEChangeFilterResolver atomicChangeResolver;
+	private AtomicEChangeHierarchicalIdFilterResolver atomicChangeResolver;
 
-	public VitruviusChangeFilterResolver(AtomicEChangeFilterResolver atomicChangeResolver) {
+	public VitruviusChangeFilterResolver(AtomicEChangeHierarchicalIdFilterResolver atomicChangeResolver) {
 		this.atomicChangeResolver = atomicChangeResolver;
 	}
 

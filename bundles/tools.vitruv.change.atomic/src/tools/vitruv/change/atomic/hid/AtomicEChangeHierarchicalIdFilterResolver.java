@@ -1,7 +1,8 @@
 package tools.vitruv.change.atomic.hid;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Preconditions.checkArgument;
+
+import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -14,21 +15,40 @@ import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange;
 import tools.vitruv.change.atomic.feature.FeatureEChange;
 import tools.vitruv.change.atomic.feature.reference.SubtractiveReferenceEChange;
 import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange;
+import tools.vitruv.change.atomic.hid.internal.FilterModelResolverImpl;
 import tools.vitruv.change.atomic.hid.internal.HierarchicalIdResolver;
+import tools.vitruv.change.atomic.hid.internal.HierarchicalIdResolverImpl;
 import tools.vitruv.change.atomic.resolve.AtomicEChangeResolverHelper;
 import tools.vitruv.change.atomic.root.InsertRootEObject;
 import tools.vitruv.change.atomic.root.RemoveRootEObject;
 
 /**
- * A resolver for resolving a change with {@link HierarchicalId} to
- * {@link EObject} or vice versa.
+ * A resolver for resolving a change with {@link HierarchicalId} which has been executed on 
+ * a filtered model in a specific FilterResourceSet and not the unfilteredResourceSet (the resourceSet of the 
+ * unfiltered model). Resolves changes
+ * by searching objects in the given FilterResourceSet first and then mapping it to the unfilteredResourceSet.
+ * The filterResourceSet must be in the state before the change has been applied.
+ * This Resolver must only be used for resolveAndApplyForward, but not for applyForwardAndAssignIds as this might 
+ * produce unexpected behaviour. 
  */
-public class AtomicEChangeHierarchicalIdResolver {
-	private HierarchicalIdResolver idResolver;
+public class AtomicEChangeHierarchicalIdFilterResolver {
+	
+	/**
+	 * The resolver which is used to resolve HierarchicalIds in the unfiltered ResourceSet.
+	 */
+	protected HierarchicalIdResolver idInUnfilteredModelResolver;
+	
+	/**
+	 * The resolver which is used to resolve HierarchicalIds
+	 */
+	private HierarchicalIdResolver idInFilteredModelResolver;
 
-	public AtomicEChangeHierarchicalIdResolver(ResourceSet resourceSet) {
-		this.idResolver = HierarchicalIdResolver.create(resourceSet);
+
+	public AtomicEChangeHierarchicalIdFilterResolver(ResourceSet filterResourceSet, ResourceSet unfilteredResourceSet, Map<EObject, EObject> mapCopy2OriginalObject) {
+		idInUnfilteredModelResolver = new FilterModelResolverImpl(filterResourceSet, unfilteredResourceSet, mapCopy2OriginalObject);
+		idInFilteredModelResolver = new HierarchicalIdResolverImpl(filterResourceSet);
 	}
+	
 
 	/**
 	 * Resolves the given change using its {@link HierarchicalIdResolver} and
@@ -39,49 +59,38 @@ public class AtomicEChangeHierarchicalIdResolver {
 	 * @return Returns the resolved change.
 	 */
 	public EChange<EObject> resolveAndApplyForward(EChange<HierarchicalId> unresolvedEChange) {
-		EChange<EObject> resolvedChange = resolve(unresolvedEChange);
-		applyForward(resolvedChange);
-		return resolvedChange;
+		EChange<EObject> resolvedViewResourceChange = resolve(unresolvedEChange, idInUnfilteredModelResolver);
+		EChange<EObject> resolvedFilterResourceChange = resolve(unresolvedEChange, idInFilteredModelResolver);
+		applyForward(resolvedViewResourceChange, idInUnfilteredModelResolver);
+		applyForward(resolvedFilterResourceChange, idInFilteredModelResolver);
+		return resolvedViewResourceChange;
 	}
-
-	/**
-	 * Applies a change backward. Since hierarchical Ids can only be assigned when
-	 * the resource set is in the state before the change, this method might be used
-	 * to reverse some change to allow Id assignment.
-	 * 
-	 * @param resolvedEChange the change to reverse.
-	 * @see AtomicEChangeHierarchicalIdResolver#applyForwardAndAssignIds(EChange)
-	 */
-	public void applyBackward(EChange<EObject> resolvedEChange) {
-		ApplyEChangeSwitch.applyEChange(resolvedEChange, false);
-	}
-
-	/**
-	 * Gets {@link HierarchicalId HierarchicalIds} for all elements of the given
-	 * change, applies it forward, and returns the Id-assigned change. The
-	 * associated resource set must be in the state before the change has been
-	 * applied.
-	 * 
-	 * @param resolvedEChange the change to assign hierarchical Ids for.
-	 * @return Returns the Id-assigned change.
-	 * @see AtomicEChangeHierarchicalIdResolver#applyBackward(EChange)
-	 */
-	public EChange<HierarchicalId> applyForwardAndAssignIds(EChange<EObject> resolvedEChange) {
-		EChange<HierarchicalId> unresolvedChange = unresolve(resolvedEChange);
-		applyForward(resolvedEChange);
-		return unresolvedChange;
-	}
-
+	
 	/**
 	 * Ends a transactions such that all {@link EObject}s not being contained in a
 	 * resource, which is contained in a resource set, are removed from the
 	 * hierarchical ID mapping.
 	 */
 	public void endTransaction() {
-		idResolver.endTransaction();
+		idInUnfilteredModelResolver.endTransaction();
+		idInFilteredModelResolver.endTransaction();
 	}
-
-	private EChange<EObject> resolve(EChange<HierarchicalId> unresolvedChange) {
+	
+	
+	private void applyForward(EChange<EObject> resolvedChange, HierarchicalIdResolver idResolver) {
+		EObject affectedEObject = getAffectedEObject(resolvedChange);
+		HierarchicalId affectedId = idResolver.getAndUpdateId(affectedEObject);
+		EObject oldObject = getOldContainedEObject(resolvedChange);
+		ApplyEChangeSwitch.applyEChange(resolvedChange, true);
+		if (isContainmentChange(resolvedChange) || affectedId != idResolver.getAndUpdateId(affectedEObject)) {
+			refreshIds(affectedEObject, idResolver);
+		}
+		if (oldObject != null) {
+			refreshIds(oldObject, idResolver);
+		}
+	}
+	
+	private EChange<EObject> resolve(EChange<HierarchicalId> unresolvedChange, HierarchicalIdResolver idResolver) {
 		return AtomicEChangeResolverHelper.resolveChange(unresolvedChange, id -> {
 			if (unresolvedChange instanceof CreateEObject<HierarchicalId> createChange) {
 				EObject createdElement = EcoreUtil.create(createChange.getAffectedEObjectType());
@@ -94,25 +103,7 @@ public class AtomicEChangeHierarchicalIdResolver {
 			}
 		}, resource -> idResolver.getResource(resource.getURI()));
 	}
-
-	private EChange<HierarchicalId> unresolve(EChange<EObject> resolvedChange) {
-		return AtomicEChangeResolverHelper.resolveChange(resolvedChange, eObject -> idResolver.getAndUpdateId(eObject),
-				resource -> idResolver.getResource(resource.getURI()));
-	}
-
-	private void applyForward(EChange<EObject> resolvedChange) {
-		EObject affectedEObject = getAffectedEObject(resolvedChange);
-		HierarchicalId affectedId = idResolver.getAndUpdateId(affectedEObject);
-		EObject oldObject = getOldContainedEObject(resolvedChange);
-		ApplyEChangeSwitch.applyEChange(resolvedChange, true);
-		if (isContainmentChange(resolvedChange) || affectedId != idResolver.getAndUpdateId(affectedEObject)) {
-			refreshIds(affectedEObject);
-		}
-		if (oldObject != null) {
-			refreshIds(oldObject);
-		}
-	}
-
+	
 	private static EObject getAffectedEObject(EChange<EObject> eChange) {
 		if (eChange instanceof FeatureEChange<EObject, ?> featureChange) {
 			return featureChange.getAffectedElement();
@@ -125,7 +116,7 @@ public class AtomicEChangeHierarchicalIdResolver {
 		}
 		throw new IllegalArgumentException("cannot identify affected EObject of change %s".formatted(eChange));
 	}
-
+	
 	private static EObject getOldContainedEObject(EChange<EObject> eChange) {
 		if (eChange instanceof SubtractiveReferenceEChange<EObject> subtractiveChange) {
 			if (subtractiveChange.isContainment()) {
@@ -134,16 +125,16 @@ public class AtomicEChangeHierarchicalIdResolver {
 		}
 		return null;
 	}
-
-	private static boolean isContainmentChange(EChange<EObject> eChange) {
+	
+	protected static boolean isContainmentChange(EChange<EObject> eChange) {
 		if (eChange instanceof UpdateReferenceEChange<EObject> referenceChange) {
 			return referenceChange.isContainment();
 		}
 		return false;
 	}
 
-	private void refreshIds(EObject eObject) {
+	protected void refreshIds(EObject eObject, HierarchicalIdResolver idResolver) {
 		idResolver.getAndUpdateId(eObject);
-		eObject.eContents().forEach(this::refreshIds);
+		eObject.eContents().forEach(it -> refreshIds(it, idResolver));
 	}
 }
