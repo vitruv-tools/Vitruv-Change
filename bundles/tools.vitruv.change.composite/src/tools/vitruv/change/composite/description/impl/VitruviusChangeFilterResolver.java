@@ -12,7 +12,11 @@ import tools.vitruv.change.atomic.hid.AtomicEChangeHierarchicalIdResolver;
 import tools.vitruv.change.atomic.hid.HierarchicalId;
 import tools.vitruv.change.composite.description.VitruviusChange;
 
-//TODO nbr: Add Javadoc
+/**
+ * This Resolver can be used to resolve {@link VitruvChange} Objects which have been made on a 
+ * filtered {@link ResourceSet} on the unfiltered {@link ResourceSet}. The resolver uses {@link HierarchicalId}s.
+ * May not be used to assign Ids but only to resolve Changes which reference {@link HierarchicalId}s.
+ */
 public class VitruviusChangeFilterResolver extends AbstractVitruviusChangeResolver<HierarchicalId> {
 	
 	private AtomicEChangeFilterResolver atomicChangeResolver;

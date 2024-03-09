@@ -11,67 +11,36 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Map;
 
-//TODO nbr: Add Javadoc
+/**
+ * This is a special {@link HierarchicalIdResolver} which can be used to resolve {@link HierarchicalId}s on Filtered-Models.
+ * The Resolver therefore needs the filtered {@link ResourceSet} as well as the unfiltered {@link ResourceSet}. The Resolver first tries to 
+ * resolve a given {@link HierarchicalId} in the filtered {@link ResourceSet}. If the {@link HierarchicalId} can be resolved in the 
+ * filtered {@link ResourceSet}, the Resolver uses the mapping-function, which has been provided during construction 
+ * {@link mapCopy2OriginalObject}, to find the corresponding {@link EObject} in the unfiltered {@link ResourceSet}.
+ */
 public class FilterModelResolverImpl extends HierarchicalIdResolverImpl {
 	
-	private ResourceSet filterResourceSet;
-
 	private Map<EObject, EObject> mapCopy2OriginalObject;
 
 	public FilterModelResolverImpl(ResourceSet filterResourceSet, ResourceSet preFilterResourceSet, Map<EObject, EObject> mapCopy2OriginalObject) {
-		super(preFilterResourceSet);
+		super(filterResourceSet);
 		this.mapCopy2OriginalObject = mapCopy2OriginalObject;
-		checkArgument(filterResourceSet != null, "Resource set may not be null");
-		this.filterResourceSet = filterResourceSet;
-		
+		checkArgument(filterResourceSet != null, "Resource set may not be null");		
 	}
 	
 	
 	@Override
 	public EObject getEObject(HierarchicalId id) {
-		EObject eObject = getEObjectOrNull(id);
+		EObject objectInFilterSet = super.getEObject(id);
+		EObject eObject = getEObjectInUnfilteredSet(objectInFilterSet);
 		checkState(eObject != null, "no EObject could be found for ID: %s", id);
 		return eObject;
 	}
 	
 	
-	private EObject getEObjectOrNull(HierarchicalId id) {
-		URI uri = URI.createURI(id.getId());
-		
-		EObject eObject = getEObjectIfReadonlyUri(uri);
-		if (eObject != null) {
-			return eObject;
-		}
-		eObject = getStoredEObject(uri);
-		if (eObject != null) {
-			return eObject;
-		}
-		eObject = getAndRegisterNonStoredEObject(uri);
-		if (eObject != null) {
-			return eObject;
-		}
-		eObject = mapObjectFromFilteredResourceSet(uri);
-		if (eObject != null) {
-			return eObject;
-		} 
-		
-		return null;		
+	private EObject getEObjectInUnfilteredSet(EObject objectInFilteredSet) {
+		EObject eObjectInViewResourceSet = mapCopy2OriginalObject.get(objectInFilteredSet);
+		return eObjectInViewResourceSet;		
 	}
 	
-	
-	private EObject mapObjectFromFilteredResourceSet(URI uri) {
-		//TODO nbr: Hier müssen evtl. noch die anderen Fälle wie in getEObjectOrNull auch für
-		//filterResourceSet durchlaufen werden.
-		EObject eObjectInFilterResourceSet = filterResourceSet.getEObject(uri, false);
-		EObject eObjectInViewResourceSet = mapCopy2OriginalObject.get(eObjectInFilterResourceSet);
-		if (eObjectInViewResourceSet != null) {
-			getAndUpdateId(eObjectInViewResourceSet);
-		}
-		return eObjectInViewResourceSet;
-	}
-
-	public EObject getPreFilterObject(EObject eObject) {
-		EObject result = mapCopy2OriginalObject.get(eObject);
-		return result;
-	}
 }
