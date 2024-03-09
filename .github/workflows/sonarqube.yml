@@ -35,10 +35,11 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: mvn -B clean org.jacoco:jacoco-maven-plugin:0.8.8:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.9:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Vitruv -Dsonar.projectName='Vitruv' #-Dsonar.jacoco.reportPath='report/target/site/jacoco/jacoco.xml'
+        run: mvn -B clean org.jacoco:jacoco-maven-plugin:0.8.8:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.9:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Vitruv -Dsonar.projectName='Vitruv' -Dsonar.jacoco.reportPath='report/target/site/jacoco/jacoco.xml'
       - name: Posting information About the Progress
         run: |
-          echo '::error file=README.md,line=1,title=Link to the Sonarqube Dashboard::dashboard http://6cb96fc3-7048-4484-9038-61921e7f6ae1.ka.bw-cloud-instance.org:9000/'
+          link="dashboard http://6cb96fc3-7048-4484-9038-61921e7f6ae1.ka.bw-cloud-instance.org:9000/"
+          echo '::warning file=app.js,line=10,col=15::$link"
       - name: API Request
         id: api-request
         uses: fjogeleit/http-request-action@v1
@@ -47,9 +48,9 @@ jobs:
           customHeaders: '{"Authorization": "Bearer ${{ secrets.SONAR_TOKEN }}"}'
           bearerToken: ${{ secrets.SONAR_TOKEN }}
           method: 'GET'
-      - name: Show Error response
+      - name: Show API response
         run: |
-          echo ${{ fromJson(steps.api-request.outputs.response).projectStatus.status }}
+          echo ${{ steps.api-request.outputs.response }}
       - name: Fail Pipeline if QualityGate fails
         if: ${{ fromJson(steps.api-request.outputs.response).projectStatus.status == 'ERROR' }}
         uses: actions/github-script@v6
