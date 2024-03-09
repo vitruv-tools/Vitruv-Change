@@ -8,13 +8,8 @@ on:
   pull_request:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    steps:
-        - uses: actions/checkout@v1
-        - name: Checkstyle
-          uses: ./.github/workflows/checkstyle
-        - name: Jacoco
-          uses: ./.github/workflows/jacoco
+  checkstyle:
+    uses: ./.github/workflows/checkstyle.yml
+  jacoco:
+    uses: ./.github/workflows/jacoco.yml
+          
