@@ -36,6 +36,9 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: mvn -B clean org.jacoco:jacoco-maven-plugin:0.8.8:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.9:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Vitruv -Dsonar.projectName='Vitruv' #-Dsonar.jacoco.reportPath='report/target/jacoco-reports/jacoco.exec 
+      - name: Information About the Progress
+        run: |
+          echo "Sonarqube Quality Gate Check Finished. For more Information visit http://6cb96fc3-7048-4484-9038-61921e7f6ae1.ka.bw-cloud-instance.org:9000/ and enter your admin Credentials to get access to detailed Information."
       - name: API Request
         id: api-request
         uses: fjogeleit/http-request-action@v1
@@ -44,9 +47,6 @@ jobs:
           customHeaders: '{"Authorization": "Bearer ${{ secrets.SONAR_TOKEN }}"}'
           bearerToken: ${{ secrets.SONAR_TOKEN }}
           method: 'GET'
-      - name: Show API Response Status
-        run: |
-          echo "Response Status: ${{ steps.api-request.outputs.response }}"
       - name: Show Error response
         run: |
           echo ${{ fromJson(steps.api-request.outputs.response).projectStatus.status }}
@@ -55,4 +55,4 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            core.setFailed('SonarQube Quality Gate Failed!')
+            core.setFailed('SonarQube Quality Gate Failed! For more Information visit the Site http://6cb96fc3-7048-4484-9038-61921e7f6ae1.ka.bw-cloud-instance.org:9000/ and enter your admin Credentials to get access to detailed Information.')

@@ -1,0 +1,15 @@
+name: Jacoco
+
+# workflow triggers
+on:
+  # manually
+  workflow_dispatch:
+  workflow_call:
+  pull_request:
+
+jobs:
+  checkstyle:
+    uses: ./.github/workflows/checkstyle.yml
+  jacoco:
+    uses: ./.github/workflows/jacoco.yml
+          
