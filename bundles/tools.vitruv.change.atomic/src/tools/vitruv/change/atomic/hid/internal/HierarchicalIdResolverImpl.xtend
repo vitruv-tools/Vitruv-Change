@@ -100,7 +100,7 @@ class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
 			?: null
 	}
 	
-	protected def getEObjectIfReadonlyUri(URI uri) {
+	private def getEObjectIfReadonlyUri(URI uri) {
 		if (uri.readOnly) {
 			if (uri.hasFragment) {
 				return resourceSet.getEObject(uri, true)
@@ -108,11 +108,11 @@ class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
 		}
 	}
 	
-	protected def getStoredEObject(URI uri) {
+	private def getStoredEObject(URI uri) {
 		return eObjectToId.inverse.get(new HierarchicalId(uri.toString))
 	}
 	
-	protected def getAndRegisterNonStoredEObject(URI uri) {
+	private def getAndRegisterNonStoredEObject(URI uri) {
 		val candidate = resourceSet.getEObject(uri, false)
 		if (candidate !== null) getAndUpdateId(candidate)
 		return candidate
