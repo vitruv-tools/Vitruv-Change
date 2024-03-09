@@ -1,0 +1,19 @@
+name: Jacoco
+
+# workflow triggers
+on:
+  # manually
+  workflow_dispatch:
+  workflow_call:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+        - name: Checkstyle
+          uses: /github/workflow/checkstyle.yml
+        - name: Jacoco
+          uses: /github/workflow/jacoco.yml

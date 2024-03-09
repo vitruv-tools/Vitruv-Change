@@ -5,10 +5,6 @@ on:
   # manually
   workflow_dispatch:
   workflow_call:
-  # PRs on `main`
-  pull_request:
-    branches:
-    - build/pure-maven
 
 jobs:
   checkstyle:
