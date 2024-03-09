@@ -2,7 +2,6 @@ name: Jacoco
 
 # workflow triggers
 on:
-  # manually
   workflow_dispatch:
   workflow_call:
   pull_request:

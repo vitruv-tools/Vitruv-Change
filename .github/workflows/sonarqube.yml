@@ -52,4 +52,4 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            core.setFailed('SonarQube Quality Gate Failed! For more Information visit the dashboard and enter your admin Credentials to get access to detailed Information.')
+            core.setFailed('SonarQube Quality Gate Failed! For more Information visit the Sonarqube Dashboard and enter your admin Credentials to get access to detailed Information.')
