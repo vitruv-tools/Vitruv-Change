@@ -7,22 +7,30 @@ Bundle-Version: 3.0.1.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: tools.vitruv.change.atomic,
  tools.vitruv.change.atomic.eobject,
+ tools.vitruv.change.atomic.eobject.impl,
  tools.vitruv.change.atomic.eobject.util,
  tools.vitruv.change.atomic.feature,
  tools.vitruv.change.atomic.feature.attribute,
+ tools.vitruv.change.atomic.feature.attribute.impl,
  tools.vitruv.change.atomic.feature.attribute.util,
+ tools.vitruv.change.atomic.feature.impl,
  tools.vitruv.change.atomic.feature.list,
+ tools.vitruv.change.atomic.feature.list.impl,
  tools.vitruv.change.atomic.feature.list.util,
  tools.vitruv.change.atomic.feature.reference,
+ tools.vitruv.change.atomic.feature.reference.impl,
  tools.vitruv.change.atomic.feature.reference.util,
  tools.vitruv.change.atomic.feature.single,
+ tools.vitruv.change.atomic.feature.single.impl,
  tools.vitruv.change.atomic.feature.single.util,
  tools.vitruv.change.atomic.feature.util,
+ tools.vitruv.change.atomic.impl,
  tools.vitruv.change.atomic.hid,
  tools.vitruv.change.atomic.root,
+ tools.vitruv.change.atomic.root.impl,
  tools.vitruv.change.atomic.root.util,
  tools.vitruv.change.atomic.util,
  tools.vitruv.change.atomic.uuid
