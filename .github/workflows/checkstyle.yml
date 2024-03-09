@@ -16,8 +16,8 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
           level: warning
-      - uses: reviewdog/action-setup@v1
-        with:
-          reviewdog_version: latest
+      #- uses: reviewdog/action-setup@v1
+        #with:
+          #reviewdog_version: latest
     
 
