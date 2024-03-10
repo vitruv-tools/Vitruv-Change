@@ -1,4 +1,4 @@
-name: Jacoco
+name: Pull Request Checks
 
 # workflow triggers
 on:

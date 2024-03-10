@@ -1,0 +1,15 @@
+name: Push on main checks
+
+# workflow triggers
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    branches:
+        - build/pure-maven
+
+jobs:
+  sonarqube:
+    uses: ./.github/workflows/sonarqube.yml
+
+          
