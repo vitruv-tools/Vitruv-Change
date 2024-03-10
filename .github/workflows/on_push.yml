@@ -4,9 +4,9 @@ name: Push on main checks
 on:
   workflow_dispatch:
   workflow_call:
-  push:
-    branches:
-        - build/pure-maven
+  #push:
+   #branches:
+        #- build/pure-maven
 
 jobs:
   sonarqube:
