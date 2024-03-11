@@ -4,13 +4,19 @@ name: Push on main checks
 on:
   workflow_dispatch:
   workflow_call:
-  #push:
-   #branches:
-        #- build/pure-maven
+  push:
+    branches:
+      - build/pure-maven
 
 jobs:
+  action-checkout:
+    name: My Job
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
   sonarqube:
     permissions: read-all
+    needs: action-checkout
     uses: ./.github/workflows/sonarqube.yml
 
           
