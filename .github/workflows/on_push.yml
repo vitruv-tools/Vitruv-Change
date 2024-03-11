@@ -24,9 +24,6 @@ jobs:
     permissions: read-all
     needs: action-checkout
     uses: ./.github/workflows/sonarqube.yml
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      SONAR_PROJECT_STATUS_API_URL: ${{ secrets.SONAR_PROJECT_STATUS_API_URL }}
+    secrets: inherit
 
           
