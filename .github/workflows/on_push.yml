@@ -9,16 +9,8 @@ on:
       - build/pure-maven
 
 jobs:
-  action-checkout:
-    name: Checkout Actions
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
   sonarqube:
     permissions: read-all
-    needs: action-checkout
     uses: ./.github/workflows/sonarqube.yml
     secrets: inherit
 
