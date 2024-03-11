@@ -10,8 +10,5 @@ on:
 
 jobs:
   sonarqube:
-    #permissions: read-all
     uses: ./.github/workflows/sonarqube.yml
     secrets: inherit
-
-          

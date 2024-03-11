@@ -3,9 +3,6 @@ name: SonarBuild
 on:
   workflow_dispatch:
   workflow_call:
-  #push:
-    #branches:
-      #- build/pure-maven
 
 jobs:
   build:
@@ -43,7 +40,6 @@ jobs:
         with:
           url: ${{ secrets.SONAR_PROJECT_STATUS_API_URL }}
           customHeaders: '{"Authorization": "Bearer ${{ secrets.SONAR_TOKEN }}"}'
-          bearerToken: ${{ secrets.SONAR_TOKEN }}
           method: 'GET'
       - name: Show API response
         run: |

@@ -56,7 +56,6 @@ jobs:
 
       - name: Stage Test Results
         run: mkdir staging && cp -r report/target/site/jacoco/ staging/
-        #run: mkdir staging && cp -r `ls -A | grep -v "staging"` staging/
       - name: Upload Test Results
         uses: actions/upload-artifact@v3.1.3
         with:
