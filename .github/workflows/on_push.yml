@@ -12,10 +12,6 @@ jobs:
   action-checkout:
     name: Checkout Actions
     runs-on: ubuntu-latest
-    outputs:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      SONAR_PROJECT_STATUS_API_URL: ${{ secrets.SONAR_PROJECT_STATUS_API_URL }}
     steps:
       - uses: actions/checkout@v2
         with:
