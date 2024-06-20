@@ -21,7 +21,7 @@
 
    <requires>
       <import plugin="org.apache.log4j"/>
-      <import plugin="org.slf4j.api"/>
+      <import plugin="slf4j.api"/>
       <import plugin="ch.qos.logback.classic"/>
       <import plugin="ch.qos.logback.core"/>
       <import plugin="org.junit.jupiter.api"/>
