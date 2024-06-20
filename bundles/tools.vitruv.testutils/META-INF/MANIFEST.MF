@@ -8,8 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-17
 Import-Package: org.junit.jupiter.api.extension,
  org.junit.jupiter.params.converter,
  org.junit.platform.commons.support
-Require-Bundle: org.apache.log4j,
- org.slf4j.api,
+Require-Bundle: slf4j.api,
  ch.qos.logback.classic,
  ch.qos.logback.core,
  org.hamcrest.core,

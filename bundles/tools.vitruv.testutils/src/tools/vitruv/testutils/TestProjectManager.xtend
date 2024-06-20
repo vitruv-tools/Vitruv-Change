@@ -5,7 +5,6 @@ import java.nio.file.DirectoryNotEmptyException
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Path
 import java.nio.file.SimpleFileVisitor
-import org.apache.log4j.Logger
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import org.junit.jupiter.api.^extension.ExtensionContext
 import org.junit.jupiter.api.^extension.ParameterContext
@@ -28,6 +27,7 @@ import java.nio.file.NoSuchFileException
 import java.util.stream.Stream
 import org.eclipse.core.runtime.Platform
 import static extension tools.vitruv.change.propagation.ProjectMarker.markAsProjectRootFolder
+import org.slf4j.LoggerFactory
 
 /**
  * Extension managing the test projects for Eclipse tests. Test classes using this extension can have test project 
@@ -45,7 +45,7 @@ class TestProjectManager implements ParameterResolver, AfterEachCallback {
 	 * Set this system property to overwrite the workspace path 
 	 */
 	public static val WORKSPACE_PATH_SYSTEM_PROPERTY = "vitruv.workspace"
-	static val log = Logger.getLogger(TestProjectManager)
+	static val log = LoggerFactory.getLogger(TestProjectManager)
 	static val namespace = ExtensionContext.Namespace.create(TestProjectManager)
 	static val observedFailure = "observedFailure"
 	static val projectNamespace = ExtensionContext.Namespace.create(TestProjectManager, "projects")

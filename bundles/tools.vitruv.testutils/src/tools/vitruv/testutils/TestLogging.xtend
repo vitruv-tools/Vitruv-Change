@@ -3,18 +3,14 @@ package tools.vitruv.testutils
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import edu.kit.ipd.sdq.activextendannotations.Lazy
-import org.apache.log4j.ConsoleAppender
-import org.apache.log4j.PatternLayout
 import org.junit.jupiter.api.^extension.BeforeAllCallback
 import org.junit.jupiter.api.^extension.ExtensionContext
 import org.slf4j.LoggerFactory
 
-import static org.apache.log4j.Level.*
-import static org.apache.log4j.Logger.getRootLogger
 import static org.slf4j.Logger.ROOT_LOGGER_NAME
 
-import static extension org.apache.log4j.Logger.getLogger
 import java.util.List
+import org.slf4j.Logger
 
 /** 
  * Initializes console logger for tests. Sets the logger level to {@code WARN} by default. If the VM property
@@ -28,6 +24,8 @@ class TestLogging implements BeforeAllCallback {
 	public static val VM_ARGUMENT_LOG_LEVEL = "vitruv.logLevel"
 	static val LOG_PATTERN = "%d{HH:mm:ss.SSS} [%35.35c{1}] %5p: %m%n"
 	static val VITRUV_LOG_ROOTS = List.of("tools.vitruv", "mir.reactions", "mir.routines")
+	
+	static val Logger rootLogger = LoggerFactory.getLogger(TestLogging)
 
 	override beforeAll(ExtensionContext context) throws Exception {
 		configureLog4J()
@@ -35,11 +33,11 @@ class TestLogging implements BeforeAllCallback {
 	}
 	
 	def private static configureLog4J() {
-		rootLogger.removeAllAppenders()
-		rootLogger.addAppender(new ConsoleAppender(new PatternLayout(LOG_PATTERN)))
-		rootLogger.level = ERROR
-		VITRUV_LOG_ROOTS.forEach [logger.level = toLevel(desiredLogLevel, WARN)]
-		TestProjectManager.logger.level = INFO
+//		rootLogger.atLevel()
+//		rootLogger.addAppender(new ConsoleAppender(new PatternLayout(LOG_PATTERN)))
+//		rootLogger.level = ERROR
+//		VITRUV_LOG_ROOTS.forEach [logger.level = toLevel(desiredLogLevel, WARN)]
+//		TestProjectManager.logger.level = INFO
 	}
 	
 	def private static configureSlf4J() {
