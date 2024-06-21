@@ -1,4 +1,4 @@
-package tools.vitruv.change.changederivation
+package tools.vitruv.change.changederivation.persistence
 
 import java.io.IOException
 import java.io.InputStream
@@ -41,7 +41,7 @@ class DeltaBasedResource extends ResourceImpl {
 	}
 	
 	override doSave(OutputStream outputStream, Map<?, ?> options) throws IOException {
-		val deltaChanges = new DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(this).EChanges;
+		val deltaChanges = new tools.vitruv.change.changederivation.DefaultStateBasedChangeResolutionStrategy().getChangeSequenceForCreated(this).EChanges;
 		val resourceSet = withGlobalFactories(new ResourceSetImpl());
 		val resource = resourceSet.createResource(this.URI);
 		resource.getContents().addAll(deltaChanges)

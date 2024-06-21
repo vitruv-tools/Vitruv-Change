@@ -16,4 +16,6 @@ Import-Package: org.junit.jupiter.api,
 Require-Bundle: org.eclipse.xtend.lib,
  org.hamcrest.core,
  tools.vitruv.testutils,
- tools.vitruv.testutils.metamodels
+ tools.vitruv.testutils.metamodels,
+ edu.kit.ipd.sdq.commons.util.java,
+ edu.kit.ipd.sdq.commons.util.emf
