@@ -1,4 +1,4 @@
-package tools.vitruv.change.changederivation
+package tools.vitruv.change.changederivation.persistence
 
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
