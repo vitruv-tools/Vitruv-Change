@@ -38,7 +38,7 @@ import static extension tools.vitruv.change.atomic.EChangeUtil.*
  * that all objects that have been removed from their containment reference without being added to a new containment
  * reference while changes were being recorded have been deleted, resulting in an appropriate delete change.
  * The recorder considers resources being loaded as existing and does thus not produce changes for it.
- *
+ * 
  * Does not record changes of the <code>xmi:id</code> tag in an 
  * {@link org.eclipse.emf.ecore.xmi.XMLResource XMLResource} if it is not stored in the element 
  * but directly in the <code>Resource</code>.
@@ -75,7 +75,7 @@ class ChangeRecorder implements AutoCloseable {
 		// it can be potentially a reference to a third party model, for which no create shall be instantiated		
 		create = create && (addedObject.eResource === null || affectedObject === null ||
 			addedObject.eResource == affectedObject.eResource)
-		if (create) existingObjects += addedObject
+		if(create) existingObjects += addedObject
 		return create;
 	}
 
@@ -88,12 +88,11 @@ class ChangeRecorder implements AutoCloseable {
 	def void addToRecording(Notifier notifier) {
 		checkNotDisposed()
 		checkNotNull(notifier, "notifier")
-		checkArgument(notifier.isInOurResourceSet,
-			"cannot record changes in a different resource set!")
+		checkArgument(notifier.isInOurResourceSet, "cannot record changes in a different resource set!")
 
 		if (rootObjects += notifier) {
 			notifier.recursively [
-				if (it instanceof EObject) existingObjects += it
+				if(it instanceof EObject) existingObjects += it
 				addAdapter()
 			]
 		}
@@ -183,7 +182,7 @@ class ChangeRecorder implements AutoCloseable {
 				if (allElementsToDelete.values.exists[it.contains(element)]) {
 					return
 				}
-				var elementsToDelete = element.eAllContents.toList.reverse //delete from inner to outer
+				var elementsToDelete = element.eAllContents.toList.reverse // delete from inner to outer
 				elementsToDelete.forEach [ child |
 					if (allElementsToDelete.containsKey(child)) {
 						allElementsToDelete.remove(child)
@@ -192,8 +191,8 @@ class ChangeRecorder implements AutoCloseable {
 				elementsToDelete.add(element)
 				allElementsToDelete.put(element, elementsToDelete)
 			]
-			changes += allElementsToDelete.values.flatMap [ elementsToDelete | 
-				elementsToDelete.map [ converter.createDeleteChange(it) ]
+			changes += allElementsToDelete.values.flatMap [ elementsToDelete |
+				elementsToDelete.flatMap[converter.createDeleteChanges(it)]
 			].toList
 		}
 		return changes
@@ -315,18 +314,18 @@ class ChangeRecorder implements AutoCloseable {
 					converter.convert(new NotificationInfo(notification))
 				}
 			if (!changes.isEmpty) {
- 				// Register any added object as existing, even if we are not recording
- 				changes.forEach [
- 					switch it {
- 						EObjectAddedEChange<EObject>: {
- 							existingObjects += newValue
- 							switch it {
- 								UpdateReferenceEChange<EObject>: existingObjects += affectedElement
- 							}
- 						}
- 					}
- 				]
- 			}
+				// Register any added object as existing, even if we are not recording
+				changes.forEach [
+					switch it {
+						EObjectAddedEChange<EObject>: {
+							existingObjects += newValue
+							switch it {
+								UpdateReferenceEChange<EObject>: existingObjects += affectedElement
+							}
+						}
+					}
+				]
+			}
 			return changes
 		}
 
