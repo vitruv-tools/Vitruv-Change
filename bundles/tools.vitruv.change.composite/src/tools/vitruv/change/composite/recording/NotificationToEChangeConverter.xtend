@@ -1,6 +1,9 @@
 package tools.vitruv.change.composite.recording
 
 import java.util.List
+import java.util.LinkedList
+
+import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EObject
@@ -15,7 +18,6 @@ import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
 
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.*
 import static extension tools.vitruv.change.composite.recording.EChangeCreationUtil.*
-import java.util.LinkedList
 
 /** 
  * Converts an EMF notification to an {@link EChange}.
@@ -37,14 +39,16 @@ package final class NotificationToEChangeConverter {
 	 * </ul>
 	 */
 	def List<EChange<EObject>> createDeleteChanges(EObject eObject) {
-		var changes = new LinkedList<EChange<EObject>>
+		val changes = new LinkedList<EChange<EObject>>
 		
 		val containingFeature = eObject.eContainmentFeature
 		if (containingFeature !== null) {
-			var container = eObject.eContainer
+			val container = eObject.eContainer
 			
 			if (containingFeature.isMany) {
-				var indexOfEObject = containingFeature.eContents.indexOf(eObject)
+				// Reflection to get to the actual list where eObject is contained
+				val containmentListForEObject = container.eGet(containingFeature) as EList<? extends EObject>
+				val indexOfEObject = containmentListForEObject.indexOf(eObject)
 				changes.add(createRemoveReferenceChange(container, containingFeature, eObject, indexOfEObject))
 			}
 			else {
