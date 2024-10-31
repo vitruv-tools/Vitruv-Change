@@ -194,7 +194,9 @@ class ChangeRecorderTest {
 			resource.contents.clear()
 		]
 
-		assertThat(changeRecorder.change, hasEChanges(RemoveRootEObject, DeleteEObject, DeleteEObject, DeleteEObject, DeleteEObject))
+		assertThat(changeRecorder.change, hasEChanges(
+			RemoveRootEObject, RemoveEReference, DeleteEObject, RemoveEReference, DeleteEObject, ReplaceSingleValuedEReference, DeleteEObject, DeleteEObject
+		))
 	}
 
 	@DisplayName("adds an object set as containment to the recording")
@@ -370,7 +372,7 @@ class ChangeRecorderTest {
 		record [
 			resource.delete(emptyMap)
 		]
-		assertThat(changeRecorder.change, hasEChanges(RemoveRootEObject, DeleteEObject, DeleteEObject))
+		assertThat(changeRecorder.change, hasEChanges(RemoveRootEObject, ReplaceSingleValuedEReference, DeleteEObject, DeleteEObject))
 	}
 
 	@ParameterizedTest(name="while isRecording={0}")

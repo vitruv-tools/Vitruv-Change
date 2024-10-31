@@ -15,6 +15,7 @@ import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange
 
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.*
 import static extension tools.vitruv.change.composite.recording.EChangeCreationUtil.*
+import java.util.LinkedList
 
 /** 
  * Converts an EMF notification to an {@link EChange}.
@@ -23,20 +24,46 @@ import static extension tools.vitruv.change.composite.recording.EChangeCreationU
 @FinalFieldsConstructor
 package final class NotificationToEChangeConverter {
 	extension val TypeInferringAtomicEChangeFactory changeFactory = TypeInferringAtomicEChangeFactory.instance
-	
+
 	val (EObject, EObject)=>boolean isCreateChange
-	
-	def EChange<EObject> createDeleteChange(EObject eObject) {
-		return createDeleteEObjectChange(eObject)
+
+	/**
+	 * Creates the required changes for the deletion of eObject:
+	 * <ul>
+	 * 	<li>If eObject is contained by another object o2, we first create a RemoveReferenceChange
+	 *  or ReplaceSingleReferenceChange, dependent on whether the containment relation of o2 may
+	 *  also contain other elements, or not. </li>
+	 *  <li>In any case, we also create a DeleteEObjectChange.</li>
+	 * </ul>
+	 */
+	def List<EChange<EObject>> createDeleteChanges(EObject eObject) {
+		var changes = new LinkedList<EChange<EObject>>
+		
+		val containingFeature = eObject.eContainmentFeature
+		if (containingFeature !== null) {
+			var container = eObject.eContainer
+			
+			if (containingFeature.isMany) {
+				var indexOfEObject = containingFeature.eContents.indexOf(eObject)
+				changes.add(createRemoveReferenceChange(container, containingFeature, eObject, indexOfEObject))
+			}
+			else {
+				changes.add(createReplaceSingleReferenceChange(container, eObject.eContainmentFeature, eObject, null))
+			}
+		}
+		
+		changes.add(createDeleteEObjectChange(eObject))
+		changes
 	}
-	
+
 	private def String convertExceptionMessage(EventType eventType, String notificationType) {
 		String.format("Event type {} for {} Notifications unexpected.")
 	}
+
 	final String ATTRIBUTE_TYPE = "Attribute";
 	final String REFERENCE_TYPE = "Reference";
 	final String RESOURCE_CONTENTS_TYPE = "Resource Contents"
-	
+
 	/** 
 	 * Converts the given notification to a list of {@link EChange}s.
 	 * @param n the notification to convert
@@ -57,8 +84,10 @@ package final class NotificationToEChangeConverter {
 					case REMOVE: handleRemoveAttribute(notification)
 					case REMOVE_MANY: handleMultiRemoveAttribute(notification)
 					case MOVE: handleMoveAttribute(notification)
-					case RESOLVE: throw new IllegalArgumentException(convertExceptionMessage(EventType.RESOLVE, ATTRIBUTE_TYPE))
-					case REMOVING_ADAPTER: throw new IllegalArgumentException(convertExceptionMessage(EventType.REMOVING_ADAPTER, ATTRIBUTE_TYPE))
+					case RESOLVE: throw new IllegalArgumentException(
+						convertExceptionMessage(EventType.RESOLVE, ATTRIBUTE_TYPE))
+					case REMOVING_ADAPTER: throw new IllegalArgumentException(
+						convertExceptionMessage(EventType.REMOVING_ADAPTER, ATTRIBUTE_TYPE))
 					default: throw new IllegalArgumentException("Unexpected event type " + eventType)
 				}
 			case notification.isReferenceNotification:
@@ -70,8 +99,10 @@ package final class NotificationToEChangeConverter {
 					case REMOVE: handleRemoveReference(notification)
 					case REMOVE_MANY: handleMultiRemoveReference(notification)
 					case MOVE: handleMoveReference(notification)
-					case RESOLVE: throw new IllegalArgumentException(convertExceptionMessage(EventType.RESOLVE, REFERENCE_TYPE))
-					case REMOVING_ADAPTER: throw new IllegalArgumentException(convertExceptionMessage(EventType.REMOVING_ADAPTER, REFERENCE_TYPE))
+					case RESOLVE: throw new IllegalArgumentException(
+						convertExceptionMessage(EventType.RESOLVE, REFERENCE_TYPE))
+					case REMOVING_ADAPTER: throw new IllegalArgumentException(
+						convertExceptionMessage(EventType.REMOVING_ADAPTER, REFERENCE_TYPE))
 					default: throw new IllegalArgumentException("Unexpected event type " + eventType)
 				}
 			case notifier instanceof Resource:
@@ -82,17 +113,23 @@ package final class NotificationToEChangeConverter {
 							case ADD_MANY: handleMultiInsertRootChange(notification)
 							case REMOVE: handleRemoveRootChange(notification)
 							case REMOVE_MANY: handleMultiRemoveRootChange(notification)
-							case SET: throw new IllegalArgumentException(convertExceptionMessage(EventType.SET, RESOURCE_CONTENTS_TYPE))
-							case UNSET: throw new IllegalArgumentException(convertExceptionMessage(EventType.UNSET, RESOURCE_CONTENTS_TYPE))
-							case MOVE: throw new IllegalArgumentException(convertExceptionMessage(EventType.MOVE, RESOURCE_CONTENTS_TYPE))
-							case RESOLVE: throw new IllegalArgumentException(convertExceptionMessage(EventType.RESOLVE, RESOURCE_CONTENTS_TYPE))
-							case REMOVING_ADAPTER: throw new IllegalArgumentException(convertExceptionMessage(EventType.REMOVING_ADAPTER, RESOURCE_CONTENTS_TYPE))
+							case SET: throw new IllegalArgumentException(
+								convertExceptionMessage(EventType.SET, RESOURCE_CONTENTS_TYPE))
+							case UNSET: throw new IllegalArgumentException(
+								convertExceptionMessage(EventType.UNSET, RESOURCE_CONTENTS_TYPE))
+							case MOVE: throw new IllegalArgumentException(
+								convertExceptionMessage(EventType.MOVE, RESOURCE_CONTENTS_TYPE))
+							case RESOLVE: throw new IllegalArgumentException(
+								convertExceptionMessage(EventType.RESOLVE, RESOURCE_CONTENTS_TYPE))
+							case REMOVING_ADAPTER: throw new IllegalArgumentException(
+								convertExceptionMessage(EventType.REMOVING_ADAPTER, RESOURCE_CONTENTS_TYPE))
 							default: throw new IllegalArgumentException("Unexpected event type " + eventType)
 						}
 					case Resource.RESOURCE__URI:
 						switch (eventTypeEnum) {
 							case SET: handleSetUriChange(notification)
-							default: throw new IllegalArgumentException("Unexpected event type " + eventType + " for Resource URI Notification.")
+							default: throw new IllegalArgumentException("Unexpected event type " + eventType +
+								" for Resource URI Notification.")
 						}
 					default:
 						emptyList()
@@ -101,14 +138,14 @@ package final class NotificationToEChangeConverter {
 				emptyList()
 		}
 	}
-	
+
 	private def Iterable<? extends EChange<EObject>> handleMoveAttribute(extension NotificationInfo notification) {
 		#[
 			createRemoveAttributeChange(notifierModelElement, attribute, oldValue as Integer, newValue),
 			createInsertAttributeChange(notifierModelElement, attribute, position, newValue)
 		]
 	}
-	
+
 	private def Iterable<? extends EChange<EObject>> handleMoveReference(extension NotificationInfo notification) {
 		#[
 			createRemoveReferenceChange(notifierModelElement, reference, newModelElementValue, oldValue as Integer),
@@ -229,7 +266,8 @@ package final class NotificationToEChangeConverter {
 			surroundWithCreateAndFeatureChangesIfNecessary()
 	}
 
-	private def Iterable<? extends EChange<EObject>> handleMultiInsertReference(extension NotificationInfo notification) {
+	private def Iterable<? extends EChange<EObject>> handleMultiInsertReference(
+		extension NotificationInfo notification) {
 		(newValue as List<EObject>).flatMapFixedIndexed [ index, value |
 			createInsertReferenceChange(notifierModelElement, reference, value, initialIndex + index).
 				surroundWithCreateAndFeatureChangesIfNecessary()
@@ -272,12 +310,17 @@ package final class NotificationToEChangeConverter {
 		]
 	}
 
-	def private Iterable<? extends EChange<EObject>> allAdditiveChangesForChangeRelevantFeatures(EObjectAddedEChange<EObject> change, EObject eObject) {
+	def private Iterable<? extends EChange<EObject>> allAdditiveChangesForChangeRelevantFeatures(
+		EObjectAddedEChange<EObject> change, EObject eObject) {
 		change.newValue.walkChangeRelevantFeatures(
 			[object, attribute|createAdditiveEChangeForAttribute(object, attribute)],
-			[object, reference|if (reference.isContainment) createAdditiveEChangeForReferencedObject(object, reference, [referencedObject | isCreateChange.apply(object, referencedObject)])]
+			[ object, reference |
+				if(reference.isContainment) createAdditiveEChangeForReferencedObject(object, reference, [ referencedObject |
+					isCreateChange.apply(object, referencedObject)
+				])
+			]
 		) + change.newValue.walkChangeRelevantFeatures(null) [ object, reference |
-			if (!reference.isContainment) createAdditiveEChangeForReferencedObject(object, reference, [false])
+			if(!reference.isContainment) createAdditiveEChangeForReferencedObject(object, reference, [false])
 		]
 	}
 
@@ -317,7 +360,8 @@ package final class NotificationToEChangeConverter {
 			emptyList()
 	}
 
-	def private <T extends EChange<EObject>> addUnsetChangeIfNecessary(Iterable<T> changes, NotificationInfo notification) {
+	def private <T extends EChange<EObject>> addUnsetChangeIfNecessary(Iterable<T> changes,
+		NotificationInfo notification) {
 		return if (notification.wasUnset)
 			changes +
 				List.of(createUnsetFeatureChange(notification.notifierModelElement, notification.structuralFeature))
