@@ -9,9 +9,35 @@ on:
     types: [published]
 
 jobs:
+  verify:
+    name: Verify build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4.2.2
+
+    - name: Setup Java and Maven cache
+      uses: actions/setup-java@v4.5.0
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        check-latest: true
+        cache: 'maven'
+
+    - name: Verify build
+      run: >
+        ./mvnw clean verify
+        --batch-mode
+        --update-snapshots
+        --no-transfer-progress
+
   release:
     name: Release
     runs-on: ubuntu-latest
+    needs: [verify]
     strategy:
       fail-fast: true
 
@@ -35,6 +61,7 @@ jobs:
     - name: Deploy to staging and release
       run: >
         ./mvnw clean deploy -P release
+        -DskipTests
         --batch-mode
         --update-snapshots
         --no-transfer-progress
