@@ -10,10 +10,12 @@ on:
 
 jobs:
   verify:
-    name: Verify build
-    runs-on: ubuntu-latest
+    name: Verify build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
 
     steps:
     - name: Checkout repository
