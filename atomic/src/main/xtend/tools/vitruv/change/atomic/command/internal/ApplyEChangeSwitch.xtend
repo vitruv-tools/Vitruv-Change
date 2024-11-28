@@ -14,10 +14,10 @@ import static com.google.common.base.Preconditions.checkState
 class ApplyEChangeSwitch {
 	/**
 	 * Applies a given {@link EChange}.
+	 * Returns if the change was successfully applied.
 	 * @param change					The {@link EChange} which will be applied.
 	 * @param applyForward				If {@code true} the change will be applied forward,
 	 * 									otherwise backward.
-	 * @returns							The change was successfully applied.
 	 * @throws IllegalStateException	No commands can be generated for the change, or they cannot be executed.
 	 */
 	def static void applyEChange(EChange<EObject> change, boolean applyForward) {

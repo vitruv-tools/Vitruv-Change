@@ -4,7 +4,7 @@ import tools.vitruv.change.interaction.UserInteractionOptions.NotificationType
 import tools.vitruv.change.interaction.types.ConfirmationInteraction
 
 /**
- * Defines one single entry point to the build process of a {@link NotificationInteraction} thus ensuring that mandatory
+ * Defines one single entry point to the build process of a {@link tools.vitruv.change.interaction.types.NotificationInteraction} thus ensuring that mandatory
  * information has to be provided before continuing. The top-level method represents the first and only mandatory step
  * returning the nested interface which includes optional steps as well as the build method
  * ({@link NotificationInteractionBuilder.OptionalSteps} extends {@link InteractionBuilder} to provide access to build step

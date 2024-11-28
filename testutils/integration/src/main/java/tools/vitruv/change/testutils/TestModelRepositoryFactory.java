@@ -17,7 +17,7 @@ public class TestModelRepositoryFactory {
 	/**
 	 * Creates a {@link ChangeableModelRepository} for the given change propagation specification provider and user
 	 * interaction, which stores metadata in a temporary folder.
-	 * @param changePropagationSpecificationProvider provides the {@link ChangePropagationSpecifications} to use in the
+	 * @param changePropagationSpecificationProvider provides the {@link tools.vitruv.change.propagation.ChangePropagationSpecification} to use in the
 	 * repository
 	 * @param userInteraction the {@link TestUserInteraction} to use for interactions during change propagation
 	 * @return the test model repository
@@ -34,7 +34,7 @@ public class TestModelRepositoryFactory {
 	 * Creates a {@link ChangeableModelRepository} for the given change propagation specification provider, user
 	 * interaction, and persistable change recording model repository.
 	 * @param modelRepository manages where files are stored.
-	 * @param changePropagationSpecificationProvider provides the {@link ChangePropagationSpecifications} to use in the
+	 * @param changePropagationSpecificationProvider provides the {@link tools.vitruv.change.propagation.ChangePropagationSpecification} to use in the
 	 * repository
 	 * @param userInteraction the {@link TestUserInteraction} to use for interactions during change propagation
 	 * @return the test model repository

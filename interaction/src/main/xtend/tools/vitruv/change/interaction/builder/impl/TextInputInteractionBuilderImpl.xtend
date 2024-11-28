@@ -16,7 +16,7 @@ import tools.vitruv.change.interaction.types.InteractionFactory
  * can also be specified which limits the input to strings conforming to its
  * {@link InputValidator#isInputValid(String) isInputValid} method (the default validator accepts all input).<br>
  * <br>
- * For further info on the rationale behind the ...InteractionBuilder implementation, see the {@link InteractionBuilder} javadoc.
+ * For further info on the rationale behind the ...InteractionBuilder implementation, see the {@link tools.vitruv.change.interaction.builder.InteractionBuilder} javadoc.
  * @see TextInputInteractionBuilder
  * 
  * @author Dominik Klooz

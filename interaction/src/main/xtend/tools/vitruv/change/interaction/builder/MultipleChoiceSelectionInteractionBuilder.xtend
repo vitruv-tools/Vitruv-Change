@@ -3,7 +3,7 @@ package tools.vitruv.change.interaction.builder
 import java.util.Collection
 
 /**
- * Defines one single entry point to the build process of a {@link MultipleChoiceSelectionInteraction} thus ensuring that
+ * Defines one single entry point to the build process of a {@link tools.vitruv.change.interaction.types.MultipleChoiceSelectionInteraction} thus ensuring that
  * mandatory information has to be provided before continuing. The nested interfaces represent another mandatory step
  * ({@link MultipleChoiceSelectionInteractionBuilder.ChoicesStep}) and optional steps as well as the build method
  * ({@link MultipleChoiceSelectionInteractionBuilder.OptionalSteps}, extends {@link InteractionBuilder} to provide access

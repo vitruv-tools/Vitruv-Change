@@ -14,14 +14,14 @@ import tools.vitruv.change.interaction.types.BaseInteraction
  * for properties not specified using the respective methods are set here or in the constructor for subclasses and
  * subclass-specific properties.<br>
  * <br>
- * For further info on the rationale behind the ...DialogBuilder implementation, see the {@link DialogBuilder} javadoc.
+ * For further info on the rationale behind the ...InteractionBuilder implementation, see the {@link InteractionBuilder} javadoc.
  * 
- * @param <V> type parameter for the return type of {@link #getResult() getResult()}, which returns the user input from
+ * @param <V> type parameter for the return type of {@link #startInteraction() startInteraction()}, which returns the user input from
  *          the dialog.
- * @param <I> the interaction type to be built by this buidler
- * @param <T> type parameter for the return type of methods declared in {@link DialogBuilder}. In subclasses, this is to
+ * @param <I> the interaction type to be built by this builder
+ * @param <T> type parameter for the return type of methods declared in {@link InteractionBuilder}. In subclasses, this is to
  *          be set to the specific builder's {@code OptionalSteps} interface (the interface that extends
- *          {@link DialogBuilder} and contains methods whose execution is optional when building a dialog).
+ *          {@link InteractionBuilder} and contains methods whose execution is optional when building a dialog).
  * 
  * @author Dominik Klooz
  * @author Heiko Klare
@@ -43,8 +43,7 @@ import tools.vitruv.change.interaction.types.BaseInteraction
 	abstract def I createUserInteraction();
 
 	/**
-	 * @inheritDoc
-	 * Implementations should call {@link #openDialog()} to make sure displaying the dialog is run on the UI thread.
+	 * {@inheritDoc}
 	 */
 	abstract override V startInteraction();
 

@@ -56,7 +56,7 @@ public abstract class MultipleFeatureProcessor {
 	 * Processes a given eChanges structural feature nodes. Every change has to result in a consistent state of all given arguments.
 	 * 
 	 * @param eChange The eChange whose sf are processed
-	 * @param parentNode The parent node of the eChange
+	 * @param node The parent node of the eChange
 	 * @param featureName2index FeatureName ==> Index of feature value in featureValues
 	 * @param featureValues Feature Values (The value of each feature is found at featureName2index index)
 	 */

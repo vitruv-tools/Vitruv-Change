@@ -11,14 +11,14 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
 /**
- * A UUID resolver manages the mapping of {@link EObject} to UUIDs within one
+ * A UUID resolver manages the mapping of {@link org.eclipse.emf.ecore.EObject} to UUIDs within one
  * resource set. UUIDs are used to uniquely identify an element in changes,
  * independent of the location within a resource set and the actual resource set
  * instance.
  */
 public interface UuidResolver {
 	/**
-	 * Returns whether the given {@link EObject} has a registered UUID or not.
+	 * Returns whether the given {@link org.eclipse.emf.ecore.EObject} has a registered UUID or not.
 	 */
 	public default boolean hasUuid(EObject eObject) {
 		try {
@@ -30,7 +30,7 @@ public interface UuidResolver {
 	};
 
 	/**
-	 * Returns whether an {@link EObject} is registered for the given UUID or not.
+	 * Returns whether an {@link org.eclipse.emf.ecore.EObject} is registered for the given UUID or not.
 	 */
 	public default boolean hasEObject(Uuid uuid) {
 		try {
@@ -42,22 +42,22 @@ public interface UuidResolver {
 	};
 
 	/**
-	 * Returns the UUID for the given {@link EObject}. If no UUID is registered for
+	 * Returns the UUID for the given {@link org.eclipse.emf.ecore.EObject}. If no UUID is registered for
 	 * it, an {@link IllegalStateException} is thrown.
 	 */
 	public Uuid getUuid(EObject eObject) throws IllegalStateException;
 
 	/**
-	 * Returns the {@link EObject} for the given UUID. If more than one object was
+	 * Returns the {@link org.eclipse.emf.ecore.EObject} for the given UUID. If more than one object was
 	 * registered for the UUID, the last one is returned.
 	 * 
-	 * @throws IllegalStateException if no {@link EObject} was registered for the
+	 * @throws IllegalStateException if no {@link org.eclipse.emf.ecore.EObject} was registered for the
 	 *                               UUID
 	 */
 	public EObject getEObject(Uuid uuid) throws IllegalStateException;
 
 	/**
-	 * Generates a new UUID for the given {@link EObject}.
+	 * Generates a new UUID for the given {@link org.eclipse.emf.ecore.EObject}.
 	 * 
 	 * @param eObject is the object to generate a UUID for. Must not be
 	 *                <code>null</code> or a proxy.
@@ -65,26 +65,26 @@ public interface UuidResolver {
 	public Uuid generateUuid(EObject eObject);
 
 	/**
-	 * Registers the given {@link EObject} for the given UUID.
+	 * Registers the given {@link org.eclipse.emf.ecore.EObject} for the given UUID.
 	 * 
-	 * @param uuid    is the UUID to register the {@link EObject} for. Must not be
+	 * @param uuid    is the UUID to register the {@link org.eclipse.emf.ecore.EObject} for. Must not be
 	 *                <code>null</code>.
-	 * @param eObject is the {@link EObject} to register. Must not be
+	 * @param eObject is the {@link org.eclipse.emf.ecore.EObject} to register. Must not be
 	 *                <code>null</code> or a proxy.
 	 * @throws IllegalStateException if there is already another UUID registered for
-	 *                               the given {@link EObject} or vice versa.
+	 *                               the given {@link org.eclipse.emf.ecore.EObject} or vice versa.
 	 */
 	public void registerEObject(Uuid uuid, EObject eObject) throws IllegalStateException;
 
 	/**
-	 * Registers the given {@link EObjecty} for a newly generated UUID and returns
+	 * Registers the given {@link org.eclipse.emf.ecore.EObject} for a newly generated UUID and returns
 	 * that UUID. The UUID is generated using {@link UuidResolver#generateUuid}.
 	 * 
 	 * @param eObject is the object to register. Must not be <code>null</code> or a
 	 *                proxy.
 	 * @throws IllegalStateException if there is already another UUID registered for
-	 *                               the given {@link EObject}.
-	 * @return the UUID registered for the given {@link EObject}.
+	 *                               the given {@link org.eclipse.emf.ecore.EObject}.
+	 * @return the UUID registered for the given {@link org.eclipse.emf.ecore.EObject}.
 	 */
 	public default Uuid registerEObject(EObject eObject) throws IllegalStateException {
 		Uuid uuid = generateUuid(eObject);
@@ -101,7 +101,7 @@ public interface UuidResolver {
 	public Resource getResource(URI uri);
 
 	/**
-	 * Ends a transactions such that any registered {@link EObject} not being
+	 * Ends a transactions such that any registered {@link org.eclipse.emf.ecore.EObject} not being
 	 * contained in a resource throws an error.
 	 * 
 	 * @throws IllegalStateException if an uncontained element is registered.
@@ -109,8 +109,8 @@ public interface UuidResolver {
 	public void endTransaction() throws IllegalStateException;
 
 	/**
-	 * Resolves all {@link EObject}s contained in any resource of the given
-	 * mapping's key set to its counterpart {@link EObject} in the corresponding
+	 * Resolves all {@link org.eclipse.emf.ecore.EObject}s contained in any resource of the given
+	 * mapping's key set to its counterpart {@link org.eclipse.emf.ecore.EObject} in the corresponding
 	 * resource of the <code>targetUuidResolver</code> and registers the resolved
 	 * object under the same UUID as in the current resolver. The resource
 	 * correspondences are determined by the
@@ -128,7 +128,7 @@ public interface UuidResolver {
 	 * @param targetUuidResolver            is the {@link UuidResolver} to resolve
 	 *                                      the given resources in. Must not be
 	 *                                      <code>null</code>.
-	 * @throws IllegalStateException if any {@link EObject} of the current resolver
+	 * @throws IllegalStateException if any {@link org.eclipse.emf.ecore.EObject} of the current resolver
 	 *                               is not contained in a resource or a resource
 	 *                               pair is not structurally equal.
 	 */
@@ -136,8 +136,8 @@ public interface UuidResolver {
 			throws IllegalStateException;
 
 	/**
-	 * Resolves all {@link EObject}s contained in the given
-	 * <code>sourceResource</code> to its counterpart {@link EObject} in the
+	 * Resolves all {@link org.eclipse.emf.ecore.EObject}s contained in the given
+	 * <code>sourceResource</code> to its counterpart {@link org.eclipse.emf.ecore.EObject} in the
 	 * <code>targetResource</code> and registers the resolved object under the same
 	 * UUID as in the current resolver. The source and target resources are expected
 	 * to be structurally equal.
@@ -150,7 +150,7 @@ public interface UuidResolver {
 	 *                           <code>null</code>.
 	 * @param targetUuidResolver is the {@link UuidResolver} to resolve the given
 	 *                           resources in. Must not be <code>null</code>.
-	 * @throws IllegalStateException if any {@link EObject} of the current resolver
+	 * @throws IllegalStateException if any {@link org.eclipse.emf.ecore.EObject} of the current resolver
 	 *                               is not contained in a resource or the given
 	 *                               resources are not structurally equal.
 	 */
@@ -177,7 +177,7 @@ public interface UuidResolver {
 	 * @param uri is the {@link URI} to store the serialization at. Must not be
 	 *            <code>null</code> and must be a file URI.
 	 * @throws IOException           if saving to file fails.
-	 * @throws IllegalStateException if any {@link EObject} of the current resolver
+	 * @throws IllegalStateException if any {@link org.eclipse.emf.ecore.EObject} of the current resolver
 	 *                               is not contained in a resource.
 	 */
 	public void storeAtUri(URI uri) throws IOException, IllegalStateException;

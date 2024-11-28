@@ -7,7 +7,7 @@ import tools.vitruv.change.interaction.impl.PredefinedInteractionResultProviderI
 import tools.vitruv.change.interaction.impl.ThinktimeSimulatingInteractionResultProvider
 
 /**
- * Factory for {@link UserInteraction}s and {@link InteractionResultProvider}.
+ * Factory for {@link UserInteractor}s and {@link InteractionResultProvider}.
  * 
  * @author Heiko Klare
  */
@@ -34,7 +34,7 @@ class UserInteractionFactory {
 	}
 
 	/**
-	 * Creates a {@link InteralResultProvider} based on UI dialogs.
+	 * Creates a {@link InteractionResultProvider} based on UI dialogs.
 	 */
 	def InteractionResultProvider createDialogInteractionResultProvider() {
 		return new DialogInteractionResultProviderImpl();

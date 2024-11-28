@@ -9,7 +9,7 @@ import tools.vitruv.change.composite.description.PropagatedChange
  * for manually starting and stopping recording changes of elements and for propagating all changes recorded
  * since the last propagation.
  * <p>
- * This view is deprecated and exists only to support {@link LegacyVitruvApplicationTest}. Do not use this class!
+ * This view is deprecated and exists only to support {@code LegacyVitruvApplicationTest}. Do not use this class!
  */
 interface NonTransactionalTestView extends TestView {
 	/**

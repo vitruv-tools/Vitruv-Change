@@ -8,10 +8,7 @@ import tools.vitruv.change.interaction.types.MultipleChoiceSelectionInteraction
 import tools.vitruv.change.interaction.types.InteractionFactory
 
 /**
- * Base implementation of the dialog builder for single- and multi-select {@link MultipleChoiceInteraction}s. Implementation
- * of {@link #showDialogAndGetUserInput()} is left up to the two concrete subclasses
- * {@link MultipleChoiceSingleSelectionInteractionBuilderImpl} and {@link MultipleChoiceMultiSelectionInteractionBuilderImpl} so
- * they can specify the return type while inheriting everything else from here.
+ * Base implementation of the dialog builder for single- and multi-select {@link MultipleChoiceSelectionInteraction}s.
  * 
  * @author Dominik Klooz
  * @author Heiko Klare

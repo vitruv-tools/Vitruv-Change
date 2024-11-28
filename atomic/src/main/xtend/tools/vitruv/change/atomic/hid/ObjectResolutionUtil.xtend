@@ -33,7 +33,7 @@ class ObjectResolutionUtil {
 	 * </pre>
 	 * 
 	 * @param object - the {@link EObject} to get a hierarchic URI fragment for
-	 * @returns a hierarchic URI fragment for the given {@link EObject} 
+	 * @return a hierarchic URI fragment for the given {@link EObject} 
 	 */
 	def static getHierarchicUriFragment(EObject object) {
 		val resource = object.eResource

@@ -29,7 +29,7 @@ public interface ChangeRecordingModelRepository extends ResourceAccess, AutoClos
 	 * Applies the given change to this model repository. It resolves the change
 	 * against the models in this repository and applies it afterwards.
 	 * 
-	 * @param change - the {@link VitrivusChange} to apply, must be unresolved
+	 * @param change - the {@link VitruviusChange} to apply, must be unresolved
 	 * @return the resolved and applied {@link VitruviusChange}
 	 * @throws IllegalStateException if the the given change is resolved
 	 */

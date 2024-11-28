@@ -10,7 +10,7 @@ import tools.vitruv.change.interaction.builder.ConfirmationInteractionBuilder
  * Builder class for {@link ConfirmationInteraction}s.
  * Creates a dialog with a question and buttons to give a positive or negative answer.<br>
  * <br>
- * For further info on the rationale behind the ...InteractionBuilder implementation, see the {@link InteractionBuilder} javadoc.
+ * For further info on the rationale behind the ...InteractionBuilder implementation, see the {@link tools.vitruv.change.interaction.builder.InteractionBuilder} javadoc.
  * 
  * @see ConfirmationInteractionBuilder
  * 

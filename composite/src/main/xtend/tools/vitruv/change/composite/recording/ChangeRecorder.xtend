@@ -40,7 +40,7 @@ import static extension tools.vitruv.change.atomic.EChangeUtil.*
  * The recorder considers resources being loaded as existing and does thus not produce changes for it.
  *
  * Does not record changes of the <code>xmi:id</code> tag in an 
- * {@link org.eclipse.emf.ecore.xmi.XMLResource XMLResource} if it is not stored in the element 
+ * {@code org.eclipse.emf.ecore.xmi.XMLResource} if it is not stored in the element 
  * but directly in the <code>Resource</code>.
  */
 class ChangeRecorder implements AutoCloseable {

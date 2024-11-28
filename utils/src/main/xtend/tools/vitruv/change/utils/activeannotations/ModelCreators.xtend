@@ -30,7 +30,7 @@ import com.google.common.base.Preconditions
  * <li>An {@link ArgumentConverter} called {@code NewEObject} for creating new instances of {@link EObject}s from their 
  * {@link EClass}’ {@linkplain EClass#getName name}.
  * <li> An {@link ArgumentConverter} called {@code Classifier} for getting an EClassifier by its
- *  {@linkplain EClassifier#getName name}.
+ *  {@linkplain org.eclipse.emf.ecore.EClassifier#getName name}.
  * </ul>
  */
 @Active(ModelCreatorsProcessor)

@@ -81,7 +81,7 @@ public class LabelValuePanel extends JScrollPane{
 	 * The values at [x][0] are used as label text on the left, [x][1] are displayed in textFields
 	 * on the right.
 	 * 
-	 * @param eObj The EObject to visualize
+	 * @param array The array to visualize
 	 */
 	public LabelValuePanel(String[][] array) {
 		//Create the basic layout and panel structure

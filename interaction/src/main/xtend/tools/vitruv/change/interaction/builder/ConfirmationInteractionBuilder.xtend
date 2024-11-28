@@ -1,7 +1,7 @@
 package tools.vitruv.change.interaction.builder
 
 /**
- * Defines one single entry point to the build process of a {@link ConfirmationInteraction} thus ensuring that mandatory
+ * Defines one single entry point to the build process of a {@link tools.vitruv.change.interaction.types.ConfirmationInteraction} thus ensuring that mandatory
  * information has to be provided before continuing. The top-level method represents the first and only mandatory step
  * returning the nested interface which includes optional steps as well as the build method
  * ({@link ConfirmationInteractionBuilder.OptionalSteps} extends {@link InteractionBuilder} to provide access to build step
@@ -18,7 +18,7 @@ interface ConfirmationInteractionBuilder {
 	 * Specifies the message of the interaction.<br><br>
 	 * Calling this method is mandatory, it is thus the only method available in the {@link ConfirmationInteractionBuilder}
 	 * interface handed out for user interaction and returns a {@link InteractionBuilder} implementation to allow for further
-	 * adjustments and building the adjusted interaction ({@link ConfirmationInteraction}s don't provide any adjustments that
+	 * adjustments and building the adjusted interaction ({@link tools.vitruv.change.interaction.types.ConfirmationInteraction}s don't provide any adjustments that
 	 * aren't already defined for all types of interactions in the {@link InteractionBuilder} interface).<br>
 	 * This is a form of implementation of the Step Builder pattern.
 	 * 

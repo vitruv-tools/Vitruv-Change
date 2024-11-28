@@ -24,10 +24,10 @@ final class UserInteractionOptions {
 	}
 
 	/**
-	 * Enum for the levels of severity for notification messages (specifies the icon used in {@link NotificationInteraction}s).
-	 * @see NotificationInteraction
+	 * Enum for the levels of severity for notification messages (specifies the icon used in {@link tools.vitruv.change.interaction.types.NotificationInteraction}s).
+	 * @see tools.vitruv.change.interaction.types.NotificationInteraction
 	 * 
-	 * @uthor Dominik Klooz
+	 * @author Dominik Klooz
 	 */
 	enum NotificationType {
 		INFORMATION,
@@ -46,7 +46,7 @@ final class UserInteractionOptions {
 	}
 
 	/**
-	 * Interface for input validators used in {@link TextInputDialog}s. The {@link #isInputValid(String) isInputValid}
+	 * Interface for input validators used in {@link tools.vitruv.change.interaction.types.TextInputInteraction}s. The {@link #isInputValid(String) isInputValid}
 	 * method is used to accept or deny input changes, the message constructed in
 	 * {@link #getInvalidInputMessage(String) getInvalidInputMessage} is displayed whenever the user tries to enter
 	 * illegal characters as determined by {@link #isInputValid(String) isInputValid}.
