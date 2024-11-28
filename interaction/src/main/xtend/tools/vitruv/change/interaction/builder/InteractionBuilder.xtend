@@ -5,15 +5,15 @@ import tools.vitruv.change.interaction.UserInteractionOptions.WindowModality
 /**
  * Interface for functionality relevant to all types of dialog builders.<br>
  * <br>
- * DialogBuilder rationale:<br>
- * For each type of dialog, there is a builder (...DialogBuilderImpl) implementing a ...DialogBuilder interface and
- * extending BaseDialogBuilder which provides methods to specify dialog properties common to all types of dialogs. To
+ * InteractionBuilder rationale:<br>
+ * For each type of dialog, there is a builder (...InteractionBuilderImpl) implementing a ...InteractionBuilder interface and
+ * extending BaseInteractionBuilder which provides methods to specify dialog properties common to all types of dialogs. To
  * ensure that mandatory properties are set via the builder before the dialog is being built and shown, the
- * ...DialogBuilder interfaces only declare one (mandatory) method, which then either returns further (inner) interfaces
+ * ...InteractionBuilder interfaces only declare one (mandatory) method, which then either returns further (inner) interfaces
  * representing further mandatory steps on the builder the same way, or an OptionalSteps interface, which contains
- * non-mandatory build steps as well as the common ones from the {@link DialogBuilder} interface and the method to build
- * and display the dialog as well as get the user input (if any). A ...DialogBuilderImpl implements all inner interfaces
- * of its ...DialogBuilder interface to enable using it for all build steps. This is a form of a fluent Step Builder.
+ * non-mandatory build steps as well as the common ones from the {@link InteractionBuilder} interface and the method to build
+ * and display the dialog as well as get the user input (if any). A ...InteractionBuilderImpl implements all inner interfaces
+ * of its ...InteractionBuilder interface to enable using it for all build steps. This is a form of a fluent Step Builder.
  * 
  * @param <V> the return type for the user input.
  * @param <T> type parameter for the return type of methods whose execution is optional when building a dialog. This
@@ -33,7 +33,7 @@ interface InteractionBuilder<V, T extends InteractionBuilder<V, T>> {
 	def T title(String title)
 
 	/**
-	 * Sets the dialog window's modality, defaults to {@link WindowModality.MODELESS}.
+	 * Sets the dialog window's modality, defaults to {@link tools.vitruv.change.interaction.UserInteractionOptions.WindowModality#MODELESS}.
 	 * 
 	 * @param windowModality    The modality of the window to be set, if {@code null}, nothing happens.
 	 * @return a matching DialogBuilder implementation for method chaining.

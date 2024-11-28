@@ -15,7 +15,7 @@ public interface ChangeDecoder {
 	 * @param eChange The eChange whose Information should be decoded
 	 * @return The simple Info text, can be null (=ignore)
 	 */
-	String decode(EChange echange);
+	String decode(EChange eChange);
 
 	/**
 	 * Returns the name of the eClass decoded by this decoder

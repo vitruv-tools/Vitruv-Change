@@ -22,7 +22,7 @@ interface InternalUserInteractor extends UserInteractor {
 	 * Replaces the current {@link InteractionResultProvider} with the one provided by the given {@code replacementProvider}.
 	 * 
 	 * @param replacementProvider - function that gets the current {@link InteractionResultProvider} and returns the new one.
-	 * @result an {@link AutoCloseable} that will revert the change when being closed.
+	 * @return an {@link AutoCloseable} that will revert the change when being closed.
 	 */
 	def AutoCloseable replaceUserInteractionResultProvider(
 		(InteractionResultProvider) => InteractionResultProvider replacementProvider

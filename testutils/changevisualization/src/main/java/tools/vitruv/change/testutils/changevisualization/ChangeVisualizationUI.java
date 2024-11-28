@@ -343,7 +343,7 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
 
 	/**
 	 * Show a file together with the change-tabs
-	 * @param uri The file to load and show
+	 * @param file The file to load and show
 	 */
 	public void addFile(File file) {
 		try {

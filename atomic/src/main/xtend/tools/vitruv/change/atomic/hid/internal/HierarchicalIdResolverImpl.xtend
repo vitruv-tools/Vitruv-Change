@@ -32,7 +32,7 @@ class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
 	 * 
 	 * @param resourceSet -
 	 * 		the {@link ResourceSet} to load model elements from, may not be {@code null}
-	 * @throws IllegalArgumentExceptionif given {@link ResourceSet} is {@code null}
+	 * @throws IllegalArgumentException if given {@link ResourceSet} is {@code null}
 	 */
 	new(ResourceSet resourceSet) {
 		checkArgument(resourceSet !== null, "Resource set may not be null")

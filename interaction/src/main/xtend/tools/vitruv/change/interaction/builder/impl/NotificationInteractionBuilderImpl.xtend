@@ -11,7 +11,7 @@ import tools.vitruv.change.interaction.UserInteractionListener
  * Builder class for {@link NotificationInteraction}s.
  * Creates a dialog with a notification message and an icon depicting the severity.<br>
  * <br>
- * For further info on the rationale behind the ...InteractionBuilder implementation, see the {@link InteractionBuilder} javadoc.
+ * For further info on the rationale behind the ...InteractionBuilder implementation, see the {@link tools.vitruv.change.interaction.builder.InteractionBuilder} javadoc.
  * @see NotificationInteractionBuilder
  * 
  * @author Dominik Klooz

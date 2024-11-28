@@ -27,7 +27,7 @@ class TypeInferringCompoundEChangeFactory {
 	}
 
 	/**
-	 * Creates a new {@link CreateAndInsertRoot} EChange.
+	 * Creates a new EChange list that creates and inserts a root object.
 	 * @param affectedEObject The created and inserted root object by the change.
 	 * @param resource The resource where the root object will be inserted.
 	 * @param index The index at which the root object will be inserted into the resource.
@@ -41,7 +41,7 @@ class TypeInferringCompoundEChangeFactory {
 	}
 
 	/**
-	 * Creates a new {@link CreateAndRemoveDeleteRoot} EChange.
+	 * Creates a new EChange list that removes and delete a root object.
 	 * @param affectedEObject The removed and deleted root object by the change.
 	 * @param resource The resource where the root object will be removed from.
 	 * @param index The index at which the root object will be removed from the resource.
@@ -55,7 +55,7 @@ class TypeInferringCompoundEChangeFactory {
 	}
 
 	/**
-	 * Creates a new {@link CreateAndInsertNonRoot} EChange.
+	 * Creates a new EChange list that creates and inserts a non root element.
 	 * @param affectedEObject The affected object, in which feature the created non root element will be inserted.
 	 * @param reference The reference of the affected object, in which the created non root element will be inserted.
 	 * @param newValue The created and inserted non root element.
@@ -70,7 +70,7 @@ class TypeInferringCompoundEChangeFactory {
 	}
 
 	/**
-	 * Creates a new {@link RemoveAndDeleteNonRoot} EChange.
+	 * Creates a new EChange list that removes and deletes a non root element.
 	 * @param affectedEObject The affected object, from which feature the non root element will be removed.
 	 * @param reference The reference of the affected object, from which the non root element will be removed.
 	 * @param oldValue The removed and deleted non root element.
@@ -85,7 +85,7 @@ class TypeInferringCompoundEChangeFactory {
 	}
 
 	/**
-	 * Creates a new {@link CreateAndReplaceNonRoot} EChange.
+	 * Creates a new EChange list that creates an EObject and replaces a value with it.
 	 * @param affectedEObject The affected object, in which feature null will be replaced by the new value.
 	 * @param reference The reference of the affected object, in which null will be replaced by the new value.
 	 * @param newValue The new value which replaces null.
@@ -99,7 +99,7 @@ class TypeInferringCompoundEChangeFactory {
 	}
 
 	/**
-	 * Creates a new {@link ReplaceAndDeleteNonRoot} EChange.
+	 * Creates a new EChange list that replace a feature value with null and deletes the replaced EObject.
 	 * @param affectedEObject The affected object, in which feature the old value will be replaced by null.
 	 * @param reference The reference of the affected object, in which the old value will be replaced by null.
 	 * @param oldValue The old value which will be replaced by null.
@@ -113,7 +113,7 @@ class TypeInferringCompoundEChangeFactory {
 	}
 
 	/**
-	 * Creates a new {@link CreateAndReplaceAndDeleteNonRoot} EChange.
+	 * Creates a new EChange list that replaced a feature value with a newly created EObject and deletes the replaced EObject.
 	 * @param affectedEObject The affected object, in which feature the non root element will be replaced.
 	 * @param reference The reference of the affected object, in which the non root element will be replaced.
 	 * @param oldValue The replaced and deleted non root element.

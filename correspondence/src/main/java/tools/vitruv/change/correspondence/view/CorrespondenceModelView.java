@@ -10,7 +10,7 @@ import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.correspondence.Correspondence;
 
 /**
- * A view on a {@link CorrespondenceModel} that is aware of the actual correspondence type to be handled.
+ * A view on a {@link tools.vitruv.change.correspondence.model.CorrespondenceModel} that is aware of the actual correspondence type to be handled.
  * @author Heiko Klare
  * @param <C> - the type of correspondences to be handled, i.e., to be retrieved, added or removed
  */
@@ -83,11 +83,11 @@ public interface CorrespondenceModelView<C extends Correspondence> {
 	}
 
 	/**
-	 * Returns a view on the {@link CorrespondenceModel} restricted to the specified kind of {@link Correspondence}, which
+	 * Returns a view on the {@link tools.vitruv.change.correspondence.model.CorrespondenceModel} restricted to the specified kind of {@link Correspondence}, which
 	 * must be a subtype of the {@link Correspondence} type used in this view. The functions of the view will only act on
 	 * the given implementation of {@link Correspondence}s.
 	 * @param correspondenceType the type of correspondence to create a view for
-	 * @return the restricted view on the {@link CorrespondenceModel}
+	 * @return the restricted view on the {@link tools.vitruv.change.correspondence.model.CorrespondenceModel}
 	 * @param <V> the type of correspondence to create a view for
 	 */
 	public <V extends C> CorrespondenceModelView<V> getView(Class<V> correspondenceType);

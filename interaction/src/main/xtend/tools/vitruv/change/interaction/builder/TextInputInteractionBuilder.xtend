@@ -5,7 +5,7 @@ import tools.vitruv.change.interaction.UserInteractionOptions.InputFieldType
 import tools.vitruv.change.interaction.UserInteractionOptions.InputValidator
 
 /**
- * Defines one single entry point to the build process of a {@link TextInputInteraction} thus ensuring that mandatory
+ * Defines one single entry point to the build process of a {@link tools.vitruv.change.interaction.types.TextInputInteraction} thus ensuring that mandatory
  * information has to be provided before continuing. The top-level method represents the first and only mandatory step
  * returning the nested interface which includes optional steps as well as the build method
  * ({@link TextInputInteractionBuilder.OptionalSteps} extends {@link InteractionBuilder} to provide access to build step

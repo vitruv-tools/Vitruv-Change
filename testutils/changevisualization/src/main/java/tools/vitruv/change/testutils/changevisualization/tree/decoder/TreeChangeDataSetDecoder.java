@@ -21,7 +21,7 @@ import tools.vitruv.change.testutils.changevisualization.tree.decoder.feature.Mu
 import tools.vitruv.change.testutils.changevisualization.tree.decoder.feature.OldValueNewValueProcessor;
 
 /**
- * Helper class to generate {@link TreeChangeDataSets}s from propagation results and
+ * Helper class to generate {@link TreeChangeDataSet}s from propagation results and
  * register {@link MultipleFeatureProcessor}s.  
  * 
  * @author Andreas Loeffler
@@ -57,7 +57,7 @@ public class TreeChangeDataSetDecoder {
 	/**
 	 * Can be called to register new processors implementing multiple structural feature enhancements
 	 * 
-	 * @param dec The processor for multi feature enhancements
+	 * @param proc The processor for multi feature enhancements
 	 */
 	public static void registerMultipleFeatureProcessor(MultipleFeatureProcessor proc) {
 		multipleFeatureProcessors.add(proc);

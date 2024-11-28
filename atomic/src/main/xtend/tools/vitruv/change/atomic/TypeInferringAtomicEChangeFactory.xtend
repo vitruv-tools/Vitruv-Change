@@ -56,8 +56,8 @@ class TypeInferringAtomicEChangeFactory {
 	/** 
 	 * Sets the attributes of a RootEChange.
 	 * @param change The RootEChange which attributes are to be set.
-	 * @param resourceURI The affected resource of the change.
-	 * @param URI the URI of the resource. May differ from URI of the resource if it has changed.
+	 * @param resource The affected resource of the change.
+	 * @param uri the URI of the resource. May differ from URI of the resource if it has changed.
 	 * @param index The affected index of the resource.
 	 */
 	def protected setRootChangeFeatures(RootEChange<?> change, Resource resource, URI uri, int index) {
@@ -149,7 +149,7 @@ class TypeInferringAtomicEChangeFactory {
 	}
 
 	/**
-	 * Creates a new {@link InsertEAttribute} EChange.
+	 * Creates a new {@link InsertEAttributeValue} EChange.
 	 * @param affectedEObject The affected EObject of the change.
 	 * @param affectedAttribute The affected EAttribute of the change.
 	 * @param newValue The inserted value.

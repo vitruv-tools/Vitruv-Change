@@ -22,7 +22,7 @@ public final class ProjectMarker {
 
 	/**
 	 * Marks the folder with the given path as a project root folder by placing a marker file to be identified by
-	 * {@link #getProjectRootFolder(URI)}.
+	 * {@link #getProjectRootFolder(Path)}.
 	 * @param projectRootFolder the path of the root folder to mark, must not be <code>null</code>
 	 * @throws IOException if something went wrong when creating the marker file (see
 	 * {@link Files#createFile(Path, java.nio.file.attribute.FileAttribute...)}.

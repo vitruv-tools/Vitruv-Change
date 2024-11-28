@@ -51,7 +51,6 @@ public class ChangeNodeDecoder {
 	/**
 	 * Can be called to register new decoders for given EChange classes
 	 * 
-	 * @param className The eClass-name to decode
 	 * @param dec The decoder used to decode objects of the class
 	 */
 	public static void registerChangeDecoder(ChangeDecoder dec) {

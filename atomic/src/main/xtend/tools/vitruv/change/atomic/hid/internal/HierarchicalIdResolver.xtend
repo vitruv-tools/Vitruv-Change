@@ -37,7 +37,7 @@ interface HierarchicalIdResolver {
 	def void endTransaction()
 	
 	/**
-	 * Instantiates a {@link IdResolverAndRepository} with the given {@link ResourceSet}
+	 * Instantiates a {@link HierarchicalIdResolver} with the given {@link ResourceSet}
 	 * for resolving objects.
 	 * 
 	 * @param resourceSet -

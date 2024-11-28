@@ -32,7 +32,7 @@ public interface UserInteractor {
 	/**
 	 * @return a {@link TextInputInteractionBuilder} used to configure, build and
 	 *         show text input dialogs to prompt the user to input free text
-	 *         optionally restricted by a {@link InputValidator}. Can be configured
+	 *         optionally restricted by a {@link tools.vitruv.change.interaction.UserInteractionOptions.InputValidator}. Can be configured
 	 *         to take single- or multi-line input.
 	 */
 	TextInputInteractionBuilder getTextInputDialogBuilder();

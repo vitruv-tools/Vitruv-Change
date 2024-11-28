@@ -69,7 +69,7 @@ public class CloseableTabComponent extends JPanel{
 	
 	/**
      * Adds an <code>ActionListener</code> to the close button.
-     * @param l the <code>ActionListener</code> to be added
+     * @param actionListener the <code>ActionListener</code> to be added
      */
 	public void addActionListener(ActionListener actionListener) {
 		closeButton.addActionListener(actionListener);	
@@ -78,7 +78,7 @@ public class CloseableTabComponent extends JPanel{
 	/**
      * Removes an <code>ActionListener</code> from the close button.
      *
-     * @param l the listener to be removed
+     * @param actionListener the listener to be removed
      */
 	public void removeActionListener(ActionListener actionListener) {
 		closeButton.removeActionListener(actionListener);

@@ -17,10 +17,10 @@ abstract class AbstractVitruviusChangeResolver<Id> implements VitruviusChangeRes
 	 * After completely handling a transactional change, the
 	 * {@code onTransactionEnd} handler is called with the transformed change.
 	 * 
-	 * @parameter change the change to transform
-	 * @parameter changeHandler the handler for transforming a single
+	 * @param change the change to transform
+	 * @param changeHandler the handler for transforming a single
 	 *            {@code EChange}.
-	 * @parameter onTransactionEnd any cleanup logic after a transactional change
+	 * @param onTransactionEnd any cleanup logic after a transactional change
 	 *            has been completely transformed. This might be called multiple
 	 *            times with different changes if the passed change is a composite
 	 *            change.
