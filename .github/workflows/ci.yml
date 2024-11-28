@@ -48,11 +48,25 @@ jobs:
       with:
         name: Build Results
         path: staging-*/
-  
+
+  sonarcloud:
+    name: SonarCloud Analysis
+    runs-on: ubuntu-latest
+    needs: [verify]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4.2.2
+      with:
+        fetch-depth: 0
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   deploy-snapshot:
     name: Deploy snapshot
     runs-on: ubuntu-latest
-    needs: [verify]
+    needs: [verify, sonarcloud]
     if: github.ref == 'refs/heads/main' && github.repository_owner == 'vitruv-tools'
     strategy:
       fail-fast: true
