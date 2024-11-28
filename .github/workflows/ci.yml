@@ -33,6 +33,14 @@ jobs:
         check-latest: true
         cache: 'maven'
 
+    - name: Verify build
+      if: matrix.os != 'ubuntu-latest'
+      run: >
+        ./mvnw clean verify
+        --batch-mode
+        --update-snapshots
+        --no-transfer-progress
+
     - name: Verify build with Sonar
       if: matrix.os == 'ubuntu-latest'
       run: >
@@ -42,14 +50,6 @@ jobs:
         --no-transfer-progress
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-    - name: Verify build
-      if: matrix.os != 'ubuntu-latest'
-      run: >
-        ./mvnw clean verify
-        --batch-mode
-        --update-snapshots
-        --no-transfer-progress
 
     - name: Stage build results
       run: mkdir staging-${{ matrix.os }} && cp **/target/*.jar staging-${{ matrix.os }}/
