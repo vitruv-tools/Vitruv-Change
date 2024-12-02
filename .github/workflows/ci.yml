@@ -79,7 +79,7 @@ jobs:
 
     - name: Verify JavaDoc
       run: >
-        ./mvnw clean javadoc:javadoc
+        ./mvnw clean compile javadoc:javadoc
         -DskipTests
         --batch-mode
         --update-snapshots
