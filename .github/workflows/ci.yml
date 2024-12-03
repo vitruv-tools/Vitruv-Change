@@ -58,7 +58,6 @@ jobs:
     name: Verify JavaDoc
     runs-on: ubuntu-latest
     needs: [verify]
-    if: github.actor != 'dependabot[bot]'
     strategy:
       fail-fast: true
 
