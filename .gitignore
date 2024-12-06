@@ -6,6 +6,9 @@ target/
 *.log
 .mvn/wrapper/*.jar
 
+# Idea
+.idea/
+
 # Eclipse
 META-INF
 build.properties
