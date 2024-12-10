@@ -11,3 +11,16 @@ For general information on Vitruvius, see our [GitHub Organisation](https://gith
 
 This project contains the underlying definition of changes in Ecore-based models and interfaces for specifying the propagation of changes between models to preserve their consistency with the central interface `ChangePropagationSpecification`, as well as an interface and a default implementation for orchestrating the execution of such specifications.
 In addition, interactions to involve the user into the change preservation process are provided.
+
+## Module Overview
+
+| Name             | Description                                                       |
+|------------------|-------------------------------------------------------------------|
+| atomic           | Definition of the atomic change meta-model.                       |
+| composite        | Definition of complex changes as a sequence of atomic changes.    |
+| propagation      | Applying changes to update model states.                          |
+| changederivation | Derivation of changes from an updated model state.                |
+| interaction      | Requesting input from developers during consistency preservation. |
+| correspondence   | Definition of annotatable mappings between model elements.        |
+| *testutils*      | *Utilities for testing in Vitruvius or V-SUM projects.*           |
+| *utils*          | *Utilities for Vitruvius or V-SUM projects.*                      |
