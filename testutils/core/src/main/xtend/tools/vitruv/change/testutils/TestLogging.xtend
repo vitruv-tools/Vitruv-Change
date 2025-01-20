@@ -1,18 +1,29 @@
 package tools.vitruv.change.testutils
 
 import edu.kit.ipd.sdq.activextendannotations.Lazy
-import org.apache.log4j.ConsoleAppender
-import org.apache.log4j.PatternLayout
+import org.apache.logging.log4j.core.Layout
+import org.apache.logging.log4j.Level
 import org.junit.jupiter.api.^extension.BeforeAllCallback
 import org.junit.jupiter.api.^extension.ExtensionContext
 
-import static org.apache.log4j.Level.*
-import static org.apache.log4j.Logger.getRootLogger
+import static org.apache.logging.log4j.Level.*
+import static org.apache.logging.log4j.LogManager.getRootLogger
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
+import org.apache.logging.log4j.core.config.Configurator
+import org.apache.logging.log4j.core.layout.PatternLayout
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
+import org.apache.logging.log4j.core.config.builder.api.LayoutComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
+import org.apache.logging.log4j.Level
 
-import static extension org.apache.log4j.Logger.getLogger
 import java.util.List
 
-/** 
+/**
  * Initializes console logger for tests. Sets the logger level to {@code WARN} by default. If the VM property
  * {@link VM_ARGUMENT_LOG_LEVEL} is specified, it is used to determine the logger level.
  */
@@ -30,10 +41,22 @@ class TestLogging implements BeforeAllCallback {
 	}
 	
 	def private static configureLog4J() {
-		rootLogger.removeAllAppenders()
-		rootLogger.addAppender(new ConsoleAppender(new PatternLayout(LOG_PATTERN)))
-		rootLogger.level = ERROR
-		VITRUV_LOG_ROOTS.forEach [logger.level = toLevel(desiredLogLevel, WARN)]
-		TestProjectManager.logger.level = INFO
+        val builder = ConfigurationBuilderFactory.newConfigurationBuilder();
+
+        builder.setStatusLevel(Level.ERROR);
+        builder.setConfigurationName("RollingBuilder");
+        // create the console appender
+        var appenderBuilder =
+                builder.newAppender("Stdout", "CONSOLE").addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT) as org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder
+        appenderBuilder.add(builder.newLayout("PatternLayout").addAttribute("pattern",LOG_PATTERN));
+        builder.add(appenderBuilder);
+        val config = builder.build();
+        config.initialize();
+        VITRUV_LOG_ROOTS.forEach [loggerName |
+            val logger = LogManager.getLogger(loggerName) as org.apache.logging.log4j.core.Logger
+            logger.level = Level.toLevel(desiredLogLevel, Level.WARN)
+        ]
+        val testLogger = LogManager.getLogger(TestProjectManager) as org.apache.logging.log4j.core.Logger
+        testLogger.level = Level.INFO
 	}
 }

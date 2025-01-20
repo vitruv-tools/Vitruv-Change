@@ -5,8 +5,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.composite.description.PropagatedChange;
@@ -18,28 +18,34 @@ import tools.vitruv.change.propagation.ChangePropagationSpecificationProvider;
 import tools.vitruv.change.propagation.PersistableChangeRecordingModelRepository;
 
 /**
- * A default implementation of a {@link ChangeableModelRepository} that requires a
- * {@link PersistableChangeRecordingModelRepository} and a {@link ChangePropagationSpecificationProvider} to propagate
- * changes. It uses the default {@link ChangePropagator} to propagate changes passed to the
+ * A default implementation of a {@link ChangeableModelRepository} that requires
+ * a
+ * {@link PersistableChangeRecordingModelRepository} and a
+ * {@link ChangePropagationSpecificationProvider} to propagate
+ * changes. It uses the default {@link ChangePropagator} to propagate changes
+ * passed to the
  * {@link #propagateChange(VitruviusChange)} method.
  */
 public class DefaultChangeableModelRepository implements ChangeableModelRepository {
-	private static final Logger LOGGER = Logger.getLogger(DefaultChangeableModelRepository.class);
+	private static final Logger LOGGER = LogManager.getLogger(DefaultChangeableModelRepository.class);
 
 	private final Set<ChangePropagationListener> changePropagationListeners = new HashSet<>();
 	private final PersistableChangeRecordingModelRepository modelRepository;
 	private final ChangePropagator changePropagator;
 
 	public DefaultChangeableModelRepository(PersistableChangeRecordingModelRepository modelRepository,
-			ChangePropagationSpecificationProvider changePropagationSpecificationProvider, InternalUserInteractor userInteractor) {
+			ChangePropagationSpecificationProvider changePropagationSpecificationProvider,
+			InternalUserInteractor userInteractor) {
 		this.modelRepository = modelRepository;
-		this.changePropagator = new ChangePropagator(modelRepository, changePropagationSpecificationProvider, userInteractor);
+		this.changePropagator = new ChangePropagator(modelRepository, changePropagationSpecificationProvider,
+				userInteractor);
 	}
 
 	@Override
 	public List<PropagatedChange> propagateChange(VitruviusChange<Uuid> change) {
 		checkArgument(change != null, "change to propagate must not be null");
-		checkArgument(change.containsConcreteChange(), "change to propagate must contain concrete changes:%s%s", System.lineSeparator(), change);
+		checkArgument(change.containsConcreteChange(), "change to propagate must contain concrete changes:%s%s",
+				System.lineSeparator(), change);
 
 		LOGGER.info("Start change propagation");
 		notifyChangePropagationStarted(change);
@@ -57,7 +63,8 @@ public class DefaultChangeableModelRepository implements ChangeableModelReposito
 		changePropagationListeners.stream().forEach((listener) -> listener.startedChangePropagation(change));
 	}
 
-	private void notifyChangePropagationFinished(VitruviusChange<Uuid> inputChange, Iterable<PropagatedChange> generatedChanges) {
+	private void notifyChangePropagationFinished(VitruviusChange<Uuid> inputChange,
+			Iterable<PropagatedChange> generatedChanges) {
 		changePropagationListeners.stream().forEach((listener) -> listener.finishedChangePropagation(generatedChanges));
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Finished synchronizing change: " + inputChange);

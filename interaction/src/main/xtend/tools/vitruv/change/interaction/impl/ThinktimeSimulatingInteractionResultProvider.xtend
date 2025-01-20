@@ -1,6 +1,7 @@
 package tools.vitruv.change.interaction.impl
 
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import java.util.Random
 import tools.vitruv.change.interaction.InteractionResultProvider
 import org.eclipse.xtend.lib.annotations.Delegate
@@ -11,7 +12,7 @@ import org.eclipse.xtend.lib.annotations.Delegate
  * @author Heiko Klare
  */
 class ThinktimeSimulatingInteractionResultProvider implements InteractionResultProvider {
-	static val Logger logger = Logger.getLogger(ThinktimeSimulatingInteractionResultProvider)
+	static val Logger logger = LogManager.getLogger(ThinktimeSimulatingInteractionResultProvider)
 	val Random random = new Random()
 	val int minWaittime
 	val int maxWaittime

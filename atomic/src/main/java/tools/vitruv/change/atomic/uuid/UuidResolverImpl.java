@@ -13,8 +13,9 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.InternalEObject;
@@ -30,7 +31,7 @@ import tools.vitruv.change.atomic.hid.ObjectResolutionUtil;
 import tools.vitruv.change.atomic.hid.internal.HierarchicalIdResolver;
 
 class UuidResolverImpl implements UuidResolver {
-	static private final Logger LOGGER = Logger.getLogger(UuidResolverImpl.class);
+	static private final Logger LOGGER = LogManager.getLogger(UuidResolverImpl.class);
 	private static final String NON_READONLY_PREFIX = "ord_";
 
 	private static final String SERIALIZATION_SEPARATOR = "|";

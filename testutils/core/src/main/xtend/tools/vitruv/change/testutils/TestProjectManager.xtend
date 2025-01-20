@@ -5,7 +5,7 @@ import java.nio.file.DirectoryNotEmptyException
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Path
 import java.nio.file.SimpleFileVisitor
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.LogManager
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import org.junit.jupiter.api.^extension.ExtensionContext
 import org.junit.jupiter.api.^extension.ParameterContext
@@ -45,7 +45,7 @@ class TestProjectManager implements ParameterResolver, AfterEachCallback {
 	 * Set this system property to overwrite the workspace path 
 	 */
 	public static val WORKSPACE_PATH_SYSTEM_PROPERTY = "vitruv.workspace"
-	static val log = Logger.getLogger(TestProjectManager)
+	static val log = LogManager.getLogger(TestProjectManager)
 	static val namespace = ExtensionContext.Namespace.create(TestProjectManager)
 	static val observedFailure = "observedFailure"
 	static val projectNamespace = ExtensionContext.Namespace.create(TestProjectManager, "projects")

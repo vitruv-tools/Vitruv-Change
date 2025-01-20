@@ -10,8 +10,9 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.logging.log4j.LogManager;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -31,14 +32,19 @@ import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.propagation.PersistableChangeRecordingModelRepository;
 
 /**
- * A default implementation of a {@link PersistableChangeRecordingModelRepository}. It manages a {@link ResourceSet} for
- * the models, which are automatically monitored for changes. It loads existing models calling
- * {@link #loadExistingModels()} by loading the correspondence model at the URI specified in the constructor and
- * resolving all models references in the correspondence model. If no such URI is specified, loading will have no
+ * A default implementation of a
+ * {@link PersistableChangeRecordingModelRepository}. It manages a
+ * {@link ResourceSet} for
+ * the models, which are automatically monitored for changes. It loads existing
+ * models calling
+ * {@link #loadExistingModels()} by loading the correspondence model at the URI
+ * specified in the constructor and
+ * resolving all models references in the correspondence model. If no such URI
+ * is specified, loading will have no
  * effect.
  */
 public class DefaultChangeRecordingModelRepository implements PersistableChangeRecordingModelRepository {
-	private static final Logger LOGGER = Logger.getLogger(DefaultChangeRecordingModelRepository.class);
+	private static final Logger LOGGER = LogManager.getLogger(DefaultChangeRecordingModelRepository.class);
 	private static final String METADATA_KEY_FRAGMENT_SEPARATOR = "_";
 
 	private final ResourceSet modelsResourceSet;
@@ -51,12 +57,18 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 	private boolean isLoading = false;
 
 	/**
-	 * Creates a repository with the defined URI for the correspondence model and using the specified path for storing
-	 * metadata. The URI must be resolvable when performing load or save operations, or can be {@code null} is no
+	 * Creates a repository with the defined URI for the correspondence model and
+	 * using the specified path for storing
+	 * metadata. The URI must be resolvable when performing load or save operations,
+	 * or can be {@code null} is no
 	 * persistence of the correspondence model shall be managed.
-	 * @param correspondencesURI the URI of the correspondence model to use for saving and loading it, must be {@code null}
-	 * or valid
-	 * @param consistencyMetadataFolder the folder to store consistency metadata in, must not be {@code null}
+	 * 
+	 * @param correspondencesURI        the URI of the correspondence model to use
+	 *                                  for saving and loading it, must be
+	 *                                  {@code null}
+	 *                                  or valid
+	 * @param consistencyMetadataFolder the folder to store consistency metadata in,
+	 *                                  must not be {@code null}
 	 */
 	public DefaultChangeRecordingModelRepository(URI correspondencesURI, Path consistencyMetadataFolder) {
 		this.consistencyMetadataFolder = consistencyMetadataFolder;
@@ -86,7 +98,8 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 
 	@Override
 	public URI getMetadataModelURI(String... metadataKey) {
-		Path metadataPath = consistencyMetadataFolder.resolve(String.join(METADATA_KEY_FRAGMENT_SEPARATOR, metadataKey));
+		Path metadataPath = consistencyMetadataFolder
+				.resolve(String.join(METADATA_KEY_FRAGMENT_SEPARATOR, metadataKey));
 		return URI.createFileURI(metadataPath.toString());
 	}
 
