@@ -12,7 +12,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -26,7 +27,7 @@ import tools.vitruv.change.correspondence.CorrespondenceFactory;
 import tools.vitruv.change.correspondence.Correspondences;
 
 class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceModel {
-	private static final Logger logger = Logger.getLogger(PersistableCorrespondenceModelImpl.class);
+	private static final Logger logger = LogManager.getLogger(PersistableCorrespondenceModelImpl.class);
 	private final Correspondences correspondences;
 	private final Resource correspondencesResource;
 
@@ -42,8 +43,10 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
 
 	@Override
 	public void loadSerializedCorrespondences(ResourceSet resolveIn) {
-		checkState(correspondencesResource != null, "Correspondences resource must be specified to load existing correspondences");
-		Resource loadedResource = loadOrCreateResource(withGlobalFactories(new ResourceSetImpl()), correspondencesResource.getURI());
+		checkState(correspondencesResource != null,
+				"Correspondences resource must be specified to load existing correspondences");
+		Resource loadedResource = loadOrCreateResource(withGlobalFactories(new ResourceSetImpl()),
+				correspondencesResource.getURI());
 		if (!loadedResource.getContents().isEmpty()) {
 			Correspondences loadedCorrespondences = (Correspondences) loadedResource.getContents().get(0);
 			for (Correspondence correspondence : loadedCorrespondences.getCorrespondences()) {
@@ -62,9 +65,11 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
 	}
 
 	private static List<EObject> resolve(List<EObject> eObjects, ResourceSet resolveIn) {
-		List<EObject> resolvedEObjects = eObjects.stream().map(eObject -> EcoreUtil.resolve(eObject, resolveIn)).toList();
+		List<EObject> resolvedEObjects = eObjects.stream().map(eObject -> EcoreUtil.resolve(eObject, resolveIn))
+				.toList();
 		for (EObject resolvedEObject : resolvedEObjects) {
-			checkState(!resolvedEObject.eIsProxy(), "object %s is referenced in correspondence but could not be resolved", resolvedEObject);
+			checkState(!resolvedEObject.eIsProxy(),
+					"object %s is referenced in correspondence but could not be resolved", resolvedEObject);
 		}
 		return resolvedEObjects;
 	}
@@ -81,7 +86,8 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
 	}
 
 	@Override
-	public <C extends Correspondence> C addCorrespondenceBetween(List<EObject> firstEObjects, List<EObject> secondEObjects, String tag,
+	public <C extends Correspondence> C addCorrespondenceBetween(List<EObject> firstEObjects,
+			List<EObject> secondEObjects, String tag,
 			Supplier<C> correspondenceCreator) {
 		C correspondence = correspondenceCreator.get();
 		correspondence.getLeftEObjects().addAll(firstEObjects);
@@ -102,19 +108,22 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
 								|| element.getRightEObjects().stream().allMatch(this::isNotInManagedResource),
 						"Correspondence between %s and %s contains elements %s that are not contained in a resource anymore.",
 						element.getLeftEObjects(), element.getRightEObjects(),
-						Stream.concat(element.getLeftEObjects().stream(), element.getRightEObjects().stream()).filter(this::isNotInManagedResource)
+						Stream.concat(element.getLeftEObjects().stream(), element.getRightEObjects().stream())
+								.filter(this::isNotInManagedResource)
 								.toList());
 				iterator.remove();
 				if (logger.isTraceEnabled()) {
-					logger.trace("Correspondence between " + element.getLeftEObjects() + " and " + element.getRightEObjects()
-							+ " has been removed as all its elements have been removed from resources.");
+					logger.trace(
+							"Correspondence between " + element.getLeftEObjects() + " and " + element.getRightEObjects()
+									+ " has been removed as all its elements have been removed from resources.");
 				}
 			}
 		}
 	}
 
 	private boolean isNotInManagedResource(EObject object) {
-		return !(object instanceof EClass) && (object.eResource() == null || object.eResource().getResourceSet() == null);
+		return !(object instanceof EClass)
+				&& (object.eResource() == null || object.eResource().getResourceSet() == null);
 	}
 
 	private void removeCorrespondence(Correspondence correspondence) {
@@ -122,22 +131,27 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
 	}
 
 	@Override
-	public <C extends Correspondence> Set<C> removeCorrespondencesBetween(Class<C> correspondenceType, List<EObject> aEObjects,
+	public <C extends Correspondence> Set<C> removeCorrespondencesBetween(Class<C> correspondenceType,
+			List<EObject> aEObjects,
 			List<EObject> bEObjects, String tag) {
 		Set<Correspondence> correspondencesBetween = getCorrespondencesBetween(aEObjects, bEObjects);
-		Set<C> correspondencesToRemove = filterCorrespondenceTypeAndTag(correspondencesBetween, correspondenceType, tag);
+		Set<C> correspondencesToRemove = filterCorrespondenceTypeAndTag(correspondencesBetween, correspondenceType,
+				tag);
 		correspondencesToRemove.stream().forEach(this::removeCorrespondence);
 		return correspondencesToRemove;
 	}
 
-	private <C extends Correspondence> Set<C> filterCorrespondenceTypeAndTag(Set<Correspondence> original, Class<C> filteredType,
+	private <C extends Correspondence> Set<C> filterCorrespondenceTypeAndTag(Set<Correspondence> original,
+			Class<C> filteredType,
 			String expectedTag) {
 		return original.stream().filter(filteredType::isInstance).map(filteredType::cast)
-				.filter(correspondence -> expectedTag == null || expectedTag.equals(correspondence.getTag())).collect(Collectors.toSet());
+				.filter(correspondence -> expectedTag == null || expectedTag.equals(correspondence.getTag()))
+				.collect(Collectors.toSet());
 	}
 
 	private Set<Correspondence> getCorrespondences(List<EObject> eObjects) {
-		return this.correspondences.getCorrespondences().stream().filter(correspondence -> isEitherSideOfCorrespondence(correspondence, eObjects))
+		return this.correspondences.getCorrespondences().stream()
+				.filter(correspondence -> isEitherSideOfCorrespondence(correspondence, eObjects))
 				.collect(Collectors.toSet());
 	}
 
@@ -145,24 +159,31 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
 		return this.correspondences.getCorrespondences().stream()
 				.filter(correspondence -> isEitherSideOfCorrespondence(correspondence, firstEObjects)
 						&& isEitherSideOfCorrespondence(correspondence, secondEObjects)
-						&& (!firstEObjects.equals(secondEObjects) || correspondence.getLeftEObjects().equals(correspondence.getRightEObjects())))
+						&& (!firstEObjects.equals(secondEObjects)
+								|| correspondence.getLeftEObjects().equals(correspondence.getRightEObjects())))
 				.collect(Collectors.toSet());
 	}
 
 	private boolean isEitherSideOfCorrespondence(Correspondence correspondence, List<EObject> elementsToBeEitherSide) {
-		return elementsToBeEitherSide.equals(correspondence.getLeftEObjects()) || elementsToBeEitherSide.equals(correspondence.getRightEObjects());
+		return elementsToBeEitherSide.equals(correspondence.getLeftEObjects())
+				|| elementsToBeEitherSide.equals(correspondence.getRightEObjects());
 	}
 
 	@Override
-	public Set<List<EObject>> getCorrespondingEObjects(Class<? extends Correspondence> correspondenceType, List<EObject> eObjects, String tag) {
+	public Set<List<EObject>> getCorrespondingEObjects(Class<? extends Correspondence> correspondenceType,
+			List<EObject> eObjects, String tag) {
 		Set<Correspondence> objectsCorrespondences = getCorrespondences(eObjects);
-		Set<? extends Correspondence> properlyTaggedAndTypedCorrespondences = filterCorrespondenceTypeAndTag(objectsCorrespondences,
+		Set<? extends Correspondence> properlyTaggedAndTypedCorrespondences = filterCorrespondenceTypeAndTag(
+				objectsCorrespondences,
 				correspondenceType, tag);
 		return mapToCorrespondingEObjects(properlyTaggedAndTypedCorrespondences, eObjects);
 	}
 
-	private Set<List<EObject>> mapToCorrespondingEObjects(Set<? extends Correspondence> correspondences, List<EObject> originalEObjects) {
-		return correspondences.stream().map(correspondence -> getCorrespondingEObjects(correspondence, originalEObjects)).collect(Collectors.toSet());
+	private Set<List<EObject>> mapToCorrespondingEObjects(Set<? extends Correspondence> correspondences,
+			List<EObject> originalEObjects) {
+		return correspondences.stream()
+				.map(correspondence -> getCorrespondingEObjects(correspondence, originalEObjects))
+				.collect(Collectors.toSet());
 	}
 
 	private List<EObject> getCorrespondingEObjects(Correspondence correspondence, List<EObject> eObjects) {

@@ -4,7 +4,8 @@ import java.util.ArrayList
 import java.util.HashSet
 import java.util.List
 import java.util.Set
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.Logger
+import org.apache.logging.log4j.LogManager
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
@@ -29,7 +30,7 @@ import static com.google.common.base.Preconditions.checkState
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.*
 
 class ChangePropagator {
-	static val logger = Logger.getLogger(ChangePropagator)
+	static val logger = LogManager.getLogger(ChangePropagator)
 	val ChangeRecordingModelRepository modelRepository
 	val ChangePropagationSpecificationProvider changePropagationProvider
 	val InternalUserInteractor userInteractor
