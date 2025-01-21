@@ -10,3 +10,9 @@ target/
 META-INF
 build.properties
 plugin.properties
+
+# Generated Files
+**/src-gen/*
+**/xtend-gen/*
+.settings
+**/*.java._trace
