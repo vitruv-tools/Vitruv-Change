@@ -159,42 +159,6 @@
         <version>3.19.100</version>
       </dependency>
       <dependency>
-        <groupId>org.eclipse.platform</groupId>
-        <artifactId>org.eclipse.jface</artifactId>
-        <version>3.35.0</version>
-        <exclusions>
-          <!-- exclude main Eclipse SWT dependency, as we use platform-specific dependencies -->
-          <exclusion>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>org.eclipse.swt</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.platform</groupId>
-        <artifactId>org.eclipse.swt.${swt.platform}</artifactId>
-        <version>3.124.100</version>
-        <exclusions>
-          <!-- exclude main Eclipse SWT dependency, as we use platform-specific dependencies -->
-          <exclusion>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>org.eclipse.swt</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.platform</groupId>
-        <artifactId>org.eclipse.ui.workbench</artifactId>
-        <version>3.133.0</version>
-        <exclusions>
-          <!-- exclude main Eclipse SWT dependency, as we use platform-specific dependencies -->
-          <exclusion>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>org.eclipse.swt</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
         <groupId>org.eclipse.xtend</groupId>
         <artifactId>org.eclipse.xtend.lib</artifactId>
         <version>2.36.0</version>

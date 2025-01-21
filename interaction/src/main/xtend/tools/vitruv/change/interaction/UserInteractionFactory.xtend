@@ -2,7 +2,6 @@ package tools.vitruv.change.interaction
 
 import tools.vitruv.change.interaction.impl.UserInteractorImpl
 import tools.vitruv.change.interaction.UserInteractionBase
-import tools.vitruv.change.interaction.impl.DialogInteractionResultProviderImpl
 import tools.vitruv.change.interaction.impl.PredefinedInteractionResultProviderImpl
 import tools.vitruv.change.interaction.impl.ThinktimeSimulatingInteractionResultProvider
 
@@ -24,20 +23,6 @@ class UserInteractionFactory {
 	 */
 	def InternalUserInteractor createUserInteractor(InteractionResultProvider interactionResultProvider) {
 		return new UserInteractorImpl(interactionResultProvider);
-	}
-
-	/**
-	 * Creates a {@link InternalUserInteractor} with the a result provider based on UI dialogs.
-	 */
-	def InternalUserInteractor createDialogUserInteractor() {
-		return new UserInteractorImpl(createDialogInteractionResultProvider());
-	}
-
-	/**
-	 * Creates a {@link InteractionResultProvider} based on UI dialogs.
-	 */
-	def InteractionResultProvider createDialogInteractionResultProvider() {
-		return new DialogInteractionResultProviderImpl();
 	}
 
 	/**
