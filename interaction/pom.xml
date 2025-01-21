@@ -51,18 +51,6 @@
       <artifactId>org.eclipse.emf.common</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.jface</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.swt.${swt.platform}</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.ui.workbench</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.eclipse.xtend</groupId>
       <artifactId>org.eclipse.xtend.lib</artifactId>
     </dependency>
