@@ -70,9 +70,12 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
     </dependency>
+
+    <!-- p2 dependencies -->
     <dependency>
-      <groupId>xannotations</groupId>
-      <artifactId>edu.kit.ipd.sdq.activextendannotations</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>tools.vitruv.change.p2wrappers.activextendannotations</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 </project>
