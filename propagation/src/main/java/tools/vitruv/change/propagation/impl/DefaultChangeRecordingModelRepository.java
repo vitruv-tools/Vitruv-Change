@@ -24,6 +24,7 @@ import tools.vitruv.change.atomic.uuid.UuidResolver;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.composite.description.VitruviusChangeResolver;
+import tools.vitruv.change.composite.description.VitruviusChangeResolverFactory;
 import tools.vitruv.change.composite.recording.ChangeRecorder;
 import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.model.PersistableCorrespondenceModel;
@@ -74,7 +75,7 @@ public class DefaultChangeRecordingModelRepository implements PersistableChangeR
 		this.consistencyMetadataFolder = consistencyMetadataFolder;
 		this.modelsResourceSet = withGlobalFactories(new ResourceSetImpl());
 		this.uuidResolver = UuidResolver.create(modelsResourceSet);
-		this.changeResolver = VitruviusChangeResolver.forUuids(uuidResolver);
+		this.changeResolver = VitruviusChangeResolverFactory.forUuids(uuidResolver);
 		this.correspondenceModel = createPersistableCorrespondenceModel(correspondencesURI);
 		this.modelsResourceSet.eAdapters().add(new ResourceRegistrationAdapter((resource) -> {
 			if (!isLoading) {
