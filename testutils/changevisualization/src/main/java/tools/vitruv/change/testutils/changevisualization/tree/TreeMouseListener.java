@@ -4,8 +4,6 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -22,7 +20,7 @@ import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
 /**
  * This listener is used to react to mouse events for a {@link ChangeTree}
  * 
- * @author Andreas Loeffler 
+ * @author Andreas Loeffler
  */
 public class TreeMouseListener extends MouseAdapter {
 	private final TabHighlighting tabHighlighting;
@@ -38,44 +36,37 @@ public class TreeMouseListener extends MouseAdapter {
 	 * {@inheritDoc}
 	 */
 	public void mouseClicked(MouseEvent e) {
-		if(e.getButton()==MouseEvent.BUTTON1) {
-			processLeftclick(e);
-		}else if(e.getButton()==MouseEvent.BUTTON3) {
-			processRightclick(e);
+		if (e.getButton() == MouseEvent.BUTTON3) {
+			displayMenuForTreeNode(e);
 		} 
 	}
 
 	/**
-	 * Process a right click.
-	 * Displays a menu adapted to the actual state of the tree and the node clicked on.
+	 * Displays a menu adapted to the actual state of the tree and the node.
+	 * This happens whenever a node is right-clicked on.
 	 * 
 	 * @param e The MouseEvent associated with the click
 	 */
-	private void processRightclick(MouseEvent e) {
-		if(e.getClickCount()!=1) return;
+	private void displayMenuForTreeNode(MouseEvent e) {
+		if (e.getClickCount() != 1) { 
+			return; 
+		}
 		
-		JTree treeUI=getTreeUI(e);
-		
-		JPopupMenu popupMenu=new JPopupMenu();
-		
-		DefaultMutableTreeNode node=determineNode(e.getPoint(),treeUI);
-		if(node!=null) {
-			if(treeUI.getSelectionPath()==null||(treeUI.getSelectionPath().getLastPathComponent()!=node)) {
-				//If the clicked node is not the selected one, select it
+		JTree treeUI = getTreeUI(e);
+		JPopupMenu popupMenu = new JPopupMenu();
+		DefaultMutableTreeNode node = determineNode(e.getPoint(), treeUI);
+		if (node != null) {
+			if(treeUI.getSelectionPath()==null || (treeUI.getSelectionPath().getLastPathComponent() != node)) {
+				// If the clicked node is not the selected one, select it
 				treeUI.setSelectionPath(new TreePath(node.getPath()));
 			}
 		}
-			
-		addHighlightItem(popupMenu,node,treeUI);			
-				
+
+		addHighlightItem(popupMenu,node,treeUI);
 		addSearchItem(popupMenu,treeUI);
-		
 		addResetSearchItem(popupMenu);
-		
 		addCopyToClipboardItem(popupMenu);
-		
 		addInfoItem(popupMenu);
-		
 		popupMenu.show(treeUI, e.getPoint().x, e.getPoint().y);		
 	}		
 
@@ -99,16 +90,13 @@ public class TreeMouseListener extends MouseAdapter {
 	 * @param popupMenu The menu to add the item to
 	 */
 	private void addCopyToClipboardItem(JPopupMenu popupMenu) {
-		JMenuItem copySearchItem=new JMenuItem("Copy highlight ID to clipboard");
+		JMenuItem copySearchItem = new JMenuItem("Copy highlight ID to clipboard");
 		copySearchItem.setFont(ChangeVisualizationUI.DEFAULT_MENUITEM_FONT);
-		copySearchItem.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				StringSelection stringSelection = new StringSelection(tabHighlighting.getHighlightID());
-			    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-			    clipboard.setContents(stringSelection, null);
-			} 					
-		});
+		copySearchItem.addActionListener(_e -> {
+			StringSelection stringSelection = new StringSelection(tabHighlighting.getHighlightID());
+			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			clipboard.setContents(stringSelection, null);
+		} );
 		copySearchItem.setEnabled(tabHighlighting.getHighlightID()!=null);
 		popupMenu.add(copySearchItem);
 	}
@@ -119,14 +107,11 @@ public class TreeMouseListener extends MouseAdapter {
 	 * @param popupMenu The menu to add the item to
 	 */
 	private void addResetSearchItem(JPopupMenu popupMenu) {
-		JMenuItem resetSearchItem=new JMenuItem("Reset highlight ID");
+		JMenuItem resetSearchItem = new JMenuItem("Reset highlight ID");
 		resetSearchItem.setFont(ChangeVisualizationUI.DEFAULT_MENUITEM_FONT);
-		resetSearchItem.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				tabHighlighting.setHighlightID(null);				
-			} 					
-		});
+		resetSearchItem.addActionListener(_e -> 
+			tabHighlighting.setHighlightID(null)					
+		);
 		resetSearchItem.setEnabled(tabHighlighting.getHighlightID()!=null);
 		popupMenu.add(resetSearchItem);
 	}
@@ -138,16 +123,15 @@ public class TreeMouseListener extends MouseAdapter {
 	 * @param treeUI The tree that this listener observes
 	 */
 	private void addSearchItem(JPopupMenu popupMenu, final JTree treeUI) {
-		JMenuItem searchItem=new JMenuItem("Enter manual highlight ID..");
+		JMenuItem searchItem = new JMenuItem("Enter manual highlight ID..");
 		searchItem.setFont(ChangeVisualizationUI.DEFAULT_MENUITEM_FONT);
-		searchItem.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String input=JOptionPane.showInputDialog(treeUI, "Please input the ID to search :");
-				if(input==null) return;
-				input=input.trim();
-				tabHighlighting.setHighlightID(input);				
-			} 					
+		searchItem.addActionListener(_e -> {
+			String input = JOptionPane.showInputDialog(treeUI, "Please input the ID to search :");
+			if(input == null){
+				return;
+			}
+			input = input.trim();
+			tabHighlighting.setHighlightID(input);				
 		});
 		popupMenu.add(searchItem);
 		popupMenu.addSeparator();
@@ -161,45 +145,33 @@ public class TreeMouseListener extends MouseAdapter {
 	 * @param treeUI The tree that this listener observes
 	 */
 	private void addHighlightItem(JPopupMenu popupMenu, DefaultMutableTreeNode node, JTree treeUI) {
-		if(node==null) {
+		if(node == null) {
 			//Nothing to add
 			return;
 		}		
 		
 		Object userObject = node.getUserObject();
-		if(userObject!=null&& userObject instanceof ChangeNode) {
-			ChangeNode changeNode=(ChangeNode)node.getUserObject();
-			
-			final String highlightID=changeNode.getEObjectID();		
-			JMenuItem menuItem=new JMenuItem("Highlight ID : "+highlightID);
+		if (userObject != null && userObject instanceof ChangeNode) {
+			ChangeNode changeNode = (ChangeNode) node.getUserObject();
+			final String highlightID = changeNode.getEObjectID();
+			JMenuItem menuItem = new JMenuItem("Highlight ID : " + highlightID);
 			menuItem.setFont(ChangeVisualizationUI.DEFAULT_MENUITEM_FONT);
-			menuItem.addActionListener(new ActionListener(){
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					tabHighlighting.setHighlightID(highlightID);								
-				} 					
-			});
+			menuItem.addActionListener(_e ->
+				tabHighlighting.setHighlightID(highlightID)								
+			);
 			popupMenu.add(menuItem);
 			popupMenu.addSeparator();
 		}
 	}
 
 	/**
-	 * Process a left click
-	 * 
-	 * @param e The MouseEvent associated with the click
-	 */
-	private void processLeftclick(MouseEvent e) {
-		//Leftclicks not processed so far
-	}
-
-	/**
 	 * Determines the JTree that fired the given event
+	 * 
 	 * @param e The MouseEvent fired
 	 * @return The firing JTree
 	 */
 	private JTree getTreeUI(MouseEvent e) {
-		return (JTree)e.getSource();
+		return (JTree) e.getSource();
 	}
 
 	/**
@@ -208,15 +180,13 @@ public class TreeMouseListener extends MouseAdapter {
 	 * @param point The clicked point
 	 * @return The clicked node, null if no node exists at the given point
 	 */
-	private DefaultMutableTreeNode determineNode(Point point,JTree treeUI) {
+	private DefaultMutableTreeNode determineNode(Point point, JTree treeUI) {
 		TreePath selPath = treeUI.getPathForLocation(point.x, point.y);
-		if (selPath!=null) {
-			DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)selPath.getLastPathComponent();
+		if (selPath != null) {
+			DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) selPath.getLastPathComponent();
 			return selectedNode;
-		}else {        
+		} else {        
 			return null;
 		}
 	}
-
-
 }
