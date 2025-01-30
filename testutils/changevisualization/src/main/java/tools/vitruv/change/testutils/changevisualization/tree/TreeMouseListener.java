@@ -92,7 +92,7 @@ public class TreeMouseListener extends MouseAdapter {
 	private void addCopyToClipboardItem(JPopupMenu popupMenu) {
 		JMenuItem copySearchItem = new JMenuItem("Copy highlight ID to clipboard");
 		copySearchItem.setFont(ChangeVisualizationUI.DEFAULT_MENUITEM_FONT);
-		copySearchItem.addActionListener(_e -> {
+		copySearchItem.addActionListener(e -> {
 			StringSelection stringSelection = new StringSelection(tabHighlighting.getHighlightID());
 			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 			clipboard.setContents(stringSelection, null);
@@ -109,7 +109,7 @@ public class TreeMouseListener extends MouseAdapter {
 	private void addResetSearchItem(JPopupMenu popupMenu) {
 		JMenuItem resetSearchItem = new JMenuItem("Reset highlight ID");
 		resetSearchItem.setFont(ChangeVisualizationUI.DEFAULT_MENUITEM_FONT);
-		resetSearchItem.addActionListener(_e -> 
+		resetSearchItem.addActionListener(e -> 
 			tabHighlighting.setHighlightID(null)					
 		);
 		resetSearchItem.setEnabled(tabHighlighting.getHighlightID()!=null);
@@ -125,7 +125,7 @@ public class TreeMouseListener extends MouseAdapter {
 	private void addSearchItem(JPopupMenu popupMenu, final JTree treeUI) {
 		JMenuItem searchItem = new JMenuItem("Enter manual highlight ID..");
 		searchItem.setFont(ChangeVisualizationUI.DEFAULT_MENUITEM_FONT);
-		searchItem.addActionListener(_e -> {
+		searchItem.addActionListener(e -> {
 			String input = JOptionPane.showInputDialog(treeUI, "Please input the ID to search :");
 			if(input == null){
 				return;
@@ -156,7 +156,7 @@ public class TreeMouseListener extends MouseAdapter {
 			final String highlightID = changeNode.getEObjectID();
 			JMenuItem menuItem = new JMenuItem("Highlight ID : " + highlightID);
 			menuItem.setFont(ChangeVisualizationUI.DEFAULT_MENUITEM_FONT);
-			menuItem.addActionListener(_e ->
+			menuItem.addActionListener(e ->
 				tabHighlighting.setHighlightID(highlightID)								
 			);
 			popupMenu.add(menuItem);
