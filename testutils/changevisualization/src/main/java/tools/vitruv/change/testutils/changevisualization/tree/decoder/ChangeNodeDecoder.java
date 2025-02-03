@@ -63,14 +63,14 @@ public class ChangeNodeDecoder {
 	 * @param eChange The change to visualize, not null
 	 * @return The changeNode representing the change
 	 */
-	public static ChangeNode generateChangeNode(EChange eChange) {
+	public static ChangeNode generateChangeNode(EChange<?> eChange) {
 		
 		String eClassName=eChange.eClass().getName();
 	
 		String individualText=null;		
-		if(decoders.containsKey(eChange.eClass().getName())) {
+		if(decoders.containsKey(eClassName)) {
 			//Use the special decoder to derive the full text
-			individualText=decoders.get(eChange.eClass().getName()).decode(eChange);			
+			individualText=decoders.get(eClassName).decode(eChange);			
 		}	
 
 		String[][] structuralFeatureLabelValues = ModelHelper.extractStructuralFeatureArray(eChange);
@@ -93,7 +93,7 @@ public class ChangeNodeDecoder {
 	 * @param eChange The eChange
 	 * @return The type of eChange
 	 */
-	private static EChangeClass determineEChangeClass(EChange eChange) {
+	private static EChangeClass determineEChangeClass(EChange<?> eChange) {
 		//No ReferenceEChange or AttributeEChange class found to check for instanceof
 		//so class recognition is done by name so far
 		switch(eChange.eClass().getName()){
@@ -122,7 +122,7 @@ public class ChangeNodeDecoder {
 	 * @param eChange The eChange
 	 * @return The affectedEObjects id
 	 */
-	private static String getAffectedEObjectID(EChange eChange) {
+	private static String getAffectedEObjectID(EChange<?> eChange) {
 		String featureName=null;
 		switch(eChange.eClass().getName()) {
 		case "InsertRootEObject":
@@ -147,7 +147,7 @@ public class ChangeNodeDecoder {
 	 * @param eChange The eChange
 	 * @return The classname
 	 */
-	private static String getAffectedClass(EChange eChange) {		
+	private static String getAffectedClass(EChange<?> eChange) {		
 		String featureName=null;
 		switch(eChange.eClass().getName()) {		
 		case "InsertRootEObject":			
