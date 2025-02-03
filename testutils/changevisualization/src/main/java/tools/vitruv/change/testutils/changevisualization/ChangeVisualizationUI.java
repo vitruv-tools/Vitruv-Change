@@ -35,19 +35,24 @@ import tools.vitruv.change.testutils.changevisualization.ui.ChangesTab;
 import tools.vitruv.change.testutils.changevisualization.ui.CloseableTabComponent;
 
 /**
- * The frame in which the change visualization is displayed. Also holds default fonts.
+ * The frame in which the change visualization is displayed. Also holds default
+ * fonts.
  */
 public class ChangeVisualizationUI extends JFrame implements MonitoredRepositoryAddedListener {
 	private static final long serialVersionUID = 8376935677939982608L;
 
 	/**
-	 * Creates a font derived from the default font of the java's look and feel for a given fontKey. If the fontKey is
-	 * unknown, the font is derived from Label.font as fallback. For different possible fontKeys search the web for "java
-	 * default font uimanager". Valid fontSizes and styles are not checked here and may therefore throw Exceptions if
+	 * Creates a font derived from the default font of the java's look and feel for
+	 * a given fontKey. If the fontKey is
+	 * unknown, the font is derived from Label.font as fallback. For different
+	 * possible fontKeys search the web for "java
+	 * default font uimanager". Valid fontSizes and styles are not checked here and
+	 * may therefore throw Exceptions if
 	 * invalid values are given.
+	 * 
 	 * @param fontKey The key identifying the font
-	 * @param size The font size
-	 * @param style The style (Font.bold and so on)
+	 * @param size    The font size
+	 * @param style   The style (Font.bold and so on)
 	 * @return The derived font
 	 */
 	private static Font createFont(String fontKey, float size, int style) {
@@ -160,19 +165,15 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
 
 			@Override
 			public void componentRemoved(ContainerEvent e) {
-				if (e.getChild() instanceof ChangesTab) {
-					ChangesTab tab = (ChangesTab) e.getChild();
+				if (e.getChild() instanceof ChangesTab tab) {
 					changeVisualization.removeMonitoredRepository(tab.getTitle());
 				}
 			}
 		});
-		tabbedPane.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				for (Component component : tabbedPane.getComponents()) {
-					if (component instanceof ChangesTab) {
-						((ChangesTab) component).setEnabled(tabbedPane.getSelectedComponent() == component);
-					}
+		tabbedPane.addChangeListener(event -> {
+			for (Component component : tabbedPane.getComponents()) {
+				if (component instanceof ChangesTab) {
+					((ChangesTab) component).setEnabled(tabbedPane.getSelectedComponent() == component);
 				}
 			}
 		});
@@ -190,48 +191,33 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
 	/**
 	 * Listener for the usual zoom in/out on text elements
 	 */
-	private final MouseWheelListener mwl = new MouseWheelListener() {
-		@Override
-		public void mouseWheelMoved(MouseWheelEvent e) {
-			if (!(e.getSource() instanceof JTextArea)) {
-				return;
-			}
-
-			if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == 0)
-				return;
-
-			// Strg is pressed
-			JTextArea area = (JTextArea) e.getSource();
-			if (e.getWheelRotation() <= -1) {
-				float newSize = area.getFont().getSize() + 2;
-				if (newSize > 30)
-					newSize = 30;
-				area.setFont(area.getFont().deriveFont(newSize));
-			} else if (e.getWheelRotation() >= 1) {
-				float newSize = area.getFont().getSize() - 2;
-				if (newSize < 5)
-					newSize = 5;
-				area.setFont(area.getFont().deriveFont(newSize));
-			}
+	private final MouseWheelListener mwl = (MouseWheelEvent event) -> {
+		if (!(event.getSource() instanceof JTextArea)) {
+			return;
+		}
+		if ((event.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == 0)
+			return;
+		// Strg is pressed
+		JTextArea area = (JTextArea) e.getSource();
+		if (event.getWheelRotation() <= -1) {
+			float newSize = area.getFont().getSize() + 2;
+			if (newSize > 30)
+				newSize = 30;
+			area.setFont(area.getFont().deriveFont(newSize));
+		} else if (event.getWheelRotation() >= 1) {
+			float newSize = area.getFont().getSize() - 2;
+			if (newSize < 5)
+				newSize = 5;
+			area.setFont(area.getFont().deriveFont(newSize));
 		}
 	};
 
 	private void initializeFileMenu() {
 		JMenuItem saveItem = new JMenuItem("Save");
-		saveItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				selectAndSaveFile();
-			}
-		});
+		saveItem.addActionListener(e -> selectAndSaveFile());
 
 		JMenuItem loadItem = new JMenuItem("Load");
-		loadItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				selectAndLoadFile();
-			}
-		});
+		loadItem.addActionListener(e -> selectAndLoadFile());
 
 		saveItem.setFont(DEFAULT_MENUITEM_FONT);
 		loadItem.setFont(DEFAULT_MENUITEM_FONT);
@@ -264,7 +250,8 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
 			try {
 				changeVisualizationDataModel.loadFromFile(file);
 			} catch (IOException e) {
-				JOptionPane.showMessageDialog(ChangeVisualizationUI.this, "Error loading changes : " + e.getMessage(), "Error",
+				JOptionPane.showMessageDialog(ChangeVisualizationUI.this, "Error loading changes : " + e.getMessage(),
+						"Error",
 						JOptionPane.ERROR_MESSAGE);
 			}
 		});
@@ -281,14 +268,14 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
 			}
 		}).start();
 	}
-	
 
 	private JFileChooser createChangesFileChooser() {
 		JFileChooser chooser = new JFileChooser();
 		chooser.setFileFilter(new FileFilter() {
 			@Override
 			public boolean accept(File f) {
-				return f.isDirectory() || (f.isFile() && f.getName().toLowerCase().endsWith(ChangeDataSetPersistenceHelper.FILE_ENDING));
+				return f.isDirectory() || (f.isFile()
+						&& f.getName().toLowerCase().endsWith(ChangeDataSetPersistenceHelper.FILE_ENDING));
 			}
 
 			@Override
@@ -304,7 +291,8 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
 			try {
 				changeVisualizationDataModel.saveToFile(file);
 			} catch (IOException e) {
-				JOptionPane.showMessageDialog(ChangeVisualizationUI.this, "Error saving changes : " + e.getMessage(), "Error",
+				JOptionPane.showMessageDialog(ChangeVisualizationUI.this, "Error saving changes : " + e.getMessage(),
+						"Error",
 						JOptionPane.ERROR_MESSAGE);
 			}
 		});
@@ -312,7 +300,8 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
 
 	/**
 	 * Adds a new tab to this frame
-	 * @param title The tab title
+	 * 
+	 * @param title     The tab title
 	 * @param component The tab component
 	 */
 	private void addTab(final String title, Component component) {
@@ -322,19 +311,17 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
 		closeableTabComponent.setFont(ChangeVisualizationUI.DEFAULT_TABBED_PANE_FONT);
 
 		// Add a listener to the tabComponent to react on its close button
-		closeableTabComponent.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				int choice = JOptionPane.showConfirmDialog(ChangeVisualizationUI.this, "Close tab " + title, "Close tab",
-						JOptionPane.YES_NO_CANCEL_OPTION);
-				if (choice != JOptionPane.YES_OPTION) {
+		closeableTabComponent.addActionListener(e -> {
+			int choice = JOptionPane.showConfirmDialog(ChangeVisualizationUI.this, "Close tab " + title,
+					"Close tab",
+					JOptionPane.YES_NO_CANCEL_OPTION);
+			if (choice != JOptionPane.YES_OPTION) {
+				return;
+			}
+			for (int index = 0; index < tabbedPane.getTabCount(); index++) {
+				if (tabbedPane.getTabComponentAt(index) == closeableTabComponent) {
+					tabbedPane.removeTabAt(index);
 					return;
-				}
-				for (int index = 0; index < tabbedPane.getTabCount(); index++) {
-					if (tabbedPane.getTabComponentAt(index) == closeableTabComponent) {
-						tabbedPane.removeTabAt(index);
-						return;
-					}
 				}
 			}
 		});
@@ -343,17 +330,16 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
 
 	/**
 	 * Show a file together with the change-tabs
+	 * 
 	 * @param file The file to load and show
 	 */
 	public void addFile(File file) {
-		try {
-			InputStream in = new FileInputStream(file);
+		try (InputStream in = new FileInputStream(file)) {
 			byte[] bytes = new byte[(int) file.length()];
 			int read = 0;
 			while (read < bytes.length) {
 				read += in.read(bytes, read, bytes.length - read);
 			}
-			in.close();
 			JTextArea area = new JTextArea();
 			area.setFont(ChangeVisualizationUI.DEFAULT_TEXTAREA_FONT);
 			area.setText(new String(bytes));
@@ -375,7 +361,7 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
 		String repositoryName = newModelRepositoryChanges.getRepositoryName();
 		addTab(repositoryName, new ChangesTab(newModelRepositoryChanges, false));
 	}
-	
+
 	@Override
 	public void addedMonitoredRepositoryFromFile(ModelRepositoryChanges newModelRepositoryChanges) {
 		String repositoryName = newModelRepositoryChanges.getRepositoryName();
