@@ -165,7 +165,8 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
 
 			@Override
 			public void componentRemoved(ContainerEvent e) {
-				if (e.getChild() instanceof ChangesTab tab) {
+				if (e.getChild() instanceof ChangesTab) {
+					ChangesTab tab = (ChangesTab) e.getChild();
 					changeVisualization.removeMonitoredRepository(tab.getTitle());
 				}
 			}
@@ -191,20 +192,20 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
 	/**
 	 * Listener for the usual zoom in/out on text elements
 	 */
-	private final MouseWheelListener mwl = (MouseWheelEvent event) -> {
-		if (!(event.getSource() instanceof JTextArea)) {
+	private final MouseWheelListener mwl = (MouseWheelEvent e) -> {
+		if (!(e.getSource() instanceof JTextArea)) {
 			return;
 		}
-		if ((event.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == 0)
+		if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == 0)
 			return;
 		// Strg is pressed
 		JTextArea area = (JTextArea) e.getSource();
-		if (event.getWheelRotation() <= -1) {
+		if (e.getWheelRotation() <= -1) {
 			float newSize = area.getFont().getSize() + 2;
 			if (newSize > 30)
 				newSize = 30;
 			area.setFont(area.getFont().deriveFont(newSize));
-		} else if (event.getWheelRotation() >= 1) {
+		} else if (e.getWheelRotation() >= 1) {
 			float newSize = area.getFont().getSize() - 2;
 			if (newSize < 5)
 				newSize = 5;
