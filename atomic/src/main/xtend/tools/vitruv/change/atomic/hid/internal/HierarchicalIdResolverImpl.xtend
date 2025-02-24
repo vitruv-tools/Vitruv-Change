@@ -3,7 +3,6 @@ package tools.vitruv.change.atomic.hid.internal
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import java.util.PriorityQueue
-import org.apache.logging.log4j.Logger
 import org.apache.logging.log4j.LogManager
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject

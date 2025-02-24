@@ -12,7 +12,6 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.hid.HierarchicalId
 import tools.vitruv.change.composite.description.VitruviusChangeFactory
-import tools.vitruv.change.composite.description.VitruviusChangeResolver
 import tools.vitruv.change.composite.description.VitruviusChangeResolverFactory
 
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories

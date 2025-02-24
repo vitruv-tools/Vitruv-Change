@@ -16,7 +16,6 @@ import org.eclipse.emf.compare.scope.DefaultComparisonScope
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.util.EcoreUtil
-import tools.vitruv.change.composite.description.VitruviusChangeResolver
 import tools.vitruv.change.composite.description.VitruviusChangeResolverFactory
 import tools.vitruv.change.composite.recording.ChangeRecorder
 

@@ -4,7 +4,6 @@ import java.util.List
 import java.util.ArrayList
 import tools.vitruv.change.interaction.UserInteractor
 import tools.vitruv.change.propagation.ChangePropagationSpecification
-import org.apache.logging.log4j.Logger
 import org.apache.logging.log4j.LogManager
 import tools.vitruv.change.propagation.ChangePropagationObserver
 import org.eclipse.emf.ecore.EObject
