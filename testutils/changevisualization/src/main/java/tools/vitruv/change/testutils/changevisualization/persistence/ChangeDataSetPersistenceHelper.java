@@ -47,11 +47,8 @@ public final class ChangeDataSetPersistenceHelper {
 	 * @throws IOException if an error occurred when reading the file
 	 */
 	public static List<ModelRepositoryChanges> load(File file) throws IOException {
-		FileInputStream fIn = new FileInputStream(file);
-		GZIPInputStream gzIn = new GZIPInputStream(fIn);
-
 		List<ModelRepositoryChanges> modelRepositoryChanges = new ArrayList<>();
-		try (ObjectInputStream oIn = new ObjectInputStream(gzIn)) {
+		try (FileInputStream fIn = new FileInputStream(file); GZIPInputStream gzIn = new GZIPInputStream(fIn); ObjectInputStream oIn = new ObjectInputStream(gzIn)) {
 			Object readObject = oIn.readObject();
 			while (!EOF_MARKER.equals(readObject)) {
 				modelRepositoryChanges.add((ModelRepositoryChanges) readObject);
@@ -71,15 +68,12 @@ public final class ChangeDataSetPersistenceHelper {
 	 * @throws IOException if an error occurred when writing the file
 	 */
 	public static void save(File file, List<ModelRepositoryChanges> modelRepositoryChangesToSave) throws IOException {
-		FileOutputStream fOut = null;
+		File OutputFile = file;
 		if (!file.getName().toLowerCase().endsWith(FILE_ENDING)) {
-			fOut = new FileOutputStream(new File(file.getParentFile(), file.getName() + FILE_ENDING));
-		} else {
-			fOut = new FileOutputStream(file);
+			OutputFile =  new File(file.getParentFile(), file.getName() + FILE_ENDING);
 		}
-		GZIPOutputStream gzOut = new GZIPOutputStream(fOut);
 
-		try (ObjectOutputStream oOut = new ObjectOutputStream(gzOut)) {
+		try (FileOutputStream fOut = new FileOutputStream(OutputFile); GZIPOutputStream gzOut = new GZIPOutputStream(fOut); ObjectOutputStream oOut = new ObjectOutputStream(gzOut)) {
 			for (ModelRepositoryChanges modelRepositoryChanges : modelRepositoryChangesToSave) {
 				oOut.writeObject(modelRepositoryChanges);
 			}
