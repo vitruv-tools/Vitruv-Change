@@ -1,25 +1,13 @@
 package tools.vitruv.change.testutils
 
 import edu.kit.ipd.sdq.activextendannotations.Lazy
-//import org.apache.logging.log4j.core.Layout
 import org.apache.logging.log4j.Level
 import org.junit.jupiter.api.^extension.BeforeAllCallback
 import org.junit.jupiter.api.^extension.ExtensionContext
 
-//import static org.apache.logging.log4j.Level.*
-//import static org.apache.logging.log4j.LogManager.getRootLogger
 import org.apache.logging.log4j.LogManager
-//import org.apache.logging.log4j.Logger
-//import org.apache.logging.log4j.core.config.Configurator
-//import org.apache.logging.log4j.core.layout.PatternLayout
 import org.apache.logging.log4j.core.appender.ConsoleAppender;
-//import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
-//import org.apache.logging.log4j.core.config.builder.api.ComponentBuilder;
-//import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
-//import org.apache.logging.log4j.core.config.builder.api.LayoutComponentBuilder;
-//import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
-//import org.apache.logging.log4j.Level
 
 import java.util.List
 
