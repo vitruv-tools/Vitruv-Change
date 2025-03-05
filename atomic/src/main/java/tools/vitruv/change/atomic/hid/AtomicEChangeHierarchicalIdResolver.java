@@ -126,11 +126,9 @@ public class AtomicEChangeHierarchicalIdResolver {
 	}
 
 	private static EObject getOldContainedEObject(EChange<EObject> eChange) {
-		if (eChange instanceof SubtractiveReferenceEChange<EObject> subtractiveChange) {
-			if (subtractiveChange.isContainment()) {
+		if ((eChange instanceof SubtractiveReferenceEChange<EObject> subtractiveChange)&&(subtractiveChange.isContainment())) {
 				return subtractiveChange.getOldValue();
 			}
-		}
 		return null;
 	}
 
