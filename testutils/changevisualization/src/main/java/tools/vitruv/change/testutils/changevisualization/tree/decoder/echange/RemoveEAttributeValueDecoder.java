@@ -1,15 +1,14 @@
 package tools.vitruv.change.testutils.changevisualization.tree.decoder.echange;
 
 /**
- * Decoder for removeEAttribute changes
- * 
+ * Decoder for removeEAttribute changes.
+ *
  * @author Andreas Loeffler
  */
 public class RemoveEAttributeValueDecoder extends InsertRemoveDecoder {
 
-	
-	public RemoveEAttributeValueDecoder() {
-		super("RemoveEAttributeValue","oldValue");
-	}
-	
+  /** Constructor. */
+  public RemoveEAttributeValueDecoder() {
+    super("RemoveEAttributeValue", "oldValue");
+  }
 }
