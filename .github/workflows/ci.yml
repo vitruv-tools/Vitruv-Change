@@ -156,10 +156,6 @@ jobs:
       fail-fast: true
     steps:
       - uses: actions/checkout@v4
-      - name: Run Checkstyle
-        run: |
-          ./mvnw checkstyle:checkstyle
-          cat target/checkstyle-result.xml
       - uses: dbelyaev/action-checkstyle@master
         with:
           github_token: ${{ secrets.github_token }}
