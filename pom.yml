@@ -1,0 +1,69 @@
+modelEncoding: UTF-8
+modelVersion: 4.0.0
+
+# Build Parent
+parent:
+  relativePath: ../pom.yml
+  artifactId: parent
+  groupId: tools.vitruv
+  version: 3.0.7
+
+# Project Information
+artifactId: tools.vitruv.change
+version: 3.2.0-SNAPSHOT
+packaging: pom
+
+name: Vitruv Change and Propagation Framework
+description: The Vitruv change and propagation framework providing change propagation specification and execution capabilities
+url: https://github.com/vitruv-tools/Vitruv-Change
+
+# Organizational Information
+licenses:
+- name: Eclipse Public License - v 1.0
+  url: 'https://www.eclipse.org/org/documents/epl-v10.php'
+
+scm:
+  connection: 'scm:git:git://github.com/vitruv-tools/Vitruv-Change.git'
+  developerConnection: 'scm:git:https://github.com/vitruv-tools/Vitruv-Change.git'
+  url: 'https://github.com/vitruv-tools/Vitruv-Change/tree/main'
+
+# Modules
+modules:
+- atomic
+- changederivation
+- composite
+- correspondence
+- interaction
+- interaction.model
+- propagation
+- testutils
+- utils
+- p2wrappers
+
+properties:
+  # SonarQube configuration
+  sonar.projectKey: vitruv-tools_Vitruv-Change
+  sonar.host.url: 'https://sonarcloud.io'
+  sonar.organization: vitruv-tools
+
+# Dependency Management
+dependencyManagement:
+  dependencies:
+  - { groupId: com.google.guava, artifactId: guava, version: 33.4.0-jre }
+  - { groupId: org.apache.logging.log4j, artifactId: log4j-core, version: 2.24.3 }
+  - { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.common, version: 2.41.0 }
+  - { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.ecore, version: 2.38.0 }
+  - { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.ecore.change, version: 2.17.0 }
+  - { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.ecore.xmi, version: 2.38.0 }
+  - { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.edit, version: 2.22.0 }
+  - { groupId: org.eclipse.platform, artifactId: org.eclipse.core.resources, version: 3.22.100 }
+  - { groupId: org.eclipse.platform, artifactId: org.eclipse.core.runtime, version: 3.33.0 }
+  - { groupId: org.eclipse.platform, artifactId: org.eclipse.equinox.common, version: 3.20.0 }
+  - { groupId: org.eclipse.xtend, artifactId: org.eclipse.xtend.lib, version: 2.38.0 }
+  - { groupId: org.eclipse.xtend, artifactId: org.eclipse.xtend.lib.macro, version: 2.38.0 }
+  - { groupId: org.eclipse.xtext, artifactId: org.eclipse.xtext.xbase.lib, version: 2.38.0 }
+  - { groupId: org.hamcrest, artifactId: hamcrest, version: 3.0 }
+  - { groupId: org.junit.jupiter, artifactId: junit-jupiter-api, version: 5.12.0 }
+  - { groupId: org.junit.jupiter, artifactId: junit-jupiter-params, version: 5.12.0 }
+  - { groupId: org.junit.platform, artifactId: junit-platform-commons, version: 1.12.0 }
+  - { groupId: org.slf4j, artifactId: slf4j-api, version: 2.0.17 }

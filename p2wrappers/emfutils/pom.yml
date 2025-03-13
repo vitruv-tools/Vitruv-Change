@@ -1,0 +1,41 @@
+modelEncoding: UTF-8
+modelVersion: 4.0.0
+
+parent:
+  relativePath: ../pom.yml
+  groupId: tools.vitruv
+  artifactId: tools.vitruv.change.p2wrappers
+  version: 3.2.0-SNAPSHOT
+
+artifactId: tools.vitruv.change.p2wrappers.emfutils
+name: p2 Dependency Wrapper EMF Utils
+description: wrapper for the p2 dependency sdq-commons:edu.kit.ipd.sdq.commons.util.emf
+
+properties:
+  repo.sdq-commons.version: 2.2.0
+
+build:
+  plugins:
+  - groupId: org.openntf.maven
+    artifactId: p2-layout-resolver
+
+  - groupId: org.codehaus.mojo
+    artifactId: flatten-maven-plugin
+
+  - artifactId: maven-shade-plugin
+
+  - artifactId: maven-jar-plugin
+
+dependencies:
+- groupId: sdq-commons
+  artifactId: edu.kit.ipd.sdq.commons.util.emf
+  version: 2.3.0.202304271319
+  exclusions:
+  # exclude unnecessary transitive dependencies from sdq-commons p2 repository
+  - { groupId: '*', artifactId: '*' }
+
+repositories:
+- id: sdq-commons
+  name: SDQ Commons
+  url: 'https://kit-sdq.github.io/updatesite/release/commons/${repo.sdq-commons.version}'
+  layout: p2

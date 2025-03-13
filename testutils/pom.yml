@@ -1,0 +1,19 @@
+modelEncoding: UTF-8
+modelVersion: 4.0.0
+
+parent:
+  relativePath: ../pom.yml
+  groupId: tools.vitruv
+  artifactId: tools.vitruv.change
+  version: 3.2.0-SNAPSHOT
+
+artifactId: tools.vitruv.change.testutils
+name: Vitruv Change Test Utilities
+description: Utilities for defining tests using the Vitruv change and propagation specifications
+
+packaging: pom
+modules:
+- changevisualization
+- core
+- integration
+- metamodels

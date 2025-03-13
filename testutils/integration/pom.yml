@@ -1,0 +1,44 @@
+modelEncoding: UTF-8
+modelVersion: 4.0.0
+
+parent:
+  relativePath: ../pom.yml
+  groupId: tools.vitruv
+  artifactId: tools.vitruv.change.testutils
+  version: 3.2.0-SNAPSHOT
+
+artifactId: tools.vitruv.change.testutils.integration
+name: Vitruv Change Test Utilities for Integration
+description: ''
+
+build:
+  plugins:
+  - groupId: org.codehaus.mojo
+    artifactId: build-helper-maven-plugin
+
+  - groupId: org.eclipse.xtend
+    artifactId: xtend-maven-plugin
+
+dependencies:
+# project compile dependencies
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.atomic, version: '${project.version}' }
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.composite, version: '${project.version}' }
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.interaction, version: '${project.version}' }
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.propagation, version: '${project.version}' }
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.testutils.core, version: '${project.version}' }
+
+# external compile dependencies
+- { groupId: com.google.guava, artifactId: guava }
+- { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.common }
+- { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.ecore }
+- { groupId: org.eclipse.xtend, artifactId: org.eclipse.xtend.lib }
+- { groupId: org.eclipse.xtext, artifactId: org.eclipse.xtext.xbase.lib }
+
+# external test dependencies
+- { groupId: org.hamcrest, artifactId: hamcrest, scope: test }
+- { groupId: org.junit.jupiter, artifactId: junit-jupiter-api, scope: test }
+
+# p2 compile dependencies
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.p2wrappers.activextendannotations, version: '${project.version}' }
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.p2wrappers.emfutils, version: '${project.version}' }
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.p2wrappers.javautils, version: '${project.version}' }

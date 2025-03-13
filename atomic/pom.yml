@@ -1,0 +1,54 @@
+modelEncoding: UTF-8
+modelVersion: 4.0.0
+
+parent:
+  relativePath: ../pom.yml
+  groupId: tools.vitruv
+  artifactId: tools.vitruv.change
+  version: 3.2.0-SNAPSHOT
+
+artifactId: tools.vitruv.change.atomic
+name: Vitruv Atomic Change Metamodel
+description: ''
+
+build:
+  plugins:
+  - groupId: org.codehaus.mojo
+    artifactId: build-helper-maven-plugin
+
+  - groupId: org.codehaus.mojo
+    artifactId: exec-maven-plugin
+
+  - groupId: org.eclipse.xtend
+    artifactId: xtend-maven-plugin
+
+  - artifactId: maven-jar-plugin
+    configuration:
+      archive:
+        manifestFile: '${project.basedir}/META-INF/MANIFEST.MF'
+
+dependencies:
+# project test dependencies
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.testutils.core, version: '${project.version}', scope: test }
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.testutils.metamodels, version: '${project.version}', scope: test }
+
+# external compile dependencies
+- { groupId: org.apache.logging.log4j, artifactId: log4j-core }
+- { groupId: com.google.guava, artifactId: guava }
+- { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.common }
+- { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.ecore }
+- { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.edit }
+- { groupId: org.eclipse.xtext, artifactId: org.eclipse.xtext.xbase.lib }
+
+# external test dependencies
+- { groupId: org.eclipse.xtend, artifactId: org.eclipse.xtend.lib, scope: test }
+- { groupId: org.hamcrest, artifactId: hamcrest, scope: test }
+- { groupId: org.junit.jupiter, artifactId: junit-jupiter-api, scope: test }
+- { groupId: org.junit.jupiter, artifactId: junit-jupiter-params, scope: test }
+
+# p2 compile dependencies
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.p2wrappers.activextendannotations, version: '${project.version}' }
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.p2wrappers.emfutils, version: '${project.version}' }
+
+# p2 test dependencies
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.p2wrappers.javautils, version: '${project.version}', scope: test }

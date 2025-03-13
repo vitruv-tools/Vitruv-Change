@@ -1,0 +1,29 @@
+modelEncoding: UTF-8
+modelVersion: 4.0.0
+
+parent:
+  relativePath: ../pom.yml
+  groupId: tools.vitruv
+  artifactId: tools.vitruv.change
+  version: 3.2.0-SNAPSHOT
+
+artifactId: tools.vitruv.change.interaction.model
+name: Vitruv Change Interactions Metamodel
+description: ''
+
+build:
+  plugins:
+  - groupId: org.codehaus.mojo
+    artifactId: build-helper-maven-plugin
+
+  - groupId: org.codehaus.mojo
+    artifactId: exec-maven-plugin
+
+  - artifactId: maven-jar-plugin
+    configuration:
+      archive:
+        manifestFile: '${project.basedir}/META-INF/MANIFEST.MF'
+
+dependencies:
+- { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.common }
+- { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.ecore }

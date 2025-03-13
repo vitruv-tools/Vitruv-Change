@@ -1,0 +1,21 @@
+modelEncoding: UTF-8
+modelVersion: 4.0.0
+
+parent:
+  relativePath: ../pom.yml
+  groupId: tools.vitruv
+  artifactId: tools.vitruv.change.testutils
+  version: 3.2.0-SNAPSHOT
+
+artifactId: tools.vitruv.change.testutils.changevisualization
+name: Vitruv Change Visualization
+description: Utilities for visualization changes on models
+
+dependencies:
+# project dependencies
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.atomic, version: '${project.version}' }
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.composite, version: '${project.version}' }
+
+# external dependencies
+- { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.common }
+- { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.ecore }

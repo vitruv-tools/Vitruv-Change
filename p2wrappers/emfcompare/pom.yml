@@ -1,0 +1,36 @@
+modelEncoding: UTF-8
+modelVersion: 4.0.0
+
+parent:
+  relativePath: ../pom.yml
+  groupId: tools.vitruv
+  artifactId: tools.vitruv.change.p2wrappers
+  version: 3.2.0-SNAPSHOT
+
+artifactId: tools.vitruv.change.p2wrappers.emfcompare
+name: p2 Dependency Wrapper EMF Compare
+description: wrapper for the p2 dependency emf-compare:org.eclipse.emf.compare
+
+properties:
+  repo.emf-compare.version: 3.3
+
+build:
+  plugins:
+  - groupId: org.openntf.maven
+    artifactId: p2-layout-resolver
+
+  - groupId: org.codehaus.mojo
+    artifactId: flatten-maven-plugin
+
+  - artifactId: maven-shade-plugin
+
+  - artifactId: maven-jar-plugin
+
+dependencies:
+- { groupId: emf-compare, artifactId: org.eclipse.emf.compare, version: 3.5.3.202212280858 }
+
+repositories:
+- id: emf-compare
+  name: EMF Compare
+  url: 'https://download.eclipse.org/modeling/emf/compare/updates/releases/${repo.emf-compare.version}'
+  layout: p2

@@ -1,0 +1,36 @@
+modelEncoding: UTF-8
+modelVersion: 4.0.0
+
+parent:
+  relativePath: ../pom.yml
+  groupId: tools.vitruv
+  artifactId: tools.vitruv.change.p2wrappers
+  version: 3.2.0-SNAPSHOT
+
+artifactId: tools.vitruv.change.p2wrappers.activextendannotations
+name: p2 Dependency Wrapper Active Xtend Annotations
+description: wrapper for the p2 dependency xannotations:edu.kit.ipd.sdq.activextendannotations
+
+properties:
+  repo.xannotations.version: 1.6.0
+
+build:
+  plugins:
+  - groupId: org.openntf.maven
+    artifactId: p2-layout-resolver
+
+  - groupId: org.codehaus.mojo
+    artifactId: flatten-maven-plugin
+
+  - artifactId: maven-shade-plugin
+
+  - artifactId: maven-jar-plugin
+
+dependencies:
+- { groupId: xannotations, artifactId: edu.kit.ipd.sdq.activextendannotations, version: 1.6.0 }
+
+repositories:
+- id: xannotations
+  name: XAnnotations
+  url: 'https://kit-sdq.github.io/updatesite/release/xannotations/${repo.xannotations.version}'
+  layout: p2

@@ -1,0 +1,42 @@
+modelEncoding: UTF-8
+modelVersion: 4.0.0
+
+parent:
+  relativePath: ../pom.yml
+  groupId: tools.vitruv
+  artifactId: tools.vitruv.change.testutils
+  version: 3.2.0-SNAPSHOT
+
+artifactId: tools.vitruv.change.testutils.metamodels
+name: Vitruv Change Test Utilities Metamodels
+description: ''
+
+build:
+  plugins:
+  - groupId: org.codehaus.mojo
+    artifactId: build-helper-maven-plugin
+
+  - groupId: org.codehaus.mojo
+    artifactId: exec-maven-plugin
+
+  - groupId: org.eclipse.xtend
+    artifactId: xtend-maven-plugin
+
+  - artifactId: maven-jar-plugin
+    configuration:
+      archive:
+        manifestFile: '${project.basedir}/META-INF/MANIFEST.MF'
+
+dependencies:
+# project dependencies
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.utils, version: '${project.version}' }
+
+# external dependencies
+- { groupId: com.google.guava, artifactId: guava }
+- { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.common }
+- { groupId: org.eclipse.emf, artifactId: org.eclipse.emf.ecore }
+- { groupId: org.junit.jupiter, artifactId: junit-jupiter-api }
+- { groupId: org.junit.jupiter, artifactId: junit-jupiter-params }
+
+# p2 dependencies
+- { groupId: '${project.groupId}', artifactId: tools.vitruv.change.p2wrappers.activextendannotations, version: '${project.version}' }
