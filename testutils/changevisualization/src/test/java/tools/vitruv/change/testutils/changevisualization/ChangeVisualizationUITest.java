@@ -17,6 +17,9 @@ class ChangeVisualizationUITest {
 
     @BeforeEach
     void setUp() throws Exception {
+        // Set headless mode to true to avoid GUI-related errors in non-graphical environments
+        System.setProperty("java.awt.headless", "true");
+
         // Create an instance of ChangeVisualizationUI with a mock data model
         ChangeVisualizationUI ui = new ChangeVisualizationUI(new ChangeVisualizationDataModel());
 
