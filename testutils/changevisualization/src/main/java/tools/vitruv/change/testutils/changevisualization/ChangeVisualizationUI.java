@@ -163,7 +163,7 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
   }
 
   /** Listener for the usual zoom in/out on text elements. */
-  final MouseWheelListener mwl =
+  private final MouseWheelListener mwl =
       (MouseWheelEvent e) -> {
         if (!(e.getSource() instanceof JTextArea)) {
           return;
