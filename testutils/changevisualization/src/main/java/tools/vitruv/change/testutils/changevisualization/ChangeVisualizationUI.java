@@ -174,13 +174,13 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
         // Strg is pressed
         JTextArea area = (JTextArea) e.getSource();
         if (e.getWheelRotation() <= -1) {
-          float newSize = area.getFont().getSize() + 2;
+          float newSize = (float) area.getFont().getSize() + 2;
           if (newSize > 30) {
             newSize = 30;
           }
           area.setFont(area.getFont().deriveFont(newSize));
         } else if (e.getWheelRotation() >= 1) {
-          float newSize = area.getFont().getSize() - 2;
+          float newSize = (float) area.getFont().getSize() - 2;
           if (newSize < 5) {
             newSize = 5;
           }
