@@ -1,13 +1,11 @@
 package tools.vitruv.change.testutils.changevisualization.tree;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import javax.swing.*;
+import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TreeChangeDataSetTest {
