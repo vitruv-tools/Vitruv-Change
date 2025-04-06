@@ -1,11 +1,14 @@
 package tools.vitruv.change.testutils.changevisualization.tree;
 
+import java.lang.reflect.Method;
+
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.lang.reflect.Method;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TreeChangeDataSetTest {
@@ -35,27 +38,27 @@ public class TreeChangeDataSetTest {
   }
 
   @Test
-  public void testValidPath() throws Exception {
+  void testValidPath() throws Exception {
     TreeNode[] path = ((DefaultMutableTreeNode) root.getChildAt(0)).getPath();
     String result = invokeGetPathString(path);
     assertEquals("0|0", result); // child1 is the 0th child of root
   }
 
   @Test
-  public void testDeeperPath() throws Exception {
+  void testDeeperPath() throws Exception {
     TreeNode[] path = ((DefaultMutableTreeNode) root.getChildAt(0).getChildAt(0)).getPath();
     String result = invokeGetPathString(path);
     assertEquals("0|0|0", result); // grandchild is the 0th child of child1
   }
 
   @Test
-  public void testEmptyPath() throws Exception {
+  void testEmptyPath() throws Exception {
     String result = invokeGetPathString(new TreeNode[0]);
     assertEquals("", result);
   }
 
   @Test
-  public void testNullPath() throws Exception {
+  void testNullPath() throws Exception {
     String result = invokeGetPathString(null);
     assertEquals("", result);
   }
