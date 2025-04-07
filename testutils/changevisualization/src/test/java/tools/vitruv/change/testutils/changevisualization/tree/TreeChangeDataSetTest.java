@@ -6,6 +6,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -18,7 +19,7 @@ class TreeChangeDataSetTest {
   private JTree tree;
 
   /**
-   * Initializes a tree structure for testing:
+   * Initializes a tree structure for testing.
    *
    * <pre>
    * root
