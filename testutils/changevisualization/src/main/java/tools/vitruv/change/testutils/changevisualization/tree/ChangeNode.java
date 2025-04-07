@@ -87,37 +87,26 @@ public class ChangeNode implements Serializable {
 
   @Override
   public String toString() {
-    // The tree renderer uses the toString() method to get the text to display
-    if (isSimpleEChangeText()) {
-      if (isShowID()) {
-        // Show id and simple text
-        return eClassName
-            + (affectedClass != null ? " : " + affectedClass : "")
-            + " <"
-            + getEObjectID()
-            + ">";
-      } else {
-        // Don't show id and show simple text
-        return eClassName + (affectedClass != null ? " : " + affectedClass : "");
-      }
-    } else {
-      if (isShowID()) {
-        // Show id and individual text
-        return eClassName
-            + (affectedClass != null ? " : " + affectedClass : "")
-            + " <"
-            + getEObjectID()
-            + "> | "
-            + individualText;
-      } else {
-        // Don't show id and show individual text
-        return eClassName
-            + (affectedClass != null ? " : " + affectedClass : "")
-            + " | "
-            + individualText;
-      }
+    StringBuilder result = new StringBuilder();
+
+    result.append(eClassName);
+
+    if (affectedClass != null) {
+      result.append(" : ").append(affectedClass);
     }
+
+    if (isShowID()) {
+      result.append(" <").append(getEObjectID()).append(">");
+    }
+
+    if (isSimpleEChangeText()) {
+      return result.toString();
+    }
+
+    result.append(" | ").append(individualText);
+    return result.toString();
   }
+
 
   /**
    * Returns the type of the echange.
