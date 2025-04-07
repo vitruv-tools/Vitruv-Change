@@ -4,17 +4,33 @@ import java.lang.reflect.Method;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
-public class TreeChangeDataSetTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+/**
+ * Unit test class for testing the private static method {@code getPathString}
+ * in {@code TreeChangeDataSet} using reflection.
+ */
+class TreeChangeDataSetTest {
 
   private DefaultMutableTreeNode root;
   private JTree tree;
 
+  /**
+   * Initializes a tree structure for testing:
+   *
+   * <pre>
+   * root
+   * ├── child1
+   * │   └── grandchild
+   * └── child2
+   * </pre>
+   */
   @BeforeEach
-  public void setup() {
+  void setup() {
     root = new DefaultMutableTreeNode("root");
     DefaultMutableTreeNode child1 = new DefaultMutableTreeNode("child1");
     DefaultMutableTreeNode child2 = new DefaultMutableTreeNode("child2");
@@ -27,33 +43,62 @@ public class TreeChangeDataSetTest {
     tree = new JTree(root);
   }
 
+  /**
+   * Invokes the private static method {@code getPathString(TreeNode[], JTree)}
+   * from {@code TreeChangeDataSet} via reflection.
+   *
+   * @param path the path array of TreeNode elements
+   * @return the index-based string representation of the path
+   * @throws Exception if reflection or invocation fails
+   */
   private String invokeGetPathString(TreeNode[] path) throws Exception {
-    Method method = Class.forName("tools.vitruv.change.testutils.changevisualization.tree.TreeChangeDataSet")
-                          .getDeclaredMethod("getPathString", TreeNode[].class, JTree.class);
+    Class<?> clazz = Class.forName(
+            "tools.vitruv.change.testutils.changevisualization.tree.TreeChangeDataSet"
+    );
+
+    Method method = clazz.getDeclaredMethod(
+            "getPathString",
+            TreeNode[].class,
+            JTree.class
+    );
+
     method.setAccessible(true);
     return (String) method.invoke(null, path, tree);
   }
 
+  /**
+   * Tests {@code getPathString} for a valid path to a direct child of root.
+   */
   @Test
   void testValidPath() throws Exception {
     TreeNode[] path = ((DefaultMutableTreeNode) root.getChildAt(0)).getPath();
     String result = invokeGetPathString(path);
-    assertEquals("0|0", result); // child1 is the 0th child of root
+    assertEquals("0|0", result);
   }
 
+  /**
+   * Tests {@code getPathString} for a deeper path to a grandchild node.
+   */
   @Test
   void testDeeperPath() throws Exception {
-    TreeNode[] path = ((DefaultMutableTreeNode) root.getChildAt(0).getChildAt(0)).getPath();
+    TreeNode[] path = ((DefaultMutableTreeNode)
+            root.getChildAt(0).getChildAt(0)).getPath();
     String result = invokeGetPathString(path);
-    assertEquals("0|0|0", result); // grandchild is the 0th child of child1
+    assertEquals("0|0|0", result);
   }
 
+  /**
+   * Tests {@code getPathString} with an empty TreeNode array.
+   */
   @Test
   void testEmptyPath() throws Exception {
     String result = invokeGetPathString(new TreeNode[0]);
     assertEquals("", result);
   }
 
+  /**
+   * Tests {@code getPathString} with a null path.
+   */
   @Test
   void testNullPath() throws Exception {
     String result = invokeGetPathString(null);
