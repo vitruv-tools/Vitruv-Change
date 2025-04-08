@@ -1,53 +1,54 @@
 package tools.vitruv.change.testutils.changevisualization;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.awt.Font;
 import java.lang.reflect.Method;
-
 import org.junit.jupiter.api.Test;
 
 class ChangeVisualizationUITest {
 
-    @Test
-    void testCreateFontWithNullKeyFallsBackToDefault() throws Exception {
-        // Use reflection to access the private method
-        Method createFontMethod = ChangeVisualizationUI.class.getDeclaredMethod(
-                "createFont", String.class, float.class, int.class);
-        createFontMethod.setAccessible(true);
+  @Test
+  void testCreateFontWithNullKeyFallsBackToDefault() throws Exception {
+    // Use reflection to access the private method
+    Method createFontMethod = ChangeVisualizationUI.class.getDeclaredMethod(
+            "createFont", String.class, float.class, int.class);
+    createFontMethod.setAccessible(true);
 
-        // Call with null key
-        Font font = (Font) createFontMethod.invoke(null, null, 16f, Font.PLAIN);
+    // Call with null key
+    Font font = (Font) createFontMethod.invoke(null, null, 16f, Font.PLAIN);
 
-        assertNotNull(font, "Font should not be null when null fontKey is passed");
-        assertEquals(16, font.getSize(), "Font size should be 16");
-        assertEquals(Font.PLAIN, font.getStyle(), "Font style should be plain");
-    }
+    assertNotNull(font, "Font should not be null when null fontKey is passed");
+    assertEquals(16, font.getSize(), "Font size should be 16");
+    assertEquals(Font.PLAIN, font.getStyle(), "Font style should be plain");
+  }
 
-    @Test
-    void testCreateFontWithInvalidKeyUsesDefaultFont() throws Exception {
-        Method createFontMethod = ChangeVisualizationUI.class.getDeclaredMethod(
-                "createFont", String.class, float.class, int.class);
-        createFontMethod.setAccessible(true);
+  @Test
+  void testCreateFontWithInvalidKeyUsesDefaultFont() throws Exception {
+    Method createFontMethod = ChangeVisualizationUI.class.getDeclaredMethod(
+            "createFont", String.class, float.class, int.class);
+    createFontMethod.setAccessible(true);
 
-        Font font = (Font) createFontMethod.invoke(null, "NonExistentKey", 14f, Font.BOLD);
+    Font font = (Font) createFontMethod.invoke(null, "NonExistentKey", 14f, Font.BOLD);
 
-        assertNotNull(font, "Font should not be null for invalid key fallback");
-        assertEquals(14, font.getSize(), "Font size should be 14");
-        assertEquals(Font.BOLD, font.getStyle(), "Font style should be bold");
-    }
+    assertNotNull(font, "Font should not be null for invalid key fallback");
+    assertEquals(14, font.getSize(), "Font size should be 14");
+    assertEquals(Font.BOLD, font.getStyle(), "Font style should be bold");
+  }
 
-    @Test
-    void testCreateFontWithValidKey() throws Exception {
-        Method createFontMethod = ChangeVisualizationUI.class.getDeclaredMethod(
-                "createFont", String.class, float.class, int.class);
-        createFontMethod.setAccessible(true);
+  @Test
+  void testCreateFontWithValidKey() throws Exception {
+    Method createFontMethod = ChangeVisualizationUI.class.getDeclaredMethod(
+            "createFont", String.class, float.class, int.class);
+    createFontMethod.setAccessible(true);
 
-        Font font = (Font) createFontMethod.invoke(null, "Button.font", 18f, Font.ITALIC);
+    Font font = (Font) createFontMethod.invoke(null, "Button.font", 18f, Font.ITALIC);
 
-        assertNotNull(font, "Font should be created with valid key");
-        assertEquals(18, font.getSize(), "Font size should be 18");
-        assertEquals(Font.ITALIC, font.getStyle(), "Font style should be italic");
-    }
+    assertNotNull(font, "Font should be created with valid key");
+    assertEquals(18, font.getSize(), "Font size should be 18");
+    assertEquals(Font.ITALIC, font.getStyle(), "Font style should be italic");
+  }
 }
+
 
