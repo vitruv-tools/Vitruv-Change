@@ -32,6 +32,9 @@ import tools.vitruv.change.testutils.changevisualization.ui.CloseableTabComponen
 public class ChangeVisualizationUI extends JFrame implements MonitoredRepositoryAddedListener {
   private static final long serialVersionUID = 8376935677939982608L;
 
+  /** Constant for the default fallback font key. */
+  private static final String DEFAULT_FONT_KEY = "Label.font";
+
   /**
    * Creates a font derived from the default font of the java's look and feel for a given fontKey.
    * If the fontKey is unknown, the font is derived from Label.font as fallback. For different
@@ -46,12 +49,12 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
   private static Font createFont(String fontKey, float size, int style) {
     if (fontKey == null) {
       // Fallback is Label.font
-      fontKey = "Label.font";
+      fontKey = DEFAULT_FONT_KEY;
     }
     Font defaultFont = (Font) UIManager.get(fontKey);
     if (defaultFont == null) {
       // Fallback is Label.font
-      defaultFont = (Font) UIManager.get("Label.font");
+      defaultFont = (Font) UIManager.get(DEFAULT_FONT_KEY);
       System.err.println(fontKey);
     }
     return defaultFont.deriveFont(size).deriveFont(style);
@@ -75,7 +78,7 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
   public static final Font DEFAULT_BUTTON_FONT = createFont("Button.font", 16, Font.PLAIN);
 
   /** Default font used for labels. */
-  public static final Font DEFAULT_LABEL_FONT = createFont("Label.font", 16, Font.PLAIN);
+  public static final Font DEFAULT_LABEL_FONT = createFont(DEFAULT_FONT_KEY, 16, Font.PLAIN);
 
   /** Default font used for textFields. */
   public static final Font DEFAULT_TEXTFIELD_FONT = createFont("TextField.font", 16, Font.PLAIN);
