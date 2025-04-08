@@ -23,6 +23,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.WindowConstants;
 import tools.vitruv.change.testutils.changevisualization.common.ModelRepositoryChanges;
 import tools.vitruv.change.testutils.changevisualization.persistence.ChangeDataSetPersistenceHelper;
 import tools.vitruv.change.testutils.changevisualization.ui.ChangesTab;
@@ -120,7 +121,7 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
   }
 
   private void initializeWindow() {
-    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
     int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
     setSize(Math.min(screenWidth - 30, 1890), Math.min(screenHeight - 60, 1020));
