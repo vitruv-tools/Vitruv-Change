@@ -6,12 +6,11 @@ import java.awt.Font;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
-import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
 
-public class ChangeVisualizationUITest {
+class ChangeVisualizationUITest {
 
     @Test
-    public void testCreateFontWithNullKeyFallsBackToDefault() throws Exception {
+    void testCreateFontWithNullKeyFallsBackToDefault() throws Exception {
         // Use reflection to access the private method
         Method createFontMethod = ChangeVisualizationUI.class.getDeclaredMethod(
                 "createFont", String.class, float.class, int.class);
@@ -26,7 +25,7 @@ public class ChangeVisualizationUITest {
     }
 
     @Test
-    public void testCreateFontWithInvalidKeyUsesDefaultFont() throws Exception {
+    void testCreateFontWithInvalidKeyUsesDefaultFont() throws Exception {
         Method createFontMethod = ChangeVisualizationUI.class.getDeclaredMethod(
                 "createFont", String.class, float.class, int.class);
         createFontMethod.setAccessible(true);
@@ -39,7 +38,7 @@ public class ChangeVisualizationUITest {
     }
 
     @Test
-    public void testCreateFontWithValidKey() throws Exception {
+    void testCreateFontWithValidKey() throws Exception {
         Method createFontMethod = ChangeVisualizationUI.class.getDeclaredMethod(
                 "createFont", String.class, float.class, int.class);
         createFontMethod.setAccessible(true);
