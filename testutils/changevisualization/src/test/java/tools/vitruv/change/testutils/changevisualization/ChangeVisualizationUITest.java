@@ -4,14 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.awt.Font;
 import java.awt.Dimension;
 import java.lang.reflect.Method;
 
 import javax.swing.WindowConstants;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 class ChangeVisualizationUITest {
 
@@ -84,3 +84,4 @@ class ChangeVisualizationUITest {
     assertEquals(Font.ITALIC, font.getStyle(), "Font style should be italic");
   }
 }
+
