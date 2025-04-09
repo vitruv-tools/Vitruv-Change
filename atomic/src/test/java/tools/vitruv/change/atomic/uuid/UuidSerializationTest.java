@@ -40,9 +40,9 @@ class UuidSerializationTest {
   void setup(@TestProject Path testProjectPath) {
     this.testProjectPath = testProjectPath;
     this.storeResourceSet = withGlobalFactories(new ResourceSetImpl());
-    this.storeUuidResolver = UuidResolver.create(storeResourceSet);
+    this.storeUuidResolver = UuidResolverFactory.create(storeResourceSet);
     this.loadResourceSet = withGlobalFactories(new ResourceSetImpl());
-    this.loadUuidResolver = UuidResolver.create(loadResourceSet);
+    this.loadUuidResolver = UuidResolverFactory.create(loadResourceSet);
   }
 
   @ParameterizedTest(name = "{0} element(s)")
