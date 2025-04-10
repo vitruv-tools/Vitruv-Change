@@ -5,11 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import java.awt.*;
+import java.awt.Font;
+import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
 import java.lang.reflect.Method;
-
-import javax.swing.*;
-
+import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -85,8 +86,8 @@ class ChangeVisualizationUITest {
 
     Font defaultFont = UIManager.getFont("Button.font");
     if (defaultFont == null) {
-      System.out.println("Skipping testCreateFontWithValidKey: " +
-              "'Button.font' not available on this platform.");
+      System.out.println("Skipping testCreateFontWithValidKey: "
+              + "'Button.font' not available on this platform.");
       return; // or use Assumptions.assumeTrue to skip
     }
 
