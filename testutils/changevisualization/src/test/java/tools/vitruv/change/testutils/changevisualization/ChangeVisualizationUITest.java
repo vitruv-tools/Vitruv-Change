@@ -8,8 +8,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.awt.Font;
-import java.awt.Dimension;
+import java.awt.*;
 import java.lang.reflect.Method;
 
 import javax.swing.*;
@@ -19,16 +18,19 @@ class ChangeVisualizationUITest {
   private ChangeVisualizationUI ui;
 
   @BeforeEach
-  public void setUp() throws Exception {
+  void setUp() throws Exception {
     UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
 
-    ChangeVisualizationDataModel mockModel = new ChangeVisualizationDataModel(); // or mock
-    ui = new ChangeVisualizationUI(mockModel);
+    ChangeVisualizationDataModel mockModel = new ChangeVisualizationDataModel();
+    if (!GraphicsEnvironment.isHeadless()) {
+      ui = new ChangeVisualizationUI(mockModel);
+    }
   }
 
   @Test
   public void testInitializeWindowProperties() {
     // Check close operation
+    assumeTrue(ui != null, "Skipping UI test in headless environment.");
     assertEquals(WindowConstants.DISPOSE_ON_CLOSE, ui.getDefaultCloseOperation(), 
                   "Window should dispose on close");
 
@@ -80,12 +82,15 @@ class ChangeVisualizationUITest {
             "createFont", String.class, float.class, int.class);
     createFontMethod.setAccessible(true);
 
-    Font defaultFont = javax.swing.UIManager.getFont("Button.font");
-
+    Font defaultFont = UIManager.getFont("Button.font");
     if (defaultFont == null) {
       System.out.println("Skipping testCreateFontWithValidKey: 'Button.font' not available on this platform.");
       return; // or use Assumptions.assumeTrue to skip
     }
+
+    assumeTrue(defaultFont != null, "'Button.font' is not available in this environment.");
+
+
 
     Font font = (Font) createFontMethod.invoke(null, "Button.font", 18f, Font.ITALIC);
 
