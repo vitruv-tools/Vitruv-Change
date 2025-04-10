@@ -22,6 +22,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileFilter;
 import tools.vitruv.change.testutils.changevisualization.common.ModelRepositoryChanges;
 import tools.vitruv.change.testutils.changevisualization.persistence.ChangeDataSetPersistenceHelper;
@@ -98,6 +99,9 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
   /** Default font used for menuItems . */
   public static final Font DEFAULT_MENUITEM_FONT = createFont("MenuItem.font", 16, Font.PLAIN);
 
+  // Define a constant in your class to make it more descriptive
+  private static final int CLOSE_OPERATION = WindowConstants.DISPOSE_ON_CLOSE;
+
   private final ChangeVisualizationDataModel changeVisualizationDataModel;
 
   private JTabbedPane tabbedPane;
@@ -123,7 +127,7 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
   }
 
   private void initializeWindow() {
-    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    setDefaultCloseOperation(CLOSE_OPERATION);
     int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
     int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
     setSize(Math.min(screenWidth - 30, 1890), Math.min(screenHeight - 60, 1020));
