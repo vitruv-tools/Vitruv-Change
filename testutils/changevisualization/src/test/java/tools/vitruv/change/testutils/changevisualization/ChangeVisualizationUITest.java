@@ -30,7 +30,7 @@ class ChangeVisualizationUITest {
   }
 
   @Test
-  public void testInitializeWindowProperties() {
+  void testInitializeWindowProperties() {
     // Check close operation
     assumeTrue(ui != null, "Skipping UI test in headless environment.");
     assertEquals(WindowConstants.DISPOSE_ON_CLOSE, ui.getDefaultCloseOperation(), 
