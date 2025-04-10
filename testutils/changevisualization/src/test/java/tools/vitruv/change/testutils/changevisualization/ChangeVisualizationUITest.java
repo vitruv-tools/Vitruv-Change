@@ -19,8 +19,10 @@ class ChangeVisualizationUITest {
   private ChangeVisualizationUI ui;
 
   @BeforeEach
-  public void setUp() {
-    ChangeVisualizationDataModel mockModel = new ChangeVisualizationDataModel(); // or mock it if needed
+  public void setUp() throws Exception {
+    UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+
+    ChangeVisualizationDataModel mockModel = new ChangeVisualizationDataModel(); // or mock
     ui = new ChangeVisualizationUI(mockModel);
   }
 
