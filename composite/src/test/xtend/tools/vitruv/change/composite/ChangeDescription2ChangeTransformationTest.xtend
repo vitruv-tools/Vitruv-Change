@@ -15,6 +15,7 @@ import org.junit.jupiter.api.^extension.ExtendWith
 import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.atomic.uuid.UuidResolver
+import tools.vitruv.change.atomic.uuid.UuidResolverFactory
 import tools.vitruv.change.composite.description.VitruviusChange
 import tools.vitruv.change.composite.description.VitruviusChangeResolver
 import tools.vitruv.change.composite.description.VitruviusChangeResolverFactory
@@ -51,7 +52,7 @@ abstract class ChangeDescription2ChangeTransformationTest {
 	def void beforeTest(@TestProject Path tempFolder) {
 		this.tempFolder = tempFolder
 		this.resourceSet = new ResourceSetImpl().withGlobalFactories()
-		this.uuidResolver = UuidResolver.create(resourceSet)
+		this.uuidResolver = UuidResolverFactory.create(resourceSet)
 		this.changeRecorder = new ChangeRecorder(resourceSet)
 		this.changeResolver = VitruviusChangeResolverFactory.forUuids(uuidResolver);
 		this.resourceSet.startRecording
@@ -124,7 +125,7 @@ abstract class ChangeDescription2ChangeTransformationTest {
 	private def <T> T validateChange(Function<Consumer<VitruviusChange<Uuid>>, T> operationToValidate) {
 		val comparisonResourceSet = new ResourceSetImpl().withGlobalFactories()
 		val originalToComparisonResourceMapping = resourceSet.copyTo(comparisonResourceSet)
-		val comparisonUuidResolver = UuidResolver.create(comparisonResourceSet)
+		val comparisonUuidResolver = UuidResolverFactory.create(comparisonResourceSet)
 		val comparisonChangeResolver = VitruviusChangeResolverFactory.forUuids(comparisonUuidResolver)
 		uuidResolver.resolveResources(originalToComparisonResourceMapping, comparisonUuidResolver)
 		operationToValidate.apply [ unresolvedChange |

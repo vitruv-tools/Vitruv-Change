@@ -27,6 +27,7 @@ import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReferenc
 import tools.vitruv.change.atomic.root.InsertRootEObject
 import tools.vitruv.change.atomic.root.RemoveRootEObject
 import tools.vitruv.change.atomic.uuid.UuidResolver
+import tools.vitruv.change.atomic.uuid.UuidResolverFactory
 import tools.vitruv.change.composite.description.TransactionalChange
 import tools.vitruv.change.testutils.RegisterMetamodelsInStandalone
 import tools.vitruv.change.testutils.TestProject
@@ -47,7 +48,7 @@ class ChangeRecorderTest {
 	// this test only covers general behaviour of ChangeRecorder. Whether it always produces correct change sequences
 	// is covered by other tests
 	val ResourceSet resourceSet = new ResourceSetImpl().withGlobalFactories()
-	val uuidResolver = UuidResolver.create(resourceSet)
+	val uuidResolver = UuidResolverFactory.create(resourceSet)
 	val ChangeRecorder changeRecorder = new ChangeRecorder(resourceSet)
 
 	private def <T extends EObject> T wrapIntoRecordedResource(T object) {
