@@ -26,7 +26,6 @@ import tools.vitruv.change.atomic.feature.reference.RemoveEReference
 import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference
 import tools.vitruv.change.atomic.root.InsertRootEObject
 import tools.vitruv.change.atomic.root.RemoveRootEObject
-import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.atomic.uuid.UuidResolverFactory
 import tools.vitruv.change.composite.description.TransactionalChange
 import tools.vitruv.change.testutils.RegisterMetamodelsInStandalone
