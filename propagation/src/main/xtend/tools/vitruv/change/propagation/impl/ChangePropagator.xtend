@@ -87,10 +87,10 @@ class ChangePropagator {
 		val List<UserInteractionBase> userInteractions = new ArrayList
 
 		def private propagateChanges() {
-		    //TODO dunno if this is good..
-		    // first, the whole vitruviuschange is propagated to CPSs that can handle it.
-		    // Then, the other CPSs handle the change in their way (the non-atomic-enabled CPSs are called, but perform noops, currently, just like some other CPSs where 'doesHandleChange' returns false,
-		    // which is not checked, here (noop is assumed). TODO see unten
+		    /* First, the whole vitruviuschange is propagated to CPSs that can handle it.
+		     * Then, the other CPSs handle the change in their way (the non-atomic-enabled CPSs are called, but perform noops,
+             * currently, just like some other CPSs where 'doesHandleChange' returns false, which is not checked, here (noop is assumed). TODO see unten
+		    */
 		    val result = propagateNonAtomicChange()
 			result += sourceChange.transactionalChangeSequence.flatMapFixed[propagateSingleChange(it)]
 
@@ -101,13 +101,10 @@ class ChangePropagator {
 		}
 
 		def private List<PropagatedChange> propagateNonAtomicChange() {
-		    //TODO maybr deactivate??
 			val userInteractorChange = installUserInteractorForChange(sourceChange)
 			changePropagationProvider.forEach[registerObserver(this)]
 			userInteractor.registerUserInputListener(this)
-		    //TODO implement calling changepropspec respective function
-		    //TODO do the other crap done in propagateSingleChange, too...
-		    // TODO this for testin purposes only, only the weiterleiting part for testing!
+
 			val propagationResultChanges = try {
 					sourceChange.affectedEObjectsMetamodelDescriptors.flatMap [
 					    // we only want ChangePropSpecs that handle non-atomic changes
@@ -115,18 +112,14 @@ class ChangePropagator {
 							forEach[it.userInteractor = outer.userInteractor]
 						]
 					].toSet.flatMapFixed [
-					    //TODO change deez to
 					    propagateNonAtomicChangeForChangePropagationSpecification(sourceChange, it)
-						//propagateChangeForChangePropagationSpecification(change, it)
 					]
 				} finally {
-		            //TODO maybr deactivate??
 					userInteractor.deregisterUserInputListener(this)
 					changePropagationProvider.forEach[deregisterObserver(this)]
 					userInteractorChange.close()
 				}
 
-            //TODO copied: müsste passen so
 			if (logger.isDebugEnabled) {
 				logger.debug(
 					'''Propagated «FOR p : propagationPath SEPARATOR ' -> '»«p»«ENDFOR» -> {«FOR changeInPropagation : propagationResultChanges SEPARATOR ", "»«
@@ -141,9 +134,6 @@ class ChangePropagator {
 						«ENDFOR»
 				''')
 			}
-
-            //TODO if sourcechange instanceof TransactionalChange<Element> do the following:
-			//sourceChange.userInteractions = userInteractions
 
 			val resultingChanges = new ArrayList()
 			if (!propagationResultChanges.isNullOrEmpty) {
@@ -233,14 +223,9 @@ class ChangePropagator {
 			VitruviusChange<EObject> change,
 			ChangePropagationSpecification propagationSpecification
 		) {
-		    //TODO check if this passt so
 			val transitiveChanges = modelRepository.recordChanges [
 			    propagationSpecification.propagateNonAtomicChange(change,  modelRepository.correspondenceModel,
                        modelRepository)
-				//for (eChange : change.EChanges) {
-				//	propagationSpecification.propagateChange(eChange, modelRepository.correspondenceModel,
-				//		modelRepository)
-				//}
 			]
 
 			// Store modification information
@@ -255,7 +240,6 @@ class ChangePropagator {
 		) {
 			val transitiveChanges = modelRepository.recordChanges [
 				for (eChange : change.EChanges) {
-				    // TODO wouldn't it be good to call .doesHandleChange(), here? Or do we assume propagateChange to ignore EChanges it 'doesnt handle'? --> should be documented in ChangePropagationSpecification.
 					propagationSpecification.propagateChange(eChange, modelRepository.correspondenceModel,
 						modelRepository)
 				}
