@@ -88,13 +88,12 @@ class ChangePropagator {
 
 		def private propagateChanges() {
 		    /* First, the whole vitruviuschange is propagated to CPSs that can handle it.
-		     * Then, the other CPSs handle the change in their way (the non-atomic-enabled CPSs are called, but perform noops,
-             * currently, just like some other CPSs where 'doesHandleChange' returns false, which is not checked, here (noop is assumed). TODO see unten
+		     * Then, the other CPSs handle the change in their way.
+		     (the non-atomic-enabled CPSs are called, too, but perform noops)
 		    */
 		    val result = propagateNonAtomicChange()
 			result += sourceChange.transactionalChangeSequence.flatMapFixed[propagateSingleChange(it)]
 
-			//val result = sourceChange.transactionalChangeSequence.flatMapFixed[propagateSingleChange(it)]
 			handleObjectsWithoutResource()
 			changedResources.forEach[modified = true]
 			return result
