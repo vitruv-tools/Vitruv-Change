@@ -88,7 +88,7 @@ interface ChangePropagationSpecification extends ChangePropagationObservable {
     * for the elements changed by the given <code>EChange</code> in order to reflect the changes in the
     * target model.
     *
-    * Else, this does nothing. TODO maybe let it delegate to {@link #propagateChange}?
+    * Else, this does nothing.
     *
     * @param change 			  	the non-atomic change (i.e. change sequence) which shall be propagated. Should affect only elements in
     * 								an instance of a source metamodel of this specification (see
