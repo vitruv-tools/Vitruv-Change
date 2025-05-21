@@ -45,7 +45,6 @@ interface ChangePropagationSpecification extends ChangePropagationObservable {
 	/**
 	 * Returns whether this <code>ChangePropagationSpecification</code> handles the given change, i.e.,
 	 * whether {@link #propagateChange} will perform changes when applied to that change.
-	 * TODO ist default-impl false hier ne gute Idee?
 	 * 
 	 * @param change				the atomic change for which to check whether this specification reacts 
 	 * 								to it. Must not be <code>null</code>.
