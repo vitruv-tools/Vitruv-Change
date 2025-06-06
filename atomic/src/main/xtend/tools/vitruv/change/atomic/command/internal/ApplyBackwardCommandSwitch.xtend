@@ -2,7 +2,8 @@ package tools.vitruv.change.atomic.command.internal
 
 import edu.kit.ipd.sdq.activextendannotations.Utility
 import java.util.List
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.Logger
+import org.apache.logging.log4j.LogManager
 import org.eclipse.emf.common.command.Command
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.edit.command.AddCommand
@@ -31,7 +32,7 @@ import static extension tools.vitruv.change.atomic.command.internal.ChangeComman
  */
 @Utility
 package class ApplyBackwardCommandSwitch {
-	static val Logger logger = Logger.getLogger(ApplyBackwardCommandSwitch)
+	static val Logger logger = LogManager.getLogger(ApplyBackwardCommandSwitch)
 	
 	def package dispatch static List<Command> getCommands(EChange<EObject> change) {
 		#[]

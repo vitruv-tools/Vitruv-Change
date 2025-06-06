@@ -1,14 +1,13 @@
 package tools.vitruv.change.testutils.changevisualization.tree.decoder.echange;
 
 /**
- * Decoder for insertEReference changes
- * 
+ * Decoder for insertEReference changes.
+ *
  * @author Andreas Loeffler
  */
 public class InsertEReferenceDecoder extends InsertRemoveDecoder {
-		
-	public InsertEReferenceDecoder() {
-		super("InsertEReference","newValue");
-	}	
-
+  /** Instantiates a new InsertEReferenceDecoder. */
+  public InsertEReferenceDecoder() {
+    super("InsertEReference", "newValue");
+  }
 }

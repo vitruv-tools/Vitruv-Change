@@ -3,7 +3,8 @@ package tools.vitruv.change.correspondence
 import java.nio.file.Path
 import java.util.List
 import java.util.Set
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.Logger
+import org.apache.logging.log4j.LogManager
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.util.EcoreUtil
@@ -35,7 +36,7 @@ import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resou
 
 @ExtendWith(TestProjectManager, TestLogging, RegisterMetamodelsInStandalone)
 class CorrespondenceTest {
-	static val Logger LOGGER = Logger.getLogger(CorrespondenceTest)
+	static val Logger LOGGER = LogManager.getLogger(CorrespondenceTest)
 	static val CORRESPONDENCE_MODEL_NAME = "correspondence.correspondence"
 	var ResourceSet testResourceSet
 

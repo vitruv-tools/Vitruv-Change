@@ -3,7 +3,7 @@ package tools.vitruv.change.atomic.hid.internal
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import java.util.PriorityQueue
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.LogManager
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.ResourceSet
@@ -20,7 +20,7 @@ import static extension tools.vitruv.change.atomic.hid.ObjectResolutionUtil.getH
  * {@link HierarchicalIdResolver}
  */
 class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
-	static val logger = Logger.getLogger(HierarchicalIdResolverImpl)
+	static val logger = LogManager.getLogger(HierarchicalIdResolverImpl)
 	static val CACHE_PREFIX = "cache:/"
 	
 	val ResourceSet resourceSet

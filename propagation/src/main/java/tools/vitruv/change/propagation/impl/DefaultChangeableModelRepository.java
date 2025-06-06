@@ -5,9 +5,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.apache.log4j.Logger;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.composite.description.PropagatedChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
@@ -18,62 +17,80 @@ import tools.vitruv.change.propagation.ChangePropagationSpecificationProvider;
 import tools.vitruv.change.propagation.PersistableChangeRecordingModelRepository;
 
 /**
- * A default implementation of a {@link ChangeableModelRepository} that requires a
- * {@link PersistableChangeRecordingModelRepository} and a {@link ChangePropagationSpecificationProvider} to propagate
- * changes. It uses the default {@link ChangePropagator} to propagate changes passed to the
- * {@link #propagateChange(VitruviusChange)} method.
+ * A default implementation of a {@link ChangeableModelRepository} that requires a {@link
+ * PersistableChangeRecordingModelRepository} and a {@link ChangePropagationSpecificationProvider}
+ * to propagate changes. It uses the default {@link ChangePropagator} to propagate changes passed to
+ * the {@link #propagateChange(VitruviusChange)} method.
  */
 public class DefaultChangeableModelRepository implements ChangeableModelRepository {
-	private static final Logger LOGGER = Logger.getLogger(DefaultChangeableModelRepository.class);
+  private static final Logger LOGGER = LogManager.getLogger(DefaultChangeableModelRepository.class);
 
-	private final Set<ChangePropagationListener> changePropagationListeners = new HashSet<>();
-	private final PersistableChangeRecordingModelRepository modelRepository;
-	private final ChangePropagator changePropagator;
+  private final Set<ChangePropagationListener> changePropagationListeners = new HashSet<>();
+  private final PersistableChangeRecordingModelRepository modelRepository;
+  private final ChangePropagator changePropagator;
 
-	public DefaultChangeableModelRepository(PersistableChangeRecordingModelRepository modelRepository,
-			ChangePropagationSpecificationProvider changePropagationSpecificationProvider, InternalUserInteractor userInteractor) {
-		this.modelRepository = modelRepository;
-		this.changePropagator = new ChangePropagator(modelRepository, changePropagationSpecificationProvider, userInteractor);
-	}
+  /**
+   * Creates a new instance of the {@link DefaultChangeableModelRepository}.
+   *
+   * @param modelRepository the {@link PersistableChangeRecordingModelRepository} to use for
+   * @param changePropagationSpecificationProvider the {@link
+   *     ChangePropagationSpecificationProvider}
+   * @param userInteractor the {@link InternalUserInteractor} to use for interactions during change
+   */
+  public DefaultChangeableModelRepository(
+      PersistableChangeRecordingModelRepository modelRepository,
+      ChangePropagationSpecificationProvider changePropagationSpecificationProvider,
+      InternalUserInteractor userInteractor) {
+    this.modelRepository = modelRepository;
+    this.changePropagator =
+        new ChangePropagator(
+            modelRepository, changePropagationSpecificationProvider, userInteractor);
+  }
 
-	@Override
-	public List<PropagatedChange> propagateChange(VitruviusChange<Uuid> change) {
-		checkArgument(change != null, "change to propagate must not be null");
-		checkArgument(change.containsConcreteChange(), "change to propagate must contain concrete changes:%s%s", System.lineSeparator(), change);
+  @Override
+  public List<PropagatedChange> propagateChange(VitruviusChange<Uuid> change) {
+    checkArgument(change != null, "change to propagate must not be null");
+    checkArgument(
+        change.containsConcreteChange(),
+        "change to propagate must contain concrete changes:%s%s",
+        System.lineSeparator(),
+        change);
 
-		LOGGER.info("Start change propagation");
-		notifyChangePropagationStarted(change);
-		List<PropagatedChange> resultChanges = changePropagator.propagateChange(change);
-		modelRepository.saveOrDeleteModels();
-		notifyChangePropagationFinished(change, resultChanges);
-		LOGGER.info("Finished change propagation");
-		return resultChanges;
-	}
+    LOGGER.info("Start change propagation");
+    notifyChangePropagationStarted(change);
+    List<PropagatedChange> resultChanges = changePropagator.propagateChange(change);
+    modelRepository.saveOrDeleteModels();
+    notifyChangePropagationFinished(change, resultChanges);
+    LOGGER.info("Finished change propagation");
+    return resultChanges;
+  }
 
-	private void notifyChangePropagationStarted(VitruviusChange<Uuid> change) {
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Started synchronizing change: " + change);
-		}
-		changePropagationListeners.stream().forEach((listener) -> listener.startedChangePropagation(change));
-	}
+  private void notifyChangePropagationStarted(VitruviusChange<Uuid> change) {
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Started synchronizing change: " + change);
+    }
+    changePropagationListeners.stream()
+        .forEach((listener) -> listener.startedChangePropagation(change));
+  }
 
-	private void notifyChangePropagationFinished(VitruviusChange<Uuid> inputChange, Iterable<PropagatedChange> generatedChanges) {
-		changePropagationListeners.stream().forEach((listener) -> listener.finishedChangePropagation(generatedChanges));
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Finished synchronizing change: " + inputChange);
-		}
-	}
+  private void notifyChangePropagationFinished(
+      VitruviusChange<Uuid> inputChange, Iterable<PropagatedChange> generatedChanges) {
+    changePropagationListeners.stream()
+        .forEach((listener) -> listener.finishedChangePropagation(generatedChanges));
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Finished synchronizing change: " + inputChange);
+    }
+  }
 
-	@Override
-	public void addChangePropagationListener(ChangePropagationListener propagationListener) {
-		checkArgument(propagationListener != null, "propagation listener must not be null");
-		changePropagationListeners.add(propagationListener);
-	}
+  @Override
+  public void addChangePropagationListener(ChangePropagationListener propagationListener) {
+    checkArgument(propagationListener != null, "propagation listener must not be null");
+    changePropagationListeners.add(propagationListener);
+  }
 
-	@Override
-	public void removeChangePropagationListener(ChangePropagationListener propagationListener) {
-		checkArgument(propagationListener != null, "propagation listener must not be null");
-		changePropagationListeners.remove(propagationListener);
-	}
-
+  @Override
+  public void removeChangePropagationListener(ChangePropagationListener propagationListener) {
+    checkArgument(propagationListener != null, "propagation listener must not be null");
+    changePropagationListeners.remove(propagationListener);
+  }
 }

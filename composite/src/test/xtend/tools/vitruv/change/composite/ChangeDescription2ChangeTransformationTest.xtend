@@ -17,6 +17,7 @@ import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.atomic.uuid.UuidResolver
 import tools.vitruv.change.composite.description.VitruviusChange
 import tools.vitruv.change.composite.description.VitruviusChangeResolver
+import tools.vitruv.change.composite.description.VitruviusChangeResolverFactory
 import tools.vitruv.change.composite.recording.ChangeRecorder
 import tools.vitruv.change.testutils.RegisterMetamodelsInStandalone
 import tools.vitruv.change.testutils.TestProject
@@ -52,7 +53,7 @@ abstract class ChangeDescription2ChangeTransformationTest {
 		this.resourceSet = new ResourceSetImpl().withGlobalFactories()
 		this.uuidResolver = UuidResolver.create(resourceSet)
 		this.changeRecorder = new ChangeRecorder(resourceSet)
-		this.changeResolver = VitruviusChangeResolver.forUuids(uuidResolver);
+		this.changeResolver = VitruviusChangeResolverFactory.forUuids(uuidResolver);
 		this.resourceSet.startRecording
 	}
 
@@ -124,7 +125,7 @@ abstract class ChangeDescription2ChangeTransformationTest {
 		val comparisonResourceSet = new ResourceSetImpl().withGlobalFactories()
 		val originalToComparisonResourceMapping = resourceSet.copyTo(comparisonResourceSet)
 		val comparisonUuidResolver = UuidResolver.create(comparisonResourceSet)
-		val comparisonChangeResolver = VitruviusChangeResolver.forUuids(comparisonUuidResolver)
+		val comparisonChangeResolver = VitruviusChangeResolverFactory.forUuids(comparisonUuidResolver)
 		uuidResolver.resolveResources(originalToComparisonResourceMapping, comparisonUuidResolver)
 		operationToValidate.apply [ unresolvedChange |
 			comparisonChangeResolver.resolveAndApply(unresolvedChange)
