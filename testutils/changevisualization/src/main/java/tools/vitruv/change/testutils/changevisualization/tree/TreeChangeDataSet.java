@@ -69,13 +69,26 @@ public class TreeChangeDataSet extends ChangeDataSet {
    * @return String identifying the path
    */
   private static String getPathString(TreeNode[] path, JTree treeUI) {
+    if (path == null || path.length == 0 || treeUI == null || treeUI.getModel() == null) {
+      return "";
+    }
+
     TreeNode parent = path[0];
-    StringBuilder pathString = new StringBuilder("0"); // parent is always the root here
+    StringBuilder pathString = new StringBuilder("0"); // root is always index 0
+
     for (int n = 1; n < path.length; n++) {
       TreeNode child = path[n];
-      pathString.append("|" + treeUI.getModel().getIndexOfChild(parent, child));
+      int index = treeUI.getModel().getIndexOfChild(parent, child);
+
+      if (index < 0) {
+        // If index is invalid, stop and return what we have so far
+        break;
+      }
+
+      pathString.append("|").append(index);
       parent = child;
     }
+
     return pathString.toString();
   }
 

@@ -22,6 +22,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileFilter;
 import tools.vitruv.change.testutils.changevisualization.common.ModelRepositoryChanges;
 import tools.vitruv.change.testutils.changevisualization.persistence.ChangeDataSetPersistenceHelper;
@@ -31,6 +32,9 @@ import tools.vitruv.change.testutils.changevisualization.ui.CloseableTabComponen
 /** The frame in which the change visualization is displayed. Also holds default fonts. */
 public class ChangeVisualizationUI extends JFrame implements MonitoredRepositoryAddedListener {
   private static final long serialVersionUID = 8376935677939982608L;
+
+  /** Constant for the default fallback font key. */
+  private static final String DEFAULT_FONT_KEY = "Label.font";
 
   /**
    * Creates a font derived from the default font of the java's look and feel for a given fontKey.
@@ -46,12 +50,12 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
   private static Font createFont(String fontKey, float size, int style) {
     if (fontKey == null) {
       // Fallback is Label.font
-      fontKey = "Label.font";
+      fontKey = DEFAULT_FONT_KEY;
     }
     Font defaultFont = (Font) UIManager.get(fontKey);
     if (defaultFont == null) {
       // Fallback is Label.font
-      defaultFont = (Font) UIManager.get("Label.font");
+      defaultFont = (Font) UIManager.get(DEFAULT_FONT_KEY);
       System.err.println(fontKey);
     }
     return defaultFont.deriveFont(size).deriveFont(style);
@@ -75,7 +79,7 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
   public static final Font DEFAULT_BUTTON_FONT = createFont("Button.font", 16, Font.PLAIN);
 
   /** Default font used for labels. */
-  public static final Font DEFAULT_LABEL_FONT = createFont("Label.font", 16, Font.PLAIN);
+  public static final Font DEFAULT_LABEL_FONT = createFont(DEFAULT_FONT_KEY, 16, Font.PLAIN);
 
   /** Default font used for textFields. */
   public static final Font DEFAULT_TEXTFIELD_FONT = createFont("TextField.font", 16, Font.PLAIN);
@@ -94,6 +98,9 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
 
   /** Default font used for menuItems . */
   public static final Font DEFAULT_MENUITEM_FONT = createFont("MenuItem.font", 16, Font.PLAIN);
+
+  // Define a constant in your class to make it more descriptive
+  private static final int CLOSE_OPERATION = WindowConstants.DISPOSE_ON_CLOSE;
 
   private final ChangeVisualizationDataModel changeVisualizationDataModel;
 
@@ -120,7 +127,7 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
   }
 
   private void initializeWindow() {
-    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    setDefaultCloseOperation(CLOSE_OPERATION);
     int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
     int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
     setSize(Math.min(screenWidth - 30, 1890), Math.min(screenHeight - 60, 1020));

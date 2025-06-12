@@ -37,14 +37,14 @@ public class LabelValuePanel extends JScrollPane {
           }
           if (e.getWheelRotation() <= -1) {
             for (JLabel label : getAllLabels()) {
-              float newSize = label.getFont().getSize() + 2;
+              float newSize = (float) label.getFont().getSize() + 2;
               if (newSize > 30) {
                 newSize = 30;
               }
               label.setFont(label.getFont().deriveFont(newSize));
             }
             for (JTextField field : getAllFields()) {
-              float newSize = field.getFont().getSize() + 2;
+              float newSize = (float) field.getFont().getSize() + 2;
               if (newSize > 30) {
                 newSize = 30;
               }
@@ -52,14 +52,14 @@ public class LabelValuePanel extends JScrollPane {
             }
           } else if (e.getWheelRotation() >= 1) {
             for (JLabel label : getAllLabels()) {
-              float newSize = label.getFont().getSize() - 2;
+              float newSize = (float) label.getFont().getSize() - 2;
               if (newSize < 5) {
                 newSize = 5;
               }
               label.setFont(label.getFont().deriveFont(newSize));
             }
             for (JTextField field : getAllFields()) {
-              float newSize = field.getFont().getSize() - 2;
+              float newSize = (float) field.getFont().getSize() - 2;
               if (newSize < 5) {
                 newSize = 5;
               }
