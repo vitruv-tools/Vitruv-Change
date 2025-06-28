@@ -33,6 +33,10 @@ public class AtomicEChangeCopier {
    * @param change The change to copy.
    * @return The copied change.
    */
+  private AtomicEChangeCopier() {
+    throw new IllegalStateException("Utility class");
+  }
+
   public static <Source, Target> EChange<Target> copy(EChange<Source> change) {
     EChange<Target> result = copyOld(change);
     if (change instanceof EObjectExistenceEChange<Source> existenceChange
