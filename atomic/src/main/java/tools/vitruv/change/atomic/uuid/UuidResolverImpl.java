@@ -216,8 +216,7 @@ class UuidResolverImpl implements UuidResolver {
     if (isReadOnlyEObject(eObject)) {
       return getUuidForReadOnlyEObject(eObject);
     }
-    Uuid uuid = eObjectToUuid.get(eObject);
-    return uuid;
+    return eObjectToUuid.get(eObject);
   }
 
   private Uuid getUuidForReadOnlyEObject(EObject eObject) {
