@@ -47,7 +47,7 @@ class UuidResolvingTest {
   void registerMultipleElementsWithoutResource(int count) {
     Map<Uuid, EObject> uuidToEObjectMapping =
         IntStream.range(0, count)
-            .mapToObj((i) -> aet.Root())
+            .mapToObj(i -> aet.Root())
             .collect(Collectors.toMap(root -> uuidResolver.generateUuid(root), root -> root));
 
     uuidToEObjectMapping.forEach((uuid, element) -> uuidResolver.registerEObject(uuid, element));
@@ -67,7 +67,7 @@ class UuidResolvingTest {
     Map<Uuid, EObject> uuidToEObjectMapping =
         IntStream.range(0, count)
             .mapToObj(
-                (i) -> {
+                i -> {
                   var root = aet.Root();
                   URI resourceUri =
                       URI.createFileURI(testProjectPath.resolve("root" + i + ".aet").toString());
