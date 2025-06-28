@@ -99,12 +99,13 @@ class UuidResolvingTest {
   @Test
   @DisplayName("re-register element with changed UUID")
   void reregisterElementChanged() {
-    var root = aet.Root();
-    Uuid uuid = uuidResolver.registerEObject(root);
+      var root = aet.Root();
+      Uuid uuid = uuidResolver.registerEObject(root);
+      Uuid modifiedUuid = new Uuid(uuid + "modified");
 
-    assertThrows(
-        IllegalStateException.class,
-        () -> uuidResolver.registerEObject(new Uuid(uuid + "modified"), root));
+      assertThrows(
+          IllegalStateException.class,
+          () -> uuidResolver.registerEObject(modifiedUuid, root));
   }
 
   @Test
@@ -125,18 +126,18 @@ class UuidResolvingTest {
   @Test
   @DisplayName("register element in wrong resource set")
   void registerElementInWrongResourceSet() {
-    ResourceSet otherResourceSet = withGlobalFactories(new ResourceSetImpl());
-    var root = aet.Root();
-    URI resourceUri = URI.createFileURI(testProjectPath.resolve("root.aet").toString());
-    Resource rootResource = otherResourceSet.createResource(resourceUri);
-    rootResource.getContents().add(root);
-
-    assertThrows(IllegalStateException.class, () -> uuidResolver.registerEObject(root));
-    assertThrows(
-        IllegalStateException.class,
-        () -> uuidResolver.registerEObject(uuidResolver.generateUuid(root), root));
-    assertFalse(uuidResolver.hasUuid(root));
+      ResourceSet otherResourceSet = withGlobalFactories(new ResourceSetImpl());
+      var root = aet.Root();
+      URI resourceUri = URI.createFileURI(testProjectPath.resolve("root.aet").toString());
+      Resource rootResource = otherResourceSet.createResource(resourceUri);
+      rootResource.getContents().add(root);
+      Uuid generatedUuid = uuidResolver.generateUuid(root);
+      
+      assertThrows(IllegalStateException.class, () -> uuidResolver.registerEObject(root));
+      assertThrows(IllegalStateException.class, () -> uuidResolver.registerEObject(generatedUuid, root));
+      assertFalse(uuidResolver.hasUuid(root));
   }
+
 
   @Test
   @DisplayName("generate UUID and resolve it after element deletion")
