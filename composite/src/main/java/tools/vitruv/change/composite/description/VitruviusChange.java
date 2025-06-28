@@ -10,7 +10,7 @@ import tools.vitruv.change.composite.MetamodelDescriptor;
 import tools.vitruv.change.interaction.UserInteractionBase;
 
 /** Base interface for all kinds of changes in Vitruvius. */
-public interface VitruviusChange<Element> {
+public interface VitruviusChange<T> {
   /** Returns whether the change contains any concrete change or consists only of composite ones. */
   public boolean containsConcreteChange();
 
@@ -18,7 +18,7 @@ public interface VitruviusChange<Element> {
    * Returns the {@link EChange}s that describe this change. Requires the change to be prepared so
    * that the original change information is transformed into {@link EChange}s.
    */
-  public List<EChange<Element>> getEChanges();
+  public List<EChange<T>> getEChanges();
 
   /**
    * Returns all {@link EObject}s directly affected by this change. This does not include referenced
@@ -56,5 +56,5 @@ public interface VitruviusChange<Element> {
    * Returns a copy of this change. The copy is independent of the original change and can be
    * modified without affecting the original change.
    */
-  public VitruviusChange<Element> copy();
+  public VitruviusChange<T> copy();
 }
