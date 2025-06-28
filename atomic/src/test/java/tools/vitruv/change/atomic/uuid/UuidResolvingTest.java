@@ -138,7 +138,6 @@ class UuidResolvingTest {
       assertFalse(uuidResolver.hasUuid(root));
   }
 
-
   @Test
   @DisplayName("generate UUID and resolve it after element deletion")
   void elementDeletionDoesNotRemoveUuid() {
