@@ -6,7 +6,6 @@ import static com.google.common.base.Preconditions.checkState;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.eobject.EObjectAddedEChange;
@@ -52,7 +51,7 @@ public class AtomicEChangeResolverHelper<Source, Target> {
    *
    * @param change The change which should be resolved.
    */
-  private <F extends EStructuralFeature> void resolveFeatureEChange(
+  private void resolveFeatureEChange(
       FeatureEChange<Source, ?> sourceChange, FeatureEChange<Target, ?> targetChange) {
     checkArgument(
         sourceChange.getAffectedElement() != null,
