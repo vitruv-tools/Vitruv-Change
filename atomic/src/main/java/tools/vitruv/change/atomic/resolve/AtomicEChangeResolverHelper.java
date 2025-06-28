@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -17,10 +18,10 @@ import tools.vitruv.change.atomic.root.RootEChange;
 /** Helper class for resolving {@link EChange}s. The class provides a method to resolve a given */
 public class AtomicEChangeResolverHelper<Source, Target> {
   private Function<Source, Target> elementResolver;
-  private Function<Resource, Resource> resourceResolver;
+  private UnaryOperator<Resource> resourceResolver;
 
   private AtomicEChangeResolverHelper(
-      Function<Source, Target> elementResolver, Function<Resource, Resource> resourceResolver) {
+      Function<Source, Target> elementResolver, UnaryOperator<Resource> resourceResolver) {
     checkArgument(elementResolver != null, "resolver must not be null");
     checkArgument(resourceResolver != null, "resolver must not be null");
     this.elementResolver = elementResolver;
@@ -42,7 +43,7 @@ public class AtomicEChangeResolverHelper<Source, Target> {
   public static <Source, Target> EChange<Target> resolveChange(
       EChange<Source> eChange,
       Function<Source, Target> elementResolver,
-      Function<Resource, Resource> resourceResolver) {
+      UnaryOperator<Resource> resourceResolver) {
     return new AtomicEChangeResolverHelper<>(elementResolver, resourceResolver).resolve(eChange);
   }
 
