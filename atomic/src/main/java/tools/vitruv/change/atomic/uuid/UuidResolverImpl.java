@@ -92,7 +92,7 @@ class UuidResolverImpl implements UuidResolver {
       return;
     }
     if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Adding UUID " + uuid + " for EObject: " + eObject);
+      LOGGER.trace("Adding UUID {} for EObject: {}", uuid, eObject);
     }
     eObjectToUuid.put(eObject, uuid);
   }
