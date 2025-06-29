@@ -127,7 +127,7 @@ public class DefaultChangeRecordingModelRepository
   private void addRoot(Resource resource, EObject root) {
     resource.getContents().add(root);
     resource.setModified(true);
-    LOGGER.debug("Add root to resource: " + resource);
+    LOGGER.debug("Add root to resource: {}", resource);
   }
 
   @Override
