@@ -129,11 +129,11 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
         iterator.remove();
         if (logger.isTraceEnabled()) {
           logger.trace(
-              "Correspondence between "
-                  + element.getLeftEObjects()
-                  + " and "
-                  + element.getRightEObjects()
-                  + " has been removed as all its elements have been removed from resources.");
+              "Correspondence between {} and {} has been removed as all its elements have been removed from resources.",
+              element.getLeftEObjects(),
+              element.getRightEObjects()
+          );
+
         }
       }
     }
