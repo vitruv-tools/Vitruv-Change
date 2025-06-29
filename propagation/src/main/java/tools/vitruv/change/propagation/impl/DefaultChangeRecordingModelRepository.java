@@ -73,7 +73,7 @@ public class DefaultChangeRecordingModelRepository
         .eAdapters()
         .add(
             new ResourceRegistrationAdapter(
-                (resource) -> {
+                resource -> {
                   if (!isLoading) {
                     getCreateOrLoadModel(resource.getURI());
                   }
@@ -127,7 +127,7 @@ public class DefaultChangeRecordingModelRepository
   private void addRoot(Resource resource, EObject root) {
     resource.getContents().add(root);
     resource.setModified(true);
-    LOGGER.debug("Add root to resource: " + resource);
+    LOGGER.debug("Add root to resource: {}", resource);
   }
 
   @Override
@@ -148,7 +148,7 @@ public class DefaultChangeRecordingModelRepository
     try {
       resource.delete(null);
     } catch (IOException e) {
-      LOGGER.error("Deletion of resource " + resource + " did not work.", e);
+      LOGGER.error("Deletion of resource {} did not work.", resource, e);
       throw new IllegalStateException("Could not delete resource with URI " + resource.getURI(), e);
     }
   }
@@ -157,12 +157,12 @@ public class DefaultChangeRecordingModelRepository
     if (!resource.isModified()) {
       return;
     }
-    LOGGER.debug("Attempt to save resource: " + resource);
+    LOGGER.debug("Attempt to save resource: {}", resource);
     try {
       resource.save(null);
       resource.setModified(false);
     } catch (IOException e) {
-      LOGGER.error("Model could not be saved: " + resource.getURI(), e);
+      LOGGER.error("Model could not be saved: {}", resource.getURI(), e);
       throw new IllegalStateException("Could not save resource with URI " + resource.getURI(), e);
     }
   }
