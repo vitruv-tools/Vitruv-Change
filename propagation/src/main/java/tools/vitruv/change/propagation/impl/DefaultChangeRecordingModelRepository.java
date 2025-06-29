@@ -73,7 +73,7 @@ public class DefaultChangeRecordingModelRepository
         .eAdapters()
         .add(
             new ResourceRegistrationAdapter(
-                (resource) -> {
+                resource -> {
                   if (!isLoading) {
                     getCreateOrLoadModel(resource.getURI());
                   }
