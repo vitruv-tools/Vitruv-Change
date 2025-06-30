@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.awt.BorderLayout;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseWheelEvent;
-import javax.swing.SwingUtilities;
 import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
