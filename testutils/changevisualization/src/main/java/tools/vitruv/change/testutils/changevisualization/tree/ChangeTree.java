@@ -27,6 +27,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+
+import lombok.Getter;
 import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
 import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet;
 import tools.vitruv.change.testutils.changevisualization.ui.ChangeComponent;
@@ -37,6 +39,7 @@ import tools.vitruv.change.testutils.changevisualization.ui.LabelValuePanel;
  *
  * @author Andreas Loeffler
  */
+@Getter
 public class ChangeTree extends ChangeComponent {
 
   /**
