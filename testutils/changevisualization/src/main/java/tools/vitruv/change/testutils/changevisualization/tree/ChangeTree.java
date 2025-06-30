@@ -164,7 +164,7 @@ public class ChangeTree extends ChangeComponent {
     createUI();
     this.changeEventTreeRenderer = new ChangeTreeNodeRenderer(tabHighlighting);
 
-    // Add listeners and renderes to the treeUI and scrollpane
+    // Add listeners and renderers to the tree UI and scroll pane.
     ml = new TreeMouseListener(tabHighlighting);
     treeUI.addMouseListener(ml);
 
@@ -172,28 +172,27 @@ public class ChangeTree extends ChangeComponent {
 
     treeUI.setCellRenderer(changeEventTreeRenderer);
 
-    treeScroller.addMouseWheelListener(
-        mouseWheelEvent -> {
-          // Implements the usual strg + mousewheel behaviour for zooming
-          if ((mouseWheelEvent.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == 0) {
-            return;
-          }
-          if (mouseWheelEvent.getWheelRotation() <= -1) {
-            float newSize = treeUI.getFont().getSize() + 2.0f;
-            if (newSize > 30f) {
-              newSize = 30f;
-            }
-            treeUI.setFont(treeUI.getFont().deriveFont(newSize));
-            treeUI.setRowHeight((int) (newSize + 10f));
-          } else if (mouseWheelEvent.getWheelRotation() >= 1) {
-            float newSize = treeUI.getFont().getSize() - 2f;
-            if (newSize < 5f) {
-              newSize = 5f;
-            }
-            treeUI.setFont(treeUI.getFont().deriveFont(newSize));
-            treeUI.setRowHeight((int) (newSize + 10f));
-          }
-        });
+    treeScroller.addMouseWheelListener(mouseWheelEvent -> {
+      // Implements the usual Ctrl + mouse wheel behavior for zooming.
+      if ((mouseWheelEvent.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == 0) {
+        return;
+      }
+      if (mouseWheelEvent.getWheelRotation() <= -1) {
+        float newSize = treeUI.getFont().getSize() + 2.0f;
+        if (newSize > 30f) {
+          newSize = 30f;
+        }
+        treeUI.setFont(treeUI.getFont().deriveFont(newSize));
+        treeUI.setRowHeight((int) (newSize + 10f));
+      } else if (mouseWheelEvent.getWheelRotation() >= 1) {
+        float newSize = treeUI.getFont().getSize() - 2f;
+        if (newSize < 5f) {
+          newSize = 5f;
+        }
+        treeUI.setFont(treeUI.getFont().deriveFont(newSize));
+        treeUI.setRowHeight((int) (newSize + 10f));
+      }
+    });
   }
 
   /** Sets the enabled state of the ChangeTree. */

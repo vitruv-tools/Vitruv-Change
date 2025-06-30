@@ -21,14 +21,14 @@ class ChangeTreeUnitTest {
             dummyHighlighting = new TabHighlighting() {
                 @Override
                 public void setHighlightID(String highlightID) {
-                    // Intentionally left blank for testing:
-                    // This test doesn't require real highlighting behavior.
+                    // Intentionally left blank for testing.
+                    // This test does not require real highlighting behavior.
                 }
 
                 @Override
                 public String getHighlightID() {
-                    // Intentionally returns dummy value for testing:
-                    // This test doesn't depend on actual highlight ID logic.
+                    // Intentionally returns a dummy value for testing.
+                    // This test does not depend on actual highlight ID logic.
                     return "";
                 }
             };
@@ -41,7 +41,7 @@ class ChangeTreeUnitTest {
         SwingUtilities.invokeAndWait(() -> {
             assertThat(changeTree.getLayout()).isInstanceOf(BorderLayout.class);
 
-            var hasSplitPane = false;
+            boolean hasSplitPane = false;
             for (int i = 0; i < changeTree.getComponentCount(); i++) {
                 if (changeTree.getComponent(i) instanceof JSplitPane) {
                     hasSplitPane = true;
@@ -66,11 +66,11 @@ class ChangeTreeUnitTest {
     void zoomInWithCtrlIncreasesFontSize() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             var tree = changeTree.getTreeUI();
-            var originalSize = tree.getFont().getSize2D();
+            float originalSize = tree.getFont().getSize2D();
 
             simulateCtrlMouseWheel(-1);
 
-            var newSize = tree.getFont().getSize2D();
+            float newSize = tree.getFont().getSize2D();
             assertThat(newSize)
                     .isGreaterThan(originalSize)
                     .isLessThanOrEqualTo(30.0f);
@@ -100,7 +100,7 @@ class ChangeTreeUnitTest {
             tree.setFont(tree.getFont().deriveFont(29.0f));
 
             simulateCtrlMouseWheel(-1);
-            var newSize = tree.getFont().getSize2D();
+            float newSize = tree.getFont().getSize2D();
             assertThat(newSize).isEqualTo(30.0f);
         });
     }
@@ -112,7 +112,7 @@ class ChangeTreeUnitTest {
             tree.setFont(tree.getFont().deriveFont(6.0f));
 
             simulateCtrlMouseWheel(1);
-            var newSize = tree.getFont().getSize2D();
+            float newSize = tree.getFont().getSize2D();
             assertThat(newSize).isEqualTo(5.0f);
         });
     }
@@ -124,7 +124,8 @@ class ChangeTreeUnitTest {
                 System.currentTimeMillis(),
                 InputEvent.CTRL_DOWN_MASK,
                 100, 100,
-                0, false,
+                0,
+                false,
                 MouseWheelEvent.WHEEL_UNIT_SCROLL,
                 1,
                 rotation
