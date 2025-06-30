@@ -194,6 +194,7 @@ public class ChangeTree extends ChangeComponent {
   }
 
   /** Sets the enabled state of the ChangeTree. */
+  @Override
   public void setEnabled(boolean isEnabled) {
     changeEventTreeRenderer.setEnabled(isEnabled);
     if (isEnabled) {
