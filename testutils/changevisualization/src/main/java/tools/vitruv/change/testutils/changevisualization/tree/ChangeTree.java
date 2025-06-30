@@ -27,7 +27,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-
 import lombok.Getter;
 import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
 import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet;
