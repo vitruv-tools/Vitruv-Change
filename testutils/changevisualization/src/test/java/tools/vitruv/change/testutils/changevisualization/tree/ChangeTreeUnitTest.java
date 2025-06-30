@@ -39,7 +39,7 @@ public class ChangeTreeUnitTest {
         SwingUtilities.invokeAndWait(() -> {
             assertThat(changeTree.getLayout()).isInstanceOf(BorderLayout.class);
 
-            boolean hasSplitPane = false;
+            var hasSplitPane = false;
             for (int i = 0; i < changeTree.getComponentCount(); i++) {
                 if (changeTree.getComponent(i) instanceof JSplitPane) {
                     hasSplitPane = true;
@@ -63,12 +63,12 @@ public class ChangeTreeUnitTest {
     @Test
     void zoomInWithCtrlIncreasesFontSize() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
-            JTree tree = changeTree.getTreeUI();
-            float originalSize = tree.getFont().getSize2D();
+            var tree = changeTree.getTreeUI();
+            var originalSize = tree.getFont().getSize2D();
 
             simulateCtrlMouseWheel(-1);
 
-            float newSize = tree.getFont().getSize2D();
+            var newSize = tree.getFont().getSize2D();
             assertThat(newSize)
                     .isGreaterThan(originalSize)
                     .isLessThanOrEqualTo(30.0f);
@@ -78,7 +78,7 @@ public class ChangeTreeUnitTest {
     @Test
     void zoomOutWithCtrlDecreasesFontSize() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
-            JTree tree = changeTree.getTreeUI();
+            var tree = changeTree.getTreeUI();
             tree.setFont(tree.getFont().deriveFont(20.0f));
             float originalSize = tree.getFont().getSize2D();
 
@@ -94,11 +94,11 @@ public class ChangeTreeUnitTest {
     @Test
     void zoomDoesNotExceedMaxLimit() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
-            JTree tree = changeTree.getTreeUI();
+            var tree = changeTree.getTreeUI();
             tree.setFont(tree.getFont().deriveFont(29.0f));
 
             simulateCtrlMouseWheel(-1);
-            float newSize = tree.getFont().getSize2D();
+            var newSize = tree.getFont().getSize2D();
             assertThat(newSize).isEqualTo(30.0f);
         });
     }
@@ -106,17 +106,17 @@ public class ChangeTreeUnitTest {
     @Test
     void zoomDoesNotGoBelowMinLimit() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
-            JTree tree = changeTree.getTreeUI();
+            var tree = changeTree.getTreeUI();
             tree.setFont(tree.getFont().deriveFont(6.0f));
 
             simulateCtrlMouseWheel(1);
-            float newSize = tree.getFont().getSize2D();
+            var newSize = tree.getFont().getSize2D();
             assertThat(newSize).isEqualTo(5.0f);
         });
     }
 
     private void simulateCtrlMouseWheel(int rotation) {
-        MouseWheelEvent event = new MouseWheelEvent(
+        var event = new MouseWheelEvent(
                 changeTree.getTreeScroller(),
                 MouseWheelEvent.MOUSE_WHEEL,
                 System.currentTimeMillis(),
