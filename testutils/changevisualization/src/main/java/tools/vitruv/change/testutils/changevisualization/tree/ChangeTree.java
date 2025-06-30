@@ -170,25 +170,25 @@ public class ChangeTree extends ChangeComponent {
     treeUI.setCellRenderer(changeEventTreeRenderer);
 
     treeScroller.addMouseWheelListener(
-        e -> {
+        mouseWheelEvent -> {
           // Implements the usual strg + mousewheel behaviour for zooming
-          if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == 0) {
+          if ((mouseWheelEvent.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == 0) {
             return;
           }
-          if (e.getWheelRotation() <= -1) {
-            float newSize = treeUI.getFont().getSize() + 2;
-            if (newSize > 30) {
-              newSize = 30;
+          if (mouseWheelEvent.getWheelRotation() <= -1) {
+            float newSize = treeUI.getFont().getSize() + 2.0f;
+            if (newSize > 30f) {
+              newSize = 30f;
             }
             treeUI.setFont(treeUI.getFont().deriveFont(newSize));
-            treeUI.setRowHeight((int) (newSize + 10));
-          } else if (e.getWheelRotation() >= 1) {
-            float newSize = treeUI.getFont().getSize() - 2;
-            if (newSize < 5) {
-              newSize = 5;
+            treeUI.setRowHeight((int) (newSize + 10f));
+          } else if (mouseWheelEvent.getWheelRotation() >= 1) {
+            float newSize = treeUI.getFont().getSize() - 2f;
+            if (newSize < 5f) {
+              newSize = 5f;
             }
             treeUI.setFont(treeUI.getFont().deriveFont(newSize));
-            treeUI.setRowHeight((int) (newSize + 10));
+            treeUI.setRowHeight((int) (newSize + 10f));
           }
         });
   }
