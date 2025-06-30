@@ -10,7 +10,7 @@ import javax.swing.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ChangeTreeUnitTest {
+class ChangeTreeUnitTest {
 
     private ChangeTree changeTree;
     private TabHighlighting dummyHighlighting;
