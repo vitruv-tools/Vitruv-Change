@@ -1,6 +1,5 @@
 package tools.vitruv.change.testutils.changevisualization.tree;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.*;
@@ -14,7 +13,6 @@ class ChangeTreeUnitTest {
     void zoomInWithCtrlIncreasesFontSize() throws Exception {
 
         SwingUtilities.invokeAndWait(() -> {
-            // Arrange
             TabHighlighting dummyTabHighlighting = new TabHighlighting() {
                 @Override
                 public void setHighlightID(String highlightID) {
@@ -25,15 +23,12 @@ class ChangeTreeUnitTest {
                 public String getHighlightID() {
                     return "";
                 }
-            }; // Replace with a mock if you want
+            };
 
-            // Act
             ChangeTree changeTree = new ChangeTree(dummyTabHighlighting);
 
-            // Assert
             assertThat(changeTree.getLayout()).isInstanceOf(BorderLayout.class);
 
-            // Check splitpane exists
             assertThat(changeTree.getComponentCount()).isGreaterThanOrEqualTo(1);
             boolean hasSplitPane = false;
             for (int i = 0; i < changeTree.getComponentCount(); i++) {
