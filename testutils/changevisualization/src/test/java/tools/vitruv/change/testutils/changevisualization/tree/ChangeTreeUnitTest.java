@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseWheelEvent;
-
 import javax.swing.*;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,11 +21,14 @@ public class ChangeTreeUnitTest {
             dummyHighlighting = new TabHighlighting() {
                 @Override
                 public void setHighlightID(String highlightID) {
-
+                    // Intentionally left blank for testing:
+                    // This test doesn't require real highlighting behavior.
                 }
 
                 @Override
                 public String getHighlightID() {
+                    // Intentionally returns dummy value for testing:
+                    // This test doesn't depend on actual highlight ID logic.
                     return "";
                 }
             };
