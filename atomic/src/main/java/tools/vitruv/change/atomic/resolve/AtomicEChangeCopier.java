@@ -25,6 +25,11 @@ import tools.vitruv.change.atomic.root.RootFactory;
 
 /** A copier for {@link EChange}s that copies the change to a new type. */
 public class AtomicEChangeCopier {
+    
+  private AtomicEChangeCopier() {
+    throw new UnsupportedOperationException("Utility class should not be instantiated");
+  }
+  
   /**
    * Copy the given change to a new type.
    *
@@ -33,10 +38,6 @@ public class AtomicEChangeCopier {
    * @param change The change to copy.
    * @return The copied change.
    */
-  private AtomicEChangeCopier() {
-    throw new IllegalStateException("Utility class");
-  }
-
   public static <Source, Target> EChange<Target> copy(EChange<Source> change) {
     EChange<Target> result = copyOld(change);
     if (change instanceof EObjectExistenceEChange<Source> existenceChange
