@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 /**
- * Holds constant error messages for change copying.
+ * Holds constant error messages.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Error {
