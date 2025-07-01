@@ -43,6 +43,8 @@ public class ChangeNodeDecoder {
     registerChangeDecoder(new RemoveRootEObjectDecoder());
     registerChangeDecoder(new RemoveEReferenceDecoder());
   }
+  final static String REMOVE_ROOT_OBJECT = "RemoveRootEObject";
+  final static String INSERT_ROOT_OBJECT = "InsertRootEObject";
 
   /**
    * Can be called to register new decoders for given EChange classes.
@@ -103,7 +105,7 @@ public class ChangeNodeDecoder {
       case "CreateEObject", "DeleteEObject" -> {
          return EChangeClass.EXISTENCE_ECHANGE;
       }
-      case "InsertRootEObject","RemoveRootEObject"-> {
+      case INSERT_ROOT_OBJECT, REMOVE_ROOT_OBJECT -> {
         return EChangeClass.ROOT_ECHANGE;
       } 
       case "InsertEReference", "ReplaceSingleValuedEReference", "RemoveEReference" -> {
@@ -128,11 +130,11 @@ public class ChangeNodeDecoder {
   private static String getAffectedEObjectID(EChange<?> eChange) {
     String featureName = null;
     switch (eChange.eClass().getName()) {
-      case "InsertRootEObject":
+      case INSERT_ROOT_OBJECT :
         // InsertRootEObject eChanges don't have affectedEObjectIDs, they use newValueID
         featureName = "newValueID";
         break;
-      case "RemoveRootEObject":
+      case REMOVE_ROOT_OBJECT :
         // RemoveRootEObject eChanges don't have affectedEObjectIDs, they use oldValueID
         featureName = "oldValueID";
         break;
@@ -153,8 +155,8 @@ public class ChangeNodeDecoder {
   private static String getAffectedClass(EChange<?> eChange) {
     String featureName = null;
     switch (eChange.eClass().getName()) {
-      case "InsertRootEObject":
-      case "RemoveRootEObject":
+      case INSERT_ROOT_OBJECT :
+      case REMOVE_ROOT_OBJECT :
         // Insert- and RemoveRootEObject eChanges don't have affectedEObject, they use resource
         featureName = "resource";
         break;
