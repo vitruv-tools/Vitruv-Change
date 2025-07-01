@@ -1,6 +1,8 @@
 package tools.vitruv.change.atomic.resolve;
 
-import org.eclipse.emf.ecore.*;
+import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.junit.jupiter.api.Test;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory;
@@ -19,8 +21,6 @@ import tools.vitruv.change.atomic.feature.single.ReplaceSingleValuedFeatureEChan
 import tools.vitruv.change.atomic.root.InsertRootEObject;
 import tools.vitruv.change.atomic.root.RemoveRootEObject;
 import tools.vitruv.change.atomic.root.RootFactory;
-
-import java.lang.reflect.Constructor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
