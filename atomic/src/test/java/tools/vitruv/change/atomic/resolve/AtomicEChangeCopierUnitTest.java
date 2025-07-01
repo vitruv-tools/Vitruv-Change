@@ -31,12 +31,11 @@ class AtomicEChangeCopierUnitTest {
 
   @Test
   void constructor_isPrivate() throws Exception {
-    Constructor<AtomicEChangeCopier> constructor =
-        AtomicEChangeCopier.class.getDeclaredConstructor();
+    var constructor = AtomicEChangeCopier.class.getDeclaredConstructor();
     assertThat(constructor.canAccess(null)).isFalse();
 
     constructor.setAccessible(true);
-    AtomicEChangeCopier instance = constructor.newInstance();
+    var instance = constructor.newInstance();
     assertThat(instance).isNotNull();
   }
 
