@@ -100,22 +100,22 @@ public class ChangeNodeDecoder {
     // No ReferenceEChange or AttributeEChange class found to check for instanceof
     // so class recognition is done by name so far
     switch (eChange.eClass().getName()) {
-      case "CreateEObject":
-      case "DeleteEObject":
-        return EChangeClass.EXISTENCE_ECHANGE;
-      case "InsertRootEObject":
-      case "RemoveRootEObject":
+      case "CreateEObject", "DeleteEObject" -> {
+         return EChangeClass.EXISTENCE_ECHANGE;
+      }
+      case "InsertRootEObject","RemoveRootEObject"-> {
         return EChangeClass.ROOT_ECHANGE;
-      case "InsertEReference":
-      case "ReplaceSingleValuedEReference":
-      case "RemoveEReference":
+      } 
+      case "InsertEReference", "ReplaceSingleValuedEReference", "RemoveEReference" -> {
         return EChangeClass.REFERENCE_ECHANGE;
-      case "InsertEAttributeValue":
-      case "ReplaceSingleValuedEAttribute":
-      case "RemoveEAttributeValue":
+      }
+      case "InsertEAttributeValue", "ReplaceSingleValuedEAttribute", "RemoveEAttributeValue" -> {
         return EChangeClass.ATTRIBUTE_ECHANGE;
-      default:
+      }
+      default -> {
         return null;
+      }
+       
     }
   }
 
