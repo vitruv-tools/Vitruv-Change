@@ -1,5 +1,7 @@
 package tools.vitruv.change.atomic.resolve;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory;
@@ -26,6 +28,7 @@ import tools.vitruv.change.atomic.root.RootFactory;
 import static tools.vitruv.change.atomic.message.Error.UNKNOWN_CHANGE_OF_TYPE;
 
 /** A copier for {@link EChange}s that copies the change to a new type. */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AtomicEChangeCopier {
   /**
    * Copy the given change to a new type.
