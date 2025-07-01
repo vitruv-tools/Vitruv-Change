@@ -36,7 +36,7 @@ public class EObjectNameDecoder extends AbstractChangeDecoder {
 
     // Extract the eObject
     Object sfValue = structuralFeatures2values.get(nameFeature);
-    if (sfValue == null || !(sfValue instanceof EObject)) {
+    if (!(sfValue instanceof EObject)) {
       return null;
     }
 
