@@ -80,7 +80,7 @@ public class ChangeNodeDecoder {
     // extract eObjectID
     String eObjectID = getAffectedEObjectID(eChange);
 
-    ChangeNode changeNode =
+      return
         new ChangeNode(
             individualText,
             structuralFeatureLabelValues,
@@ -89,7 +89,6 @@ public class ChangeNodeDecoder {
             affectedClass,
             eObjectID);
 
-    return changeNode;
   }
 
   /**
