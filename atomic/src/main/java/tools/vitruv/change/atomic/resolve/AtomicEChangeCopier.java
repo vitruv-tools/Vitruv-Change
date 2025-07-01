@@ -33,6 +33,10 @@ public class AtomicEChangeCopier {
    * @param change The change to copy.
    * @return The copied change.
    */
+  private AtomicEChangeCopier() {
+    throw new IllegalStateException("Utility class");
+  }
+
   public static <Source, Target> EChange<Target> copy(EChange<Source> change) {
     EChange<Target> result = copyOld(change);
     if (change instanceof EObjectExistenceEChange<Source> existenceChange
@@ -61,9 +65,9 @@ public class AtomicEChangeCopier {
   }
 
   private static <Source, Target> EChange<Target> copyOld(EChange<Source> change) {
-    if (change instanceof InsertRootEObject<Source> c) {
+    if (change instanceof InsertRootEObject<Source>) {
       return RootFactory.eINSTANCE.createInsertRootEObject();
-    } else if (change instanceof RemoveRootEObject<Source> c) {
+    } else if (change instanceof RemoveRootEObject<Source>) {
       return RootFactory.eINSTANCE.createRemoveRootEObject();
     } else if (change instanceof InsertEAttributeValue<Source, ?> c) {
       return getChangeFactory()
@@ -84,9 +88,9 @@ public class AtomicEChangeCopier {
     } else if (change instanceof RemoveEReference<Source> c) {
       return getChangeFactory()
           .createRemoveReferenceChange(null, c.getAffectedFeature(), null, c.getIndex());
-    } else if (change instanceof CreateEObject<Source> c) {
+    } else if (change instanceof CreateEObject<Source>) {
       return EobjectFactory.eINSTANCE.createCreateEObject();
-    } else if (change instanceof DeleteEObject<Source> c) {
+    } else if (change instanceof DeleteEObject<Source>) {
       return EobjectFactory.eINSTANCE.createDeleteEObject();
     } else if (change instanceof UnsetFeature<Source, ?> c) {
       return copyUnsetFeature(c);
