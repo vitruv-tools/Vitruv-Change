@@ -1,5 +1,6 @@
 package tools.vitruv.change.testutils.changevisualization.tree.decoder;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import org.eclipse.emf.ecore.EObject;
@@ -28,7 +29,7 @@ import tools.vitruv.change.testutils.changevisualization.utils.ModelHelper;
 public class ChangeNodeDecoder {
 
   /** Decoders which extract the information to display from given Object of specific eChanges. */
-  private static Map<String, ChangeDecoder> decoders = new Hashtable<>();
+  private static Map<String, ChangeDecoder> decoders = new HashMap<>();
 
   // register additional decoders, default instances
   static {
