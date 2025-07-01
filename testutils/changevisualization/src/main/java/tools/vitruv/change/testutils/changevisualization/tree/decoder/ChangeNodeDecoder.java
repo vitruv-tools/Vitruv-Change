@@ -28,7 +28,7 @@ import tools.vitruv.change.testutils.changevisualization.utils.ModelHelper;
 public class ChangeNodeDecoder {
 
   /** Decoders which extract the information to display from given Object of specific eChanges. */
-  private static Map<String, ChangeDecoder> decoders = new Hashtable<String, ChangeDecoder>();
+  private static Map<String, ChangeDecoder> decoders = new Hashtable<>();
 
   // register additional decoders, default instances
   static {
