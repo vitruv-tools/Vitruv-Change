@@ -1,5 +1,10 @@
 package tools.vitruv.change.atomic.resolve;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static tools.vitruv.change.atomic.message.Error.UNKNOWN_CHANGE_OF_TYPE;
+
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -21,11 +26,6 @@ import tools.vitruv.change.atomic.feature.single.ReplaceSingleValuedFeatureEChan
 import tools.vitruv.change.atomic.root.InsertRootEObject;
 import tools.vitruv.change.atomic.root.RemoveRootEObject;
 import tools.vitruv.change.atomic.root.RootFactory;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static tools.vitruv.change.atomic.message.Error.UNKNOWN_CHANGE_OF_TYPE;
 
 class AtomicEChangeCopierUnitTest {
 
