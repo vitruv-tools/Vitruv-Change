@@ -30,7 +30,7 @@ import static tools.vitruv.change.atomic.message.Error.UNKNOWN_CHANGE_OF_TYPE;
 class AtomicEChangeCopierUnitTest {
 
   @Test
-  void constructor_isPrivate() throws Exception {
+  void constructorIsPrivate() throws Exception {
     var constructor = AtomicEChangeCopier.class.getDeclaredConstructor();
     assertThat(constructor.canAccess(null)).isFalse();
 
@@ -40,7 +40,7 @@ class AtomicEChangeCopierUnitTest {
   }
 
   @Test
-  void testCopy_InsertRootEObject() {
+  void testCopyInsertRootEObject() {
     var original = RootFactory.eINSTANCE.createInsertRootEObject();
     original.setUri("test://insert");
     original.setIndex(42);
@@ -54,7 +54,7 @@ class AtomicEChangeCopierUnitTest {
   }
 
   @Test
-  void testCopy_RemoveRootEObject() {
+  void testCopyRemoveRootEObject() {
     var original = RootFactory.eINSTANCE.createRemoveRootEObject();
     original.setUri("test://remove");
     original.setIndex(24);
@@ -68,7 +68,7 @@ class AtomicEChangeCopierUnitTest {
   }
 
   @Test
-  void testCopy_CreateEObject() {
+  void testCopyCreateEObject() {
     var original = EobjectFactory.eINSTANCE.createCreateEObject();
 
     var copy = AtomicEChangeCopier.copy(original);
@@ -77,7 +77,7 @@ class AtomicEChangeCopierUnitTest {
   }
 
   @Test
-  void testCopy_DeleteEObject() {
+  void testCopyDeleteEObject() {
     var original = EobjectFactory.eINSTANCE.createDeleteEObject();
 
     var copy = AtomicEChangeCopier.copy(original);
@@ -86,7 +86,7 @@ class AtomicEChangeCopierUnitTest {
   }
 
   @Test
-  void testCopy_UnsetFeature() {
+  void testCopyUnsetFeature() {
     var feature = mock(EStructuralFeature.class);
 
     var original = FeatureFactory.eINSTANCE.createUnsetFeature();
@@ -100,7 +100,7 @@ class AtomicEChangeCopierUnitTest {
   }
 
   @Test
-  void testCopy_InsertEAttributeValue() {
+  void testCopyInsertEAttributeValue() {
     var feature = mock(EAttribute.class);
 
     var original =
@@ -116,7 +116,7 @@ class AtomicEChangeCopierUnitTest {
   }
 
   @Test
-  void testCopy_ReplaceSingleValuedEAttribute() {
+  void testCopyReplaceSingleValuedEAttribute() {
     var feature = mock(EAttribute.class);
 
     var original =
@@ -132,7 +132,7 @@ class AtomicEChangeCopierUnitTest {
   }
 
   @Test
-  void testCopy_RemoveEAttributeValue() {
+  void testCopyRemoveEAttributeValue() {
     var feature = mock(EAttribute.class);
 
     var original =
@@ -148,7 +148,7 @@ class AtomicEChangeCopierUnitTest {
   }
 
   @Test
-  void testCopy_InsertEReference() {
+  void testCopyInsertEReference() {
     var feature = mock(EReference.class);
 
     var original =
@@ -163,7 +163,7 @@ class AtomicEChangeCopierUnitTest {
   }
 
   @Test
-  void testCopy_ReplaceSingleValuedEReference() {
+  void testCopyReplaceSingleValuedEReference() {
     var feature = mock(EReference.class);
 
     var original =
@@ -179,7 +179,7 @@ class AtomicEChangeCopierUnitTest {
   }
 
   @Test
-  void testCopy_RemoveEReference() {
+  void testCopyRemoveEReference() {
     var feature = mock(EReference.class);
 
     var original =
@@ -194,7 +194,7 @@ class AtomicEChangeCopierUnitTest {
   }
 
   @Test
-  void testCopy_UnknownType_ThrowsException() {
+  void testCopyUnknownTypeThrowsException() {
     @SuppressWarnings("unchecked")
     EChange<Object> unknown = mock(EChange.class);
 

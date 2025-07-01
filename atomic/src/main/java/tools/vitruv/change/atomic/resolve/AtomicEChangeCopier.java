@@ -24,7 +24,6 @@ import tools.vitruv.change.atomic.root.InsertRootEObject;
 import tools.vitruv.change.atomic.root.RemoveRootEObject;
 import tools.vitruv.change.atomic.root.RootEChange;
 import tools.vitruv.change.atomic.root.RootFactory;
-
 import static tools.vitruv.change.atomic.message.Error.UNKNOWN_CHANGE_OF_TYPE;
 
 /** A copier for {@link EChange}s that copies the change to a new type. */
@@ -72,30 +71,45 @@ public class AtomicEChangeCopier {
       return RootFactory.eINSTANCE.createRemoveRootEObject();
     } else if (change instanceof InsertEAttributeValue<Source, ?> sourceInsertEAttributeValue) {
       return getChangeFactory()
-          .createInsertAttributeChange(null, sourceInsertEAttributeValue.getAffectedFeature(),
-                  sourceInsertEAttributeValue.getIndex(), sourceInsertEAttributeValue.getNewValue());
-    } else if (change instanceof ReplaceSingleValuedEAttribute<Source, ?> sourceReplaceSingleValuedEAttribute) {
+          .createInsertAttributeChange(
+              null,
+              sourceInsertEAttributeValue.getAffectedFeature(),
+              sourceInsertEAttributeValue.getIndex(),
+              sourceInsertEAttributeValue.getNewValue());
+    } else if (change
+        instanceof ReplaceSingleValuedEAttribute<Source, ?> sourceReplaceSingleValuedEAttribute) {
       return getChangeFactory()
           .createReplaceSingleAttributeChange(
-              null, sourceReplaceSingleValuedEAttribute.getAffectedFeature(),
-                  sourceReplaceSingleValuedEAttribute.getOldValue(), sourceReplaceSingleValuedEAttribute.getNewValue());
+              null,
+              sourceReplaceSingleValuedEAttribute.getAffectedFeature(),
+              sourceReplaceSingleValuedEAttribute.getOldValue(),
+              sourceReplaceSingleValuedEAttribute.getNewValue());
     } else if (change instanceof RemoveEAttributeValue<Source, ?> sourceRemoveEAttributeValue) {
       return getChangeFactory()
-          .createRemoveAttributeChange(null, sourceRemoveEAttributeValue.getAffectedFeature(),
-                  sourceRemoveEAttributeValue.getIndex(), sourceRemoveEAttributeValue.getOldValue());
+          .createRemoveAttributeChange(
+              null,
+              sourceRemoveEAttributeValue.getAffectedFeature(),
+              sourceRemoveEAttributeValue.getIndex(),
+              sourceRemoveEAttributeValue.getOldValue());
     } else if (change instanceof InsertEReference<Source> sourceInsertEReference) {
       return getChangeFactory()
-          .createInsertReferenceChange(null, sourceInsertEReference.getAffectedFeature(),
-                  null, sourceInsertEReference.getIndex());
-    } else if (change instanceof ReplaceSingleValuedEReference<Source> sourceReplaceSingleValuedEReference) {
+          .createInsertReferenceChange(
+              null,
+              sourceInsertEReference.getAffectedFeature(),
+              null,
+              sourceInsertEReference.getIndex());
+    } else if (change
+        instanceof ReplaceSingleValuedEReference<Source> sourceReplaceSingleValuedEReference) {
       return getChangeFactory()
-          .createReplaceSingleReferenceChange(null,
-                  sourceReplaceSingleValuedEReference.getAffectedFeature(),
-                  null, null);
+          .createReplaceSingleReferenceChange(
+              null, sourceReplaceSingleValuedEReference.getAffectedFeature(), null, null);
     } else if (change instanceof RemoveEReference<Source> sourceRemoveEReference) {
       return getChangeFactory()
-          .createRemoveReferenceChange(null, sourceRemoveEReference.getAffectedFeature(),
-                  null, sourceRemoveEReference.getIndex());
+          .createRemoveReferenceChange(
+              null,
+              sourceRemoveEReference.getAffectedFeature(),
+              null,
+              sourceRemoveEReference.getIndex());
     } else if (change instanceof CreateEObject<Source>) {
       return EobjectFactory.eINSTANCE.createCreateEObject();
     } else if (change instanceof DeleteEObject<Source>) {
@@ -103,7 +117,8 @@ public class AtomicEChangeCopier {
     } else if (change instanceof UnsetFeature<Source, ?> sourceUnsetFeature) {
       return copyUnsetFeature(sourceUnsetFeature);
     }
-    throw new IllegalStateException(String.format(UNKNOWN_CHANGE_OF_TYPE, change.getClass().getSimpleName()));
+    throw new IllegalStateException(
+        String.format(UNKNOWN_CHANGE_OF_TYPE, change.getClass().getSimpleName()));
   }
 
   private static TypeInferringAtomicEChangeFactory getChangeFactory() {
