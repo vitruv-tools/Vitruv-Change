@@ -178,6 +178,6 @@ public class TreeMouseListener extends MouseAdapter {
     if (selPath != null) {
       return (DefaultMutableTreeNode) selPath.getLastPathComponent();
     } 
-      return null;
+    return null;
   }
 }
