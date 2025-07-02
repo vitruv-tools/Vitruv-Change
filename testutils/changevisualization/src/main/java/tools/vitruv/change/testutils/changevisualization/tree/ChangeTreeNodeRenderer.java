@@ -105,7 +105,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
   /** The default closed icon. */
   private Icon defaultClosedIcon;
 
-  private TabHighlighting tabHighlighting;
+  private transient TabHighlighting tabHighlighting;
 
   private boolean isActive = false;
 
