@@ -29,6 +29,7 @@ public class TreeMouseListener extends MouseAdapter {
   }
 
   /** {@inheritDoc} */
+  @Override
   public void mouseClicked(MouseEvent e) {
     if (e.getButton() == MouseEvent.BUTTON3) {
       displayMenuForTreeNode(e);
