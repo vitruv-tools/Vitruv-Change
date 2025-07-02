@@ -158,7 +158,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
 
     // if the node is highlighted, set the color after super.getTreeCell...
     // to overwrite any potential coloring of the superclasses implementation
-    if (shouldHighlight(tree, row, value)) {
+    if (shouldHighlight(value)) {
       comp.setForeground(ChangesTab.HIGHLIGHT_COLOR);
     }
 
@@ -229,7 +229,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
    * @param value The value visualized (usually the tree-node)
    * @return true if we should be highlighted
    */
-  private boolean shouldHighlight(JTree tree, int row, Object value) {
+  private boolean shouldHighlight(Object value) {
     if (!isActive) {
       return false;
     }
