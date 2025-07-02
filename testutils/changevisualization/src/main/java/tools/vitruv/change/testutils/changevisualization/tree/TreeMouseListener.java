@@ -29,6 +29,7 @@ public class TreeMouseListener extends MouseAdapter {
   }
 
   /** {@inheritDoc} */
+  @Override
   public void mouseClicked(MouseEvent e) {
     if (e.getButton() == MouseEvent.BUTTON3) {
       displayMenuForTreeNode(e);
@@ -49,15 +50,14 @@ public class TreeMouseListener extends MouseAdapter {
     JTree treeUI = getTreeUI(e);
     JPopupMenu popupMenu = new JPopupMenu();
     DefaultMutableTreeNode node = determineNode(e.getPoint(), treeUI);
-    if (node != null) {
-      if (treeUI.getSelectionPath() == null
-          || (treeUI.getSelectionPath().getLastPathComponent() != node)) {
+    if (node != null && (treeUI.getSelectionPath() == null) 
+        || (treeUI.getSelectionPath().getLastPathComponent() != node)) {
         // If the clicked node is not the selected one, select it
         treeUI.setSelectionPath(new TreePath(node.getPath()));
       }
-    }
+  
 
-    addHighlightItem(popupMenu, node, treeUI);
+    addHighlightItem(popupMenu, node);
     addSearchItem(popupMenu, treeUI);
     addResetSearchItem(popupMenu);
     addCopyToClipboardItem(popupMenu);
@@ -139,14 +139,14 @@ public class TreeMouseListener extends MouseAdapter {
    * @param node The node clicked on, may be null
    * @param treeUI The tree that this listener observes
    */
-  private void addHighlightItem(JPopupMenu popupMenu, DefaultMutableTreeNode node, JTree treeUI) {
+  private void addHighlightItem(JPopupMenu popupMenu, DefaultMutableTreeNode node) {
     if (node == null) {
       // Nothing to add
       return;
     }
 
     Object userObject = node.getUserObject();
-    if (userObject != null && userObject instanceof ChangeNode) {
+    if (userObject instanceof ChangeNode) {
       ChangeNode changeNode = (ChangeNode) node.getUserObject();
       final String highlightID = changeNode.getEObjectID();
       JMenuItem menuItem = new JMenuItem("Highlight ID : " + highlightID);
@@ -176,10 +176,8 @@ public class TreeMouseListener extends MouseAdapter {
   private DefaultMutableTreeNode determineNode(Point point, JTree treeUI) {
     TreePath selPath = treeUI.getPathForLocation(point.x, point.y);
     if (selPath != null) {
-      DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) selPath.getLastPathComponent();
-      return selectedNode;
-    } else {
-      return null;
-    }
+      return (DefaultMutableTreeNode) selPath.getLastPathComponent();
+    } 
+    return null;
   }
 }
