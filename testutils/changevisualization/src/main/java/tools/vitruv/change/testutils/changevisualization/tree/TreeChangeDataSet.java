@@ -104,7 +104,7 @@ public class TreeChangeDataSet extends ChangeDataSet {
   private final Map<String, Boolean> pathString2expanded = new Hashtable<String, Boolean>();
 
   /** List of all registered pathStrings. */
-  private final List<String> pathStrings = new Vector<String>();
+  private final List<String> pathStrings = new Vector<>();
 
   /** Stores the actual selected Node, if any. */
   private String selectedPathString = null;
