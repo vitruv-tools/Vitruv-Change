@@ -149,7 +149,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
     }
 
     // Change icon if necessary
-    updateIcons(tree, (DefaultMutableTreeNode) value, sel, expanded, leaf, row, hasFocus);
+    updateIcons((DefaultMutableTreeNode) value);
 
     // Get default visualization
     Component comp =
@@ -176,14 +176,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
    * @param row The row in the jtree's model
    * @param hasFocus Do we have focus
    */
-  private void updateIcons(
-      JTree tree,
-      DefaultMutableTreeNode node,
-      boolean sel,
-      boolean expanded,
-      boolean leaf,
-      int row,
-      boolean hasFocus) {
+  private void updateIcons(DefaultMutableTreeNode node) {
     if (node == null || node.getUserObject() == null) {
       return; // Use default icons
     }
