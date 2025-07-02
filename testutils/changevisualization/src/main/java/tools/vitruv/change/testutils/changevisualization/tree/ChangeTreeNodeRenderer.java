@@ -257,8 +257,8 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
     }
 
     // It should be highlighted if it is a ChangeNode with the highlightID
-    if (userObject instanceof ChangeNode) {
-      return highlightID.equals(((ChangeNode) userObject).getEObjectID());
+    if (userObject instanceof ChangeNode changenode) {
+      return highlightID.equals(changenode.getEObjectID());
     } else {
       // In this case we are a rootnode, a propagatedChange or original/consequential
       // Change nodes
