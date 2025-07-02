@@ -102,7 +102,7 @@ public class TreeChangeDataSet extends ChangeDataSet {
    * Stores if a given Node is expanded in the ui. The Node is identified by a TreePath, and that by
    * its pathString.
    */
-  private final Map<String, Boolean> pathString2expanded = new Hashtable<String, Boolean>();
+  private final Map<String, Boolean> pathString2expanded = new Hashtable<>();
 
   /** List of all registered pathStrings. */
   private final List<String> pathStrings = new LinkedList<>();
