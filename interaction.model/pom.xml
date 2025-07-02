@@ -14,7 +14,7 @@
   <artifactId>tools.vitruv.change.interaction.model</artifactId>
 
   <name>Vitruv Change Interactions Metamodel</name>
-  <description />
+  <description>Metamodel for Representing User Inputs during Change Propagation.</description>
 
   <build>
     <plugins>

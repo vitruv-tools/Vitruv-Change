@@ -14,7 +14,7 @@
   <artifactId>tools.vitruv.change.utils</artifactId>
 
   <name>Vitruv Change Utilities</name>
-  <description />
+  <description>Common Utilities used across Modules in Vitruv-Change.</description>
 
   <build>
     <plugins>
