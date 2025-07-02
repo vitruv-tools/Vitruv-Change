@@ -139,7 +139,7 @@ public class TreeMouseListener extends MouseAdapter {
    * @param node The node clicked on, may be null
    * @param treeUI The tree that this listener observes
    */
-  private void addHighlightItem(JPopupMenu popupMenu, DefaultMutableTreeNode node, JTree treeUI) {
+  private void addHighlightItem(JPopupMenu popupMenu, DefaultMutableTreeNode node) {
     if (node == null) {
       // Nothing to add
       return;
