@@ -1,5 +1,6 @@
 package tools.vitruv.change.testutils.changevisualization.tree;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -102,7 +103,7 @@ public class TreeChangeDataSet extends ChangeDataSet {
    * Stores if a given Node is expanded in the ui. The Node is identified by a TreePath, and that by
    * its pathString.
    */
-  private final Map<String, Boolean> pathString2expanded = new Hashtable<>();
+  private final Map<String, Boolean> pathString2expanded = new HashMap<>();
 
   /** List of all registered pathStrings. */
   private final List<String> pathStrings = new LinkedList<>();
