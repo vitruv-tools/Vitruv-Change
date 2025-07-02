@@ -14,7 +14,7 @@
   <artifactId>tools.vitruv.change.propagation</artifactId>
 
   <name>Vitruv Framework Change Processing</name>
-  <description />
+  <description>Propagation of Changes across Multiple Models according to Abstract Change Propagation Specifications.</description>
 
   <build>
     <plugins>
