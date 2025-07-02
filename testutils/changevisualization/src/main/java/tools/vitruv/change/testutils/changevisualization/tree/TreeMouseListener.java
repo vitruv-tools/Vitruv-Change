@@ -176,10 +176,8 @@ public class TreeMouseListener extends MouseAdapter {
   private DefaultMutableTreeNode determineNode(Point point, JTree treeUI) {
     TreePath selPath = treeUI.getPathForLocation(point.x, point.y);
     if (selPath != null) {
-      DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) selPath.getLastPathComponent();
-      return selectedNode;
-    } else {
+      return (DefaultMutableTreeNode) selPath.getLastPathComponent();
+    } 
       return null;
-    }
   }
 }
