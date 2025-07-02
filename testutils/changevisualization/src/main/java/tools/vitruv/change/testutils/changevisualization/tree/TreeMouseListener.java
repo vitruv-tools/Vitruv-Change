@@ -49,13 +49,12 @@ public class TreeMouseListener extends MouseAdapter {
     JTree treeUI = getTreeUI(e);
     JPopupMenu popupMenu = new JPopupMenu();
     DefaultMutableTreeNode node = determineNode(e.getPoint(), treeUI);
-    if (node != null) {
-      if (treeUI.getSelectionPath() == null
-          || (treeUI.getSelectionPath().getLastPathComponent() != node)) {
+    if (node != null && (treeUI.getSelectionPath() == null) 
+        || (treeUI.getSelectionPath().getLastPathComponent() != node)) {
         // If the clicked node is not the selected one, select it
         treeUI.setSelectionPath(new TreePath(node.getPath()));
       }
-    }
+  
 
     addHighlightItem(popupMenu, node);
     addSearchItem(popupMenu, treeUI);
