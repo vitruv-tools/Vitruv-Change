@@ -146,7 +146,7 @@ public class TreeMouseListener extends MouseAdapter {
     }
 
     Object userObject = node.getUserObject();
-    if (userObject != null && userObject instanceof ChangeNode) {
+    if (userObject instanceof ChangeNode) {
       ChangeNode changeNode = (ChangeNode) node.getUserObject();
       final String highlightID = changeNode.getEObjectID();
       JMenuItem menuItem = new JMenuItem("Highlight ID : " + highlightID);
