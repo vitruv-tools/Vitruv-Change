@@ -57,7 +57,7 @@ public class TreeMouseListener extends MouseAdapter {
       }
     }
 
-    addHighlightItem(popupMenu, node, treeUI);
+    addHighlightItem(popupMenu, node);
     addSearchItem(popupMenu, treeUI);
     addResetSearchItem(popupMenu);
     addCopyToClipboardItem(popupMenu);
