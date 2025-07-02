@@ -1,5 +1,6 @@
 package tools.vitruv.change.testutils.changevisualization.tree.decoder;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import org.eclipse.emf.ecore.EObject;
@@ -28,7 +29,7 @@ import tools.vitruv.change.testutils.changevisualization.utils.ModelHelper;
 public class ChangeNodeDecoder {
 
   /** Decoders which extract the information to display from given Object of specific eChanges. */
-  private static Map<String, ChangeDecoder> decoders = new Hashtable<String, ChangeDecoder>();
+  private static Map<String, ChangeDecoder> decoders = new HashMap<>();
 
   // register additional decoders, default instances
   static {
@@ -43,6 +44,8 @@ public class ChangeNodeDecoder {
     registerChangeDecoder(new RemoveRootEObjectDecoder());
     registerChangeDecoder(new RemoveEReferenceDecoder());
   }
+  final static String REMOVE_ROOT_OBJECT = "RemoveRootEObject";
+  final static String INSERT_ROOT_OBJECT = "InsertRootEObject";
 
   /**
    * Can be called to register new decoders for given EChange classes.
@@ -78,7 +81,7 @@ public class ChangeNodeDecoder {
     // extract eObjectID
     String eObjectID = getAffectedEObjectID(eChange);
 
-    ChangeNode changeNode =
+      return
         new ChangeNode(
             individualText,
             structuralFeatureLabelValues,
@@ -87,7 +90,6 @@ public class ChangeNodeDecoder {
             affectedClass,
             eObjectID);
 
-    return changeNode;
   }
 
   /**
@@ -100,22 +102,22 @@ public class ChangeNodeDecoder {
     // No ReferenceEChange or AttributeEChange class found to check for instanceof
     // so class recognition is done by name so far
     switch (eChange.eClass().getName()) {
-      case "CreateEObject":
-      case "DeleteEObject":
-        return EChangeClass.EXISTENCE_ECHANGE;
-      case "InsertRootEObject":
-      case "RemoveRootEObject":
+      case "CreateEObject", "DeleteEObject" -> {
+         return EChangeClass.EXISTENCE_ECHANGE;
+      }
+      case INSERT_ROOT_OBJECT, REMOVE_ROOT_OBJECT -> {
         return EChangeClass.ROOT_ECHANGE;
-      case "InsertEReference":
-      case "ReplaceSingleValuedEReference":
-      case "RemoveEReference":
+      } 
+      case "InsertEReference", "ReplaceSingleValuedEReference", "RemoveEReference" -> {
         return EChangeClass.REFERENCE_ECHANGE;
-      case "InsertEAttributeValue":
-      case "ReplaceSingleValuedEAttribute":
-      case "RemoveEAttributeValue":
+      }
+      case "InsertEAttributeValue", "ReplaceSingleValuedEAttribute", "RemoveEAttributeValue" -> {
         return EChangeClass.ATTRIBUTE_ECHANGE;
-      default:
+      }
+      default -> {
         return null;
+      }
+       
     }
   }
 
@@ -128,11 +130,11 @@ public class ChangeNodeDecoder {
   private static String getAffectedEObjectID(EChange<?> eChange) {
     String featureName = null;
     switch (eChange.eClass().getName()) {
-      case "InsertRootEObject":
+      case INSERT_ROOT_OBJECT :
         // InsertRootEObject eChanges don't have affectedEObjectIDs, they use newValueID
         featureName = "newValueID";
         break;
-      case "RemoveRootEObject":
+      case REMOVE_ROOT_OBJECT :
         // RemoveRootEObject eChanges don't have affectedEObjectIDs, they use oldValueID
         featureName = "oldValueID";
         break;
@@ -153,8 +155,8 @@ public class ChangeNodeDecoder {
   private static String getAffectedClass(EChange<?> eChange) {
     String featureName = null;
     switch (eChange.eClass().getName()) {
-      case "InsertRootEObject":
-      case "RemoveRootEObject":
+      case INSERT_ROOT_OBJECT :
+      case REMOVE_ROOT_OBJECT :
         // Insert- and RemoveRootEObject eChanges don't have affectedEObject, they use resource
         featureName = "resource";
         break;
