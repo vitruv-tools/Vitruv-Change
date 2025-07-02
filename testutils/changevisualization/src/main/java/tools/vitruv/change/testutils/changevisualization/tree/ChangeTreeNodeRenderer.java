@@ -189,9 +189,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
     }
 
     Object userObject = node.getUserObject();
-
-    if (userObject instanceof ChangeNode) {
-      ChangeNode changeNode = (ChangeNode) userObject;
+    if (userObject instanceof ChangeNode changeNode){
       switch (changeNode.getChangeClass()) {
         case REFERENCE_ECHANGE:
           setOpenIcon(REFERENCE_ECHANGE_OPEN_ICON);
