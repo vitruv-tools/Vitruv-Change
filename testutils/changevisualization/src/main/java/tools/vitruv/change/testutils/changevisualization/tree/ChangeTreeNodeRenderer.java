@@ -240,7 +240,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
     }
 
     // We dont highlight null values or those who are not defaultMutableTreeNodes
-    if (value == null || !(value instanceof DefaultMutableTreeNode)) {
+    if (!(value instanceof DefaultMutableTreeNode)) {
       return false;
     }
 
