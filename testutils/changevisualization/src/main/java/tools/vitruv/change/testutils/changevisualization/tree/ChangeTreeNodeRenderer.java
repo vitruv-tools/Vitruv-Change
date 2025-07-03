@@ -84,7 +84,8 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
       if (child instanceof DefaultMutableTreeNode) {
         DefaultMutableTreeNode mutableChild = (DefaultMutableTreeNode) child;
         if (mutableChild.getUserObject() != null) {
-          if (mutableChild.getUserObject() instanceof ChangeNode) {
+          Object userObject = mutableChild.getUserObject();
+          if (userObject instanceof ChangeNode) {
             if (highlightID.equals(((ChangeNode) mutableChild.getUserObject()).getEObjectID())) {
               return true;
             }
