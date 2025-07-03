@@ -38,7 +38,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
    * @param color The color for the icon
    * @return The generated icon
    */
-  private static Icon createIcon(boolean open, Color color) {
+  private static Icon createIcon(Color color) {
     // open/close is not used so far
     Image image = new BufferedImage(16, 18, BufferedImage.TYPE_INT_ARGB);
     Graphics2D g2d = (Graphics2D) image.getGraphics();
@@ -51,19 +51,19 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
 
   // Icons visualizing the open state for the echange types
   // These icons are also used in the toolbar and are therefore public
-  public static final Icon EXISTENCE_ECHANGE_OPEN_ICON = createIcon(true, EXISTENCE_ECHANGE_COLOR);
-  public static final Icon REFERENCE_ECHANGE_OPEN_ICON = createIcon(true, REFERENCE_ECHANGE_COLOR);
-  public static final Icon ATTRIBUTE_ECHANGE_OPEN_ICON = createIcon(true, ATTRIBUTE_ECHANGE_COLOR);
-  public static final Icon ROOT_ECHANGE_OPEN_ICON = createIcon(true, ROOT_ECHANGE_COLOR);
+  public static final Icon EXISTENCE_ECHANGE_OPEN_ICON = createIcon(EXISTENCE_ECHANGE_COLOR);
+  public static final Icon REFERENCE_ECHANGE_OPEN_ICON = createIcon(REFERENCE_ECHANGE_COLOR);
+  public static final Icon ATTRIBUTE_ECHANGE_OPEN_ICON = createIcon(ATTRIBUTE_ECHANGE_COLOR);
+  public static final Icon ROOT_ECHANGE_OPEN_ICON = createIcon(ROOT_ECHANGE_COLOR);
 
   // Icons visualizing the closed state for the echange types
   private static final Icon EXISTENCE_ECHANGE_CLOSED_ICON =
-      createIcon(false, EXISTENCE_ECHANGE_COLOR);
+      createIcon(EXISTENCE_ECHANGE_COLOR);
   private static final Icon REFERENCE_ECHANGE_CLOSED_ICON =
-      createIcon(false, REFERENCE_ECHANGE_COLOR);
+      createIcon(REFERENCE_ECHANGE_COLOR);
   private static final Icon ATTRIBUTE_ECHANGE_CLOSED_ICON =
-      createIcon(false, ATTRIBUTE_ECHANGE_COLOR);
-  private static final Icon ROOT_ECHANGE_CLOSED_ICON = createIcon(false, ROOT_ECHANGE_COLOR);
+      createIcon(ATTRIBUTE_ECHANGE_COLOR);
+  private static final Icon ROOT_ECHANGE_CLOSED_ICON = createIcon(ROOT_ECHANGE_COLOR);
 
   /**
    * Returns true if any sibling of the given node should be highlighted.
