@@ -78,25 +78,32 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
    * @return True if we should be highlighted
    */
   public static boolean shouldHighlightNode(String highlightID, DefaultMutableTreeNode node) {
-    Enumeration<TreeNode> children = node.breadthFirstEnumeration();
-    while (children.hasMoreElements()) {
-      TreeNode child = children.nextElement();
-      if (child instanceof DefaultMutableTreeNode mutableChild) {
-        if (mutableChild.getUserObject() != null) {
-          Object userObject = mutableChild.getUserObject();
-          if (userObject instanceof ChangeNode) {
-            if (highlightID.equals(((ChangeNode) mutableChild.getUserObject()).getEObjectID())) {
-              return true;
-            }
-          } else if (mutableChild.getUserObject() instanceof FeatureNode 
-                      && mutableChild.getUserObject().toString().indexOf(highlightID) != -1) {
-              return true;          
+      Enumeration<TreeNode> children = node.breadthFirstEnumeration();
+
+      while (children.hasMoreElements()) {
+          TreeNode child = children.nextElement();
+
+          if (!(child instanceof DefaultMutableTreeNode mutableChild)) {
+              continue;
           }
-        }
+
+          Object userObject = mutableChild.getUserObject();
+          if (userObject == null) {
+              continue;
+          }
+
+          if (userObject instanceof ChangeNode changeNode) {
+              if (highlightID.equals(changeNode.getEObjectID())) {
+                  return true;
+              }
+          } else if (userObject instanceof FeatureNode && userObject.toString().contains(highlightID)) {
+              return true;
+          }
       }
-    }
-    return false;
+
+      return false;
   }
+
 
   /** The default opened icon. */
   private transient Icon defaultOpenIcon;
