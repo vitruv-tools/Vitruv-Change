@@ -46,8 +46,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
     g2d.fillRoundRect(2, 2, 12, 14, 4, 4);
     g2d.setColor(Color.BLACK);
     g2d.drawRoundRect(2, 2, 12, 14, 4, 4);
-    Icon icon = new ImageIcon(image);
-    return icon;
+    return new ImageIcon(image);
   }
 
   // Icons visualizing the open state for the echange types
