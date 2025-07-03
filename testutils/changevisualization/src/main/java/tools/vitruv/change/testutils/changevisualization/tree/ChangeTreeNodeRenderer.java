@@ -81,8 +81,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
     Enumeration<TreeNode> children = node.breadthFirstEnumeration();
     while (children.hasMoreElements()) {
       TreeNode child = children.nextElement();
-      if (child instanceof DefaultMutableTreeNode) {
-        DefaultMutableTreeNode mutableChild = (DefaultMutableTreeNode) child;
+      if (child instanceof DefaultMutableTreeNode mutableChild) {
         if (mutableChild.getUserObject() != null) {
           Object userObject = mutableChild.getUserObject();
           if (userObject instanceof ChangeNode) {
