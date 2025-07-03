@@ -19,7 +19,7 @@ public class ChangeNode implements Serializable {
    *
    * @author Andreas Loeffler
    */
-  public static enum EChangeClass {
+  public enum EChangeClass {
     REFERENCE_ECHANGE,
     EXISTENCE_ECHANGE,
     ATTRIBUTE_ECHANGE,
