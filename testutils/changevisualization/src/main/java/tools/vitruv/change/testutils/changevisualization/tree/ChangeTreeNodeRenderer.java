@@ -100,7 +100,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
   }
 
   /** The default opened icon. */
-  private Icon defaultOpenIcon;
+  private transient Icon defaultOpenIcon;
 
   /** The default closed icon. */
   private transient Icon defaultClosedIcon;
