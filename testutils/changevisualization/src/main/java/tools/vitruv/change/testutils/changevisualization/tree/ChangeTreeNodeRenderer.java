@@ -88,10 +88,9 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
             if (highlightID.equals(((ChangeNode) mutableChild.getUserObject()).getEObjectID())) {
               return true;
             }
-          } else if (mutableChild.getUserObject() instanceof FeatureNode) {
-            if (mutableChild.getUserObject().toString().indexOf(highlightID) != -1) {
-              return true;
-            }
+          } else if (mutableChild.getUserObject() instanceof FeatureNode 
+                      && mutableChild.getUserObject().toString().indexOf(highlightID) != -1) {
+              return true;          
           }
         }
       }
