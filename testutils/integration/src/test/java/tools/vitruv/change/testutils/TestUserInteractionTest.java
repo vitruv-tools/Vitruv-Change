@@ -455,7 +455,7 @@ public class TestUserInteractionTest {
 
       @Test
       @DisplayName("required multiple but provided a single time")
-      public void provideSingleButRequireMultipleTimes() {
+       void provideSingleButRequireMultipleTimes() {
         int response = 0;
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
