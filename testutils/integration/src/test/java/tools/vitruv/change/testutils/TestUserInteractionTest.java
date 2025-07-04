@@ -486,7 +486,7 @@ public class TestUserInteractionTest {
     class StringSelected {
       @Test
       @DisplayName("required and provided a single time")
-      public void provideAndRequireSingleTime() {
+       void provideAndRequireSingleTime() {
         String response = "selectedItem";
         List<String> choices = List.of("firstDummy", response);
         testInteraction
