@@ -538,7 +538,7 @@ public class TestUserInteractionTest {
         List<String> choices = List.of("dummy", response);
         testInteraction
             .onMultipleChoiceMultiSelection(
-                (description) -> description.getTitle().equals(DIALOG_TITLE))
+                description -> description.getTitle().equals(DIALOG_TITLE))
             .respondWith(new String[] {response});
         UserInteractor userInteractor = generateInteractor(testInteraction);
         userInteractor
