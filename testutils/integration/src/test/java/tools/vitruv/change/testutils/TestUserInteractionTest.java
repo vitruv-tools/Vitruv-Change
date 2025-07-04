@@ -42,7 +42,7 @@ public class TestUserInteractionTest {
     public void provideAndRequireSingleTime() {
       String responseText = "response";
       testInteraction
-          .onTextInput((description) -> description.getTitle().equals(DIALOG_TITLE))
+          .onTextInput(description -> description.getTitle().equals(DIALOG_TITLE))
           .respondWith(responseText);
       UserInteractor userInteractor = generateInteractor(testInteraction);
       assertThat(
@@ -59,7 +59,7 @@ public class TestUserInteractionTest {
     public void provideAndRequireMultipleTimes() {
       String responseText = "response";
       testInteraction
-          .onTextInput((description) -> description.getTitle().equals(DIALOG_TITLE))
+          .onTextInput(description -> description.getTitle().equals(DIALOG_TITLE))
           .always()
           .respondWith(responseText);
       UserInteractor userInteractor = generateInteractor(testInteraction);
@@ -82,7 +82,7 @@ public class TestUserInteractionTest {
     public void provideSingleButRequireMultipleTimes() {
       String responseText = "response";
       testInteraction
-          .onTextInput((description) -> description.getTitle().equals(DIALOG_TITLE))
+          .onTextInput(description -> description.getTitle().equals(DIALOG_TITLE))
           .respondWith(responseText);
       UserInteractor userInteractor = generateInteractor(testInteraction);
       userInteractor
@@ -108,7 +108,7 @@ public class TestUserInteractionTest {
     @DisplayName("required and provided a single time")
     public void provideAndRequireSingleTime() {
       testInteraction
-          .onConfirmation((description) -> description.getTitle().equals(DIALOG_TITLE))
+          .onConfirmation(description -> description.getTitle().equals(DIALOG_TITLE))
           .respondWith(true);
       UserInteractor userInteractor = generateInteractor(testInteraction);
       assertThat(
@@ -124,7 +124,7 @@ public class TestUserInteractionTest {
     @DisplayName("required and provided multiple times")
     public void provideAndRequireMultipleTimes() {
       testInteraction
-          .onConfirmation((description) -> description.getTitle().equals(DIALOG_TITLE))
+          .onConfirmation(description -> description.getTitle().equals(DIALOG_TITLE))
           .always()
           .respondWith(true);
       UserInteractor userInteractor = generateInteractor(testInteraction);
@@ -146,7 +146,7 @@ public class TestUserInteractionTest {
     @DisplayName("required multiple but provided a single time")
     public void provideSingleButRequireMultipleTimes() {
       testInteraction
-          .onConfirmation((description) -> description.getTitle().equals(DIALOG_TITLE))
+          .onConfirmation(description -> description.getTitle().equals(DIALOG_TITLE))
           .respondWith(true);
       UserInteractor userInteractor = generateInteractor(testInteraction);
       userInteractor
@@ -178,7 +178,7 @@ public class TestUserInteractionTest {
         List<String> choices = List.of("dummy", response);
         testInteraction
             .onMultipleChoiceSingleSelection(
-                (description) -> description.getTitle().equals(DIALOG_TITLE))
+                description -> description.getTitle().equals(DIALOG_TITLE))
             .respondWith(response);
         UserInteractor userInteractor = generateInteractor(testInteraction);
         assertThat(
@@ -198,7 +198,7 @@ public class TestUserInteractionTest {
         List<String> choices = List.of("dummy", response);
         testInteraction
             .onMultipleChoiceSingleSelection(
-                (description) -> description.getTitle().equals(DIALOG_TITLE))
+                description -> description.getTitle().equals(DIALOG_TITLE))
             .always()
             .respondWith(response);
         UserInteractor userInteractor = generateInteractor(testInteraction);
@@ -225,7 +225,7 @@ public class TestUserInteractionTest {
         List<String> choices = List.of("dummy", response);
         testInteraction
             .onMultipleChoiceSingleSelection(
-                (description) -> description.getTitle().equals(DIALOG_TITLE))
+                description -> description.getTitle().equals(DIALOG_TITLE))
             .respondWith(response);
         UserInteractor userInteractor = generateInteractor(testInteraction);
         userInteractor
@@ -256,7 +256,7 @@ public class TestUserInteractionTest {
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
             .onMultipleChoiceSingleSelection(
-                (description) -> description.getTitle().equals(DIALOG_TITLE))
+                description -> description.getTitle().equals(DIALOG_TITLE))
             .respondWithChoiceAt(selectedIndex);
         UserInteractor userInteractor = generateInteractor(testInteraction);
         assertThat(
@@ -276,7 +276,7 @@ public class TestUserInteractionTest {
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
             .onMultipleChoiceSingleSelection(
-                (description) -> description.getTitle().equals(DIALOG_TITLE))
+                description -> description.getTitle().equals(DIALOG_TITLE))
             .always()
             .respondWithChoiceAt(selectedIndex);
         UserInteractor userInteractor = generateInteractor(testInteraction);
@@ -303,7 +303,7 @@ public class TestUserInteractionTest {
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
             .onMultipleChoiceSingleSelection(
-                (description) -> description.getTitle().equals(DIALOG_TITLE))
+                description -> description.getTitle().equals(DIALOG_TITLE))
             .respondWithChoiceAt(selectedIndex);
         UserInteractor userInteractor = generateInteractor(testInteraction);
         userInteractor
@@ -337,7 +337,7 @@ public class TestUserInteractionTest {
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
             .onMultipleChoiceMultiSelection(
-                (description) -> description.getTitle().equals(DIALOG_TITLE))
+                description -> description.getTitle().equals(DIALOG_TITLE))
             .respondWith(emptySet());
         UserInteractor userInteractor = generateInteractor(testInteraction);
         assertThat(
@@ -356,7 +356,7 @@ public class TestUserInteractionTest {
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
             .onMultipleChoiceMultiSelection(
-                (description) -> description.getTitle().equals(DIALOG_TITLE))
+                description -> description.getTitle().equals(DIALOG_TITLE))
             .always()
             .respondWith(new String[] {});
         UserInteractor userInteractor = generateInteractor(testInteraction);
@@ -382,7 +382,7 @@ public class TestUserInteractionTest {
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
             .onMultipleChoiceMultiSelection(
-                (description) -> description.getTitle().equals(DIALOG_TITLE))
+                description -> description.getTitle().equals(DIALOG_TITLE))
             .respondWith(new String[] {});
         UserInteractor userInteractor = generateInteractor(testInteraction);
         userInteractor
@@ -413,7 +413,7 @@ public class TestUserInteractionTest {
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
             .onMultipleChoiceMultiSelection(
-                (description) -> description.getTitle().equals(DIALOG_TITLE))
+                description -> description.getTitle().equals(DIALOG_TITLE))
             .respondWithChoicesAt(new int[] {response});
         UserInteractor userInteractor = generateInteractor(testInteraction);
         assertThat(
@@ -433,7 +433,7 @@ public class TestUserInteractionTest {
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
             .onMultipleChoiceMultiSelection(
-                (description) -> description.getTitle().equals(DIALOG_TITLE))
+                description -> description.getTitle().equals(DIALOG_TITLE))
             .always()
             .respondWithChoicesAt(new int[] {response});
         UserInteractor userInteractor = generateInteractor(testInteraction);
