@@ -506,7 +506,7 @@ public class TestUserInteractionTest {
 
       @Test
       @DisplayName("required and provided multiple times")
-      public void provideAndRequireMultipleTimes() {
+       void provideAndRequireMultipleTimes() {
         String response = "selectedItem";
         List<String> choices = List.of("dummy", response);
         testInteraction
