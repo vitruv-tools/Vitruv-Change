@@ -17,20 +17,20 @@ import tools.vitruv.change.interaction.UserInteractor;
 import tools.vitruv.change.testutils.TestUserInteraction.ResultProvider;
 
 /** Tests the {@link TestUserInteraction} class. */
-public class TestUserInteractionTest {
+class TestUserInteractionTest {
   private static String DIALOG_TITLE = "test";
 
   private TestUserInteraction testInteraction;
 
   /** Sets up the test interaction for each test. */
   @BeforeEach
-  public void setupInteraction() {
+  void setupInteraction() {
     testInteraction = new TestUserInteraction();
   }
 
   /** Asserts that all interactions have occurred. */
   @AfterEach
-  public void assertAllInteractionOccurred() {
+  void assertAllInteractionOccurred() {
     testInteraction.assertAllInteractionsOccurred();
   }
 
@@ -39,7 +39,7 @@ public class TestUserInteractionTest {
   class TextInput {
     @Test
     @DisplayName("required and provided a single time")
-    public void provideAndRequireSingleTime() {
+    void provideAndRequireSingleTime() {
       String responseText = "response";
       testInteraction
           .onTextInput(description -> description.getTitle().equals(DIALOG_TITLE))
@@ -56,7 +56,7 @@ public class TestUserInteractionTest {
 
     @Test
     @DisplayName("required and provided multiple times")
-    public void provideAndRequireMultipleTimes() {
+    void provideAndRequireMultipleTimes() {
       String responseText = "response";
       testInteraction
           .onTextInput(description -> description.getTitle().equals(DIALOG_TITLE))
@@ -79,7 +79,7 @@ public class TestUserInteractionTest {
 
     @Test
     @DisplayName("required multiple but provided a single time")
-    public void provideSingleButRequireMultipleTimes() {
+    void provideSingleButRequireMultipleTimes() {
       String responseText = "response";
       testInteraction
           .onTextInput(description -> description.getTitle().equals(DIALOG_TITLE))
@@ -106,7 +106,7 @@ public class TestUserInteractionTest {
   class Confirmation {
     @Test
     @DisplayName("required and provided a single time")
-    public void provideAndRequireSingleTime() {
+    void provideAndRequireSingleTime() {
       testInteraction
           .onConfirmation(description -> description.getTitle().equals(DIALOG_TITLE))
           .respondWith(true);
@@ -122,7 +122,7 @@ public class TestUserInteractionTest {
 
     @Test
     @DisplayName("required and provided multiple times")
-    public void provideAndRequireMultipleTimes() {
+    void provideAndRequireMultipleTimes() {
       testInteraction
           .onConfirmation(description -> description.getTitle().equals(DIALOG_TITLE))
           .always()
@@ -144,7 +144,7 @@ public class TestUserInteractionTest {
 
     @Test
     @DisplayName("required multiple but provided a single time")
-    public void provideSingleButRequireMultipleTimes() {
+    void provideSingleButRequireMultipleTimes() {
       testInteraction
           .onConfirmation(description -> description.getTitle().equals(DIALOG_TITLE))
           .respondWith(true);
@@ -173,7 +173,7 @@ public class TestUserInteractionTest {
     class MatchedByString {
       @Test
       @DisplayName("required and provided a single time")
-      public void provideAndRequireSingleTime() {
+      void provideAndRequireSingleTime() {
         String response = "selectedItem";
         List<String> choices = List.of("dummy", response);
         testInteraction
@@ -193,7 +193,7 @@ public class TestUserInteractionTest {
 
       @Test
       @DisplayName("required and provided multiple times")
-      public void provideAndRequireMultipleTimes() {
+      void provideAndRequireMultipleTimes() {
         String response = "selectedItem";
         List<String> choices = List.of("dummy", response);
         testInteraction
@@ -220,7 +220,7 @@ public class TestUserInteractionTest {
 
       @Test
       @DisplayName("required multiple but provided a single time")
-      public void provideSingleButRequireMultipleTimes() {
+      void provideSingleButRequireMultipleTimes() {
         String response = "selectedItem";
         List<String> choices = List.of("dummy", response);
         testInteraction
@@ -251,7 +251,7 @@ public class TestUserInteractionTest {
     class MatchedByIndex {
       @Test
       @DisplayName("required and provided a single time")
-      public void provideAndRequireSingleTime() {
+      void provideAndRequireSingleTime() {
         int selectedIndex = 1;
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
@@ -271,7 +271,7 @@ public class TestUserInteractionTest {
 
       @Test
       @DisplayName("required and provided multiple times")
-      public void provideAndRequireMultipleTimes() {
+      void provideAndRequireMultipleTimes() {
         int selectedIndex = 1;
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
@@ -298,7 +298,7 @@ public class TestUserInteractionTest {
 
       @Test
       @DisplayName("required multiple but provided a single time")
-      public void provideSingleButRequireMultipleTimes() {
+      void provideSingleButRequireMultipleTimes() {
         int selectedIndex = 1;
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
@@ -333,7 +333,7 @@ public class TestUserInteractionTest {
     class NoIndexSelected {
       @Test
       @DisplayName("required and provided a single time")
-      public void provideAndRequireSingleTime() {
+      void provideAndRequireSingleTime() {
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
             .onMultipleChoiceMultiSelection(
@@ -352,7 +352,7 @@ public class TestUserInteractionTest {
 
       @Test
       @DisplayName("required and provided multiple times")
-      public void provideAndRequireMultipleTimes() {
+      void provideAndRequireMultipleTimes() {
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
             .onMultipleChoiceMultiSelection(
@@ -378,7 +378,7 @@ public class TestUserInteractionTest {
 
       @Test
       @DisplayName("required multiple but provided a single time")
-      public void provideSingleButRequireMultipleTimes() {
+      void provideSingleButRequireMultipleTimes() {
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
             .onMultipleChoiceMultiSelection(
@@ -408,7 +408,7 @@ public class TestUserInteractionTest {
     class IndexSelected {
       @Test
       @DisplayName("required and provided a single time")
-      public void provideAndRequireSingleTime() {
+      void provideAndRequireSingleTime() {
         int response = 0;
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
@@ -428,7 +428,7 @@ public class TestUserInteractionTest {
 
       @Test
       @DisplayName("required and provided multiple times")
-      public void provideAndRequireMultipleTimes() {
+      void provideAndRequireMultipleTimes() {
         int response = 0;
         List<String> choices = List.of("firstDummy", "secondDummy");
         testInteraction
