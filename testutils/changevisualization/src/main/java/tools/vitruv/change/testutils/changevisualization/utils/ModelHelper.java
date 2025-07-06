@@ -25,8 +25,8 @@ public final class ModelHelper {
    * @return String array of label/value pairs
    */
   public static String[][] extractStructuralFeatureArray(EObject eObj) {
-    List<String> labels = new Vector<String>();
-    List<String> values = new Vector<String>();
+    List<String> labels = new Vector<>();
+    List<String> values = new Vector<>();
     // add general information
     appendEClassInformation(labels, values, eObj);
 
