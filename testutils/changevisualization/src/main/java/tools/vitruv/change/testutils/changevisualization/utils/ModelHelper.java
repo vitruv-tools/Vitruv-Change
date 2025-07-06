@@ -1,5 +1,6 @@
 package tools.vitruv.change.testutils.changevisualization.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 import org.eclipse.emf.common.util.EList;
@@ -25,8 +26,8 @@ public final class ModelHelper {
    * @return String array of label/value pairs
    */
   public static String[][] extractStructuralFeatureArray(EObject eObj) {
-    List<String> labels = new Vector<>();
-    List<String> values = new Vector<>();
+    List<String> labels = new ArrayList<>();
+    List<String> values = new ArrayList<>();
     // add general information
     appendEClassInformation(labels, values, eObj);
 
