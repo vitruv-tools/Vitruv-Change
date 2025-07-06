@@ -310,20 +310,20 @@ class TestUserInteractionTest {
             .respondWithChoiceAt(selectedIndex);
         UserInteractor userInteractor = generateInteractor(testInteraction);
         userInteractor
-            .getSingleSelectionDialogBuilder()
+            .getMultiSelectionDialogBuilder()
             .message(dialogTitle)
             .choices(choices)
             .title(dialogTitle)
             .startInteraction();
+        MultipleChoiceSelectionInteractionBuilder.OptionalSteps<Collection<Integer>> optionalSteps = userInteractor
+                .getMultiSelectionDialogBuilder()
+                .message(dialogTitle)
+                .choices(choices)
+                .title(dialogTitle);
         assertThrows(
             AssertionError.class,
             () ->
-                userInteractor
-                    .getSingleSelectionDialogBuilder()
-                    .message(dialogTitle)
-                    .choices(choices)
-                    .title(dialogTitle)
-                    .startInteraction());
+                optionalSteps.startInteraction());
       }
     }
   }
