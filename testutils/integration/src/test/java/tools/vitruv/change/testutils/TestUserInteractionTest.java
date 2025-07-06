@@ -472,15 +472,15 @@ class TestUserInteractionTest {
             .choices(choices)
             .title(dialogTitle)
             .startInteraction();
+        MultipleChoiceSelectionInteractionBuilder.OptionalSteps<Collection<Integer>> optionalSteps = userInteractor
+                .getMultiSelectionDialogBuilder()
+                .message(dialogTitle)
+                .choices(choices)
+                .title(dialogTitle);
         assertThrows(
             AssertionError.class,
             () ->
-                userInteractor
-                    .getMultiSelectionDialogBuilder()
-                    .message(dialogTitle)
-                    .choices(choices)
-                    .title(dialogTitle)
-                    .startInteraction());
+                optionalSteps.startInteraction());
       }
     }
 
