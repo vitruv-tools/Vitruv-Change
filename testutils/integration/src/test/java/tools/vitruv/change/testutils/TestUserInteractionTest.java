@@ -18,6 +18,7 @@ import tools.vitruv.change.interaction.UserInteractor;
 import tools.vitruv.change.interaction.builder.ConfirmationInteractionBuilder;
 import tools.vitruv.change.interaction.builder.InteractionBuilder;
 import tools.vitruv.change.interaction.builder.MultipleChoiceSelectionInteractionBuilder;
+import tools.vitruv.change.interaction.builder.TextInputInteractionBuilder;
 import tools.vitruv.change.testutils.TestUserInteraction.ResultProvider;
 
 /** Tests the {@link TestUserInteraction} class. */
@@ -90,12 +91,12 @@ class TestUserInteractionTest {
                     .respondWith(responseText);
             UserInteractor userInteractor = generateInteractor(testInteraction);
             userInteractor
-                    .getConfirmationDialogBuilder()
+                    .getTextInputDialogBuilder()
                     .message(dialogTitle)
                     .title(dialogTitle)
                     .startInteraction();
-            ConfirmationInteractionBuilder.OptionalSteps optionalSteps = userInteractor
-                    .getConfirmationDialogBuilder()
+            TextInputInteractionBuilder.OptionalSteps optionalSteps = userInteractor
+                    .getTextInputDialogBuilder()
                     .message(dialogTitle)
                     .title(dialogTitle);
             assertThrows(
@@ -233,13 +234,13 @@ class TestUserInteractionTest {
                         .respondWith(response);
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 userInteractor
-                        .getMultiSelectionDialogBuilder()
+                        .getSingleSelectionDialogBuilder()
                         .message(dialogTitle)
                         .choices(choices)
                         .title(dialogTitle)
                         .startInteraction();
-                MultipleChoiceSelectionInteractionBuilder.OptionalSteps<Collection<Integer>> optionalSteps = userInteractor
-                        .getMultiSelectionDialogBuilder()
+                MultipleChoiceSelectionInteractionBuilder.OptionalSteps<Integer> optionalSteps = userInteractor
+                        .getSingleSelectionDialogBuilder()
                         .message(dialogTitle)
                         .choices(choices)
                         .title(dialogTitle);
@@ -310,13 +311,13 @@ class TestUserInteractionTest {
                         .respondWithChoiceAt(selectedIndex);
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 userInteractor
-                        .getMultiSelectionDialogBuilder()
+                        .getSingleSelectionDialogBuilder()
                         .message(dialogTitle)
                         .choices(choices)
                         .title(dialogTitle)
                         .startInteraction();
-                MultipleChoiceSelectionInteractionBuilder.OptionalSteps<Collection<Integer>> optionalSteps = userInteractor
-                        .getMultiSelectionDialogBuilder()
+                MultipleChoiceSelectionInteractionBuilder.OptionalSteps<Integer> optionalSteps = userInteractor
+                        .getSingleSelectionDialogBuilder()
                         .message(dialogTitle)
                         .choices(choices)
                         .title(dialogTitle);
