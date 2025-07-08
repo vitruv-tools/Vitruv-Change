@@ -31,7 +31,7 @@ public class LabelValuePanel extends JScrollPane {
   private static final long serialVersionUID = 1L;
 
   /** Implements the usual strg + mousewheel zoom behaviour. */
-  private final MouseWheelListener mwl = e -> {
+  private transient final MouseWheelListener mwl = e -> {
     // Implements the usual strg + mousewheel behaviour for zooming
     if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == 0) {
       return;
