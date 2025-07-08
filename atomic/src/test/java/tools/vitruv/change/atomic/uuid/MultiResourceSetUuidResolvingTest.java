@@ -38,9 +38,9 @@ class MultiResourceSetUuidResolvingTest {
   void setup(@TestProject Path testProjectPath) {
     this.testProjectPath = testProjectPath;
     this.sourceResourceSet = withGlobalFactories(new ResourceSetImpl());
-    this.sourceUuidResolver = UuidResolver.create(sourceResourceSet);
+    this.sourceUuidResolver = UuidResolverFactory.create(sourceResourceSet);
     this.targetResourceSet = withGlobalFactories(new ResourceSetImpl());
-    this.targetUuidResolver = UuidResolver.create(targetResourceSet);
+    this.targetUuidResolver = UuidResolverFactory.create(targetResourceSet);
   }
 
   @ParameterizedTest(name = "{0} resource(s)")
