@@ -102,8 +102,7 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
   // Define a constant in your class to make it more descriptive
   private static final int CLOSE_OPERATION = WindowConstants.DISPOSE_ON_CLOSE;
 
-  private transient final ChangeVisualizationDataModel changeVisualizationDataModel;
-
+  private final transient ChangeVisualizationDataModel changeVisualizationDataModel;
   private JTabbedPane tabbedPane;
 
   /**
