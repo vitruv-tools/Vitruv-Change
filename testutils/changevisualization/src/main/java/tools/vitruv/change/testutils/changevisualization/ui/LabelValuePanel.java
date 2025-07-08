@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.SwingConstants;
 import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
 
 /**
@@ -131,7 +132,7 @@ public class LabelValuePanel extends JScrollPane {
    */
   private void createLine(JPanel center, JPanel left, String labelText, String fieldText) {
     // Create the label
-    JLabel label = new JLabel(labelText, JLabel.RIGHT);
+    JLabel label = new JLabel(labelText, SwingConstants.RIGHT);
     label.setFont(ChangeVisualizationUI.DEFAULT_LABEL_FONT);
     allLabels.add(label);
 
