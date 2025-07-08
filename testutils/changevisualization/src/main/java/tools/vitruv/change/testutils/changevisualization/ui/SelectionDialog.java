@@ -76,7 +76,7 @@ public class SelectionDialog extends JDialog {
     setLayout(new GridLayout(values.length + 2, 1));
     boxes = new JCheckBox[values.length];
     for (int n = 0; n < values.length; n++) {
-      boolean selected = initialSelections == null ? true : initialSelections[n];
+      boolean selected = initialSelections == null || initialSelections[n];
       boxes[n] = new JCheckBox(values[n], selected);
       boxes[n].setFont(ChangeVisualizationUI.DEFAULT_CHECKBOX_FONT);
       add(boxes[n]);
