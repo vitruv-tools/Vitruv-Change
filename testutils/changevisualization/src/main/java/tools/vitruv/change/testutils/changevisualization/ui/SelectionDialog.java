@@ -60,7 +60,7 @@ public class SelectionDialog extends JDialog {
    */
   public SelectionDialog(JFrame frame, String[] values, boolean[] initialSelections) {
     super(frame, true);
-    setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+    setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
     createUi(values, initialSelections);
     pack();
     setLocationRelativeTo(frame);
