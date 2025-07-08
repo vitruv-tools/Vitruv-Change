@@ -5,6 +5,7 @@ import java.awt.GridLayout;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 import javax.swing.JLabel;
@@ -71,10 +72,10 @@ public class LabelValuePanel extends JScrollPane {
       };
 
   /** List of all added JTextFields used for mouse wheel zooming. */
-  private List<JTextField> allFields = new Vector<>();
+  private List<JTextField> allFields = new ArrayList<>();
 
   /** List of all added JLabels used for mouse wheel zooming. */
-  private List<JLabel> allLabels = new Vector<>();
+  private List<JLabel> allLabels = new ArrayList<>();
 
   /**
    * Constructs an LabelValuePanel visualizing a string array.
