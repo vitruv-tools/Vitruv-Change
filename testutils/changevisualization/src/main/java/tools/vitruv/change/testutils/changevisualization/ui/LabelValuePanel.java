@@ -71,10 +71,10 @@ public class LabelValuePanel extends JScrollPane {
       };
 
   /** List of all added JTextFields used for mouse wheel zooming. */
-  private List<JTextField> allFields = new Vector<JTextField>();
+  private List<JTextField> allFields = new Vector<>();
 
   /** List of all added JLabels used for mouse wheel zooming. */
-  private List<JLabel> allLabels = new Vector<JLabel>();
+  private List<JLabel> allLabels = new Vector<>();
 
   /**
    * Constructs an LabelValuePanel visualizing a string array.
