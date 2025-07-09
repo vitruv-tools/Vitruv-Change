@@ -52,7 +52,7 @@ public class ChangesTab extends JPanel
     createUI();
     this.displayedChanges = displayedChanges;
     this.displayedChanges.registerChangeDataSetGenerationListener(this);
-    this.displayedChanges.getChangeDataSets().forEach(dataSet -> changeDataSetGenerated(dataSet));
+    this.displayedChanges.getChangeDataSets().forEach(this::changeDataSetGenerated);
   }
 
   /**
