@@ -1,7 +1,6 @@
 package tools.vitruv.change.testutils.changevisualization.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -21,11 +20,8 @@ import tools.vitruv.change.testutils.changevisualization.tree.TabHighlighting;
  * to displaying general information.
  */
 public class ChangesTab extends JPanel
-    implements ListSelectionListener, ChangeDataSetGenerationListener, TabHighlighting {
+    implements ListSelectionListener, ChangeDataSetGenerationListener, TabHighlighting, TabColours {
   private static final long serialVersionUID = -5293272783862251463L;
-
-  /** The color used to highlight objects. */
-  public static final Color HIGHLIGHT_COLOR = Color.BLUE;
 
   /** The ChangeComponent implementing the actual visualization. */
   private ChangeTree visualization;
