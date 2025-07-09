@@ -58,9 +58,8 @@ public class CloseableTabComponent extends JPanel {
   @Override
   public void setFont(Font font) {
     super.setFont(font);
-    if (label != null) {
-      label.setFont(font);
-    }
+    label.setFont(font);
+    
   }
 
   /**
