@@ -25,7 +25,10 @@ public class CloseableTabComponent extends JPanel {
   /** Never used but necessary to show no warnings. */
   private static final long serialVersionUID = 1L;
 
-  /** The size of the close button. This also affected the size of the whole component. */
+  /**
+   * The size of the close button. This also affected the size of the whole
+   * component.
+   */
   private static final int SIZE = 20;
 
   /** The label displaying the tabs title. */
@@ -37,7 +40,8 @@ public class CloseableTabComponent extends JPanel {
   /**
    * Creates a tab component with a given title and a close button.
    *
-   * <p>Use ActionListener methods to react to close clicks.
+   * <p>
+   * Use ActionListener methods to react to close clicks.
    *
    * @param title The title to display
    */
@@ -104,7 +108,11 @@ public class CloseableTabComponent extends JPanel {
 
     // we don't want to update UI for this button
     @Override
-    public void updateUI() {}
+    public void updateUI() {
+      // Intentionally left empty to prevent Look and Feel (LaF) updates.
+      // This button uses a fixed BasicButtonUI and custom painting for consistent
+      // appearance.
+    }
 
     // paint the cross
     @Override
