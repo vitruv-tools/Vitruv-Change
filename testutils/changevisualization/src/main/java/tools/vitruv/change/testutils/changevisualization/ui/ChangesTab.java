@@ -97,7 +97,6 @@ public class ChangesTab extends JPanel
     if (row == -1) {
       visualization.setData(null);
     } else {
-      // System.out.println("Changing to row "+row);
       ChangeDataSet changeDataSet = displayedChanges.getChangeDataSets().get(row);
       visualization.setData(changeDataSet);
     }
