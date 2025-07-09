@@ -8,13 +8,15 @@
   <parent>
     <groupId>tools.vitruv</groupId>
     <artifactId>tools.vitruv.change</artifactId>
-    <version>3.2.1-SNAPSHOT</version>
+    <version>3.2.3-SNAPSHOT</version>
   </parent>
 
   <artifactId>tools.vitruv.change.atomic</artifactId>
 
   <name>Vitruv Atomic Change Metamodel</name>
-  <description />
+  <description>
+    Metamodel, Resolution and Application of Atomic Changes
+  </description>
 
   <build>
     <plugins>
@@ -121,6 +123,20 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>tools.vitruv.change.p2wrappers.javautils</artifactId>
       <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
