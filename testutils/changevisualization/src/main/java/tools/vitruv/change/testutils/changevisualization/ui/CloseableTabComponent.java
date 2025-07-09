@@ -103,6 +103,7 @@ public class CloseableTabComponent extends JPanel {
     }
 
     // we don't want to update UI for this button
+    @Override
     public void updateUI() {}
 
     // paint the cross
