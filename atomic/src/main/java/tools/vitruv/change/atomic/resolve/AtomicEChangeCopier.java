@@ -25,17 +25,17 @@ import tools.vitruv.change.atomic.root.RootFactory;
 
 /** A copier for {@link EChange}s that copies the change to a new type. */
 public class AtomicEChangeCopier {
-    
+
   private AtomicEChangeCopier() {
     throw new UnsupportedOperationException("Utility class should not be instantiated");
   }
-  
+
   /**
    * Copy the given change to a new type.
    *
    * @param <Source> The type of the change to copy.
    * @param <Target> The type of the copied change.
-   * @param change The change to copy.
+   * @param change   The change to copy.
    * @return The copied change.
    */
   public static <Source, Target> EChange<Target> copy(EChange<Source> change) {
@@ -104,8 +104,9 @@ public class AtomicEChangeCopier {
     return TypeInferringAtomicEChangeFactory.getInstance();
   }
 
-  private static <Source, Target, F extends EStructuralFeature>
-      UnsetFeature<Target, F> copyUnsetFeature(UnsetFeature<Source, F> change) {
+  private static <Source, Target, F extends EStructuralFeature> UnsetFeature<Target, F> copyUnsetFeature(
+      UnsetFeature<Source, F> change) {
+
     UnsetFeature<Target, F> result = FeatureFactory.eINSTANCE.createUnsetFeature();
     result.setAffectedFeature(change.getAffectedFeature());
     return result;
