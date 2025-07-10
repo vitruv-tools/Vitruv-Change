@@ -12,7 +12,7 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
-import tools.vitruv.change.testutils.changevisualization.ui.ChangesTab;
+import tools.vitruv.change.testutils.changevisualization.ui.TabColours;
 
 /**
  * Used by the {@link ChangeTree} to visualize individual nodes.
@@ -159,7 +159,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
     // if the node is highlighted, set the color after super.getTreeCell...
     // to overwrite any potential coloring of the superclasses implementation
     if (shouldHighlight(tree, row, value)) {
-      comp.setForeground(ChangesTab.HIGHLIGHT_COLOR);
+      comp.setForeground(TabColours.HIGHLIGHT_COLOR);
     }
 
     return comp;
