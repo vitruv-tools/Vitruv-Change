@@ -14,7 +14,7 @@
   <artifactId>tools.vitruv.change.testutils.metamodels</artifactId>
 
   <name>Vitruv Change Test Utilities Metamodels</name>
-  <description />
+  <description>Metamodels used in Testing Vitruv Change and Propagation Specifications.</description>
 
   <build>
     <plugins>

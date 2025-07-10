@@ -14,7 +14,7 @@
   <artifactId>tools.vitruv.change.testutils.integration</artifactId>
 
   <name>Vitruv Change Test Utilities for Integration</name>
-  <description />
+  <description>Testing Views and User Interaction Testing.</description>
 
   <build>
     <plugins>
