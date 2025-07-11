@@ -27,7 +27,7 @@ import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet;
  *
  * @author Andreas Loeffler
  */
-public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
+public class ChangeDataSetTable extends JPanel implements ChangeDataSetTableView, MouseWheelListener {
 
   /**
    * Needed for eclipse to stop warning about serialVersionIds. This feature will

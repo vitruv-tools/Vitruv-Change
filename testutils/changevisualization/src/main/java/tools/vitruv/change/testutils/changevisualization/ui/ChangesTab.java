@@ -8,6 +8,9 @@ import javax.swing.JSplitPane;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import org.apache.logging.log4j.core.config.builder.api.Component;
+
 import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
 import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet;
 import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSetGenerationListener;
@@ -16,8 +19,10 @@ import tools.vitruv.change.testutils.changevisualization.tree.ChangeTree;
 import tools.vitruv.change.testutils.changevisualization.tree.TabHighlighting;
 
 /**
- * The changes tab is responsible for displaying the tab of a single model. It storage the added
- * changeDataSets, holds the component performing the actual visualizuation and a ChangeDataSetTable
+ * The changes tab is responsible for displaying the tab of a single model. It
+ * storage the added
+ * changeDataSets, holds the component performing the actual visualizuation and
+ * a ChangeDataSetTable
  * to displaying general information.
  */
 public class ChangesTab extends JPanel
@@ -30,8 +35,11 @@ public class ChangesTab extends JPanel
   /** The ChangeComponent implementing the actual visualization. */
   private ChangeTree visualization;
 
-  /** The table responsible for the display of the general changeDataSet information. */
-  private ChangeDataSetTable changeDataSetTable;
+  /**
+   * The table responsible for the display of the general changeDataSet
+   * information.
+   */
+  private ChangeDataSetTableView changeDataSetTable;
 
   /** The affectedEOject id to highlight. */
   private String highlightID;
@@ -40,11 +48,15 @@ public class ChangesTab extends JPanel
 
   private final ModelRepositoryChanges displayedChanges;
 
+  private ChangeDataSetTableView createChangeDataSetTable() {
+    return new ChangeDataSetTable();
+  }
+
   /**
    * Creates a new ChangesTab.
    *
    * @param displayedChanges The changes to display
-   * @param loadedFromFile Whether the changes were loaded from a file
+   * @param loadedFromFile   Whether the changes were loaded from a file
    */
   public ChangesTab(ModelRepositoryChanges displayedChanges, boolean loadedFromFile) {
     super(new BorderLayout());
@@ -68,14 +80,14 @@ public class ChangesTab extends JPanel
   private void createUI() {
 
     // add changeDataSet selection
-    changeDataSetTable = new ChangeDataSetTable();
+    changeDataSetTable = createChangeDataSetTable();
     TitledBorder cdsTitleBorder = BorderFactory.createTitledBorder("Change Selection");
     cdsTitleBorder.setTitleFont(ChangeVisualizationUI.DEFAULT_TITLED_BORDER_FONT);
     JSplitPane panel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     changeDataSetTable.setBorder(
         BorderFactory.createCompoundBorder(
             BorderFactory.createEmptyBorder(5, 5, 5, 5), cdsTitleBorder));
-    panel.add(changeDataSetTable);
+    panel.add((ChangeDataSetTable) changeDataSetTable);
 
     changeDataSetTable.addListSelectionListener(this);
 
@@ -89,7 +101,8 @@ public class ChangesTab extends JPanel
 
   @Override
   public void valueChanged(ListSelectionEvent e) {
-    // Reacts to ListSelectionEvents of the changeDataSetTable and updates the visualization
+    // Reacts to ListSelectionEvents of the changeDataSetTable and updates the
+    // visualization
     if (e.getValueIsAdjusting()) {
       return;
     }
