@@ -178,7 +178,7 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
       return;
     }
     if (e.getWheelRotation() <= -1) {
-      float newSize = table.getFont().getSize() + 2;
+      float newSize = (float) table.getFont().getSize() + 2f;
       if (newSize > 30) {
         newSize = 30;
       }
