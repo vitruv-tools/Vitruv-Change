@@ -22,14 +22,14 @@ import tools.vitruv.change.interaction.builder.TextInputInteractionBuilder;
 import tools.vitruv.change.testutils.TestUserInteraction.ResultProvider;
 
 /** Tests the {@link TestUserInteraction} class. */
-class TestUserInteractionTest {
-    private static String dialogTitle = "test";
+public class TestUserInteractionTest {
+    private static final String DIALOG_TITLE = "test";
 
     private TestUserInteraction testInteraction;
 
     /** Sets up the test interaction for each test. */
     @BeforeEach
-    void setupInteraction() {
+    public void setupInteraction() {
         testInteraction = new TestUserInteraction();
     }
 
@@ -47,14 +47,14 @@ class TestUserInteractionTest {
         void provideAndRequireSingleTime() {
             String responseText = "response";
             testInteraction
-                    .onTextInput(description -> description.getTitle().equals(dialogTitle))
+                    .onTextInput(description -> description.getTitle().equals(DIALOG_TITLE))
                     .respondWith(responseText);
             UserInteractor userInteractor = generateInteractor(testInteraction);
             assertThat(
                     userInteractor
                             .getTextInputDialogBuilder()
-                            .message(dialogTitle)
-                            .title(dialogTitle)
+                            .message(DIALOG_TITLE)
+                            .title(DIALOG_TITLE)
                             .startInteraction(),
                     equalTo(responseText));
         }
@@ -64,20 +64,20 @@ class TestUserInteractionTest {
         void provideAndRequireMultipleTimes() {
             String responseText = "response";
             testInteraction
-                    .onTextInput(description -> description.getTitle().equals(dialogTitle))
+                    .onTextInput(description -> description.getTitle().equals(DIALOG_TITLE))
                     .always()
                     .respondWith(responseText);
             UserInteractor userInteractor = generateInteractor(testInteraction);
             userInteractor
                     .getTextInputDialogBuilder()
-                    .message(dialogTitle)
-                    .title(dialogTitle)
+                    .message(DIALOG_TITLE)
+                    .title(DIALOG_TITLE)
                     .startInteraction();
             assertThat(
                     userInteractor
                             .getTextInputDialogBuilder()
-                            .message(dialogTitle)
-                            .title(dialogTitle)
+                            .message(DIALOG_TITLE)
+                            .title(DIALOG_TITLE)
                             .startInteraction(),
                     equalTo(responseText));
         }
@@ -87,18 +87,18 @@ class TestUserInteractionTest {
         void provideSingleButRequireMultipleTimes() {
             String responseText = "response";
             testInteraction
-                    .onTextInput(description -> description.getTitle().equals(dialogTitle))
+                    .onTextInput(description -> description.getTitle().equals(DIALOG_TITLE))
                     .respondWith(responseText);
             UserInteractor userInteractor = generateInteractor(testInteraction);
             userInteractor
                     .getTextInputDialogBuilder()
-                    .message(dialogTitle)
-                    .title(dialogTitle)
+                    .message(DIALOG_TITLE)
+                    .title(DIALOG_TITLE)
                     .startInteraction();
             TextInputInteractionBuilder.OptionalSteps optionalSteps = userInteractor
                     .getTextInputDialogBuilder()
-                    .message(dialogTitle)
-                    .title(dialogTitle);
+                    .message(DIALOG_TITLE)
+                    .title(DIALOG_TITLE);
             assertThrows(
                     AssertionError.class,
                     () -> optionalSteps
@@ -113,14 +113,14 @@ class TestUserInteractionTest {
         @DisplayName("required and provided a single time")
         void provideAndRequireSingleTime() {
             testInteraction
-                    .onConfirmation(description -> description.getTitle().equals(dialogTitle))
+                    .onConfirmation(description -> description.getTitle().equals(DIALOG_TITLE))
                     .respondWith(true);
             UserInteractor userInteractor = generateInteractor(testInteraction);
             assertThat(
                     userInteractor
                             .getConfirmationDialogBuilder()
-                            .message(dialogTitle)
-                            .title(dialogTitle)
+                            .message(DIALOG_TITLE)
+                            .title(DIALOG_TITLE)
                             .startInteraction(),
                     equalTo(true));
         }
@@ -129,20 +129,20 @@ class TestUserInteractionTest {
         @DisplayName("required and provided multiple times")
         void provideAndRequireMultipleTimes() {
             testInteraction
-                    .onConfirmation(description -> description.getTitle().equals(dialogTitle))
+                    .onConfirmation(description -> description.getTitle().equals(DIALOG_TITLE))
                     .always()
                     .respondWith(true);
             UserInteractor userInteractor = generateInteractor(testInteraction);
             userInteractor
                     .getConfirmationDialogBuilder()
-                    .message(dialogTitle)
-                    .title(dialogTitle)
+                    .message(DIALOG_TITLE)
+                    .title(DIALOG_TITLE)
                     .startInteraction();
             assertThat(
                     userInteractor
                             .getConfirmationDialogBuilder()
-                            .message(dialogTitle)
-                            .title(dialogTitle)
+                            .message(DIALOG_TITLE)
+                            .title(DIALOG_TITLE)
                             .startInteraction(),
                     equalTo(true));
         }
@@ -151,18 +151,18 @@ class TestUserInteractionTest {
         @DisplayName("required multiple but provided a single time")
         void provideSingleButRequireMultipleTimes() {
             testInteraction
-                    .onConfirmation(description -> description.getTitle().equals(dialogTitle))
+                    .onConfirmation(description -> description.getTitle().equals(DIALOG_TITLE))
                     .respondWith(true);
             UserInteractor userInteractor = generateInteractor(testInteraction);
             userInteractor
                     .getConfirmationDialogBuilder()
-                    .message(dialogTitle)
-                    .title(dialogTitle)
+                    .message(DIALOG_TITLE)
+                    .title(DIALOG_TITLE)
                     .startInteraction();
             ConfirmationInteractionBuilder.OptionalSteps optionalSteps = userInteractor
                     .getConfirmationDialogBuilder()
-                    .message(dialogTitle)
-                    .title(dialogTitle);
+                    .message(DIALOG_TITLE)
+                    .title(DIALOG_TITLE);
             assertThrows(
                     AssertionError.class,
                     () -> optionalSteps
@@ -183,15 +183,15 @@ class TestUserInteractionTest {
                 List<String> choices = List.of("dummy", response);
                 testInteraction
                         .onMultipleChoiceSingleSelection(
-                                description -> description.getTitle().equals(dialogTitle))
+                                description -> description.getTitle().equals(DIALOG_TITLE))
                         .respondWith(response);
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 assertThat(
                         userInteractor
                                 .getSingleSelectionDialogBuilder()
-                                .message(dialogTitle)
+                                .message(DIALOG_TITLE)
                                 .choices(choices)
-                                .title(dialogTitle)
+                                .title(DIALOG_TITLE)
                                 .startInteraction(),
                         equalTo(choices.indexOf(response)));
             }
@@ -203,22 +203,22 @@ class TestUserInteractionTest {
                 List<String> choices = List.of("dummy", response);
                 testInteraction
                         .onMultipleChoiceSingleSelection(
-                                description -> description.getTitle().equals(dialogTitle))
+                                description -> description.getTitle().equals(DIALOG_TITLE))
                         .always()
                         .respondWith(response);
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 userInteractor
                         .getSingleSelectionDialogBuilder()
-                        .message(dialogTitle)
+                        .message(DIALOG_TITLE)
                         .choices(choices)
-                        .title(dialogTitle)
+                        .title(DIALOG_TITLE)
                         .startInteraction();
                 assertThat(
                         userInteractor
                                 .getSingleSelectionDialogBuilder()
-                                .message(dialogTitle)
+                                .message(DIALOG_TITLE)
                                 .choices(choices)
-                                .title(dialogTitle)
+                                .title(DIALOG_TITLE)
                                 .startInteraction(),
                         equalTo(choices.indexOf(response)));
             }
@@ -230,20 +230,20 @@ class TestUserInteractionTest {
                 List<String> choices = List.of("dummy", response);
                 testInteraction
                         .onMultipleChoiceSingleSelection(
-                                description -> description.getTitle().equals(dialogTitle))
+                                description -> description.getTitle().equals(DIALOG_TITLE))
                         .respondWith(response);
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 userInteractor
                         .getSingleSelectionDialogBuilder()
-                        .message(dialogTitle)
+                        .message(DIALOG_TITLE)
                         .choices(choices)
-                        .title(dialogTitle)
+                        .title(DIALOG_TITLE)
                         .startInteraction();
                 MultipleChoiceSelectionInteractionBuilder.OptionalSteps<Integer> optionalSteps = userInteractor
                         .getSingleSelectionDialogBuilder()
-                        .message(dialogTitle)
+                        .message(DIALOG_TITLE)
                         .choices(choices)
-                        .title(dialogTitle);
+                        .title(DIALOG_TITLE);
                 assertThrows(
                         AssertionError.class,
                         () -> optionalSteps.startInteraction());
@@ -260,15 +260,15 @@ class TestUserInteractionTest {
                 List<String> choices = List.of("firstDummy", "secondDummy");
                 testInteraction
                         .onMultipleChoiceSingleSelection(
-                                description -> description.getTitle().equals(dialogTitle))
+                                description -> description.getTitle().equals(DIALOG_TITLE))
                         .respondWithChoiceAt(selectedIndex);
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 assertThat(
                         userInteractor
                                 .getSingleSelectionDialogBuilder()
-                                .message(dialogTitle)
+                                .message(DIALOG_TITLE)
                                 .choices(choices)
-                                .title(dialogTitle)
+                                .title(DIALOG_TITLE)
                                 .startInteraction(),
                         equalTo(selectedIndex));
             }
@@ -280,22 +280,22 @@ class TestUserInteractionTest {
                 List<String> choices = List.of("firstDummy", "secondDummy");
                 testInteraction
                         .onMultipleChoiceSingleSelection(
-                                description -> description.getTitle().equals(dialogTitle))
+                                description -> description.getTitle().equals(DIALOG_TITLE))
                         .always()
                         .respondWithChoiceAt(selectedIndex);
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 userInteractor
                         .getSingleSelectionDialogBuilder()
-                        .message(dialogTitle)
+                        .message(DIALOG_TITLE)
                         .choices(choices)
-                        .title(dialogTitle)
+                        .title(DIALOG_TITLE)
                         .startInteraction();
                 assertThat(
                         userInteractor
                                 .getSingleSelectionDialogBuilder()
-                                .message(dialogTitle)
+                                .message(DIALOG_TITLE)
                                 .choices(choices)
-                                .title(dialogTitle)
+                                .title(DIALOG_TITLE)
                                 .startInteraction(),
                         equalTo(selectedIndex));
             }
@@ -307,20 +307,20 @@ class TestUserInteractionTest {
                 List<String> choices = List.of("firstDummy", "secondDummy");
                 testInteraction
                         .onMultipleChoiceSingleSelection(
-                                description -> description.getTitle().equals(dialogTitle))
+                                description -> description.getTitle().equals(DIALOG_TITLE))
                         .respondWithChoiceAt(selectedIndex);
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 userInteractor
                         .getSingleSelectionDialogBuilder()
-                        .message(dialogTitle)
+                        .message(DIALOG_TITLE)
                         .choices(choices)
-                        .title(dialogTitle)
+                        .title(DIALOG_TITLE)
                         .startInteraction();
                 MultipleChoiceSelectionInteractionBuilder.OptionalSteps<Integer> optionalSteps = userInteractor
                         .getSingleSelectionDialogBuilder()
-                        .message(dialogTitle)
+                        .message(DIALOG_TITLE)
                         .choices(choices)
-                        .title(dialogTitle);
+                        .title(DIALOG_TITLE);
                 assertThrows(
                         AssertionError.class,
                         () -> optionalSteps.startInteraction());
@@ -340,15 +340,15 @@ class TestUserInteractionTest {
                 List<String> choices = List.of("firstDummy", "secondDummy");
                 testInteraction
                         .onMultipleChoiceMultiSelection(
-                                description -> description.getTitle().equals(dialogTitle))
+                                description -> description.getTitle().equals(DIALOG_TITLE))
                         .respondWith(emptySet());
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 assertThat(
                         userInteractor
                                 .getMultiSelectionDialogBuilder()
-                                .message(dialogTitle)
+                                .message(DIALOG_TITLE)
                                 .choices(choices)
-                                .title(dialogTitle)
+                                .title(DIALOG_TITLE)
                                 .startInteraction(),
                         equalTo(emptyList()));
             }
@@ -359,22 +359,22 @@ class TestUserInteractionTest {
                 List<String> choices = List.of("firstDummy", "secondDummy");
                 testInteraction
                         .onMultipleChoiceMultiSelection(
-                                description -> description.getTitle().equals(dialogTitle))
+                                description -> description.getTitle().equals(DIALOG_TITLE))
                         .always()
                         .respondWith(new String[] {});
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 userInteractor
                         .getMultiSelectionDialogBuilder()
-                        .message(dialogTitle)
+                        .message(DIALOG_TITLE)
                         .choices(choices)
-                        .title(dialogTitle)
+                        .title(DIALOG_TITLE)
                         .startInteraction();
                 assertThat(
                         userInteractor
                                 .getMultiSelectionDialogBuilder()
-                                .message(dialogTitle)
+                                .message(DIALOG_TITLE)
                                 .choices(choices)
-                                .title(dialogTitle)
+                                .title(DIALOG_TITLE)
                                 .startInteraction(),
                         equalTo(emptyList()));
             }
@@ -385,20 +385,20 @@ class TestUserInteractionTest {
                 List<String> choices = List.of("firstDummy", "secondDummy");
                 testInteraction
                         .onMultipleChoiceMultiSelection(
-                                description -> description.getTitle().equals(dialogTitle))
+                                description -> description.getTitle().equals(DIALOG_TITLE))
                         .respondWith(new String[] {});
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 userInteractor
                         .getMultiSelectionDialogBuilder()
-                        .message(dialogTitle)
+                        .message(DIALOG_TITLE)
                         .choices(choices)
-                        .title(dialogTitle)
+                        .title(DIALOG_TITLE)
                         .startInteraction();
                 MultipleChoiceSelectionInteractionBuilder.OptionalSteps<Collection<Integer>> optionalSteps = userInteractor
                         .getMultiSelectionDialogBuilder()
-                        .message(dialogTitle)
+                        .message(DIALOG_TITLE)
                         .choices(choices)
-                        .title(dialogTitle);
+                        .title(DIALOG_TITLE);
                 assertThrows(
                         AssertionError.class,
                         () -> optionalSteps.startInteraction());
@@ -415,15 +415,15 @@ class TestUserInteractionTest {
                 List<String> choices = List.of("firstDummy", "secondDummy");
                 testInteraction
                         .onMultipleChoiceMultiSelection(
-                                description -> description.getTitle().equals(dialogTitle))
+                                description -> description.getTitle().equals(DIALOG_TITLE))
                         .respondWithChoicesAt(new int[] { response });
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 assertThat(
                         userInteractor
                                 .getMultiSelectionDialogBuilder()
-                                .message(dialogTitle)
+                                .message(DIALOG_TITLE)
                                 .choices(choices)
-                                .title(dialogTitle)
+                                .title(DIALOG_TITLE)
                                 .startInteraction(),
                         equalTo(List.of(response)));
             }
@@ -435,22 +435,22 @@ class TestUserInteractionTest {
                 List<String> choices = List.of("firstDummy", "secondDummy");
                 testInteraction
                         .onMultipleChoiceMultiSelection(
-                                description -> description.getTitle().equals(dialogTitle))
+                                description -> description.getTitle().equals(DIALOG_TITLE))
                         .always()
                         .respondWithChoicesAt(new int[] { response });
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 userInteractor
                         .getMultiSelectionDialogBuilder()
-                        .message(dialogTitle)
+                        .message(DIALOG_TITLE)
                         .choices(choices)
-                        .title(dialogTitle)
+                        .title(DIALOG_TITLE)
                         .startInteraction();
                 assertThat(
                         userInteractor
                                 .getMultiSelectionDialogBuilder()
-                                .message(dialogTitle)
+                                .message(DIALOG_TITLE)
                                 .choices(choices)
-                                .title(dialogTitle)
+                                .title(DIALOG_TITLE)
                                 .startInteraction(),
                         equalTo(List.of(response)));
             }
@@ -462,20 +462,20 @@ class TestUserInteractionTest {
                 List<String> choices = List.of("firstDummy", "secondDummy");
                 testInteraction
                         .onMultipleChoiceMultiSelection(
-                                description -> description.getTitle().equals(dialogTitle))
+                                description -> description.getTitle().equals(DIALOG_TITLE))
                         .respondWithChoicesAt(new int[] { response });
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 userInteractor
                         .getMultiSelectionDialogBuilder()
-                        .message(dialogTitle)
+                        .message(DIALOG_TITLE)
                         .choices(choices)
-                        .title(dialogTitle)
+                        .title(DIALOG_TITLE)
                         .startInteraction();
                 MultipleChoiceSelectionInteractionBuilder.OptionalSteps<Collection<Integer>> optionalSteps = userInteractor
                         .getMultiSelectionDialogBuilder()
-                        .message(dialogTitle)
+                        .message(DIALOG_TITLE)
                         .choices(choices)
-                        .title(dialogTitle);
+                        .title(DIALOG_TITLE);
                 assertThrows(
                         AssertionError.class,
                         () -> optionalSteps.startInteraction());
@@ -492,15 +492,15 @@ class TestUserInteractionTest {
                 List<String> choices = List.of("firstDummy", response);
                 testInteraction
                         .onMultipleChoiceMultiSelection(
-                                description -> description.getTitle().equals(dialogTitle))
+                                description -> description.getTitle().equals(DIALOG_TITLE))
                         .respondWith(new String[] { response });
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 assertThat(
                         userInteractor
                                 .getMultiSelectionDialogBuilder()
-                                .message(dialogTitle)
+                                .message(DIALOG_TITLE)
                                 .choices(choices)
-                                .title(dialogTitle)
+                                .title(DIALOG_TITLE)
                                 .startInteraction(),
                         equalTo(List.of(choices.indexOf(response))));
             }
@@ -512,22 +512,22 @@ class TestUserInteractionTest {
                 List<String> choices = List.of("dummy", response);
                 testInteraction
                         .onMultipleChoiceMultiSelection(
-                                description -> description.getTitle().equals(dialogTitle))
+                                description -> description.getTitle().equals(DIALOG_TITLE))
                         .always()
                         .respondWith(new String[] { response });
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 userInteractor
                         .getMultiSelectionDialogBuilder()
-                        .message(dialogTitle)
+                        .message(DIALOG_TITLE)
                         .choices(choices)
-                        .title(dialogTitle)
+                        .title(DIALOG_TITLE)
                         .startInteraction();
                 assertThat(
                         userInteractor
                                 .getMultiSelectionDialogBuilder()
-                                .message(dialogTitle)
+                                .message(DIALOG_TITLE)
                                 .choices(choices)
-                                .title(dialogTitle)
+                                .title(DIALOG_TITLE)
                                 .startInteraction(),
                         equalTo(List.of(choices.indexOf(response))));
             }
@@ -539,20 +539,20 @@ class TestUserInteractionTest {
                 List<String> choices = List.of("dummy", response);
                 testInteraction
                         .onMultipleChoiceMultiSelection(
-                                description -> description.getTitle().equals(dialogTitle))
+                                description -> description.getTitle().equals(DIALOG_TITLE))
                         .respondWith(new String[] { response });
                 UserInteractor userInteractor = generateInteractor(testInteraction);
                 userInteractor
                         .getMultiSelectionDialogBuilder()
-                        .message(dialogTitle)
+                        .message(DIALOG_TITLE)
                         .choices(choices)
-                        .title(dialogTitle)
+                        .title(DIALOG_TITLE)
                         .startInteraction();
                 MultipleChoiceSelectionInteractionBuilder.OptionalSteps<Collection<Integer>> optionalSteps = userInteractor
                         .getMultiSelectionDialogBuilder()
-                        .message(dialogTitle)
+                        .message(DIALOG_TITLE)
                         .choices(choices)
-                        .title(dialogTitle);
+                        .title(DIALOG_TITLE);
                 assertThrows(
                         AssertionError.class,
                         () -> optionalSteps.startInteraction());
