@@ -230,7 +230,7 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
    * @return Vector suitable for usage in a JTable
    */
   private Vector<Object> encode(ChangeDataSet changeDataSet) {
-    Vector<Object> line = new Vector<Object>();
+    Vector<Object> line = new Vector<>();
     line.add(changeDataSet.getChangeDataSetID());
     line.add(changeDataSet.getCreationTime());
     line.add(changeDataSet.getNrPropagatedChanges());
