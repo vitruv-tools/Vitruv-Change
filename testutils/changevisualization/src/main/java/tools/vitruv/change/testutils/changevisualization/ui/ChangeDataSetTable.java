@@ -21,7 +21,8 @@ import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
 import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet;
 
 /**
- * A ChangeDataSetTable displays all different ChangeDataSets of a given ChangesTab in a JTable with
+ * A ChangeDataSetTable displays all different ChangeDataSets of a given
+ * ChangesTab in a JTable with
  * their general information.
  *
  * @author Andreas Loeffler
@@ -29,7 +30,8 @@ import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet;
 public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
 
   /**
-   * Needed for eclipse to stop warning about serialVersionIds. This feature will never been used.
+   * Needed for eclipse to stop warning about serialVersionIds. This feature will
+   * never been used.
    */
   private static final long serialVersionUID = 1L;
 
@@ -86,7 +88,8 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
     Vector<Vector<?>> rowData = new Vector<Vector<?>>();
     return new DefaultTableModel(rowData, columnNames) {
       /**
-       * Needed for eclipse to stop warning about serialVersionIds. This feature will never been
+       * Needed for eclipse to stop warning about serialVersionIds. This feature will
+       * never been
        * used.
        */
       private static final long serialVersionUID = 1L;
@@ -95,7 +98,8 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
         return false; // Table is not editable
       }
 
-      // JTable uses this method to determine the default renderer editor for each cell
+      // JTable uses this method to determine the default renderer editor for each
+      // cell
       public Class<?> getColumnClass(int c) {
         switch (c) {
           case 2:
@@ -133,6 +137,7 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
 
           private final SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy - HH.mm.ss");
 
+          @Override
           protected void setValue(Object value) {
             setText((value == null) ? "" : df.format((Date) value));
           }
@@ -155,9 +160,8 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
             setForeground(table.getForeground());
 
             // Get default visualization
-            Component comp =
-                super.getTableCellRendererComponent(
-                    table, value, isSelected, hasFocus, row, column);
+            Component comp = super.getTableCellRendererComponent(
+                table, value, isSelected, hasFocus, row, column);
             // Just as an info: comp==this
 
             // if the String is highlighted, set the color after super.getTableCell...
@@ -222,7 +226,8 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
   }
 
   /**
-   * Creates a Vector to display in the table that shows the relevant information of a given
+   * Creates a Vector to display in the table that shows the relevant information
+   * of a given
    * changeDataSet.
    *
    * @param changeDataSet The changeDataSet to process
