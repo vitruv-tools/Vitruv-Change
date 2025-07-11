@@ -94,6 +94,7 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
        */
       private static final long serialVersionUID = 1L;
 
+      @Override
       public boolean isCellEditable(int row, int column) {
         return false; // Table is not editable
       }
