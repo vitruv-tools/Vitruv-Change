@@ -77,7 +77,7 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
   private TableModel createModel() {
 
     // Create the column namens
-    Vector<String> columnNames = new Vector<String>();
+    Vector<String> columnNames = new Vector<>();
     columnNames.add("ID");
     columnNames.add("Time");
     columnNames.add("Propagated changes");
@@ -85,7 +85,7 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
     columnNames.add("Consequential changes");
 
     // Create the data vector
-    Vector<Vector<?>> rowData = new Vector<Vector<?>>();
+    Vector<Vector<?>> rowData = new Vector<>();
     return new DefaultTableModel(rowData, columnNames) {
       /**
        * Needed for eclipse to stop warning about serialVersionIds. This feature will
