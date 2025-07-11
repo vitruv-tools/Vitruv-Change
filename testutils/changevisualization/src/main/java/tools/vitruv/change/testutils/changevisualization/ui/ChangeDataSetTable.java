@@ -163,9 +163,8 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
             // if the String is highlighted, set the color after super.getTableCell...
             // to overwrite any potential coloring of the superclasses implementation
             if (column == 0 && shouldHighlight((String) value)) {
-              comp.setForeground(ChangesTab.HIGHLIGHT_COLOR);
+              comp.setForeground(tools.vitruv.change.testutils.changevisualization.ui.ChangesTab.HIGHLIGHT_COLOR);
             }
-
             return comp;
           }
         });
