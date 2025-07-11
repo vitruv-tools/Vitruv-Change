@@ -102,9 +102,7 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
       // cell
       public Class<?> getColumnClass(int c) {
         switch (c) {
-          case 2:
-          case 3:
-          case 4:
+          case 2, 3, 4:
             return Integer.class;
           case 1:
             return Date.class;
