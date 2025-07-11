@@ -23,7 +23,7 @@ public abstract class ChangeComponent extends JPanel {
    *
    * @param layout The layout manager to use
    */
-  public ChangeComponent(LayoutManager layout) {
+  protected ChangeComponent(LayoutManager layout) {
     super(layout);
   }
 
