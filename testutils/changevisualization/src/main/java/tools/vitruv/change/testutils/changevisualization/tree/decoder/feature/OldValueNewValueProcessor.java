@@ -33,7 +33,7 @@ public class OldValueNewValueProcessor extends MultipleFeatureProcessor {
       List<Object> featureValues) {
 
     // Removes the old nodes consistently
-    List<String> featuresToRemove = new Vector<String>();
+    List<String> featuresToRemove = new Vector<>();
     featuresToRemove.add(OLD_VALUE_SF);
     featuresToRemove.add(NEW_VALUE_SF);
     removeNodes(featuresToRemove, parentNode, featureName2index, featureValues);
