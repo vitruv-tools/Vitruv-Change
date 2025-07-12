@@ -48,7 +48,7 @@ public abstract class AbstractChangeDecoder implements ChangeDecoder {
   protected static String extractAffectedEObjectName(
       Map<String, Object> structuralFeatures2values) {
     Object eObject = structuralFeatures2values.get("affectedEObject");
-    if (eObject == null || !(eObject instanceof EObject)) {
+    if (!(eObject instanceof EObject)) {
       return null;
     }
     return extractEObjectName((EObject) eObject);
