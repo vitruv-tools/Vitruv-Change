@@ -1,5 +1,7 @@
 package tools.vitruv.change.testutils.changevisualization.tree.decoder.feature;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -33,7 +35,7 @@ public class OldValueNewValueProcessor extends MultipleFeatureProcessor {
       List<Object> featureValues) {
 
     // Removes the old nodes consistently
-    List<String> featuresToRemove = new Vector<>();
+    List<String> featuresToRemove = new ArrayList<>();
     featuresToRemove.add(OLD_VALUE_SF);
     featuresToRemove.add(NEW_VALUE_SF);
     removeNodes(featuresToRemove, parentNode, featureName2index, featureValues);
