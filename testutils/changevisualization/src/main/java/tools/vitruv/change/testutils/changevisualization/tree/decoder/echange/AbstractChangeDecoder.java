@@ -1,5 +1,6 @@
 package tools.vitruv.change.testutils.changevisualization.tree.decoder.echange;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -130,7 +131,7 @@ public abstract class AbstractChangeDecoder implements ChangeDecoder {
    */
   private Map<String, Object> extractRequiredStructuralFeatures(EChange echange) {
     // Generate the result hashtable
-    Map<String, Object> structuralFeatures2values = new Hashtable<>();
+    Map<String, Object> structuralFeatures2values = new HashMap<>();
 
     // It is necessary to count null values, since they will not occur in the hashtable. Without
     // this information
