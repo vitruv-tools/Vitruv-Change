@@ -32,7 +32,7 @@ public abstract class AbstractChangeDecoder implements ChangeDecoder {
   protected static String extractAffectedFeatureName(
       Map<String, Object> structuralFeatures2values) {
     Object feature = structuralFeatures2values.get("affectedFeature");
-    if (feature == null || !(feature instanceof EObject)) {
+    if (!(feature instanceof EObject)) {
       return null;
     }
     feature = ModelHelper.getStructuralFeatureValue((EObject) feature, "name");
