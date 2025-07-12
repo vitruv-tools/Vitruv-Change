@@ -34,6 +34,6 @@ public class ObjectFeatureDecoder implements FeatureDecoder {
 
   @Override
   public String[][] decodeDetailedArray(Object obf) {
-    return null;
+    return new String[0][0];
   }
 }
