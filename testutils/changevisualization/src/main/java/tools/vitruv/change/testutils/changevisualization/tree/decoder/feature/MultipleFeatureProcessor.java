@@ -161,8 +161,9 @@ public abstract class MultipleFeatureProcessor {
   private List<String> getAllFeaturesWhoseIndicesAreDecreased(
       final int indexToRemove, Map<String, Integer> featureName2index) {
     List<String> featuresToDecrease = new Vector<>();
-    for (String feature : featureName2index.keySet()) {
-      int index = featureName2index.get(feature);
+    for (Map.Entry<String,Integer> entry : featureName2index.entrySet()) {
+      String feature = entry.getKey();
+      int index = entry.getValue();
       if (index > indexToRemove) {
         featuresToDecrease.add(feature);
       }
