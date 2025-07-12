@@ -72,7 +72,7 @@ public abstract class MultipleFeatureProcessor {
    *                          index)
    */
   public abstract void process(
-      EChange eChange,
+      EChange<?> eChange,
       DefaultMutableTreeNode node,
       Map<String, Integer> featureName2index,
       List<Object> featureValues);
