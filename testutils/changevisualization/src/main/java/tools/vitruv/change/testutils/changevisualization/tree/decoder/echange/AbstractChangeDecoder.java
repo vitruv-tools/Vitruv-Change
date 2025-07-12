@@ -130,7 +130,7 @@ public abstract class AbstractChangeDecoder implements ChangeDecoder {
    */
   private Map<String, Object> extractRequiredStructuralFeatures(EChange echange) {
     // Generate the result hashtable
-    Map<String, Object> structuralFeatures2values = new Hashtable<String, Object>();
+    Map<String, Object> structuralFeatures2values = new Hashtable<>();
 
     // It is necessary to count null values, since they will not occur in the hashtable. Without
     // this information
