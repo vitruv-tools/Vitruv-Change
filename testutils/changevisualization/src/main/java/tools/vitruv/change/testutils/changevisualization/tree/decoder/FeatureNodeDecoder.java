@@ -2,6 +2,7 @@ package tools.vitruv.change.testutils.changevisualization.tree.decoder;
 
 import java.awt.Component;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,7 +26,7 @@ public class FeatureNodeDecoder {
    * Decoders which extract the information to display from given Object of
    * specific classes.
    */
-  private static Map<Class<?>, FeatureDecoder> decoders = new Hashtable<>();
+  private static Map<Class<?>, FeatureDecoder> decoders = new HashMap<>();
 
   /** The fallback decoder suitable for java.lang.Object (==all java classes). */
   private static FeatureDecoder objectFallbackDecoder = new ObjectFeatureDecoder();
