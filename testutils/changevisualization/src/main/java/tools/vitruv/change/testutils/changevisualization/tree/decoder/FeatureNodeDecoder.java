@@ -3,6 +3,7 @@ package tools.vitruv.change.testutils.changevisualization.tree.decoder;
 import java.awt.Component;
 import java.util.Comparator;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -106,7 +107,7 @@ public class FeatureNodeDecoder {
    * @return All implemented classes for which decoders exist
    */
   private static List<Class<?>> determineCandidates(Object obj) {
-    List<Class<?>> candidates = new Vector<>();
+    List<Class<?>> candidates = new LinkedList<>();
     for (Class<?> cl : decoders.keySet()) {
       if (cl.isInstance(obj)) {
         candidates.add(cl);
