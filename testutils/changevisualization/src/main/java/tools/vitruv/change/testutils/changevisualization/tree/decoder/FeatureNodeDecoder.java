@@ -78,7 +78,7 @@ public class FeatureNodeDecoder {
         detailsUI = decoders.get(candidates.get(0)).decodeDetailedUI(obj);
       } else {
         // if multiple decoders fit, use the one that is most specific
-        Class<?> mostSpecificClass = determineMostSpecificClass(candidates, obj.getClass());
+        Class<?> mostSpecificClass = determineMostSpecificClass(candidates);
         if (mostSpecificClass == null) {
           // This case should not happen, use object as fallback
           value = objectFallbackDecoder.decodeSimple(obj);
@@ -124,7 +124,7 @@ public class FeatureNodeDecoder {
    * @param refCl      The class of the given object
    * @return The most specific class
    */
-  private static Class<?> determineMostSpecificClass(List<Class<?>> candidates, Class<?> refCl) {
+  private static Class<?> determineMostSpecificClass(List<Class<?>> candidates) {
     // All candidate classes must be in the superclass hierarchy of refCl.
     // Since java has no multiple inheritance and all candidates are different
     // classes
