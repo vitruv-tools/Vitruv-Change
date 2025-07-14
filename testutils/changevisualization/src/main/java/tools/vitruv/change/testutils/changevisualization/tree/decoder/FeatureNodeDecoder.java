@@ -25,7 +25,7 @@ public class FeatureNodeDecoder {
    * Decoders which extract the information to display from given Object of
    * specific classes.
    */
-  private static Map<Class<?>, FeatureDecoder> decoders = new Hashtable<Class<?>, FeatureDecoder>();
+  private static Map<Class<?>, FeatureDecoder> decoders = new Hashtable<>();
 
   /** The fallback decoder suitable for java.lang.Object (==all java classes). */
   private static FeatureDecoder objectFallbackDecoder = new ObjectFeatureDecoder();
