@@ -106,7 +106,7 @@ public class FeatureNodeDecoder {
    * @return All implemented classes for which decoders exist
    */
   private static List<Class<?>> determineCandidates(Object obj) {
-    List<Class<?>> candidates = new Vector<Class<?>>();
+    List<Class<?>> candidates = new Vector<>();
     for (Class<?> cl : decoders.keySet()) {
       if (cl.isInstance(obj)) {
         candidates.add(cl);
