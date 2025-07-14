@@ -22,6 +22,10 @@ import tools.vitruv.change.testutils.changevisualization.tree.decoder.feature.Ob
  * @author Andreas Loeffler
  */
 public class FeatureNodeDecoder {
+  private FeatureNodeDecoder() {
+    throw new UnsupportedOperationException("Utility class");
+  }
+
   /**
    * Decoders which extract the information to display from given Object of
    * specific classes.
