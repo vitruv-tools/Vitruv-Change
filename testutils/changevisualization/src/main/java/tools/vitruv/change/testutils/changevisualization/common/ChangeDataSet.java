@@ -24,7 +24,7 @@ public abstract class ChangeDataSet implements Serializable {
    *
    * @author Andreas Loeffler
    */
-  public static enum ChangeType {
+  public enum ChangeType {
     ORIGINAL_CHANGE,
     CONSEQUENTIAL_CHANGE
   }
