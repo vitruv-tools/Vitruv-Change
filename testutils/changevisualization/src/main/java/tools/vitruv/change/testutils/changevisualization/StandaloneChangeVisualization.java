@@ -6,7 +6,9 @@ package tools.vitruv.change.testutils.changevisualization;
  */
 public final class StandaloneChangeVisualization {
   /** No instances of StandaloneChangeVisualization are used. */
-  public StandaloneChangeVisualization() {}
+  public StandaloneChangeVisualization() {
+    // Intentionally empty: no instance needed; only used via static main method
+  }
 
   /**
    * Main method to an start offline instance of the ChangeVisualization.
