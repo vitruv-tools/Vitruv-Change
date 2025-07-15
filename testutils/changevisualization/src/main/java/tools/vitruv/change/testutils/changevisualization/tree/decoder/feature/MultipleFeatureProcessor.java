@@ -1,10 +1,13 @@
 package tools.vitruv.change.testutils.changevisualization.tree.decoder.feature;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.stream.Collectors;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.testutils.changevisualization.tree.FeatureNode;
@@ -49,13 +52,8 @@ public abstract class MultipleFeatureProcessor {
    * @return True if all required SFs exist
    */
   public boolean accepts(Set<String> structuralFeatureNames) {
-    for (String reqSf : requiredStructuralFeatures) {
-      if (!structuralFeatureNames.contains(reqSf)) {
-        return false;
-      }
-    }
-    // If all required sf are present, we reach this code and return true
-    return true;
+    return Arrays.stream(requiredStructuralFeatures)
+        .allMatch(structuralFeatureNames::contains);
   }
 
   /**
@@ -184,14 +182,10 @@ public abstract class MultipleFeatureProcessor {
    */
   private List<String> getAllFeaturesWhoseIndicesAreDecreased(
       final int indexToRemove, Map<String, Integer> featureName2index) {
-    List<String> featuresToDecrease = new LinkedList<>();
-    for (Map.Entry<String, Integer> entry : featureName2index.entrySet()) {
-      String feature = entry.getKey();
-      int index = entry.getValue();
-      if (index > indexToRemove) {
-        featuresToDecrease.add(feature);
-      }
-    }
-    return featuresToDecrease;
+
+    return featureName2index.entrySet().stream()
+        .filter(entry -> entry.getValue() > indexToRemove)
+        .map(Map.Entry::getKey)
+        .collect(Collectors.toList());
   }
 }
