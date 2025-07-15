@@ -14,7 +14,7 @@
   <artifactId>tools.vitruv.change.composite</artifactId>
 
   <name>Vitruv Composite Change Metamodel</name>
-  <description />
+  <description>Description, Recording, and Propagation of Composite Changes on V-SUMs.</description>
 
   <build>
     <plugins>
