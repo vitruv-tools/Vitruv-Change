@@ -16,6 +16,8 @@ public class ReplaceChangeDecoder extends AbstractChangeDecoder {
   protected static final int MAX_LENGTH = 40;
   private static final String OLD_VALUE = "oldValue";
   private static final String NEW_VALUE = "newValue";
+  private static final String AFFECTED_FEATURE = "affectedFeature";
+  private static final String AFFECTED_EOBJECT = "affectedEObject";
 
   /**
    * F
@@ -26,7 +28,7 @@ public class ReplaceChangeDecoder extends AbstractChangeDecoder {
    * @param eClassName The eclassName
    */
   public ReplaceChangeDecoder(String eClassName) {
-    super(eClassName, new String[] { OLD_VALUE, NEW_VALUE, "affectedFeature", "affectedEObject" });
+    super(eClassName, new String[] { OLD_VALUE, NEW_VALUE, AFFECTED_FEATURE, AFFECTED_EOBJECT });
   }
 
   @Override
@@ -38,8 +40,8 @@ public class ReplaceChangeDecoder extends AbstractChangeDecoder {
     }
 
     // affectedFeature and affectedEObject both must exist
-    if (!structuralFeatures2values.containsKey("affectedFeature")
-        || !structuralFeatures2values.containsKey("affectedEObject")) {
+    if (!structuralFeatures2values.containsKey(AFFECTED_FEATURE)
+        || !structuralFeatures2values.containsKey(AFFECTED_EOBJECT)) {
       return null;
     }
 
