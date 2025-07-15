@@ -12,7 +12,9 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
-import tools.vitruv.change.testutils.changevisualization.ui.TabColours;
+
+import tools.vitruv.change.testutils.changevisualization.ui.ChangesTab;
+
 
 /**
  * Used by the {@link ChangeTree} to visualize individual nodes.
