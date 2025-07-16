@@ -32,9 +32,7 @@ import tools.vitruv.change.atomic.root.RootFactory;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AtomicEChangeCopier {
 
-  private AtomicEChangeCopier() {
-    throw new UnsupportedOperationException("Utility class should not be instantiated");
-  }
+  
 
   /**
    * Copy the given change to a new type.
@@ -112,7 +110,7 @@ public class AtomicEChangeCopier {
               null, sourceReplaceSingleValuedEReference.getAffectedFeature(), null, null);
     } else if (change instanceof RemoveEReference<Source> sourceRemoveEReference) {
       return getChangeFactory()
-          .createRemoveReferenceChange(null, c.getAffectedFeature(), null, c.getIndex());
+          .createRemoveReferenceChange(null, sourceRemoveEReference.getAffectedFeature(), null, sourceRemoveEReference.getIndex());
     } else if (change instanceof CreateEObject<Source>) {
       return EobjectFactory.eINSTANCE.createCreateEObject();
     } else if (change instanceof DeleteEObject<Source>) {
