@@ -29,7 +29,7 @@ public class OldValueNewValueProcessor extends MultipleFeatureProcessor {
 
   @Override
   public void process(
-      final EChange eChange,
+      final EChange<?> eChange,
       final DefaultMutableTreeNode parentNode,
       Map<String, Integer> featureName2index,
       List<Object> featureValues) {
