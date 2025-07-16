@@ -8,13 +8,13 @@
   <parent>
     <groupId>tools.vitruv</groupId>
     <artifactId>tools.vitruv.change</artifactId>
-    <version>3.2.1-SNAPSHOT</version>
+    <version>3.2.3-SNAPSHOT</version>
   </parent>
 
   <artifactId>tools.vitruv.change.interaction</artifactId>
 
   <name>Vitruv Change Interactions</name>
-  <description />
+  <description>Tooling for Requesting User Input during Change Propagation.</description>
 
   <build>
     <plugins>

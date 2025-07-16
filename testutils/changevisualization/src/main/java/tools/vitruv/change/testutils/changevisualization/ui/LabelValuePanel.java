@@ -5,6 +5,7 @@ import java.awt.GridLayout;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 import javax.swing.JLabel;
@@ -12,11 +13,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.SwingConstants;
 import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
 
 /**
- * Displays a String array in a scrollable UI. The string array must be of size [x][2]. The values
- * at [x][0] are used as label text on the left, [x][1] are displayed in textFields on the right.
+ * Displays a String array in a scrollable UI. The string array must be of size
+ * [x][2]. The values
+ * at [x][0] are used as label text on the left, [x][1] are displayed in
+ * textFields on the right.
  * The usual strg+mousewheel zoom behavior is implemented.
  *
  * @author Andreas Loeffler
@@ -27,58 +31,56 @@ public class LabelValuePanel extends JScrollPane {
   private static final long serialVersionUID = 1L;
 
   /** Implements the usual strg + mousewheel zoom behaviour. */
-  private final MouseWheelListener mwl =
-      new MouseWheelListener() {
-        @Override
-        public void mouseWheelMoved(MouseWheelEvent e) {
-          // Implements the usual strg + mousewheel behaviour for zooming
-          if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == 0) {
-            return;
-          }
-          if (e.getWheelRotation() <= -1) {
-            for (JLabel label : getAllLabels()) {
-              float newSize = (float) label.getFont().getSize() + 2;
-              if (newSize > 30) {
-                newSize = 30;
-              }
-              label.setFont(label.getFont().deriveFont(newSize));
-            }
-            for (JTextField field : getAllFields()) {
-              float newSize = (float) field.getFont().getSize() + 2;
-              if (newSize > 30) {
-                newSize = 30;
-              }
-              field.setFont(field.getFont().deriveFont(newSize));
-            }
-          } else if (e.getWheelRotation() >= 1) {
-            for (JLabel label : getAllLabels()) {
-              float newSize = (float) label.getFont().getSize() - 2;
-              if (newSize < 5) {
-                newSize = 5;
-              }
-              label.setFont(label.getFont().deriveFont(newSize));
-            }
-            for (JTextField field : getAllFields()) {
-              float newSize = (float) field.getFont().getSize() - 2;
-              if (newSize < 5) {
-                newSize = 5;
-              }
-              field.setFont(field.getFont().deriveFont(newSize));
-            }
-          }
+  private transient final MouseWheelListener mwl = e -> {
+    // Implements the usual strg + mousewheel behaviour for zooming
+    if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == 0) {
+      return;
+    }
+    if (e.getWheelRotation() <= -1) {
+      for (JLabel label : getAllLabels()) {
+        float newSize = (float) label.getFont().getSize() + 2;
+        if (newSize > 30) {
+          newSize = 30;
         }
-      };
+        label.setFont(label.getFont().deriveFont(newSize));
+      }
+      for (JTextField field : getAllFields()) {
+        float newSize = (float) field.getFont().getSize() + 2;
+        if (newSize > 30) {
+          newSize = 30;
+        }
+        field.setFont(field.getFont().deriveFont(newSize));
+      }
+    } else if (e.getWheelRotation() >= 1) {
+      for (JLabel label : getAllLabels()) {
+        float newSize = (float) label.getFont().getSize() - 2;
+        if (newSize < 5) {
+          newSize = 5;
+        }
+        label.setFont(label.getFont().deriveFont(newSize));
+      }
+      for (JTextField field : getAllFields()) {
+        float newSize = (float) field.getFont().getSize() - 2;
+        if (newSize < 5) {
+          newSize = 5;
+        }
+        field.setFont(field.getFont().deriveFont(newSize));
+      }
+    }
+  };
 
   /** List of all added JTextFields used for mouse wheel zooming. */
-  private List<JTextField> allFields = new Vector<JTextField>();
+  private List<JTextField> allFields = new ArrayList<>();
 
   /** List of all added JLabels used for mouse wheel zooming. */
-  private List<JLabel> allLabels = new Vector<JLabel>();
+  private List<JLabel> allLabels = new ArrayList<>();
 
   /**
    * Constructs an LabelValuePanel visualizing a string array.
    *
-   * <p>The string array must be of size [x][2]. The values at [x][0] are used as label text on the
+   * <p>
+   * The string array must be of size [x][2]. The values at [x][0] are used as
+   * label text on the
    * left, [x][1] are displayed in textFields on the right.
    *
    * @param array The array to visualize
@@ -124,14 +126,14 @@ public class LabelValuePanel extends JScrollPane {
   /**
    * Create a line in the center and left panel with the given texts.
    *
-   * @param center The center panel
-   * @param left The left panel
+   * @param center    The center panel
+   * @param left      The left panel
    * @param labelText The text for the label
    * @param fieldText The text for the field
    */
   private void createLine(JPanel center, JPanel left, String labelText, String fieldText) {
     // Create the label
-    JLabel label = new JLabel(labelText, JLabel.RIGHT);
+    JLabel label = new JLabel(labelText, SwingConstants.RIGHT);
     label.setFont(ChangeVisualizationUI.DEFAULT_LABEL_FONT);
     allLabels.add(label);
 
