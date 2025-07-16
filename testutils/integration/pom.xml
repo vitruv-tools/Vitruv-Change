@@ -8,13 +8,13 @@
   <parent>
     <groupId>tools.vitruv</groupId>
     <artifactId>tools.vitruv.change.testutils</artifactId>
-    <version>3.2.0-SNAPSHOT</version>
+    <version>3.2.3-SNAPSHOT</version>
   </parent>
 
   <artifactId>tools.vitruv.change.testutils.integration</artifactId>
 
   <name>Vitruv Change Test Utilities for Integration</name>
-  <description />
+  <description>Testing Views and User Interaction Testing.</description>
 
   <build>
     <plugins>

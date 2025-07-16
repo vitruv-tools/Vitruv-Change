@@ -8,13 +8,13 @@
   <parent>
     <groupId>tools.vitruv</groupId>
     <artifactId>tools.vitruv.change.testutils</artifactId>
-    <version>3.2.0-SNAPSHOT</version>
+    <version>3.2.3-SNAPSHOT</version>
   </parent>
 
   <artifactId>tools.vitruv.change.testutils.metamodels</artifactId>
 
   <name>Vitruv Change Test Utilities Metamodels</name>
-  <description />
+  <description>Metamodels used in Testing Vitruv Change and Propagation Specifications.</description>
 
   <build>
     <plugins>
