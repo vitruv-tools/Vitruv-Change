@@ -12,7 +12,9 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
-import tools.vitruv.change.testutils.changevisualization.ui.TabColours;
+
+import tools.vitruv.change.testutils.changevisualization.ui.ChangesTab;
+
 
 /**
  * Used by the {@link ChangeTree} to visualize individual nodes.
@@ -38,7 +40,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
    * @param color The color for the icon
    * @return The generated icon
    */
-  private static Icon createIcon(boolean open, Color color) {
+  private static Icon createIcon(Color color) {
     // open/close is not used so far
     Image image = new BufferedImage(16, 18, BufferedImage.TYPE_INT_ARGB);
     Graphics2D g2d = (Graphics2D) image.getGraphics();
@@ -46,25 +48,24 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
     g2d.fillRoundRect(2, 2, 12, 14, 4, 4);
     g2d.setColor(Color.BLACK);
     g2d.drawRoundRect(2, 2, 12, 14, 4, 4);
-    Icon icon = new ImageIcon(image);
-    return icon;
+    return new ImageIcon(image);
   }
 
   // Icons visualizing the open state for the echange types
   // These icons are also used in the toolbar and are therefore public
-  public static final Icon EXISTENCE_ECHANGE_OPEN_ICON = createIcon(true, EXISTENCE_ECHANGE_COLOR);
-  public static final Icon REFERENCE_ECHANGE_OPEN_ICON = createIcon(true, REFERENCE_ECHANGE_COLOR);
-  public static final Icon ATTRIBUTE_ECHANGE_OPEN_ICON = createIcon(true, ATTRIBUTE_ECHANGE_COLOR);
-  public static final Icon ROOT_ECHANGE_OPEN_ICON = createIcon(true, ROOT_ECHANGE_COLOR);
+  public static final Icon EXISTENCE_ECHANGE_OPEN_ICON = createIcon(EXISTENCE_ECHANGE_COLOR);
+  public static final Icon REFERENCE_ECHANGE_OPEN_ICON = createIcon(REFERENCE_ECHANGE_COLOR);
+  public static final Icon ATTRIBUTE_ECHANGE_OPEN_ICON = createIcon(ATTRIBUTE_ECHANGE_COLOR);
+  public static final Icon ROOT_ECHANGE_OPEN_ICON = createIcon(ROOT_ECHANGE_COLOR);
 
   // Icons visualizing the closed state for the echange types
   private static final Icon EXISTENCE_ECHANGE_CLOSED_ICON =
-      createIcon(false, EXISTENCE_ECHANGE_COLOR);
+      createIcon(EXISTENCE_ECHANGE_COLOR);
   private static final Icon REFERENCE_ECHANGE_CLOSED_ICON =
-      createIcon(false, REFERENCE_ECHANGE_COLOR);
+      createIcon(REFERENCE_ECHANGE_COLOR);
   private static final Icon ATTRIBUTE_ECHANGE_CLOSED_ICON =
-      createIcon(false, ATTRIBUTE_ECHANGE_COLOR);
-  private static final Icon ROOT_ECHANGE_CLOSED_ICON = createIcon(false, ROOT_ECHANGE_COLOR);
+      createIcon(ATTRIBUTE_ECHANGE_COLOR);
+  private static final Icon ROOT_ECHANGE_CLOSED_ICON = createIcon(ROOT_ECHANGE_COLOR);
 
   /**
    * Returns true if any sibling of the given node should be highlighted.
@@ -78,34 +79,40 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
    * @return True if we should be highlighted
    */
   public static boolean shouldHighlightNode(String highlightID, DefaultMutableTreeNode node) {
-    Enumeration<TreeNode> children = node.breadthFirstEnumeration();
-    while (children.hasMoreElements()) {
-      TreeNode child = children.nextElement();
-      if (child instanceof DefaultMutableTreeNode) {
-        DefaultMutableTreeNode mutableChild = (DefaultMutableTreeNode) child;
-        if (mutableChild.getUserObject() != null) {
-          if (mutableChild.getUserObject() instanceof ChangeNode) {
-            if (highlightID.equals(((ChangeNode) mutableChild.getUserObject()).getEObjectID())) {
-              return true;
-            }
-          } else if (mutableChild.getUserObject() instanceof FeatureNode) {
-            if (mutableChild.getUserObject().toString().indexOf(highlightID) != -1) {
-              return true;
-            }
+      Enumeration<TreeNode> children = node.breadthFirstEnumeration();
+
+      while (children.hasMoreElements()) {
+          TreeNode child = children.nextElement();
+
+          if (!(child instanceof DefaultMutableTreeNode mutableChild)) {
+              continue;
           }
-        }
+
+          Object userObject = mutableChild.getUserObject();
+          if (userObject == null) {
+              continue;
+          }
+
+          if (userObject instanceof ChangeNode changeNode) {
+              if (highlightID.equals(changeNode.getEObjectID())) {
+                  return true;
+              }
+          } else if (userObject instanceof FeatureNode && userObject.toString().contains(highlightID)) {
+              return true;
+          }
       }
-    }
-    return false;
+
+      return false;
   }
 
+
   /** The default opened icon. */
-  private Icon defaultOpenIcon;
+  private transient Icon defaultOpenIcon;
 
   /** The default closed icon. */
-  private Icon defaultClosedIcon;
+  private transient Icon defaultClosedIcon;
 
-  private TabHighlighting tabHighlighting;
+  private transient TabHighlighting tabHighlighting;
 
   private boolean isActive = false;
 
@@ -149,7 +156,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
     }
 
     // Change icon if necessary
-    updateIcons(tree, (DefaultMutableTreeNode) value, sel, expanded, leaf, row, hasFocus);
+    updateIcons((DefaultMutableTreeNode) value);
 
     // Get default visualization
     Component comp =
@@ -158,8 +165,8 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
 
     // if the node is highlighted, set the color after super.getTreeCell...
     // to overwrite any potential coloring of the superclasses implementation
-    if (shouldHighlight(tree, row, value)) {
-      comp.setForeground(TabColours.HIGHLIGHT_COLOR);
+    if (shouldHighlight(value)) {
+      comp.setForeground(ChangesTab.HIGHLIGHT_COLOR);
     }
 
     return comp;
@@ -176,22 +183,13 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
    * @param row The row in the jtree's model
    * @param hasFocus Do we have focus
    */
-  private void updateIcons(
-      JTree tree,
-      DefaultMutableTreeNode node,
-      boolean sel,
-      boolean expanded,
-      boolean leaf,
-      int row,
-      boolean hasFocus) {
+  private void updateIcons(DefaultMutableTreeNode node) {
     if (node == null || node.getUserObject() == null) {
       return; // Use default icons
     }
 
     Object userObject = node.getUserObject();
-
-    if (userObject instanceof ChangeNode) {
-      ChangeNode changeNode = (ChangeNode) userObject;
+    if (userObject instanceof ChangeNode changeNode){
       switch (changeNode.getChangeClass()) {
         case REFERENCE_ECHANGE:
           setOpenIcon(REFERENCE_ECHANGE_OPEN_ICON);
@@ -229,7 +227,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
    * @param value The value visualized (usually the tree-node)
    * @return true if we should be highlighted
    */
-  private boolean shouldHighlight(JTree tree, int row, Object value) {
+  private boolean shouldHighlight(Object value) {
     if (!isActive) {
       return false;
     }
@@ -240,7 +238,7 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
     }
 
     // We dont highlight null values or those who are not defaultMutableTreeNodes
-    if (value == null || !(value instanceof DefaultMutableTreeNode)) {
+    if (!(value instanceof DefaultMutableTreeNode)) {
       return false;
     }
 
@@ -257,8 +255,8 @@ public class ChangeTreeNodeRenderer extends DefaultTreeCellRenderer {
     }
 
     // It should be highlighted if it is a ChangeNode with the highlightID
-    if (userObject instanceof ChangeNode) {
-      return highlightID.equals(((ChangeNode) userObject).getEObjectID());
+    if (userObject instanceof ChangeNode changenode) {
+      return highlightID.equals(changenode.getEObjectID());
     } else {
       // In this case we are a rootnode, a propagatedChange or original/consequential
       // Change nodes
