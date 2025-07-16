@@ -8,13 +8,13 @@
   <parent>
     <groupId>tools.vitruv</groupId>
     <artifactId>tools.vitruv.change</artifactId>
-    <version>3.2.1-SNAPSHOT</version>
+    <version>3.2.3-SNAPSHOT</version>
   </parent>
 
   <artifactId>tools.vitruv.change.utils</artifactId>
 
   <name>Vitruv Change Utilities</name>
-  <description />
+  <description>Common Utilities used across Modules in Vitruv-Change.</description>
 
   <build>
     <plugins>
