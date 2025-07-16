@@ -2,7 +2,9 @@ package tools.vitruv.change.testutils.changevisualization.tree.decoder;
 
 import java.awt.Component;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -13,14 +15,23 @@ import tools.vitruv.change.testutils.changevisualization.tree.decoder.feature.Fe
 import tools.vitruv.change.testutils.changevisualization.tree.decoder.feature.ObjectFeatureDecoder;
 
 /**
- * Helper class to generate {@link FeatureNode}s from eChanges. Central place to register new {@link
+ * Helper class to generate {@link FeatureNode}s from eChanges. Central place to
+ * register new {@link
  * FeatureDecoder}.
  *
  * @author Andreas Loeffler
  */
 public class FeatureNodeDecoder {
-  /** Decoders which extract the information to display from given Object of specific classes. */
-  private static Map<Class<?>, FeatureDecoder> decoders = new Hashtable<Class<?>, FeatureDecoder>();
+
+  private FeatureNodeDecoder() {
+    throw new UnsupportedOperationException("Utility class");
+  }
+
+  /**
+   * Decoders which extract the information to display from given Object of
+   * specific classes.
+   */
+  private static Map<Class<?>, FeatureDecoder> decoders = new HashMap<>();
 
   /** The fallback decoder suitable for java.lang.Object (==all java classes). */
   private static FeatureDecoder objectFallbackDecoder = new ObjectFeatureDecoder();
@@ -34,7 +45,7 @@ public class FeatureNodeDecoder {
   /**
    * Can be called to register new decoders for given classes.
    *
-   * @param cl The class to decode (no interfaces)
+   * @param cl  The class to decode (no interfaces)
    * @param dec The decoder used to decode objects of the class
    */
   public static void registerFeatureDecoder(Class<?> cl, FeatureDecoder dec) {
@@ -45,7 +56,7 @@ public class FeatureNodeDecoder {
    * Constructs a |@link FeatureNode} for a given {@link EStructuralFeature}.
    *
    * @param feature The structural feature, not null
-   * @param obj The value of the feature, not null
+   * @param obj     The value of the feature, not null
    * @return The featureNode representing the feature
    */
   public static FeatureNode generateFeatureNode(EStructuralFeature feature, Object obj) {
@@ -74,7 +85,7 @@ public class FeatureNodeDecoder {
         detailsUI = decoders.get(candidates.get(0)).decodeDetailedUI(obj);
       } else {
         // if multiple decoders fit, use the one that is most specific
-        Class<?> mostSpecificClass = determineMostSpecificClass(candidates, obj.getClass());
+        Class<?> mostSpecificClass = determineMostSpecificClass(candidates);
         if (mostSpecificClass == null) {
           // This case should not happen, use object as fallback
           value = objectFallbackDecoder.decodeSimple(obj);
@@ -95,13 +106,14 @@ public class FeatureNodeDecoder {
   }
 
   /**
-   * Determine all classes for which decoders exist and the given object is an instance of.
+   * Determine all classes for which decoders exist and the given object is an
+   * instance of.
    *
    * @param obj The given Object
    * @return All implemented classes for which decoders exist
    */
   private static List<Class<?>> determineCandidates(Object obj) {
-    List<Class<?>> candidates = new Vector<Class<?>>();
+    List<Class<?>> candidates = new LinkedList<>();
     for (Class<?> cl : decoders.keySet()) {
       if (cl.isInstance(obj)) {
         candidates.add(cl);
@@ -111,35 +123,27 @@ public class FeatureNodeDecoder {
   }
 
   /**
-   * Walks the class hierarchy of refCl and returns the first found occurrence of the class or a
+   * Walks the class hierarchy of refCl and returns the first found occurrence of
+   * the class or a
    * parent within candidates.
    *
    * @param candidates The candidate classes the given object is an instance of
-   * @param refCl The class of the given object
+   * @param refCl      The class of the given object
    * @return The most specific class
    */
-  private static Class<?> determineMostSpecificClass(List<Class<?>> candidates, Class<?> refCl) {
+  private static Class<?> determineMostSpecificClass(List<Class<?>> candidates) {
     // All candidate classes must be in the superclass hierarchy of refCl.
-    // Since java has no multiple inheritance and all candidates are different classes
+    // Since java has no multiple inheritance and all candidates are different
+    // classes
     // they also have to be in an ordered hierarchy.
-    // Update : This is not true for interfaces. One cannot decide which interface to prefer if
-    //         multiple interfaces are implemented. This implementation has no defined order in this
+    // Update : This is not true for interfaces. One cannot decide which interface
+    // to prefer if
+    // multiple interfaces are implemented. This implementation has no defined order
+    // in this
     // case.
-    //         This has to be implemented in a deterministic way if someday necessary
-    java.util.Collections.sort(
-        candidates,
-        new Comparator<Class<?>>() {
-          @Override
-          public int compare(Class<?> o1, Class<?> o2) {
-            if (o1.isInstance(o2)) {
-              return 1;
-            } else if (o2.isInstance(o1)) {
-              return -1;
-            } else {
-              return 0;
-            }
-          }
-        });
+    // This has to be implemented in a deterministic way if someday necessary
+    Comparator<Class<?>> comparator = (o1, o2) -> o1.isInstance(o2) ? 1 : (o2.isInstance(o1) ? -1 : 0);
+    java.util.Collections.sort(candidates, comparator);
     return candidates.get(0);
   }
 }

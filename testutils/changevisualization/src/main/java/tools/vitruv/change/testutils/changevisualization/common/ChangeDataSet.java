@@ -3,6 +3,7 @@ package tools.vitruv.change.testutils.changevisualization.common;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ public abstract class ChangeDataSet implements Serializable {
    *
    * @author Andreas Loeffler
    */
-  public static enum ChangeType {
+  public enum ChangeType {
     ORIGINAL_CHANGE,
     CONSEQUENTIAL_CHANGE
   }
@@ -33,7 +34,7 @@ public abstract class ChangeDataSet implements Serializable {
    * storage point, but does not use these information directly. It only provides a common usable
    * access to it.
    */
-  private final Map<String, Object> userInfos = new Hashtable<String, Object>();
+  private final Map<String, Object> userInfos = new HashMap<>();
 
   /** The time this changeDataSet is created. */
   private final Date creationTime;
