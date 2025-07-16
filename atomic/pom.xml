@@ -14,7 +14,9 @@
   <artifactId>tools.vitruv.change.atomic</artifactId>
 
   <name>Vitruv Atomic Change Metamodel</name>
-  <description />
+  <description>
+    Metamodel, Resolution and Application of Atomic Changes
+  </description>
 
   <build>
     <plugins>
