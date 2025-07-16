@@ -14,7 +14,7 @@
   <artifactId>tools.vitruv.change.testutils.core</artifactId>
 
   <name>Vitruv Change Test Utilities Core</name>
-  <description />
+  <description>Common Utilities for Defining Tests using Change and Propagation Specifications.</description>
 
   <build>
     <plugins>

@@ -27,6 +27,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import lombok.Getter;
 import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
 import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet;
 import tools.vitruv.change.testutils.changevisualization.ui.ChangeComponent;
@@ -37,6 +38,7 @@ import tools.vitruv.change.testutils.changevisualization.ui.LabelValuePanel;
  *
  * @author Andreas Loeffler
  */
+@Getter
 public class ChangeTree extends ChangeComponent {
 
   /**
@@ -161,7 +163,7 @@ public class ChangeTree extends ChangeComponent {
     createUI();
     this.changeEventTreeRenderer = new ChangeTreeNodeRenderer(tabHighlighting);
 
-    // Add listeners and renderes to the treeUI and scrollpane
+    // Add listeners and renderers to the tree UI and scroll pane.
     ml = new TreeMouseListener(tabHighlighting);
     treeUI.addMouseListener(ml);
 
@@ -170,25 +172,25 @@ public class ChangeTree extends ChangeComponent {
     treeUI.setCellRenderer(changeEventTreeRenderer);
 
     treeScroller.addMouseWheelListener(
-        e -> {
-          // Implements the usual strg + mousewheel behaviour for zooming
-          if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == 0) {
+        mouseWheelEvent -> {
+          // Implements the usual Ctrl + mouse wheel behavior for zooming.
+          if ((mouseWheelEvent.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == 0) {
             return;
           }
-          if (e.getWheelRotation() <= -1) {
-            float newSize = treeUI.getFont().getSize() + 2;
-            if (newSize > 30) {
-              newSize = 30;
+          if (mouseWheelEvent.getWheelRotation() <= -1) {
+            float newSize = treeUI.getFont().getSize() + 2.0f;
+            if (newSize > 30f) {
+              newSize = 30f;
             }
             treeUI.setFont(treeUI.getFont().deriveFont(newSize));
-            treeUI.setRowHeight((int) (newSize + 10));
-          } else if (e.getWheelRotation() >= 1) {
-            float newSize = treeUI.getFont().getSize() - 2;
-            if (newSize < 5) {
-              newSize = 5;
+            treeUI.setRowHeight((int) (newSize + 10f));
+          } else if (mouseWheelEvent.getWheelRotation() >= 1) {
+            float newSize = treeUI.getFont().getSize() - 2f;
+            if (newSize < 5f) {
+              newSize = 5f;
             }
             treeUI.setFont(treeUI.getFont().deriveFont(newSize));
-            treeUI.setRowHeight((int) (newSize + 10));
+            treeUI.setRowHeight((int) (newSize + 10f));
           }
         });
   }
