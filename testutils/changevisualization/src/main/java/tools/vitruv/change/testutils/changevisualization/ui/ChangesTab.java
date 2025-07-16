@@ -7,9 +7,6 @@ import javax.swing.JSplitPane;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import org.apache.logging.log4j.core.config.builder.api.Component;
-
 import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
 import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet;
 import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSetGenerationListener;
@@ -44,10 +41,6 @@ public class ChangesTab extends JPanel
 
   private final ModelRepositoryChanges displayedChanges;
 
-  private ChangeDataSetTableView createChangeDataSetTable() {
-    return new ChangeDataSetTable();
-  }
-
   /**
    * Creates a new ChangesTab.
    *
@@ -76,7 +69,7 @@ public class ChangesTab extends JPanel
   private void createUI() {
 
     // add changeDataSet selection
-    changeDataSetTable = createChangeDataSetTable();
+    changeDataSetTable = new ChangeDataSetTable();
     TitledBorder cdsTitleBorder = BorderFactory.createTitledBorder("Change Selection");
     cdsTitleBorder.setTitleFont(ChangeVisualizationUI.DEFAULT_TITLED_BORDER_FONT);
     JSplitPane panel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);

@@ -167,7 +167,7 @@ public class ChangeDataSetTable extends JPanel implements ChangeDataSetTableView
             // if the String is highlighted, set the color after super.getTableCell...
             // to overwrite any potential coloring of the superclasses implementation
             if (column == 0 && shouldHighlight((String) value)) {
-              comp.setForeground(tools.vitruv.change.testutils.changevisualization.ui.ChangesTab.HIGHLIGHT_COLOR);
+              comp.setForeground(TabColours.HIGHLIGHT_COLOR);
             }
             return comp;
           }
