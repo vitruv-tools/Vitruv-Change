@@ -14,7 +14,9 @@
   <artifactId>tools.vitruv.change.correspondence</artifactId>
 
   <name>Vitruv Correspondence Metamodel</name>
-  <description />
+  <description>
+    Management of Correspondences between Pairs of Model Elements across Different Models.
+  </description>
 
   <build>
     <plugins>

@@ -14,7 +14,7 @@
   <artifactId>tools.vitruv.change.interaction</artifactId>
 
   <name>Vitruv Change Interactions</name>
-  <description />
+  <description>Tooling for Requesting User Input during Change Propagation.</description>
 
   <build>
     <plugins>
