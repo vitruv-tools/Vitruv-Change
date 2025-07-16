@@ -32,7 +32,6 @@ import tools.vitruv.change.atomic.root.RootFactory;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AtomicEChangeCopier {
 
-  
 
   /**
    * Copy the given change to a new type.
