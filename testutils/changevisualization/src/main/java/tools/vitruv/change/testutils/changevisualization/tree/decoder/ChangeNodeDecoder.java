@@ -1,6 +1,6 @@
 package tools.vitruv.change.testutils.changevisualization.tree.decoder;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.atomic.EChange;
@@ -20,15 +20,19 @@ import tools.vitruv.change.testutils.changevisualization.tree.decoder.echange.Re
 import tools.vitruv.change.testutils.changevisualization.utils.ModelHelper;
 
 /**
- * Helper class to generate {@link ChangeNode}s from eChanges. Central place to register new {@link
+ * Helper class to generate {@link ChangeNode}s from eChanges. Central place to
+ * register new {@link
  * ChangeDecoder}.
  *
  * @author Andreas Loeffler
  */
 public class ChangeNodeDecoder {
 
-  /** Decoders which extract the information to display from given Object of specific eChanges. */
-  private static Map<String, ChangeDecoder> decoders = new Hashtable<String, ChangeDecoder>();
+  /**
+   * Decoders which extract the information to display from given Object of
+   * specific eChanges.
+   */
+  private static Map<String, ChangeDecoder> decoders = new HashMap<>();
 
   // register additional decoders, default instances
   static {
@@ -43,6 +47,16 @@ public class ChangeNodeDecoder {
     registerChangeDecoder(new RemoveRootEObjectDecoder());
     registerChangeDecoder(new RemoveEReferenceDecoder());
   }
+  final static String REMOVE_ROOT_OBJECT = "RemoveRootEObject";
+  final static String INSERT_ROOT_OBJECT = "InsertRootEObject";
+  final static String CREATE_EOBJECT = "CreateEObject";
+  final static String DELETE_EOBJECT = "DeleteEObject";
+  final static String INSERT_EREFERENCE = "InsertEReference";
+  final static String REPLACE_SINGLE_VALUED_EREFERENCE = "ReplaceSingleValuedEReference";
+  final static String REMOVE_EREFERENCE = "RemoveEReference";
+  final static String INSERT_EATTRIBUTE_VALUE = "InsertEAttributeValue";
+  final static String REPLACE_SINGLE_VALUED_EATTRIBUTE = "ReplaceSingleValuedEAttribute";
+  final static String REMOVE_EATTRIBUTE_VALUE = "RemoveEAttributeValue";
 
   /**
    * Can be called to register new decoders for given EChange classes.
@@ -78,16 +92,14 @@ public class ChangeNodeDecoder {
     // extract eObjectID
     String eObjectID = getAffectedEObjectID(eChange);
 
-    ChangeNode changeNode =
-        new ChangeNode(
-            individualText,
-            structuralFeatureLabelValues,
-            changeClass,
-            eClassName,
-            affectedClass,
-            eObjectID);
+    return new ChangeNode(
+        individualText,
+        structuralFeatureLabelValues,
+        changeClass,
+        eClassName,
+        affectedClass,
+        eObjectID);
 
-    return changeNode;
   }
 
   /**
@@ -100,22 +112,22 @@ public class ChangeNodeDecoder {
     // No ReferenceEChange or AttributeEChange class found to check for instanceof
     // so class recognition is done by name so far
     switch (eChange.eClass().getName()) {
-      case "CreateEObject":
-      case "DeleteEObject":
+      case CREATE_EOBJECT, DELETE_EOBJECT -> {
         return EChangeClass.EXISTENCE_ECHANGE;
-      case "InsertRootEObject":
-      case "RemoveRootEObject":
+      }
+      case INSERT_ROOT_OBJECT, REMOVE_ROOT_OBJECT -> {
         return EChangeClass.ROOT_ECHANGE;
-      case "InsertEReference":
-      case "ReplaceSingleValuedEReference":
-      case "RemoveEReference":
+      }
+      case INSERT_EREFERENCE, REPLACE_SINGLE_VALUED_EREFERENCE, REMOVE_EREFERENCE -> {
         return EChangeClass.REFERENCE_ECHANGE;
-      case "InsertEAttributeValue":
-      case "ReplaceSingleValuedEAttribute":
-      case "RemoveEAttributeValue":
+      }
+      case INSERT_EATTRIBUTE_VALUE, REPLACE_SINGLE_VALUED_EATTRIBUTE, REMOVE_EATTRIBUTE_VALUE -> {
         return EChangeClass.ATTRIBUTE_ECHANGE;
-      default:
+      }
+      default -> {
         return null;
+      }
+
     }
   }
 
@@ -128,11 +140,11 @@ public class ChangeNodeDecoder {
   private static String getAffectedEObjectID(EChange<?> eChange) {
     String featureName = null;
     switch (eChange.eClass().getName()) {
-      case "InsertRootEObject":
+      case INSERT_ROOT_OBJECT:
         // InsertRootEObject eChanges don't have affectedEObjectIDs, they use newValueID
         featureName = "newValueID";
         break;
-      case "RemoveRootEObject":
+      case REMOVE_ROOT_OBJECT:
         // RemoveRootEObject eChanges don't have affectedEObjectIDs, they use oldValueID
         featureName = "oldValueID";
         break;
@@ -144,7 +156,8 @@ public class ChangeNodeDecoder {
   }
 
   /**
-   * Returns the classname of the affectedEObject of the given eChange. For EObjects, this is the
+   * Returns the classname of the affectedEObject of the given eChange. For
+   * EObjects, this is the
    * eClass-name, for all other objects the java class name.
    *
    * @param eChange The eChange
@@ -153,9 +166,10 @@ public class ChangeNodeDecoder {
   private static String getAffectedClass(EChange<?> eChange) {
     String featureName = null;
     switch (eChange.eClass().getName()) {
-      case "InsertRootEObject":
-      case "RemoveRootEObject":
-        // Insert- and RemoveRootEObject eChanges don't have affectedEObject, they use resource
+      case INSERT_ROOT_OBJECT:
+      case REMOVE_ROOT_OBJECT:
+        // Insert- and RemoveRootEObject eChanges don't have affectedEObject, they use
+        // resource
         featureName = "resource";
         break;
       default:
