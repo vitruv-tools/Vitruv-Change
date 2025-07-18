@@ -31,12 +31,14 @@ import tools.vitruv.change.atomic.root.RootFactory;
 /** A copier for {@link EChange}s that copies the change to a new type. */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AtomicEChangeCopier {
+
+
   /**
    * Copy the given change to a new type.
    *
    * @param <Source> The type of the change to copy.
    * @param <Target> The type of the copied change.
-   * @param change The change to copy.
+   * @param change   The change to copy.
    * @return The copied change.
    */
   public static <Source, Target> EChange<Target> copy(EChange<Source> change) {
@@ -107,11 +109,7 @@ public class AtomicEChangeCopier {
               null, sourceReplaceSingleValuedEReference.getAffectedFeature(), null, null);
     } else if (change instanceof RemoveEReference<Source> sourceRemoveEReference) {
       return getChangeFactory()
-          .createRemoveReferenceChange(
-              null,
-              sourceRemoveEReference.getAffectedFeature(),
-              null,
-              sourceRemoveEReference.getIndex());
+          .createRemoveReferenceChange(null, sourceRemoveEReference.getAffectedFeature(), null, sourceRemoveEReference.getIndex());
     } else if (change instanceof CreateEObject<Source>) {
       return EobjectFactory.eINSTANCE.createCreateEObject();
     } else if (change instanceof DeleteEObject<Source>) {
@@ -127,8 +125,9 @@ public class AtomicEChangeCopier {
     return TypeInferringAtomicEChangeFactory.getInstance();
   }
 
-  private static <Source, Target, F extends EStructuralFeature>
-      UnsetFeature<Target, F> copyUnsetFeature(UnsetFeature<Source, F> change) {
+  private static <Source, Target, F extends EStructuralFeature> UnsetFeature<Target, F> copyUnsetFeature(
+      UnsetFeature<Source, F> change) {
+
     UnsetFeature<Target, F> result = FeatureFactory.eINSTANCE.createUnsetFeature();
     result.setAffectedFeature(change.getAffectedFeature());
     return result;
