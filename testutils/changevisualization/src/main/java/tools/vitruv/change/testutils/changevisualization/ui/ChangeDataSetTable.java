@@ -21,15 +21,17 @@ import tools.vitruv.change.testutils.changevisualization.ChangeVisualizationUI;
 import tools.vitruv.change.testutils.changevisualization.common.ChangeDataSet;
 
 /**
- * A ChangeDataSetTable displays all different ChangeDataSets of a given ChangesTab in a JTable with
+ * A ChangeDataSetTable displays all different ChangeDataSets of a given
+ * ChangesTab in a JTable with
  * their general information.
  *
  * @author Andreas Loeffler
  */
-public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
+public class ChangeDataSetTable extends JPanel implements ChangeDataSetTableView, MouseWheelListener {
 
   /**
-   * Needed for eclipse to stop warning about serialVersionIds. This feature will never been used.
+   * Needed for eclipse to stop warning about serialVersionIds. This feature will
+   * never been used.
    */
   private static final long serialVersionUID = 1L;
 
@@ -75,7 +77,7 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
   private TableModel createModel() {
 
     // Create the column namens
-    Vector<String> columnNames = new Vector<String>();
+    Vector<String> columnNames = new Vector<>();
     columnNames.add("ID");
     columnNames.add("Time");
     columnNames.add("Propagated changes");
@@ -83,24 +85,26 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
     columnNames.add("Consequential changes");
 
     // Create the data vector
-    Vector<Vector<?>> rowData = new Vector<Vector<?>>();
+    Vector<Vector<?>> rowData = new Vector<>();
     return new DefaultTableModel(rowData, columnNames) {
       /**
-       * Needed for eclipse to stop warning about serialVersionIds. This feature will never been
+       * Needed for eclipse to stop warning about serialVersionIds. This feature will
+       * never been
        * used.
        */
       private static final long serialVersionUID = 1L;
 
+      @Override
       public boolean isCellEditable(int row, int column) {
         return false; // Table is not editable
       }
 
-      // JTable uses this method to determine the default renderer editor for each cell
+      // JTable uses this method to determine the default renderer editor for each
+      // cell
+      @Override
       public Class<?> getColumnClass(int c) {
         switch (c) {
-          case 2:
-          case 3:
-          case 4:
+          case 2, 3, 4:
             return Integer.class;
           case 1:
             return Date.class;
@@ -133,6 +137,7 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
 
           private final SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy - HH.mm.ss");
 
+          @Override
           protected void setValue(Object value) {
             setText((value == null) ? "" : df.format((Date) value));
           }
@@ -155,17 +160,15 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
             setForeground(table.getForeground());
 
             // Get default visualization
-            Component comp =
-                super.getTableCellRendererComponent(
-                    table, value, isSelected, hasFocus, row, column);
+            Component comp = super.getTableCellRendererComponent(
+                table, value, isSelected, hasFocus, row, column);
             // Just as an info: comp==this
 
             // if the String is highlighted, set the color after super.getTableCell...
             // to overwrite any potential coloring of the superclasses implementation
             if (column == 0 && shouldHighlight((String) value)) {
-              comp.setForeground(ChangesTab.HIGHLIGHT_COLOR);
+              comp.setForeground(TabColours.HIGHLIGHT_COLOR);
             }
-
             return comp;
           }
         });
@@ -178,14 +181,14 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
       return;
     }
     if (e.getWheelRotation() <= -1) {
-      float newSize = table.getFont().getSize() + 2;
+      float newSize = (float) table.getFont().getSize() + 2f;
       if (newSize > 30) {
         newSize = 30;
       }
       table.setFont(table.getFont().deriveFont(newSize));
       table.setRowHeight((int) (newSize + 10));
     } else if (e.getWheelRotation() >= 1) {
-      float newSize = table.getFont().getSize() - 2;
+      float newSize = (float) table.getFont().getSize() - 2f;
       if (newSize < 5) {
         newSize = 5;
       }
@@ -223,14 +226,15 @@ public class ChangeDataSetTable extends JPanel implements MouseWheelListener {
   }
 
   /**
-   * Creates a Vector to display in the table that shows the relevant information of a given
+   * Creates a Vector to display in the table that shows the relevant information
+   * of a given
    * changeDataSet.
    *
    * @param changeDataSet The changeDataSet to process
    * @return Vector suitable for usage in a JTable
    */
   private Vector<Object> encode(ChangeDataSet changeDataSet) {
-    Vector<Object> line = new Vector<Object>();
+    Vector<Object> line = new Vector<>();
     line.add(changeDataSet.getChangeDataSetID());
     line.add(changeDataSet.getCreationTime());
     line.add(changeDataSet.getNrPropagatedChanges());
