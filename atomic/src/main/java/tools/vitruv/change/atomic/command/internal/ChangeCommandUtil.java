@@ -3,6 +3,8 @@ package tools.vitruv.change.atomic.command.internal;
 import static com.google.common.base.Preconditions.checkState;
 
 import edu.kit.ipd.sdq.activextendannotations.Utility;
+
+import java.util.LinkedList;
 import java.util.List;
 import org.eclipse.emf.common.command.BasicCommandStack;
 import org.eclipse.emf.ecore.EObject;
@@ -49,9 +51,15 @@ class ChangeCommandUtil {
       EObject affectedEObject, EReference reference, EObject value) {
     checkState(affectedEObject.eClass().getEAllReferences().contains(reference),
         "Given object %s does not contain reference %s", affectedEObject, reference);
-    final List<EObject> featureContents = reference.isMany()
-        ? (List<EObject>) affectedEObject.eGet(reference) 
-        : List.of((EObject) affectedEObject.eGet(reference));
+    var contents = affectedEObject.eGet(reference);
+    
+    List<EObject> featureContents; 
+    if (reference.isMany()) {
+      featureContents = (List<EObject>) contents;
+    } else {
+      featureContents = new LinkedList<>();
+      featureContents.add((EObject) contents);
+    }
     
     return featureContents.contains(value);
   }
