@@ -1,5 +1,6 @@
 package tools.vitruv.change.atomic.hid;
 
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.impl.EObjectImpl;
 
 /**
@@ -9,6 +10,8 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
  * hierarchical id.
  */
 public final class HierarchicalId extends EObjectImpl implements Comparable<HierarchicalId> {
+  public static String CACHE_PREFIX = "cache:/";
+
   private String id;
 
   /**
@@ -50,5 +53,14 @@ public final class HierarchicalId extends EObjectImpl implements Comparable<Hier
   @Override
   public String toString() {
     return "Id(" + id + ")";
+  }
+
+  /**
+   * Tests if the given id stands for a cached {@link EObject}.
+   *
+   * @return if id has the CACHE_PREFIX.
+   */
+  public boolean isCache() {
+    return id.startsWith(CACHE_PREFIX);
   }
 }
