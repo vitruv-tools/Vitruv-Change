@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * Can be used by any transformation that creates change models.
  */
 public class TypeInferringAtomicEChangeFactory {
-	public static TypeInferringAtomicEChangeFactory instance;
+	private static TypeInferringAtomicEChangeFactory instance;
 
 	protected TypeInferringAtomicEChangeFactory() {
 	}

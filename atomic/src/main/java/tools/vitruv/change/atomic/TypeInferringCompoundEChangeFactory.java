@@ -21,7 +21,7 @@ public class TypeInferringCompoundEChangeFactory {
 	 */
 	public static TypeInferringCompoundEChangeFactory getInstance() {
 		if (instance == null) {
-			instance = new TypeInferringCompoundEChangeFactory(TypeInferringAtomicEChangeFactory.instance);
+			instance = new TypeInferringCompoundEChangeFactory(TypeInferringAtomicEChangeFactory.getInstance());
 		}
 		return instance;
 	}
