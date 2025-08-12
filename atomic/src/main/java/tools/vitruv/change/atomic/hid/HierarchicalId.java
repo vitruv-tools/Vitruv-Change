@@ -10,7 +10,7 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
  * hierarchical id.
  */
 public final class HierarchicalId extends EObjectImpl implements Comparable<HierarchicalId> {
-  public static String CACHE_PREFIX = "cache:/";
+  public static final String CACHE_PREFIX = "cache:/";
 
   private String id;
 

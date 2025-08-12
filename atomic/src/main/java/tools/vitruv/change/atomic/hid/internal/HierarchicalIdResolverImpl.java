@@ -2,18 +2,13 @@ package tools.vitruv.change.atomic.hid.internal;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil.*;
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.getOrCreateResource;
-import static tools.vitruv.change.atomic.hid.ObjectResolutionUtil.getHierarchicUriFragment;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-
 import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil;
-
 import java.util.PriorityQueue;
 import java.util.Queue;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
@@ -24,7 +19,8 @@ import tools.vitruv.change.atomic.hid.HierarchicalId;
 import tools.vitruv.change.atomic.hid.ObjectResolutionUtil;
 
 /**
- * {@link HierarchicalIdResolver}
+ * {@link HierarchicalIdResolverImpl} implements the {@link HierarchicalIdResolver} interface,
+ * based on a bidirectional mapping between {@link EObject}s and {@link HierarchicalId}s.
  */
 public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
   private static Logger logger = LogManager.getLogger(HierarchicalIdResolverImpl.class);
@@ -35,9 +31,9 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
 
   /**
    * Instantiates an ID resolver with the given {@link ResourceSet} for resolving objects.
-   * 
+   *
    * @param resourceSet -
-   * 		the {@link ResourceSet} to load model elements from, may not be {@code null}
+   *     the {@link ResourceSet} to load model elements from, may not be {@code null}
    * @throws IllegalArgumentException if given {@link ResourceSet} is {@code null}
    */
   public HierarchicalIdResolverImpl(ResourceSet resourceSet) {
@@ -48,7 +44,8 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
   @Override
   public void endTransaction() {
     cleanupRemovedElements();
-    checkState(cacheIds.isNoneMissing(), "there are still elements in cache although a transaction has been closed");
+    checkState(cacheIds.isNoneMissing(), 
+        "there are still elements in cache although a transaction has been closed");
   }
   
   private void cleanupRemovedElements() {
@@ -114,7 +111,7 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
   }
  
   private EObject getEObjectIfReadonlyUri(URI uri) {
-    if (isReadOnly(uri) &&uri.hasFragment()) {
+    if (isReadOnly(uri) && uri.hasFragment()) {
       return resourceSet.getEObject(uri, true);
     }
     return null;
@@ -134,9 +131,8 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
     
   private void register(HierarchicalId id, EObject eObject) {
     checkState(eObject != null, "object must not be null");
-    if(logger.isTraceEnabled()) {
-      // TODO Use String templates with Java 21
-      logger.trace("Adding ID " + id.toString() + " for EObject: " + eObject.toString()); 
+    if (logger.isTraceEnabled()) {
+      logger.trace("Adding ID %s for EObject: %s", id, eObject); 
     }
 
     final var oldObject = eObjectToId.inverse().get(id);
@@ -167,27 +163,26 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
   }
     
   /**
-   * The cache IDs repository provides cache IDs with values starting from 0, always providing the
-   * one with the lowest index first. It ensures that the same sequence of taking and pushing entries
-   * always gives the same values.
+   * The cache IDs repository provides cache IDs with values starting from 0, 
+   * always providing the one with the lowest index first. It ensures that
+   * the same sequence of taking and pushing entries always gives the same values.
    */
   static class CacheIdsRepository {
-    private final PriorityQueue<HierarchicalId> entries = new PriorityQueue<>();
+    private final Queue<HierarchicalId> entries = new PriorityQueue<>();
     private int maxValue;
     
     HierarchicalId pop() {
       if (entries.isEmpty()) {
-          push(new HierarchicalId(HierarchicalId.CACHE_PREFIX + maxValue++));
+        push(new HierarchicalId(HierarchicalId.CACHE_PREFIX + maxValue++));
       }
       return entries.poll();
     }
     
     HierarchicalId peek() {
       if (entries.isEmpty()) {
-          return new HierarchicalId(HierarchicalId.CACHE_PREFIX + maxValue);
-      } else {
-          return entries.peek();
+        return new HierarchicalId(HierarchicalId.CACHE_PREFIX + maxValue);
       }
+      return entries.peek();
     }
     
     void push(HierarchicalId value) {
