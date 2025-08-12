@@ -19,7 +19,7 @@ public class TypeInferringCompoundEChangeFactory {
 	 * Get the singleton instance of the factory.
 	 * @return The singleton instance.
 	 */
-	private static TypeInferringCompoundEChangeFactory getInstance() {
+	public static TypeInferringCompoundEChangeFactory getInstance() {
 		if (instance == null) {
 			instance = new TypeInferringCompoundEChangeFactory(TypeInferringAtomicEChangeFactory.instance);
 		}

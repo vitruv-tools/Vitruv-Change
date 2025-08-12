@@ -61,7 +61,7 @@ public class TypeInferringAtomicEChangeFactory {
 	 * @param index The affected index of the resource.
 	 */
 	protected void setRootChangeFeatures(RootEChange<?> change, Resource resource, URI uri, int index) {
-		// change.uri = uri?.toString
+		change.setUri(uri != null ? uri.toString() : "");
 		change.setResource(resource);
 		change.setIndex(index);
 	}
@@ -177,7 +177,7 @@ public class TypeInferringAtomicEChangeFactory {
 		S affectedEObject, EAttribute affectedAttribute, T oldValue, T newValue) {
 		final ReplaceSingleValuedEAttribute<S, T> c = AttributeFactory.eINSTANCE.createReplaceSingleValuedEAttribute();
 		setFeatureChangeFeatures(c, affectedEObject, affectedAttribute);
-		c.setOldValue(newValue);
+		c.setOldValue(oldValue);
 		c.setNewValue(newValue);
 		return c;
 	}
