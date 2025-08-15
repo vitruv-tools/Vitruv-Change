@@ -3,7 +3,6 @@ package tools.vitruv.change.atomic.command.internal;
 import static com.google.common.base.Preconditions.checkState;
 
 import edu.kit.ipd.sdq.activextendannotations.Utility;
-
 import java.util.LinkedList;
 import java.util.List;
 import org.eclipse.emf.common.command.BasicCommandStack;
@@ -17,7 +16,7 @@ import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
  * {@link ChangeCommandUtil} provides miscelleaneous methods to handle commands.
  */
 @Utility
-class ChangeCommandUtil {
+public class ChangeCommandUtil {
   /**
    * Private constructor for Utility class.
    */
@@ -27,10 +26,10 @@ class ChangeCommandUtil {
    * Returns the editing domain of the an object. If the object has no 
    * editing domain, it returns a new {@code AdapterFactoryEditingDomain}.
    *
-   *  @param object the {@link EObject}
+   * @param object the {@link EObject}
    * @return the editing domain of the object
    */
-  static EditingDomain getEditingDomain(EObject object) {
+  public static EditingDomain getEditingDomain(EObject object) {
     final var editingDomain = AdapterFactoryEditingDomain.getEditingDomainFor(object);
     return editingDomain != null 
         ? editingDomain 
