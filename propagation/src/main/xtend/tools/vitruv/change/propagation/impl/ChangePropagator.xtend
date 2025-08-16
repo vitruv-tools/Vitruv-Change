@@ -87,10 +87,65 @@ class ChangePropagator {
 		val List<UserInteractionBase> userInteractions = new ArrayList
 
 		def private propagateChanges() {
-			val result = sourceChange.transactionalChangeSequence.flatMapFixed[propagateSingleChange(it)]
+		    /* First, the whole vitruviuschange is propagated to CPSs that can handle it.
+		     * Then, the other CPSs handle the change in their way.
+		     (the non-atomic-enabled CPSs are called, too, but perform noops)
+		    */
+		    val result = propagateNonAtomicChange()
+			result += sourceChange.transactionalChangeSequence.flatMapFixed[propagateSingleChange(it)]
+
 			handleObjectsWithoutResource()
 			changedResources.forEach[modified = true]
 			return result
+		}
+
+		def private List<PropagatedChange> propagateNonAtomicChange() {
+			val userInteractorChange = installUserInteractorForChange(sourceChange)
+			changePropagationProvider.forEach[registerObserver(this)]
+			userInteractor.registerUserInputListener(this)
+
+			val propagationResultChanges = try {
+					sourceChange.affectedEObjectsMetamodelDescriptors.flatMap [
+					    // we only want ChangePropSpecs that handle non-atomic changes
+						changePropagationProvider.getChangePropagationSpecifications(it).filter[it.doesHandleNonAtomicChanges()] => [
+							forEach[it.userInteractor = outer.userInteractor]
+						]
+					].toSet.flatMapFixed [
+					    propagateNonAtomicChangeForChangePropagationSpecification(sourceChange, it)
+					]
+				} finally {
+					userInteractor.deregisterUserInputListener(this)
+					changePropagationProvider.forEach[deregisterObserver(this)]
+					userInteractorChange.close()
+				}
+
+			if (logger.isDebugEnabled) {
+				logger.debug(
+					'''Propagated «FOR p : propagationPath SEPARATOR ' -> '»«p»«ENDFOR» -> {«FOR changeInPropagation : propagationResultChanges SEPARATOR ", "»«
+						changeInPropagation.affectedEObjectsMetamodelDescriptors»«ENDFOR»}'''
+				)
+			}
+			if (logger.isTraceEnabled) {
+				logger.trace('''
+					Result changes:
+						«FOR result : propagationResultChanges»
+							«result.affectedEObjectsMetamodelDescriptors»: «result»
+						«ENDFOR»
+				''')
+			}
+
+			val resultingChanges = new ArrayList()
+			if (!propagationResultChanges.isNullOrEmpty) {
+                val propagatedChange = new PropagatedChange(sourceChange,
+                    VitruviusChangeFactory.instance.createCompositeChange(propagationResultChanges))
+                resultingChanges += propagatedChange
+			}
+
+			if (changePropagationMode != ChangePropagationMode.SINGLE_STEP) {
+				resultingChanges +=
+					propagationResultChanges.filter[it.containsConcreteChange].propagateTransitiveChanges
+			}
+			return resultingChanges
 		}
 
 		def private List<PropagatedChange> propagateSingleChange(TransactionalChange<EObject> change) {
@@ -161,6 +216,21 @@ class ChangePropagator {
 			]
 
 			return nextPropagations.mapFixed[propagateChanges()].flatten
+		}
+
+		def private propagateNonAtomicChangeForChangePropagationSpecification(
+			VitruviusChange<EObject> change,
+			ChangePropagationSpecification propagationSpecification
+		) {
+			val transitiveChanges = modelRepository.recordChanges [
+			    propagationSpecification.propagateNonAtomicChange(change,  modelRepository.correspondenceModel,
+                       modelRepository)
+			]
+
+			// Store modification information
+			changedResources += transitiveChanges.flatMap[it.affectedEObjects].map[eResource].filterNull
+
+			return transitiveChanges
 		}
 
 		def private propagateChangeForChangePropagationSpecification(
