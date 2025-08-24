@@ -63,9 +63,9 @@ public class RemoveAtCommand extends RemoveCommand {
 
   @Override
   public boolean prepare() {
-    var result = super.prepare() && 0 <= index && index < ownerList.size() 
+    var executable = super.prepare() && 0 <= index && index < ownerList.size() 
         && (collection.size() == 1);
-    if (!result) {
+    if (!executable) {
       return false;
     }
     // Check if get(index) == object

@@ -33,8 +33,8 @@ import tools.vitruv.change.atomic.root.RootFactory;
 
 /**
  * Factory singleton class for elements of change models.
- * Infers types (i.e. metaclasses and feature types) from parameters where possible.<br/>
- *
+ * Infers types (i.e. metaclasses and feature types) from parameters where possible.
+ * <p/>
  * Can be used by any transformation that creates change models.
  */
 public class TypeInferringAtomicEChangeFactory {
@@ -312,7 +312,8 @@ public class TypeInferringAtomicEChangeFactory {
    * @param affectedFeature The feature that was unset.
    * @return The created UnsetFeature EChange.
    */
-  public <A extends EObject, F extends EStructuralFeature> UnsetFeature<A, F> createUnsetFeatureChange(
+  public <A extends EObject, F extends EStructuralFeature> UnsetFeature<A, F> 
+      createUnsetFeatureChange(
       A affectedEObject, F affectedFeature) {
     checkAffectedEObjectExists(affectedEObject);
     final UnsetFeature<A, F> c = FeatureFactory.eINSTANCE.createUnsetFeature();

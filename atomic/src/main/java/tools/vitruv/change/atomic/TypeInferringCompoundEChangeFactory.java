@@ -6,6 +6,11 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
 import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.eobject.DeleteEObject;
+import tools.vitruv.change.atomic.feature.reference.InsertEReference;
+import tools.vitruv.change.atomic.feature.reference.RemoveEReference;
+import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference;
+import tools.vitruv.change.atomic.root.InsertRootEObject;
+import tools.vitruv.change.atomic.root.RemoveRootEObject;
 
 /**
  * The singleton {@link TypeInferringCompoundEChangeFactory} creates 
@@ -50,8 +55,10 @@ public class TypeInferringCompoundEChangeFactory {
    */
   public <T extends EObject> List<EChange<T>> createCreateAndInsertRootChange(
       T affectedEObject, Resource resource, int index) {
-    final var createChange = atomicFactory.createCreateEObjectChange(affectedEObject);
-    final var insertChange = atomicFactory.createInsertRootChange(affectedEObject, resource, index);
+    final CreateEObject<T> createChange = atomicFactory
+        .createCreateEObjectChange(affectedEObject);
+    final InsertRootEObject<T> insertChange = atomicFactory
+        .createInsertRootChange(affectedEObject, resource, index);
     return List.of(createChange, insertChange);
   }
 
@@ -65,8 +72,9 @@ public class TypeInferringCompoundEChangeFactory {
    */
   public <T extends EObject> List<EChange<T>> createRemoveAndDeleteRootChange(
       T affectedEObject, Resource resource, int index) {
-    final var deleteChange = atomicFactory.createDeleteEObjectChange(affectedEObject);
-    final var removeChange = atomicFactory.createRemoveRootChange(affectedEObject, resource, index);
+    final DeleteEObject<T> deleteChange = atomicFactory.createDeleteEObjectChange(affectedEObject);
+    final RemoveRootEObject<T> removeChange = atomicFactory
+        .createRemoveRootChange(affectedEObject, resource, index);
     return List.of(removeChange, deleteChange);
   }
 
@@ -85,7 +93,7 @@ public class TypeInferringCompoundEChangeFactory {
       createCreateAndInsertNonRootChange(A affectedEObject,
       EReference reference, T newValue, int index) {
     final CreateEObject<EObject> createChange = atomicFactory.createCreateEObjectChange(newValue);
-    final var insertChange = 
+    final InsertEReference<EObject> insertChange = 
         atomicFactory.createInsertReferenceChange(affectedEObject, reference, newValue, index);
     return List.of(createChange, insertChange);
   }
@@ -105,7 +113,7 @@ public class TypeInferringCompoundEChangeFactory {
       createRemoveAndDeleteNonRootChange(A affectedEObject,
       EReference reference, T oldValue, int index) {
     final DeleteEObject<EObject> deleteChange = atomicFactory.createDeleteEObjectChange(oldValue);
-    final var removeChange = atomicFactory
+    final RemoveEReference<EObject> removeChange = atomicFactory
         .createRemoveReferenceChange(affectedEObject, reference, oldValue, index);
     return List.of(removeChange, deleteChange);
   }
@@ -123,8 +131,8 @@ public class TypeInferringCompoundEChangeFactory {
   public <A extends EObject, T extends EObject> List<EChange<EObject>> 
       createCreateAndReplaceNonRootChange(A affectedEObject, EReference reference, T newValue) {
     final CreateEObject<EObject> createChange = atomicFactory.createCreateEObjectChange(newValue);
-    final var insertChange = atomicFactory.
-        createReplaceSingleReferenceChange(affectedEObject, reference, null, newValue);
+    final ReplaceSingleValuedEReference<EObject> insertChange = atomicFactory
+        .createReplaceSingleReferenceChange(affectedEObject, reference, null, newValue);
     return List.of(createChange, insertChange);
   }
 
@@ -141,10 +149,10 @@ public class TypeInferringCompoundEChangeFactory {
    */
   public <A extends EObject, T extends EObject> List<EChange<EObject>> 
       createReplaceAndDeleteNonRootChange(A affectedEObject, EReference reference, T oldValue) {
-    final var removeChange = atomicFactory.createReplaceSingleReferenceChange(
-        affectedEObject, reference, oldValue, null);
+    final ReplaceSingleValuedEReference<EObject> replaceChange = atomicFactory
+        .createReplaceSingleReferenceChange(affectedEObject, reference, oldValue, null);
     final DeleteEObject<EObject> deleteChange = atomicFactory.createDeleteEObjectChange(oldValue);
-    return List.of(removeChange, deleteChange);
+    return List.of(replaceChange, deleteChange);
   }
 
   /**
@@ -164,8 +172,8 @@ public class TypeInferringCompoundEChangeFactory {
       T oldValue, T newValue) {
     final DeleteEObject<EObject> deleteChange = atomicFactory.createDeleteEObjectChange(oldValue);
     final CreateEObject<EObject> createChange = atomicFactory.createCreateEObjectChange(newValue);
-    final var replaceChange = atomicFactory.createReplaceSingleReferenceChange(
-        affectedEObject, reference, oldValue, newValue);
+    final ReplaceSingleValuedEReference<EObject> replaceChange = atomicFactory
+        .createReplaceSingleReferenceChange(affectedEObject, reference, oldValue, newValue);
     return List.of(createChange, replaceChange, deleteChange);
   }
 

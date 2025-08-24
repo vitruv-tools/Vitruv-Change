@@ -68,9 +68,9 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
 
   @Override
   public HierarchicalId getAndUpdateId(EObject eObject) {
-    return (eObject.eResource() != null) ?
-        registerObjectInResource(eObject) :
-        getOrRegisterCachedObject(eObject);
+    return (eObject.eResource() != null) 
+        ? registerObjectInResource(eObject)
+        : getOrRegisterCachedObject(eObject);
   }
   
   private HierarchicalId registerObjectInResource(EObject eObject) {
@@ -81,11 +81,11 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
   }
   
   private HierarchicalId getOrRegisterCachedObject(EObject eObject) {
-    final var storedId = eObjectToId.get(eObject);
+    final HierarchicalId storedId = eObjectToId.get(eObject);
     if (storedId != null && storedId.isCache()) {
       return storedId;
     } else {
-      final var id = cacheIds.peek();
+      final HierarchicalId id = cacheIds.peek();
       register(id, eObject);
       return id;
     }

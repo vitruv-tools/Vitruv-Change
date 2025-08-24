@@ -77,7 +77,7 @@ class ApplyBackwardCommandSwitch {
 
   
   /**
-   * Method to create commands to apply a {@link UnsetFeature} change forward.
+   * Method to create commands to apply a {@link UnsetFeature} change backward.
    *
    * @param change The change for which commands should be created.
    * @return List of SetCommand

@@ -30,7 +30,7 @@ public class ChangeCommandUtil {
    * @return the editing domain of the object
    */
   public static EditingDomain getEditingDomain(EObject object) {
-    final var editingDomain = AdapterFactoryEditingDomain.getEditingDomainFor(object);
+    final EditingDomain editingDomain = AdapterFactoryEditingDomain.getEditingDomainFor(object);
     return editingDomain != null 
         ? editingDomain 
         : new AdapterFactoryEditingDomain(new ComposedAdapterFactory(), new BasicCommandStack());

@@ -5,6 +5,7 @@ import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.Resour
 
 import edu.kit.ipd.sdq.activextendannotations.Utility;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
@@ -48,14 +49,13 @@ public class ObjectResolutionUtil {
    * @return a hierarchic URI fragment for the given {@link EObject} 
    */
   public static String getHierarchicUriFragment(EObject object) {
-    final var resource = object.eResource();
+    final Resource resource = object.eResource();
     var rootElementIndex = 0;
     
     EObject resourceRoot = null;
     if (resource.getContents().size() <= 1) {
       resourceRoot = getFirstRootEObject(object.eResource());
-    }
-    else {
+    } else {
       // move up containment hierarchy until some container is one of the resource's root elements
       resourceRoot = object;
       while (resourceRoot != null
