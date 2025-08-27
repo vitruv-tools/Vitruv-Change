@@ -1,8 +1,7 @@
 package tools.vitruv.change.atomic;
 
-import org.eclipse.emf.ecore.EObject;
-
 import edu.kit.ipd.sdq.activextendannotations.Utility;
+import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.atomic.feature.reference.AdditiveReferenceEChange;
 import tools.vitruv.change.atomic.feature.reference.RemoveEReference;
 import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference;

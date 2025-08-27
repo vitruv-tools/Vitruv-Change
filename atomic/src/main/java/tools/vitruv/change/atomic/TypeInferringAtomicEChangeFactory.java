@@ -34,8 +34,8 @@ import tools.vitruv.change.atomic.root.RootFactory;
 /**
  * Factory singleton class for elements of change models.
  * Infers types (i.e. metaclasses and feature types) from parameters where possible.
- * <p>
- * Can be used by any transformation that creates change models.
+ * 
+ * <p>Can be used by any transformation that creates change models.
  */
 public class TypeInferringAtomicEChangeFactory {
   private static TypeInferringAtomicEChangeFactory instance;
