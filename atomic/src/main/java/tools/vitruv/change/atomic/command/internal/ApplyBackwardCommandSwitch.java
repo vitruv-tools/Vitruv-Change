@@ -14,7 +14,6 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
-import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.command.RemoveAtCommand;
 import tools.vitruv.change.atomic.feature.UnsetFeature;
 import tools.vitruv.change.atomic.feature.attribute.InsertEAttributeValue;
@@ -31,58 +30,21 @@ import tools.vitruv.change.atomic.root.RemoveRootEObject;
  * The commands applies the EChanges backward.
  */
 @Utility
-class ApplyBackwardCommandSwitch {
+class ApplyBackwardCommandSwitch extends ApplyCommandSwitch {
   private static final String CONTAINMENT_OPPOSITE_WARNING =
       "but although there is no opposite feature it was already contained in %s";
   private static final Logger logger = LogManager.getLogger(ApplyBackwardCommandSwitch.class);
 
-  private ApplyBackwardCommandSwitch() {}
+  ApplyBackwardCommandSwitch() {}
 
-  /**
-   * "Static dispatch" method. Returns the correct commands for change to apply it forward.
-   *
-   * @param change - EChange
-   * @return a List of Commands
-   */
-  static List<Command> getCommands(EChange<EObject> change) {
-    if (change instanceof UnsetFeature) {
-      return getCommands((UnsetFeature<EObject, EStructuralFeature>) change);
-    }
-    if (change instanceof InsertEAttributeValue) {
-      return getCommands((InsertEAttributeValue<EObject, ?>) change);
-    }
-    if (change instanceof RemoveEAttributeValue) {
-      return getCommands((RemoveEAttributeValue<EObject, EStructuralFeature>) change);
-    }
-    if (change instanceof ReplaceSingleValuedEAttribute) {
-      return getCommands((ReplaceSingleValuedEAttribute<EObject, EStructuralFeature>) change);
-    }
-    if (change instanceof InsertEReference) {
-      return getCommands((InsertEReference<EObject>) change);
-    }
-    if (change instanceof RemoveEReference) {
-      return getCommands((RemoveEReference<EObject>) change);
-    }
-    if (change instanceof ReplaceSingleValuedEReference) {
-      return getCommands((ReplaceSingleValuedEReference<EObject>) change);
-    }
-    if (change instanceof InsertRootEObject) {
-      return getCommands((InsertRootEObject<EObject>) change);
-    }
-    if (change instanceof RemoveRootEObject) {
-      return getCommands((RemoveRootEObject<EObject>) change);
-    }
-    return List.of();
-  }
-
-  
   /**
    * Method to create commands to apply a {@link UnsetFeature} change backward.
    *
    * @param change The change for which commands should be created.
    * @return List of SetCommand
    */
-  static List<Command> getCommands(UnsetFeature<EObject, EStructuralFeature> change) {
+  @Override
+  List<Command> getCommands(UnsetFeature<EObject, EStructuralFeature> change) {
     val editingDomain = getEditingDomain(change.getAffectedElement());
     return List.of(new SetCommand(editingDomain,
         change.getAffectedElement(), change.getAffectedFeature(), SetCommand.UNSET_VALUE));
@@ -95,7 +57,8 @@ class ApplyBackwardCommandSwitch {
    * @return List of RemoveAtCommand, or SetCommand,
    *      depending on whether change inserts an actual value, or not.
    */
-  static List<Command> getCommands(InsertEAttributeValue<EObject, ?> change) {
+  @Override
+  List<Command> getCommands(InsertEAttributeValue<EObject, ?> change) {
     val element = change.getAffectedElement();
     val feature = change.getAffectedFeature();
     val editingDomain = getEditingDomain(element);
@@ -114,7 +77,8 @@ class ApplyBackwardCommandSwitch {
    * @param change The change for which commands should be created.
    * @return List of AddCommand
    */
-  static List<Command> getCommands(
+  @Override
+  List<Command> getCommands(
       RemoveEAttributeValue<EObject, EStructuralFeature> change) {
     val element = change.getAffectedElement();
     val editingDomain = getEditingDomain(element);
@@ -128,7 +92,8 @@ class ApplyBackwardCommandSwitch {
    * @param change The change for which commands should be created.
    * @return List of SetCommand
    */
-  static List<Command> getCommands(ReplaceSingleValuedEAttribute<EObject, ?> change) {
+  @Override
+  List<Command> getCommands(ReplaceSingleValuedEAttribute<EObject, ?> change) {
     val element = change.getAffectedElement();
     val editingDomain = getEditingDomain(element);
     val value = change.isWasUnset() ? SetCommand.UNSET_VALUE : change.getOldValue();
@@ -141,7 +106,8 @@ class ApplyBackwardCommandSwitch {
    * @param change The change for which commands should be created.
    * @return List of RemoveAtCommand, or an empty list
    */
-  static List<Command> getCommands(InsertEReference<EObject> change) {
+  @Override
+  List<Command> getCommands(InsertEReference<EObject> change) {
     val elememt = change.getAffectedElement();
     val feature = change.getAffectedFeature();
     val editingDomain = getEditingDomain(elememt);
@@ -166,7 +132,8 @@ class ApplyBackwardCommandSwitch {
    * @param change The change for which commands should be created.
    * @return List of AddCommand, or an empty list
    */
-  static List<Command> getCommands(RemoveEReference<EObject> change) {
+  @Override
+  List<Command> getCommands(RemoveEReference<EObject> change) {
     val element = change.getAffectedElement();
     val feature = change.getAffectedFeature();
     val editingDomain = getEditingDomain(element);
@@ -188,7 +155,8 @@ class ApplyBackwardCommandSwitch {
    * @param change The change for which commands should be created.
    * @return List of SetCommand, or an empty list
    */
-  static List<Command> getCommands(ReplaceSingleValuedEReference<EObject> change) {
+  @Override
+  List<Command> getCommands(ReplaceSingleValuedEReference<EObject> change) {
     val elememt = change.getAffectedElement();
     val feature = change.getAffectedFeature();
     val editingDomain = getEditingDomain(elememt);
@@ -211,7 +179,8 @@ class ApplyBackwardCommandSwitch {
    * @param change The change for which commands should be created.
    * @return List of RemoveCommand
    */
-  static List<Command> getCommands(InsertRootEObject<EObject> change) {
+  @Override
+  List<Command> getCommands(InsertRootEObject<EObject> change) {
     return List.of(new RemoveCommand(getEditingDomain(change.getNewValue()),
         change.getResource().getContents(), change.getNewValue()));
   }
@@ -222,7 +191,8 @@ class ApplyBackwardCommandSwitch {
    * @param change The change for which commands should be created.
    * @return List of AddCommand
    */
-  static List<Command> getCommands(RemoveRootEObject<EObject> change) {
+  @Override
+  List<Command> getCommands(RemoveRootEObject<EObject> change) {
     // Will be automatically removed from resource because object can only be in one resource.
     return List.of(new AddCommand(getEditingDomain(change.getOldValue()), 
         change.getResource().getContents(), change.getOldValue(), change.getIndex()));

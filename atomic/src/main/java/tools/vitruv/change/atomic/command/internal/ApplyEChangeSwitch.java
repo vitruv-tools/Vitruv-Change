@@ -13,6 +13,15 @@ import tools.vitruv.change.atomic.EChange;
 @Utility
 public class ApplyEChangeSwitch {
   /**
+   * Forward switch to apply {@link EChange}s.
+   */
+  private static final ApplyForwardCommandSwitch forwardSwitch = new ApplyForwardCommandSwitch();
+  /**
+   * Backward switch to apply {@link EChange}s.
+   */
+  private static final ApplyBackwardCommandSwitch backwardSwitch = new ApplyBackwardCommandSwitch();
+
+  /**
    * Private constructor for utility class.
    */
   private ApplyEChangeSwitch() {}
@@ -27,9 +36,8 @@ public class ApplyEChangeSwitch {
    *      or they cannot be executed.
    */
   public static void applyEChange(EChange<EObject> change, boolean applyForward) {
-    final var commands = applyForward 
-        ? ApplyForwardCommandSwitch.getCommands(change) 
-        : ApplyBackwardCommandSwitch.getCommands(change);
+    final var commandSwitch = applyForward ? forwardSwitch : backwardSwitch;
+    var commands = commandSwitch.getCommands(change);
     checkState(commands != null, "no commands could be generated for EChange: %s", change);
 
     for (Command c : commands) {
