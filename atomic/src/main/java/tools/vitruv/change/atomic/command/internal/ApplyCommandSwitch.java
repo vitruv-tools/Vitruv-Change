@@ -1,25 +1,17 @@
 package tools.vitruv.change.atomic.command.internal;
 
-import static tools.vitruv.change.atomic.command.internal.ChangeCommandUtil.alreadyContainsObject;
-
 import java.util.List;
-
-import org.apache.logging.log4j.Logger;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.change.atomic.feature.FeatureEChange;
 import tools.vitruv.change.atomic.feature.UnsetFeature;
 import tools.vitruv.change.atomic.feature.attribute.InsertEAttributeValue;
 import tools.vitruv.change.atomic.feature.attribute.RemoveEAttributeValue;
 import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute;
-import tools.vitruv.change.atomic.feature.reference.AdditiveReferenceEChange;
 import tools.vitruv.change.atomic.feature.reference.InsertEReference;
 import tools.vitruv.change.atomic.feature.reference.RemoveEReference;
 import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference;
-import tools.vitruv.change.atomic.feature.reference.SubtractiveReferenceEChange;
-import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange;
 import tools.vitruv.change.atomic.root.InsertRootEObject;
 import tools.vitruv.change.atomic.root.RemoveRootEObject;
 
