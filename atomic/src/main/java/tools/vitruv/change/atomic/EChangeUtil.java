@@ -1,5 +1,7 @@
 package tools.vitruv.change.atomic;
 
+import org.eclipse.emf.ecore.EObject;
+
 import edu.kit.ipd.sdq.activextendannotations.Utility;
 import tools.vitruv.change.atomic.feature.reference.AdditiveReferenceEChange;
 import tools.vitruv.change.atomic.feature.reference.RemoveEReference;
@@ -27,14 +29,14 @@ public class EChangeUtil {
    *    change replaces an EObject in a single-valued containment reference, in which case
    *    that EObject is considered to be removed (ReplaceSingleValuedEReference),
    *  </li>
-   *  <li>change removes an EObject from a containment reference (RemoveEReference), or</li>,
+   *  <li>change removes an EObject from a containment reference (RemoveEReference), or</li>
    *  <li>change removes a root object (RemoveRootEObject)</li>
    * </ol>
    *
    * @param change - {@link EChange}
    * @return a boolean value.
    */
-  public static boolean isContainmentRemoval(final EChange<?> change) {
+  public static boolean isContainmentRemoval(EChange<EObject> change) {
     if (change instanceof ReplaceSingleValuedEReference<?> replaceReference) {
       return replaceReference.getAffectedFeature().isContainment() 
           && (replaceReference.getOldValue() != null 
@@ -60,7 +62,7 @@ public class EChangeUtil {
    * @param change - {@link EChange}
    * @return a boolean value.
    */
-  public static boolean isContainmentInsertion(final EChange<?> change) {
+  public static boolean isContainmentInsertion(EChange<EObject> change) {
     if (change instanceof AdditiveReferenceEChange<?> additiveReferenceChange) {
       return additiveReferenceChange.getAffectedFeature().isContainment()
           && additiveReferenceChange.getNewValue() != null;  

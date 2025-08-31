@@ -14,7 +14,7 @@ import tools.vitruv.change.atomic.root.RemoveRootEObject;
 
 /**
  * The singleton {@link TypeInferringCompoundEChangeFactory} creates 
- * lists of compound {@link EChanges} for creatiing, deletiing root objects,
+ * lists of compound {@link EChange}s for creatiing, deleting root objects,
  * and replacing non-root objects.
  * 
  * <p>The actual changes are created by {@link TypeInferringAtomicEChangeFactory}.

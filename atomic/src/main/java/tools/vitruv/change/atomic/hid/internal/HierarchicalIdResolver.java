@@ -7,7 +7,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import tools.vitruv.change.atomic.hid.HierarchicalId;
 
 /**
- * A {@link HierarchicalIdResolver} resolves {@link EObjects} by their assigned 
+ * A {@link HierarchicalIdResolver} resolves {@link EObject}s by their assigned 
  * {@link HierarchicalId}.
  */
 public interface HierarchicalIdResolver {
