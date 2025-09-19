@@ -38,7 +38,7 @@ class UuidResolvingTest {
   void setup(@TestProject Path testProjectPath) {
     this.testProjectPath = testProjectPath;
     this.resourceSet = withGlobalFactories(new ResourceSetImpl());
-    this.uuidResolver = UuidResolver.create(resourceSet);
+    this.uuidResolver = UuidResolverFactory.create(resourceSet);
   }
 
   @ParameterizedTest(name = "{0} element(s)")
