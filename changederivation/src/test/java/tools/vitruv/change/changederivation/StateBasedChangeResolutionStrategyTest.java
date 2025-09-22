@@ -16,7 +16,6 @@ import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import pcm_mockup.Repository;
 import tools.vitruv.change.atomic.hid.AtomicEChangeHierarchicalIdResolver;
 import tools.vitruv.change.composite.description.impl.VitruviusChangeHierarchicalIdResolver;
