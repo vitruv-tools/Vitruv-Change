@@ -74,7 +74,7 @@ public abstract class AbstractStateBasedChangeResolutionStrategy
     checkNoProxies(newState, "new state");
     checkNoProxies(oldState, "old state");
 
-    final ResourceSet monitoredResourceSet = new ResourceSetImpl();
+    final ResourceSet monitoredResourceSet = withGlobalFactories(new ResourceSetImpl());
     final Resource currentStateCopy = ResourceCopier.copyViewResource(oldState, 
         monitoredResourceSet);
 
@@ -108,7 +108,7 @@ public abstract class AbstractStateBasedChangeResolutionStrategy
     checkArgument(oldState != null, "old state must not be null!");
     checkNoProxies(oldState, "old state");
     // Setup resolver and copy state:
-    val monitoredResourceSet = new ResourceSetImpl();
+    val monitoredResourceSet = withGlobalFactories(new ResourceSetImpl());
     val currentStateCopy = ResourceCopier.copyViewResource(oldState, monitoredResourceSet);
     return recordChanges(currentStateCopy, () -> currentStateCopy.getContents().clear());
   }

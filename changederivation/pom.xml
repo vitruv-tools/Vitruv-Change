@@ -60,6 +60,20 @@
       <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
     </dependency>
 
+    <!-- project test dependencies -->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>tools.vitruv.change.testutils.core</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>tools.vitruv.change.testutils.metamodels</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- p2 dependencies -->
     <dependency>
       <groupId>${project.groupId}</groupId>
