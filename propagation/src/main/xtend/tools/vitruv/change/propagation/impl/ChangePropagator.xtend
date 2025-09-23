@@ -208,7 +208,15 @@ class ChangePropagator {
 		override objectCreated(EObject createdObject) {
 			createdObjects += createdObject
 		}
+	
+		override changePropagationStarted(ChangePropagationSpecification spec, EObject<EChange> change) {
+			return
+		}
 
+		override changePropagationStopped(ChangePropagationSpecification spec, EObject<EChange> change) {
+			return
+		}
+	
 		override onUserInteractionReceived(UserInteractionBase interaction) {
 			userInteractions += interaction
 		}
