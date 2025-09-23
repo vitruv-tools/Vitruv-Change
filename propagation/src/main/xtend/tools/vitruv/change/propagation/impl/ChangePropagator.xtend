@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
+import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.composite.description.CompositeChange
 import tools.vitruv.change.composite.description.PropagatedChange
@@ -209,11 +210,11 @@ class ChangePropagator {
 			createdObjects += createdObject
 		}
 	
-		override changePropagationStarted(ChangePropagationSpecification spec, EObject<EChange> change) {
+		override changePropagationStarted(ChangePropagationSpecification specification, EChange<EObject> change) {
 			return
 		}
 
-		override changePropagationStopped(ChangePropagationSpecification spec, EObject<EChange> change) {
+		override changePropagationStopped(ChangePropagationSpecification specification, EChange<EObject> change) {
 			return
 		}
 	
