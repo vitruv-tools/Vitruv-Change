@@ -1,12 +1,13 @@
 package tools.vitruv.change.propagation;
 
 import org.eclipse.emf.ecore.EObject;
+import tools.vitruv.change.atomic.EChange;
 
 /**
  * A {@link ChangePropagationObservable} informs {@link ChangePropagationObserver}s about
  * event that occur during change propagation.
  */
-public interface ChangePropagationObservable {
+public interface ChangePropagationObservable extends ChangePropagationObservableRegistry {
   /**
    * Informs the observers about the creation of <code>createdObject</code>.
    *
@@ -15,16 +16,22 @@ public interface ChangePropagationObservable {
   void notifyObjectCreated(EObject createdObject);
 
   /**
-   * Registers <code>observer</code>.
+   * Informs the observers that <code>specification</code> has started to propagate 
+   * <code>change</code>.
    *
-   * @param observer - {@link ChangePropagationObserver}
+   * @param specification - {@link ChangePropagationSpecification}
+   * @param change - {@link EChange}
    */
-  void registerObserver(final ChangePropagationObserver observer);
+  void notifyChangePropagationStarted(
+      ChangePropagationSpecification specification, EChange<EObject> change);
 
   /**
-   * Deregisters <code>observer</code>.
+   * Informs this observer that <code>specification</code> has stopped propagation of
+   * <code>change</code>.
    *
-   * @param observer - {@link ChangePropagationObserver}
+   * @param specification - {@link ChangePropagationSpecification}
+   * @param change - {@link EChange}
    */
-  void deregisterObserver(final ChangePropagationObserver observer);
+  void notifyChangePropagationStopped(
+      ChangePropagationSpecification specification, EChange<EObject> change);
 }
