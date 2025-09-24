@@ -8,6 +8,9 @@ target/
 .flattened-pom.xml
 dependency-reduced-pom.xml
 
+# Idea
+.idea/
+
 # Eclipse
 META-INF
 build.properties
