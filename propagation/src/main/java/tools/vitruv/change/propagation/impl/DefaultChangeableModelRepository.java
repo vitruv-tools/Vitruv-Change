@@ -60,9 +60,10 @@ public class DefaultChangeableModelRepository implements ChangeableModelReposito
         System.lineSeparator(),
         change);
 
+    // Set up logging/reporting
     LOGGER.info("Start change propagation");
-    notifyChangePropagationStarted(change);
-    List<PropagatedChange> resultChanges = changePropagator.propagateChange(change);
+    notifyChangePropagationStarted(change);    
+    List<PropagatedChange> resultChanges = changePropagator.propagateChange(change, changePropagationObservers);
     modelRepository.saveOrDeleteModels();
     notifyChangePropagationFinished(change, resultChanges);
     LOGGER.info("Finished change propagation");
@@ -100,13 +101,13 @@ public class DefaultChangeableModelRepository implements ChangeableModelReposito
 
   @Override
   public void registerObserver(ChangePropagationObserver observer) {
-    checkArgument(observer != null, "propagation listener must not be null");
+    checkArgument(observer != null, "propagation observer must not be null");
     changePropagationObservers.add(observer);
   }
 
   @Override
   public void deregisterObserver(ChangePropagationObserver observer) {
-    checkArgument(observer != null, "propagation listener must not be null");
+    checkArgument(observer != null, "propagation observer must not be null");
     changePropagationObservers.remove(observer);
   }
 }

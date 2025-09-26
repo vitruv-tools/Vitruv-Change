@@ -65,7 +65,16 @@ class ChangePropagator {
 		this.changePropagationMode = mode
 	}
 
-	def List<PropagatedChange> propagateChange(VitruviusChange<Uuid> change) {
+	/**
+	 * Applies, then propagates <code>change</code> 
+	 * through the models in <code>modelRepository</code>.
+   *
+	 * @param change - {@link VitruviusChange}
+	 * @param observers - {@link Iterable} of {@link ChangePropagationObserver}
+	 * @return - {@link List} of {@link PropagatedChange}
+	 */
+	def List<PropagatedChange> propagateChange(VitruviusChange<Uuid> change, 
+			Iterable<ChangePropagationObserver> observers) {
 		val resolvedChange = modelRepository.applyChange(change)
 		resolvedChange.affectedEObjects.map[eResource].filterNull.forEach[modified = true]
 
@@ -75,7 +84,11 @@ class ChangePropagator {
 					«resolvedChange»
 			''')
 		}
-		return new ChangePropagation(this, resolvedChange, null).propagateChanges()
+
+		changePropagationProvider.forEach[spec | observers.forEach[observer | spec.registerObserver(observer)]]
+		var result = new ChangePropagation(this, resolvedChange, null).propagateChanges()
+		changePropagationProvider.forEach[spec | observers.forEach[observer | spec.deregisterObserver(observer)]]
+		result
 	}
 
 	@FinalFieldsConstructor

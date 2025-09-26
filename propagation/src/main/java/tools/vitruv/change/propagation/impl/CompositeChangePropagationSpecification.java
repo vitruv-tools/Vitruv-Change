@@ -119,7 +119,7 @@ public class CompositeChangePropagationSpecification
     }
   }
 
-    /**
+  /**
    * Propagates <code>change</code> via the main processors.
    *
    * @param change - {@link EChange}
