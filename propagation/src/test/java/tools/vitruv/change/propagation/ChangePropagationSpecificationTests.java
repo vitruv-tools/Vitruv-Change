@@ -7,24 +7,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.junit.jupiter.api.Test;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.eobject.CreateEObject;
+import tools.vitruv.change.atomic.eobject.DeleteEObject;
 import tools.vitruv.change.atomic.eobject.EobjectFactory;
 import tools.vitruv.change.atomic.eobject.EobjectPackage;
-import tools.vitruv.change.atomic.eobject.impl.CreateEObjectImpl;
 import tools.vitruv.change.atomic.feature.attribute.AttributeFactory;
 import tools.vitruv.change.atomic.feature.attribute.AttributePackage;
 import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute;
 import tools.vitruv.change.composite.MetamodelDescriptor;
+import tools.vitruv.change.correspondence.Correspondence; 
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.interaction.UserInteractionFactory;
 import tools.vitruv.change.interaction.impl.PredefinedInteractionResultProviderImpl;
-import tools.vitruv.change.correspondence.Correspondence; 
 import tools.vitruv.change.propagation.impl.AbstractChangePropagationSpecification;
 import tools.vitruv.change.propagation.impl.CompositeChangePropagationSpecification;
 import tools.vitruv.change.utils.ResourceAccess;
@@ -53,7 +51,7 @@ class ChangePropagationSpecificationTests {
           specAtoBOnElementAddChange, 
           specBtoAOnElementDeleteChange)
     );
-
+ 
     var resultsForDescriptorA = registry.getChangePropagationSpecifications(descriptorA);
     assertTrue(resultsForDescriptorA.contains(specAtoBOnAttributeChange));
     assertTrue(resultsForDescriptorA.contains(specAtoBOnElementAddChange));
@@ -81,9 +79,9 @@ class ChangePropagationSpecificationTests {
     compositeSpecificationForDescriptorsAAndB.addChangePreprocessor(specAtoBOnElementAddChange);
     compositeSpecificationForDescriptorsAAndB.addChangeMainprocessor(specAtoBOnAttributeChange);
 
-    var change1 = EobjectFactory.eINSTANCE.createCreateEObject();
-    var change2 = AttributeFactory.eINSTANCE.createReplaceSingleValuedEAttribute();
-    var change3 = EobjectFactory.eINSTANCE.createDeleteEObject();
+    CreateEObject<EObject> change1 = EobjectFactory.eINSTANCE.createCreateEObject();
+    ReplaceSingleValuedEAttribute<EObject, Integer> change2 =
+        AttributeFactory.eINSTANCE.createReplaceSingleValuedEAttribute();
 
     // Change Handling
     assertTrue(specAtoBOnAttributeChange.doesHandleChange(change2, null));
@@ -91,6 +89,7 @@ class ChangePropagationSpecificationTests {
     assertTrue(specAtoBOnElementAddChange.doesHandleChange(change1, null));
     assertFalse(specAtoBOnElementAddChange.doesHandleChange(change2, null));
 
+    DeleteEObject<EObject> change3 = EobjectFactory.eINSTANCE.createDeleteEObject();
     assertTrue(compositeSpecificationForDescriptorsAAndB.doesHandleChange(change1, null));
     assertTrue(compositeSpecificationForDescriptorsAAndB.doesHandleChange(change2, null));
     assertFalse(compositeSpecificationForDescriptorsAAndB.doesHandleChange(change3, null));
@@ -150,7 +149,7 @@ class ChangePropagationSpecificationTests {
    * by doing nothing, expect calling notifiers. 
    */
   private static class MockChangePropagationSpecification extends
-    AbstractChangePropagationSpecification {
+      AbstractChangePropagationSpecification {
     /**
      * Change type to handle.
      */
@@ -164,7 +163,7 @@ class ChangePropagationSpecificationTests {
 
     @Override
     public boolean doesHandleChange(EChange<EObject> change,
-      EditableCorrespondenceModelView<Correspondence> correspondenceModel) {
+        EditableCorrespondenceModelView<Correspondence> correspondenceModel) {
       return change.eClass().equals(eChangeType);
     }
 
