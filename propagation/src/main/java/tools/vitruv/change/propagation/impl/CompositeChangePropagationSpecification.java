@@ -58,7 +58,7 @@ public class CompositeChangePropagationSpecification
    *      <code>changePreprocessor</code> must be compatible to this specification,
    *      i.e. source and target metamodel descriptions must match.
    */
-  protected void addChangePreprocessor(
+  public void addChangePreprocessor(
       ChangePropagationSpecification changePreprocessor) {
     assertMetamodelsCompatible(changePreprocessor);
     changePreprocessors.add(changePreprocessor);
@@ -75,7 +75,7 @@ public class CompositeChangePropagationSpecification
    *      <code>changeMainProcessor</code> must be compatible to this specification,
    *      i.e. source and target metamodel descriptions must match.
    */
-  protected void addChangeMainprocessor(ChangePropagationSpecification changeMainProcessor) {
+  public void addChangeMainprocessor(ChangePropagationSpecification changeMainProcessor) {
     assertMetamodelsCompatible(changeMainProcessor);
     changeMainprocessors.add(changeMainProcessor);
     changeMainProcessor.setUserInteractor(this.getUserInteractor());
