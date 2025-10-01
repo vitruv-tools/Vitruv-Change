@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
+import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.composite.description.CompositeChange
 import tools.vitruv.change.composite.description.PropagatedChange
@@ -64,7 +65,16 @@ class ChangePropagator {
 		this.changePropagationMode = mode
 	}
 
-	def List<PropagatedChange> propagateChange(VitruviusChange<Uuid> change) {
+	/**
+	 * Applies, then propagates <code>change</code> 
+	 * through the models in <code>modelRepository</code>.
+   *
+	 * @param change - {@link VitruviusChange}
+	 * @param observers - {@link Iterable} of {@link ChangePropagationObserver}
+	 * @return - {@link List} of {@link PropagatedChange}
+	 */
+	def List<PropagatedChange> propagateChange(VitruviusChange<Uuid> change, 
+			Iterable<ChangePropagationObserver> observers) {
 		val resolvedChange = modelRepository.applyChange(change)
 		resolvedChange.affectedEObjects.map[eResource].filterNull.forEach[modified = true]
 
@@ -74,7 +84,11 @@ class ChangePropagator {
 					«resolvedChange»
 			''')
 		}
-		return new ChangePropagation(this, resolvedChange, null).propagateChanges()
+
+		changePropagationProvider.forEach[spec | observers.forEach[observer | spec.registerObserver(observer)]]
+		var result = new ChangePropagation(this, resolvedChange, null).propagateChanges()
+		changePropagationProvider.forEach[spec | observers.forEach[observer | spec.deregisterObserver(observer)]]
+		result
 	}
 
 	@FinalFieldsConstructor
@@ -208,7 +222,15 @@ class ChangePropagator {
 		override objectCreated(EObject createdObject) {
 			createdObjects += createdObject
 		}
+	
+		override changePropagationStarted(ChangePropagationSpecification specification, EChange<EObject> change) {
+			return
+		}
 
+		override changePropagationStopped(ChangePropagationSpecification specification, EChange<EObject> change) {
+			return
+		}
+	
 		override onUserInteractionReceived(UserInteractionBase interaction) {
 			userInteractions += interaction
 		}

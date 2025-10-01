@@ -13,6 +13,8 @@ import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.composite.propagation.ChangePropagationListener;
 import tools.vitruv.change.composite.propagation.ChangeableModelRepository;
 import tools.vitruv.change.interaction.InternalUserInteractor;
+import tools.vitruv.change.propagation.ChangePropagationObservableRegistry;
+import tools.vitruv.change.propagation.ChangePropagationObserver;
 import tools.vitruv.change.propagation.ChangePropagationSpecificationProvider;
 import tools.vitruv.change.propagation.PersistableChangeRecordingModelRepository;
 
@@ -22,10 +24,12 @@ import tools.vitruv.change.propagation.PersistableChangeRecordingModelRepository
  * to propagate changes. It uses the default {@link ChangePropagator} to propagate changes passed to
  * the {@link #propagateChange(VitruviusChange)} method.
  */
-public class DefaultChangeableModelRepository implements ChangeableModelRepository {
+public class DefaultChangeableModelRepository implements ChangeableModelRepository,
+    ChangePropagationObservableRegistry {
   private static final Logger LOGGER = LogManager.getLogger(DefaultChangeableModelRepository.class);
 
   private final Set<ChangePropagationListener> changePropagationListeners = new HashSet<>();
+  private final Set<ChangePropagationObserver> changePropagationObservers = new HashSet<>();
   private final PersistableChangeRecordingModelRepository modelRepository;
   private final ChangePropagator changePropagator;
 
@@ -56,9 +60,11 @@ public class DefaultChangeableModelRepository implements ChangeableModelReposito
         System.lineSeparator(),
         change);
 
+    // Set up logging/reporting
     LOGGER.info("Start change propagation");
-    notifyChangePropagationStarted(change);
-    List<PropagatedChange> resultChanges = changePropagator.propagateChange(change);
+    notifyChangePropagationStarted(change);    
+    List<PropagatedChange> resultChanges =
+        changePropagator.propagateChange(change, changePropagationObservers);
     modelRepository.saveOrDeleteModels();
     notifyChangePropagationFinished(change, resultChanges);
     LOGGER.info("Finished change propagation");
@@ -92,5 +98,17 @@ public class DefaultChangeableModelRepository implements ChangeableModelReposito
   public void removeChangePropagationListener(ChangePropagationListener propagationListener) {
     checkArgument(propagationListener != null, "propagation listener must not be null");
     changePropagationListeners.remove(propagationListener);
+  }
+
+  @Override
+  public void registerObserver(ChangePropagationObserver observer) {
+    checkArgument(observer != null, "propagation observer must not be null");
+    changePropagationObservers.add(observer);
+  }
+
+  @Override
+  public void deregisterObserver(ChangePropagationObserver observer) {
+    checkArgument(observer != null, "propagation observer must not be null");
+    changePropagationObservers.remove(observer);
   }
 }
