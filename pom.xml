@@ -9,12 +9,12 @@
   <parent>
     <groupId>tools.vitruv</groupId>
     <artifactId>parent</artifactId>
-    <version>3.3.1</version>
+    <version>3.3.2</version>
   </parent>
 
   <!-- Project Information -->
   <artifactId>tools.vitruv.change</artifactId>
-  <version>3.2.3-SNAPSHOT</version>
+  <version>3.2.3</version>
   <packaging>pom</packaging>
 
   <name>Vitruv Change and Propagation Framework</name>
