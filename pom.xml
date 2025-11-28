@@ -14,7 +14,7 @@
 
   <!-- Project Information -->
   <artifactId>tools.vitruv.change</artifactId>
-  <version>3.2.3</version>
+  <version>3.2.4-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Vitruv Change and Propagation Framework</name>
