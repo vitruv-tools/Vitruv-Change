@@ -1,24 +1,13 @@
 package tools.vitruv.change.propagation;
 
+import tools.vitruv.change.utils.ResourcePersistanceObservable;
+
 /**
  * A repository for models that records changes to the models. The repository can be used to
  * propagate changes to the models in the repository.
  */
-public interface PersistableChangeRecordingModelRepository extends ChangeRecordingModelRepository {
-  /**
-   * Registers an observer for model persistence.
-   *
-   * @param observer - {@link ModelsPersistenceObserver}
-   */
-  void registerModelPersistanceObserver(ModelsPersistenceObserver observer);
-
-  /**
-   * Deregisters an observer for model persistence.
-   *
-   * @param observer - {@link ModelsPersistenceObserver}
-   */
-  void deregisterModelPersistanceObserver(ModelsPersistenceObserver observer);
-
+public interface PersistableChangeRecordingModelRepository extends ChangeRecordingModelRepository, 
+    ResourcePersistanceObservable {
   /**
    * Loads existing models into the repository. The realization of this functionality depends on the
    * implementation.

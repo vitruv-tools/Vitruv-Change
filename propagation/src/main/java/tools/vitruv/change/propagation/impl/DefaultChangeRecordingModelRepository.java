@@ -30,8 +30,8 @@ import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.model.PersistableCorrespondenceModel;
 import tools.vitruv.change.correspondence.view.CorrespondenceModelViewFactory;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
-import tools.vitruv.change.propagation.ModelsPersistenceObserver;
 import tools.vitruv.change.propagation.PersistableChangeRecordingModelRepository;
+import tools.vitruv.change.utils.ResourcePersistenceObserver;
 
 /**
  * A default implementation of a {@link PersistableChangeRecordingModelRepository}. It manages a
@@ -52,7 +52,7 @@ public class DefaultChangeRecordingModelRepository
   private final Path consistencyMetadataFolder;
   private UuidResolver uuidResolver;
   private final VitruviusChangeResolver<Uuid> changeResolver;
-  private final Collection<ModelsPersistenceObserver> persistenceObservers =
+  private final Collection<ResourcePersistenceObserver> persistenceObservers =
       new ArrayList<>();
 
   private boolean isLoading = false;
@@ -115,12 +115,14 @@ public class DefaultChangeRecordingModelRepository
   private Resource getCreateOrLoadModel(URI modelResourceURI) {
     Resource resource;
     if ((modelResourceURI.isFile() || modelResourceURI.isPlatform())) {
+      persistenceObservers.forEach(observer -> observer.startLoadingResource(modelResourceURI));
       resource = getOrCreateResource(modelsResourceSet, modelResourceURI);
       // Only monitor modifiable models (file / platform URIs, not pathmap URIs)
       changeRecorder.addToRecording(resource);
     } else {
       resource = loadOrCreateResource(modelsResourceSet, modelResourceURI);
     }
+    persistenceObservers.forEach(observer -> observer.finishLoadingResource(resource));
     return resource;
   }
 
@@ -164,8 +166,10 @@ public class DefaultChangeRecordingModelRepository
     }
     LOGGER.debug("Attempt to save resource: {}", resource);
     try {
+      persistenceObservers.forEach(observer -> observer.startSavingResource(resource));
       resource.save(null);
       resource.setModified(false);
+      persistenceObservers.forEach(observer -> observer.finishSavingResource(resource));
     } catch (IOException e) {
       LOGGER.error("Model could not be saved: {}", resource.getURI(), e);
       throw new IllegalStateException("Could not save resource with URI " + resource.getURI(), e);
@@ -194,6 +198,8 @@ public class DefaultChangeRecordingModelRepository
     changeRecorder.close();
     modelsResourceSet.getResources().forEach(Resource::unload);
     modelsResourceSet.getResources().clear();
+    persistenceObservers.forEach(correspondenceModel::deregisterModelPersistanceObserver);
+    persistenceObservers.clear();
     correspondenceModel.close();
     uuidResolver = null;
   }
@@ -204,12 +210,14 @@ public class DefaultChangeRecordingModelRepository
   }
 
   @Override
-  public void registerModelPersistanceObserver(ModelsPersistenceObserver observer) {
+  public void registerModelPersistanceObserver(ResourcePersistenceObserver observer) {
     persistenceObservers.add(observer);
+    this.correspondenceModel.registerModelPersistanceObserver(observer);
   }
 
   @Override
-  public void deregisterModelPersistanceObserver(ModelsPersistenceObserver observer) {
+  public void deregisterModelPersistanceObserver(ResourcePersistenceObserver observer) {
     persistenceObservers.remove(observer);
+    this.correspondenceModel.deregisterModelPersistanceObserver(observer);
   }
 }

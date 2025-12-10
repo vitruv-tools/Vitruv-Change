@@ -1,13 +1,15 @@
 package tools.vitruv.change.correspondence.model;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import tools.vitruv.change.utils.ResourcePersistanceObservable;
 
 /**
  * An persistable representation of a {@link CorrespondenceModel}.
  *
  * @author Heiko Klare
  */
-public interface PersistableCorrespondenceModel extends CorrespondenceModel {
+public interface PersistableCorrespondenceModel extends CorrespondenceModel,  
+    ResourcePersistanceObservable {
   /**
    * Loads the correspondence model from its persistence if existing.
    *

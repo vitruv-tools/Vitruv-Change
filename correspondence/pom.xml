@@ -53,6 +53,11 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>tools.vitruv.change.utils</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>tools.vitruv.change.testutils.metamodels</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>

@@ -5,6 +5,8 @@ import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.Resour
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +25,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.CorrespondenceFactory;
 import tools.vitruv.change.correspondence.Correspondences;
+import tools.vitruv.change.utils.ResourcePersistenceObserver;
 
 /** A persistable representation of a {@link CorrespondenceModel}. */
 class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceModel {
@@ -30,6 +33,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
       LogManager.getLogger(PersistableCorrespondenceModelImpl.class);
   private final Correspondences correspondences;
   private final Resource correspondencesResource;
+  private final Collection<ResourcePersistenceObserver> observers = new ArrayList<>();
 
   /**
    * Creates a new correspondence model with the given resource URI.
@@ -52,9 +56,12 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
     checkState(
         correspondencesResource != null,
         "Correspondences resource must be specified to load existing correspondences");
+    observers.forEach(t -> t.startLoadingResource(correspondencesResource.getURI()));
     Resource loadedResource =
         loadOrCreateResource(
             withGlobalFactories(new ResourceSetImpl()), correspondencesResource.getURI());
+    observers.forEach(observers -> observers.finishLoadingResource(loadedResource));
+
     if (!loadedResource.getContents().isEmpty()) {
       Correspondences loadedCorrespondences = (Correspondences) loadedResource.getContents().get(0);
       for (Correspondence correspondence : loadedCorrespondences.getCorrespondences()) {
@@ -89,7 +96,9 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
     removeCorrespondencesForRemovedElements();
     if (this.correspondencesResource != null) {
       try {
+        observers.forEach(t ->  t.startSavingResource(this.correspondencesResource));
         this.correspondencesResource.save(null);
+        observers.forEach(t -> t.finishSavingResource(this.correspondencesResource));
       } catch (IOException e) {
         logger.error("Could not save correspondences resource", e);
       }
@@ -230,5 +239,15 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
     if (correspondencesResource != null) {
       correspondencesResource.unload();
     }
+  }
+
+  @Override
+  public void registerModelPersistanceObserver(ResourcePersistenceObserver observer) {
+    observers.add(observer);
+  }
+
+  @Override
+  public void deregisterModelPersistanceObserver(ResourcePersistenceObserver observer) {
+    observers.remove(observer);
   }
 }
