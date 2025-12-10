@@ -6,6 +6,20 @@ package tools.vitruv.change.propagation;
  */
 public interface PersistableChangeRecordingModelRepository extends ChangeRecordingModelRepository {
   /**
+   * Registers an observer for model persistence.
+   *
+   * @param observer - {@link ModelsPersistenceObserver}
+   */
+  void registerModelPersistanceObserver(ModelsPersistenceObserver observer);
+
+  /**
+   * Deregisters an observer for model persistence.
+   *
+   * @param observer - {@link ModelsPersistenceObserver}
+   */
+  void deregisterModelPersistanceObserver(ModelsPersistenceObserver observer);
+
+  /**
    * Loads existing models into the repository. The realization of this functionality depends on the
    * implementation.
    */

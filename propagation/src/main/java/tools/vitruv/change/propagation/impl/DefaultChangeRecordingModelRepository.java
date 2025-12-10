@@ -7,6 +7,8 @@ import static tools.vitruv.change.correspondence.model.CorrespondenceModelFactor
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +30,7 @@ import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.model.PersistableCorrespondenceModel;
 import tools.vitruv.change.correspondence.view.CorrespondenceModelViewFactory;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
+import tools.vitruv.change.propagation.ModelsPersistenceObserver;
 import tools.vitruv.change.propagation.PersistableChangeRecordingModelRepository;
 
 /**
@@ -49,6 +52,8 @@ public class DefaultChangeRecordingModelRepository
   private final Path consistencyMetadataFolder;
   private UuidResolver uuidResolver;
   private final VitruviusChangeResolver<Uuid> changeResolver;
+  private final Collection<ModelsPersistenceObserver> persistenceObservers =
+      new ArrayList<>();
 
   private boolean isLoading = false;
 
@@ -196,5 +201,15 @@ public class DefaultChangeRecordingModelRepository
   @Override
   public UuidResolver getUuidResolver() {
     return uuidResolver;
+  }
+
+  @Override
+  public void registerModelPersistanceObserver(ModelsPersistenceObserver observer) {
+    persistenceObservers.add(observer);
+  }
+
+  @Override
+  public void deregisterModelPersistanceObserver(ModelsPersistenceObserver observer) {
+    persistenceObservers.remove(observer);
   }
 }

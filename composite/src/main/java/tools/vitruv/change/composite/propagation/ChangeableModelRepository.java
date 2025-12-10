@@ -6,7 +6,7 @@ import tools.vitruv.change.composite.description.PropagatedChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 
 /**
- * A model repository that can be changed by applying @{link VitruviusChange}s. {@link
+ * A model repository that can be changed by applying {@link VitruviusChange}s. {@link
  * ChangePropagationListener}s can be registered to receive notifications about changes to the model
  * repository.
  */
