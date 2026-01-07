@@ -151,7 +151,7 @@ public class CompositeChangePropagationSpecification
     getAllProcessors().forEach(processor -> processor.setUserInteractor(userInteractor));
   }
 
-  private ArrayList<ChangePropagationSpecification> getAllProcessors() {
+  public List<ChangePropagationSpecification> getAllProcessors() {
     var processors = new ArrayList<ChangePropagationSpecification>();
     processors.addAll(changePreprocessors);
     processors.addAll(changeMainprocessors);
