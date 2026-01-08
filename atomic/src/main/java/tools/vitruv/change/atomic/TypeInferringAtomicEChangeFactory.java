@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -124,12 +125,15 @@ public class TypeInferringAtomicEChangeFactory {
    *
    * @param newValue The new root EObject.
    * @param resource The resource which the new root object is placed in.
+   * @param newValueEClass The type of newValue.
    * @param index The index of the resource which the new root object is placed in.
    * @return The created InsertRootEObject EChange.
    */
-  public <T> InsertRootEObject<T> createInsertRootChange(T newValue, Resource resource, int index) {
+  public <T> InsertRootEObject<T> createInsertRootChange(T newValue, EClass newValueEClass, 
+      Resource resource, int index) {
     final InsertRootEObject<T> c = RootFactory.eINSTANCE.createInsertRootEObject();
     setNewValue(c, newValue);
+    setAffectedEObjectType(c, newValueEClass);
     setRootChangeFeatures(c, resource, resource.getURI(), index);
     return c;
   }
@@ -138,6 +142,7 @@ public class TypeInferringAtomicEChangeFactory {
    * Creates a new {@link RemoveRootEObject} EChange.
    *
    * @param oldValue The root EObject which is removed.
+   * @param oldValueEClass The type of oldValue.
    * @param resource The resource which the root object is removed from.
    * @param index The index of the resource which the root object is removed from.
    * @param oldUri The old URI of the resource. 
@@ -145,9 +150,10 @@ public class TypeInferringAtomicEChangeFactory {
    * @return The created RemoveRootEObject EChange.
    */
   public <T> RemoveRootEObject<T> createRemoveRootChange(
-      T oldValue, Resource resource, URI oldUri, int index) {
+      T oldValue, EClass oldValueEClass, Resource resource, URI oldUri, int index) {
     final RemoveRootEObject<T> c = RootFactory.eINSTANCE.createRemoveRootEObject();
     setOldValue(c, oldValue);
+    setAffectedEObjectType(c, oldValueEClass);
     setRootChangeFeatures(c, resource, oldUri, index);
     return c;
   }
@@ -162,7 +168,7 @@ public class TypeInferringAtomicEChangeFactory {
    */
   public <T extends EObject> RemoveRootEObject<T> createRemoveRootChange(
       T oldValue, Resource resource, int index) {
-    return createRemoveRootChange(oldValue, resource, resource.getURI(), index);
+    return createRemoveRootChange(oldValue, oldValue.eClass(), resource, resource.getURI(), index);
   }
 
   /**
@@ -290,6 +296,10 @@ public class TypeInferringAtomicEChangeFactory {
 
   private <A> void checkAffectedEObjectExists(A affectedEObject) {
     checkArgument(affectedEObject != null, "affected object must not be null");
+  }
+
+  private void setAffectedEObjectType(RootEChange<?> eChange, EClass eClass) {
+    eChange.setAffectedEObjectType(eClass);
   }
 
   /**

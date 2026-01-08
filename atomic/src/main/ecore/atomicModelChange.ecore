@@ -155,6 +155,8 @@
           <details key="documentation" value="*&#xA;The index where the root element is inserted or removed."/>
         </eAnnotations>
       </eStructuralFeatures>
+      <eStructuralFeatures xsi:type="ecore:EReference" name="affectedEObjectType"
+          eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EClass"/>
       <eGenericSuperTypes eClassifier="#//EChange">
         <eTypeArguments eTypeParameter="#//root/RootEChange/Element"/>
       </eGenericSuperTypes>

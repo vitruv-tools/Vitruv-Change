@@ -58,7 +58,7 @@ public class TypeInferringCompoundEChangeFactory {
     final CreateEObject<T> createChange = atomicFactory
         .createCreateEObjectChange(affectedEObject);
     final InsertRootEObject<T> insertChange = atomicFactory
-        .createInsertRootChange(affectedEObject, resource, index);
+        .createInsertRootChange(affectedEObject, affectedEObject.eClass(), resource, index);
     return List.of(createChange, insertChange);
   }
 

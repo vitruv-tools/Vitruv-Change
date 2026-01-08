@@ -124,6 +124,6 @@ class InsertRootEObjectTest extends RootEChangeTest {
 	 * Creates new unresolved change.
 	 */
 	def private EChange<Uuid> createUnresolvedChange(Root rootObject, int index) {
-		return atomicFactory.createInsertRootChange(rootObject, resource, index).unresolve
+		return atomicFactory.createInsertRootChange(rootObject, rootObject.eClass, resource, index).unresolve
 	}
 }

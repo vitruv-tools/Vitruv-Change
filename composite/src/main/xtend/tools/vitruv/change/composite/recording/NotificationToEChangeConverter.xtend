@@ -237,13 +237,13 @@ package final class NotificationToEChangeConverter {
 	}
 
 	private def handleInsertRootChange(extension NotificationInfo notification) {
-		createInsertRootChange(newModelElementValue, notifierResource, position).
+		createInsertRootChange(newModelElementValue, newModelElementValue.eClass, notifierResource, position).
 			surroundWithCreateAndFeatureChangesIfNecessary()
 	}
 
 	private def handleMultiInsertRootChange(extension NotificationInfo notification) {
 		(notification.newValue as List<EObject>).flatMapFixedIndexed [ index, value |
-			createInsertRootChange(value, notifierResource, initialIndex + index).
+			createInsertRootChange(value, value.eClass, notifierResource, initialIndex + index).
 				surroundWithCreateAndFeatureChangesIfNecessary()
 		]
 	}
@@ -265,9 +265,9 @@ package final class NotificationToEChangeConverter {
 		notifierResource.contents.mapFixedIndexed [ index, value |
 			val valueIndex = initialIndex + notifierResource.contents.size - 1 - index
 			val oldResource = notifierResource.resourceSet.createResource(oldUri)
-			createRemoveRootChange(value, oldResource, oldUri, valueIndex)
+			createRemoveRootChange(value, value.eClass, oldResource, oldUri, valueIndex)
 		] + notifierResource.contents.flatMapFixedIndexed [ index, value |
-			createInsertRootChange(value, notifierResource, initialIndex + index).
+			createInsertRootChange(value, value.eClass, notifierResource, initialIndex + index).
 				surroundWithCreateAndFeatureChangesIfNecessary()
 		]
 	}
