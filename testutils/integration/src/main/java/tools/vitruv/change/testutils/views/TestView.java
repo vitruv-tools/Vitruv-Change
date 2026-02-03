@@ -17,13 +17,24 @@ import tools.vitruv.change.testutils.TestUserInteraction;
  */
 interface TestView extends AutoCloseable {
   /**
-   * Gets the resource at the provided {@code modelUri}.
-   * If the resource does not exist yet, it will be created virtually,
-   * without being persisted.
+   * Loads the model resource for the provided {@code viewRelativePath},
+   * casts its root element to the provided {@code clazz} and returns the casted object.
    *
-   * @param modelUri the {@link URI} of the model to load.
+   * @param viewRelativePath A project-relative path to a model.
    */
-  Resource resourceAt(URI modelUri);
+  default <T extends EObject> T from(Class<T> clazz, Path viewRelativePath) {
+    return from(clazz, getUri(viewRelativePath));
+  }
+
+  /**
+   * Casts the root element of the provided {@code resource} to the provided {@code clazz} 
+   * and returns the casted object.
+   */
+  default <T extends EObject> T from(Class<T> clazz, Resource resource) {
+    checkState(!resource.getContents().isEmpty(), 
+        "The resource at " + resource.getURI() + " is empty!");
+    return clazz.cast(resource.getContents().get(0));
+  }
 
   /**
    * Loads the model resource for the provided {@code modelUri},
@@ -32,6 +43,26 @@ interface TestView extends AutoCloseable {
    * @param modelUri the {@link URI} of the model to load.
    */
   <T extends EObject> T from(Class<T> clazz, URI modelUri);
+
+  /**
+   * Gets the resource at the provided {@code viewRelativePath}. If the resource
+   * does not exist yet, it will be created virtually, without being persisted.
+   *
+   * @param viewRelativePath a path to a model, relative to this view.
+   */
+  default Resource resourceAt(Path viewRelativePath) {
+    return resourceAt(getUri(viewRelativePath));
+  }
+
+  /**
+   * Gets the resource at the provided {@code modelUri}.
+   * If the resource does not exist yet, it will be created virtually,
+   * without being persisted.
+   *
+   * @param modelUri the {@link URI} of the model to load.
+   */
+  Resource resourceAt(URI modelUri);
+
 
   /**
    * Gets an EMF URI that can be used to load the resource that is persisted at the provided
@@ -81,34 +112,4 @@ interface TestView extends AutoCloseable {
    * @return the user interaction that can be used to program user interactions for this view.
    */
   TestUserInteraction getUserInteraction();
-
-  /**
-   * Loads the model resource for the provided {@code viewRelativePath},
-   * casts its root element to the provided {@code clazz} and returns the casted object.
-   *
-   * @param viewRelativePath A project-relative path to a model.
-   */
-  default <T extends EObject> T from(Class<T> clazz, Path viewRelativePath) {
-    return from(clazz, getUri(viewRelativePath));
-  }
-
-  /**
-   * Casts the root element of the provided {@code resource} to the provided {@code clazz} 
-   * and returns the casted object.
-   */
-  default <T extends EObject> T from(Class<T> clazz, Resource resource) {
-    checkState(!resource.getContents().isEmpty(), 
-        "The resource at " + resource.getURI() + " is empty!");
-    return clazz.cast(resource.getContents().get(0));
-  }
-
-  /**
-   * Gets the resource at the provided {@code viewRelativePath}. If the resource
-   * does not exist yet, it will be created virtually, without being persisted.
-   *
-   * @param viewRelativePath a path to a model, relative to this view.
-   */
-  default Resource resourceAt(Path viewRelativePath) {
-    return resourceAt(getUri(viewRelativePath));
-  }
 }

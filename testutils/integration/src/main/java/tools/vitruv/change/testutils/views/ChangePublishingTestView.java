@@ -204,6 +204,11 @@ public class ChangePublishingTestView implements NonTransactionalTestView {
   }
 
   @Override
+  public <T extends EObject> T from(Class<T> clazz, Resource resource) {
+    return this.delegate.from(clazz, resource);
+  }
+
+  @Override
   public void disposeViewResources() {
     resourceSet.getResources().forEach(resource -> {
       if (resource.getURI() == null || !isPathmap(resource.getURI())) {
@@ -238,10 +243,6 @@ public class ChangePublishingTestView implements NonTransactionalTestView {
     disposeViewResourcesAfterPropagation = enabled;
   }
 
-  @Override
-  public <T extends EObject> T from(Class<T> clazz, Resource resource) {
-    return this.delegate.from(clazz, resource);
-  }
 
   @Override
   public URI getUri(Path path) {
