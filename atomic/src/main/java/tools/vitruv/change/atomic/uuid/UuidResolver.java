@@ -7,7 +7,6 @@ import java.util.Map;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
 
 /**
  * A UUID resolver manages the mapping of {@link org.eclipse.emf.ecore.EObject} to UUIDs within one
@@ -148,16 +147,6 @@ public interface UuidResolver {
     checkState(sourceResource != null, "source resource must not be null");
     checkState(targetResource != null, "target resource must not be null");
     resolveResources(Map.of(sourceResource, targetResource), targetUuidResolver);
-  }
-
-  /**
-   * Creates a new {@link UuidResolver} with the given resource set.
-   *
-   * @param resourceSet is the resource set the UUID resolver uses.
-   * @return a new {@link UuidResolver} instance.
-   */
-  public static UuidResolver create(ResourceSet resourceSet) {
-    return new UuidResolverImpl(resourceSet);
   }
 
   /**

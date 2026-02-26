@@ -19,6 +19,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.atomic.uuid.UuidResolver;
+import tools.vitruv.change.atomic.uuid.UuidResolverFactory;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.composite.description.VitruviusChangeResolver;
@@ -66,7 +67,7 @@ public class DefaultChangeRecordingModelRepository
       URI correspondencesURI, Path consistencyMetadataFolder) {
     this.consistencyMetadataFolder = consistencyMetadataFolder;
     this.modelsResourceSet = withGlobalFactories(new ResourceSetImpl());
-    this.uuidResolver = UuidResolver.create(modelsResourceSet);
+    this.uuidResolver = UuidResolverFactory.create(modelsResourceSet);
     this.changeResolver = VitruviusChangeResolverFactory.forUuids(uuidResolver);
     this.correspondenceModel = createPersistableCorrespondenceModel(correspondencesURI);
     this.modelsResourceSet

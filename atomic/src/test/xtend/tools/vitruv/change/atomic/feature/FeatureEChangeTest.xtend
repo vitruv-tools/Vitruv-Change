@@ -14,6 +14,7 @@ import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.atomic.EChangeTest
 import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.atomic.uuid.UuidResolver
+import tools.vitruv.change.atomic.uuid.UuidResolverFactory
 
 import static org.junit.jupiter.api.Assertions.assertNull
 import static org.junit.jupiter.api.Assertions.assertThrows
@@ -41,7 +42,7 @@ class FeatureEChangeTest extends EChangeTest {
 		// Load model in second resource
 		val resourceSet2 = new ResourceSetImpl().withGlobalFactories
 		resource2 = resourceSet2.getResource(resource.URI, true)
-		uuidResolver2 = UuidResolver.create(resourceSet2)
+		uuidResolver2 = UuidResolverFactory.create(resourceSet2)
 		resource2.allContents.forEach[uuidResolver2.registerEObject(it)]
 	}
 
