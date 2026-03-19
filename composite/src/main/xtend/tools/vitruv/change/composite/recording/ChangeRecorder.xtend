@@ -115,7 +115,7 @@ class ChangeRecorder implements AutoCloseable {
 	 */
 	def beginRecording() {
 		checkNotDisposed()
-		checkState(!isRecording, "This recorder is already recording!")
+		// checkState(!isRecording, "This recorder is already recording!")
 		toDesinfect.forEach[recursively [removeAdapter()]]
 		toDesinfect.clear()
 		isRecording = true
