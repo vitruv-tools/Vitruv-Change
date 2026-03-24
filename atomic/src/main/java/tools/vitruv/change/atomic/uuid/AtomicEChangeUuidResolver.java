@@ -51,6 +51,36 @@ public class AtomicEChangeUuidResolver {
 
   /**
    * Gets or registers {@link Uuid Uuids} for all elements of the given change and returns the
+   * Uuid-assigned change.
+   * <p>
+   * Unlike {@link AtomicEChangeUuidResolver#assignIds(EChange)}, does not update the resource set,
+   * or the UuidResolver status.
+   *
+   * @param resolvedEChange the change to assign Uuids for.
+   * @return Returns the Uuid-assigned change.
+   */
+  public EChange<Uuid> assignIdsWithoutUpdatingResolver(EChange<EObject> resolvedEChange) {
+    return AtomicEChangeResolverHelper.resolveChange(
+      resolvedEChange,
+      eObject -> {
+        if (uuidResolver.hasUuid(eObject)) {
+          return uuidResolver.getUuid(eObject);
+        } else {
+          if (resolvedEChange instanceof CreateEObject<EObject> createChange
+              && createChange.getAffectedElement() == eObject) {
+            return uuidResolver.registerEObject(eObject);
+          } else {
+            throw new IllegalStateException(
+                "trying to assign UUID for unknown element %s of change %s"
+                    .formatted(eObject, resolvedEChange));
+          }
+        }
+      },
+      this::resourceResolver);
+  }
+
+  /**
+   * Gets or registers {@link Uuid Uuids} for all elements of the given change and returns the
    * Uuid-assigned change. The associated resource set must be in the state after the change has
    * been applied.
    *
@@ -58,24 +88,7 @@ public class AtomicEChangeUuidResolver {
    * @return Returns the Uuid-assigned change.
    */
   public EChange<Uuid> assignIds(EChange<EObject> resolvedEChange) {
-    EChange<Uuid> unresolvedEChange =
-        AtomicEChangeResolverHelper.resolveChange(
-            resolvedEChange,
-            eObject -> {
-              if (uuidResolver.hasUuid(eObject)) {
-                return uuidResolver.getUuid(eObject);
-              } else {
-                if (resolvedEChange instanceof CreateEObject<EObject> createChange
-                    && createChange.getAffectedElement() == eObject) {
-                  return uuidResolver.registerEObject(eObject);
-                } else {
-                  throw new IllegalStateException(
-                      "trying to assign UUID for unknown element %s of change %s"
-                          .formatted(eObject, resolvedEChange));
-                }
-              }
-            },
-            this::resourceResolver);
+    EChange<Uuid> unresolvedEChange = assignIdsWithoutUpdatingResolver(resolvedEChange);
     updateUuidResolver(resolvedEChange, unresolvedEChange);
     return unresolvedEChange;
   }
