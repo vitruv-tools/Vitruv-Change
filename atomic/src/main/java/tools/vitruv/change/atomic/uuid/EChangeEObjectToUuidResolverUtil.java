@@ -1,10 +1,14 @@
 package tools.vitruv.change.atomic.uuid;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -37,13 +41,36 @@ public final class EChangeEObjectToUuidResolverUtil {
    * 
    * @param changes the list of EChange&lt;EObject&gt;.
    * @param targetResource the Resource, to which the changes should be applied.
-   * @return the resolved list of EChange&lt;Uuid&gt;.
+   * @return the resolution result.
    */
   public static ResolutionResult resolveChanges(List<EChange<EObject>> changes,
       Resource targetResource) {
     UuidResolver uuidResolver = UuidResolver.create(targetResource.getResourceSet());
     targetResource.getAllContents().forEachRemaining(uuidResolver::registerEObject);
-    
+    return resolveChanges(changes, targetResource, uuidResolver);
+  }
+
+  /**
+   * Resolves a list of EChange&lt;EObject&gt; to a list of EChange&lt;Uuid&gt;. The changes are
+   * not applied. If they contain proxy EObjects, which cannot be resolved, the proxy objects are
+   * replaced by newly created EObjects. The method loads Uuids for existing elements from the
+   * given file path.
+   * 
+   * @param changes the list of EChange&lt;EObject&gt;.
+   * @param targetResource the Resource, to which the changes should be applied.
+   * @param uuidFilePath path to a file, which contains a mapping of elements to Uuids.
+   * @return the resolution result.
+   * @throws IOException if the file cannot be loaded.
+   */
+  public static ResolutionResult resolveChanges(List<EChange<EObject>> changes,
+      Resource targetResource, Path uuidFilePath) throws IOException {
+    UuidResolver uuidResolver = UuidResolver.create(targetResource.getResourceSet());
+    uuidResolver.loadFromUri(URI.createFileURI(uuidFilePath.toString()));
+    return resolveChanges(changes, targetResource, uuidResolver);
+  }
+
+  private static ResolutionResult resolveChanges(List<EChange<EObject>> changes,
+      Resource targetResource, UuidResolver uuidResolver) {
     AtomicEChangeUuidResolver echangeUuidResolver = new AtomicEChangeUuidResolver(
       uuidResolver);
     Map<String, EObject> proxyUriToObject = new HashMap<>();
