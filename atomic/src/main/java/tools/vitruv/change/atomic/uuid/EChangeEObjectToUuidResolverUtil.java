@@ -20,21 +20,32 @@ import tools.vitruv.change.atomic.root.InsertRootEObject;
  * A utility class for resolving lists of EChange&lt;EObject&gt; to lists of EChange&lt;Uuid&gt;.
  */
 public final class EChangeEObjectToUuidResolverUtil {
+  /**
+   * Result of resolving a list of EChange&lt;EObject&gt; to a list of EChange&lt;Uuid&gt;.
+   * Besides containing the list of resolved changes, it also includes a mapping of
+   * EObjects from the involved model and changes to Uuids.
+   */
+  public static record ResolutionResult(List<EChange<Uuid>> resolvedChanges, Map<EObject, Uuid> uuidMapping) {}
+
   private EChangeEObjectToUuidResolverUtil() {
   }
 
   /** Resolves a list of EChange&lt;EObject&gt; to a list of EChange&lt;Uuid&gt;. The changes are
    * not applied. If they contain proxy EObjects, which cannot be resolved, the proxy objects are
-   * replaced by newly created EObjects.
+   * replaced by newly created EObjects. If the targetResource contains model elements, this method
+   * will assign new UUIDs to each existing element.
    * 
    * @param changes the list of EChange&lt;EObject&gt;.
    * @param targetResource the Resource, to which the changes should be applied.
    * @return the resolved list of EChange&lt;Uuid&gt;.
    */
-  public static List<EChange<Uuid>> resolveChanges(List<EChange<EObject>> changes,
+  public static ResolutionResult resolveChanges(List<EChange<EObject>> changes,
       Resource targetResource) {
-    AtomicEChangeUuidResolver resolverUuid = new AtomicEChangeUuidResolver(
-        UuidResolver.create(targetResource.getResourceSet()));
+    UuidResolver uuidResolver = UuidResolver.create(targetResource.getResourceSet());
+    targetResource.getAllContents().forEachRemaining(uuidResolver::registerEObject);
+    
+    AtomicEChangeUuidResolver echangeUuidResolver = new AtomicEChangeUuidResolver(
+      uuidResolver);
     Map<String, EObject> proxyUriToObject = new HashMap<>();
     List<EChange<Uuid>> resultList = new ArrayList<>();
 
@@ -67,13 +78,12 @@ public final class EChangeEObjectToUuidResolverUtil {
         subChange.setOldValue(resolvedElement);
       }
 
-      EChange<Uuid> uuidChange = resolverUuid.assignIds(change);
+      EChange<Uuid> uuidChange = echangeUuidResolver.assignIds(change);
       resultList.add(uuidChange);
     }
 
-    resolverUuid.endTransaction();
     proxyUriToObject.clear();
-    return resultList;
+    return new ResolutionResult(resultList, uuidResolver.getRegisteredUuids());
   }
 
   private static EObject resolveOrCreateElement(EObject element, EObjectExistenceEChange<?> change,

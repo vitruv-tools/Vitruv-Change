@@ -41,6 +41,14 @@ public interface UuidResolver {
   }
 
   /**
+   * Returns a map of all registered {@link org.eclipse.emf.ecore.EObject}s
+   * and their corresponding UUIDs.
+   * 
+   * @return the map with the objects and UUIDs.
+   */
+  public Map<EObject, Uuid> getRegisteredUuids();
+
+  /**
    * Returns the UUID for the given {@link org.eclipse.emf.ecore.EObject}. If no UUID is registered
    * for it, an {@link IllegalStateException} is thrown.
    */
