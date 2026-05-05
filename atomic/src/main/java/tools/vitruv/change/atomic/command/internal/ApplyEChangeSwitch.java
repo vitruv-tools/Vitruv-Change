@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.ecore.EObject;
+import org.jspecify.annotations.NonNull;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.command.ApplyEChangeObserver;
 
@@ -54,19 +55,32 @@ public class ApplyEChangeSwitch {
    *
    * @param change - The {@link EChange} which will be applied.
    * @param applyForward - If {@code true} the change will be applied forward, otherwise backward.
-   * @throws IllegalStateException - No commands can be generated for the change, 
+   * @throws IllegalStateException - No commands can be generated for the change,
    *      or they cannot be executed.
    */
   public static void applyEChange(EChange<EObject> change, boolean applyForward) {
     observers.forEach(applyObserver -> applyObserver.startToApplyEChange(change, applyForward));
-    final var commandSwitch = applyForward ? forwardSwitch : backwardSwitch;
-    var commands = commandSwitch.getCommands(change);
-    checkState(commands != null, "no commands could be generated for EChange: %s", change);
+    var commands = getCommands(change, applyForward);
 
     for (Command c : commands) {
       checkState(c.canExecute(), "cannot execute command generated for EChange: %s", change);
       c.execute();
     }
     observers.forEach(applyObserver -> applyObserver.endApplyEChange(commands));
+  }
+
+  /**
+   * Computes the EMF {@link Command}s required to apply {@code change} in the given direction
+   * (forward or backward).
+   *
+   * @param change - {@link EChange}
+   * @param applyForward - boolean
+   * @return {@link List} of {@link EChange}
+   */
+  public static List<Command> getCommands(EChange<EObject> change, boolean applyForward) {
+    final var commandSwitch = applyForward ? forwardSwitch : backwardSwitch;
+    var commands = commandSwitch.getCommands(change);
+    checkState(commands != null, "no commands could be generated for EChange: %s", change);
+    return commands;
   }
 }

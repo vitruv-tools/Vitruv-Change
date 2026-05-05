@@ -68,7 +68,7 @@ public class AtomicEChangeUuidResolver {
         } else {
           if (resolvedEChange instanceof CreateEObject<EObject> createChange
               && createChange.getAffectedElement() == eObject) {
-            return uuidResolver.registerEObject(eObject);
+            return uuidResolver.generateUuid(eObject);
           } else {
             throw new IllegalStateException(
                 "trying to assign UUID for unknown element %s of change %s"
