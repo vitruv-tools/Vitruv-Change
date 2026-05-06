@@ -47,9 +47,7 @@ public final class ProjectMarker {
     // Remove last segment as long as the folder does not contain the marker file
     while (!Files.exists(potentialProjectPath.resolve(TEST_PROJECT_MARKER_FILE_NAME))) {
       potentialProjectPath = potentialProjectPath.getParent();
-      if (potentialProjectPath == null) {
-        break;
-      }
+      checkState(potentialProjectPath != null, "No project folder for %s found", containedElementPath);
     }
     return Optional.ofNullable(potentialProjectPath);
   }
