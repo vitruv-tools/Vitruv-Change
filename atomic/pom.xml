@@ -29,7 +29,7 @@
         <artifactId>exec-maven-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.eclipse.xtend</groupId>
+        <groupId>org.eclipse.xtext</groupId>
         <artifactId>xtend-maven-plugin</artifactId>
       </plugin>
       <plugin>
@@ -86,7 +86,7 @@
 
     <!-- external test dependencies -->
     <dependency>
-      <groupId>org.eclipse.xtend</groupId>
+      <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtend.lib</artifactId>
       <scope>test</scope>
     </dependency>
