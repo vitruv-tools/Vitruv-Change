@@ -3,6 +3,8 @@ package tools.vitruv.change.interaction;
 import java.io.Console;
 import java.util.ArrayList;
 import java.util.Collections;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A result provider based on CLI in- and output to make the requested input.
@@ -12,6 +14,9 @@ import java.util.Collections;
  */
 public class CliInteractionResultProviderImpl implements InteractionResultProvider {
   private final Console console;
+  private static final Logger log = LogManager.getLogger(CliInteractionResultProviderImpl.class);
+  private static final int LOWER_BOUND = 0;
+  private static final int ERROR_CODE = Integer.MIN_VALUE;
 
   /**
    * Generates a new Result provider that operates on the CLI.
@@ -19,7 +24,7 @@ public class CliInteractionResultProviderImpl implements InteractionResultProvid
   public CliInteractionResultProviderImpl() {
     this.console = System.console();
     if ((this.console == null)) {
-      System.out.print("Console not available");
+      log.error("Console not available");
     }
   }
 
@@ -43,7 +48,7 @@ public class CliInteractionResultProviderImpl implements InteractionResultProvid
       final String message,
       final String positiveDecisionText,
       final UserInteractionOptions.NotificationType notificationType) {
-    System.out.println(notificationType + " " + title + ": " + message);
+    this.console.printf(notificationType + " " + title + ": " + message);
   }
 
   @Override
@@ -73,11 +78,11 @@ public class CliInteractionResultProviderImpl implements InteractionResultProvid
       final String cancelDecisionText,
       final Iterable<String> choices) {
     StringBuilder sb = new StringBuilder(title + ": " + message + "\nChoices:\n");
-    int i = 0;
+    int choiceUpperBound = LOWER_BOUND;
     for (String choice : choices) {
-      sb.append("(").append(i).append(") ").append(choice).append("\n");
+      sb.append("(").append(choiceUpperBound).append(") ").append(choice).append("\n");
       choices.iterator().next();
-      i++;
+      choiceUpperBound++;
     }
     sb.append("Please select one option based on the index displayed or type \"")
         .append(cancelDecisionText)
@@ -87,15 +92,12 @@ public class CliInteractionResultProviderImpl implements InteractionResultProvid
       if (s.strip().equals(cancelDecisionText)) { // Abort
         return 0;
       }
-      try {
-        int response = Integer.parseInt(s); // Input given
-        if (response >= 0 && response < i) { // Input in the valid range
-          return response;
-        } else {
-          s = this.console.readLine("\"" + response + "\" is not in the valid range, try again");
-        }
-      } catch (NumberFormatException e) { // Not a number as input
-        s = this.console.readLine("\"" + s + "\" is not a valid number, try again");
+      int response = parseIntOrReturnErrorCode(s);
+
+      if (response != ERROR_CODE && isInValidRange(response, choiceUpperBound)) {
+        return response;
+      } else {
+        s = printErrorAndWaitForInputMC(s, response);
       }
     }
   }
@@ -108,46 +110,69 @@ public class CliInteractionResultProviderImpl implements InteractionResultProvid
       final String positiveDecisionText,
       final String cancelDecisionText,
       final Iterable<String> choices) {
+
+    // Print choices
     StringBuilder sb = new StringBuilder(title + ": " + message + "\nChoices:\n");
-    int i = 0;
+    int numberOfChoices = LOWER_BOUND;
     while (choices.iterator().hasNext()) {
       String choice = choices.toString();
-      sb.append("(").append(i).append(") ").append(choice).append("\n");
+      sb.append("(").append(numberOfChoices).append(") ").append(choice).append("\n");
       choices.iterator().next();
-      i++;
+      numberOfChoices++;
     }
     sb.append("Please select options based on the index displayed (comma seperated) or type \"")
         .append(cancelDecisionText)
         .append("\" to abort the operation");
+
+
     String s = this.console.readLine(sb.toString()).strip();
-    while (true) {
+    while (true) { // Read Input until valid or abort
       if (s.strip().equals(cancelDecisionText)) { // Abort
         return Collections.singleton(0);
       }
+
+      // if no abort, start parsing fragments
       String[] fragments = s.strip().split(",");
       ArrayList<Integer> result = new ArrayList<>();
       int correctlyParsedFragments = 0;
       for (String fragment : fragments) {
-        try {
-          int fragmentInt = Integer.parseInt(fragment);
-          if (!(fragmentInt >= 0 && fragmentInt < i)) {
-            if (!result.contains(fragmentInt)) {
-              result.add(fragmentInt);
-            }
-            correctlyParsedFragments++;
-          } else {
-            String rangeError = "\" is not in the valid range, try again\"";
-            s = this.console.readLine("\"" + fragmentInt + rangeError);
-            break;
-          }
-        } catch (NumberFormatException e) {
-          s = this.console.readLine("\"" + fragment + "\" is not a valid number, try again");
+        int fragmentInt = parseIntOrReturnErrorCode(fragment);
+        if (fragmentInt == ERROR_CODE || !isInValidRange(fragmentInt, numberOfChoices)) {
+          // Error state
+          s = printErrorAndWaitForInputMC(fragment, fragmentInt);
           break;
+        }
+        correctlyParsedFragments++;
+        if (!result.contains(fragmentInt)) {
+          result.add(fragmentInt);
         }
       }
       if (fragments.length == correctlyParsedFragments) {
-        return result;
+        return result; // only return iff all fragments are valid inputs
       }
     }
   }
+
+  private int parseIntOrReturnErrorCode(String numberString) {
+    try {
+      return Integer.parseInt(numberString);
+    } catch (NumberFormatException e) {
+      return ERROR_CODE;
+    }
+  }
+
+  private boolean isInValidRange(int input, int upperRangeLimit) {
+    return (input >= LOWER_BOUND && input < upperRangeLimit);
+  }
+
+  private String printErrorAndWaitForInputMC(String originalInput, int parseOutput) {
+    String errorMessage = "\"" + originalInput;
+    if (parseOutput == ERROR_CODE) {
+      errorMessage += "\" is not a valid number, try again";
+    } else { // we assume that if the parse was not the problem, the range was
+      errorMessage += "\" is not in the valid range, try again";
+    }
+    return this.console.readLine(errorMessage);
+  }
+
 }
