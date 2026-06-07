@@ -1,5 +1,6 @@
 package tools.vitruv.change.composite.description.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -36,8 +37,20 @@ abstract class AbstractVitruviusChangeResolver<Id> implements VitruviusChangeRes
               .map(c -> transformVitruviusChange(c, changeHandler, onTransactionEnd))
               .toList());
     } else if (change instanceof TransactionalChangeImpl<Source> transactionalChange) {
-      List<EChange<Target>> resolvedChanges =
-          transactionalChange.getEChanges().stream().map(changeHandler::apply).toList();
+//      List<EChange<Target>> resolvedChanges =
+//    	  transactionalChange.getEChanges().stream().map(changeHandler::apply).toList();
+      List<EChange<Target>> resolvedChanges = new ArrayList<EChange<Target>>();
+      List<? extends EChange<Source>> unresolvedChanges = transactionalChange.getEChanges();
+      for (int i = 0; i < unresolvedChanges.size(); i++) {
+//    	System.out.println("At change: " + (i+1) + " of " + unresolvedChanges.size());
+//    	if(i==700) {
+//			System.out.println("Reached change 700");
+//		}
+    	@SuppressWarnings("unchecked")
+		EChange<Source> typedUnresolvedChange = (EChange<Source>) unresolvedChanges.get(i);
+		EChange<Target> resolvedChange = changeHandler.apply(typedUnresolvedChange);
+		resolvedChanges.add(resolvedChange);
+      }      
       TransactionalChange<Target> result = new TransactionalChangeImpl<>(resolvedChanges);
       result.setUserInteractions(change.getUserInteractions());
       onTransactionEnd.accept(result);
