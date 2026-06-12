@@ -2,8 +2,11 @@ package tools.vitruv.change.composite.description.impl
 
 import java.util.ArrayList
 import java.util.Collections
+import java.util.HashMap
 import java.util.HashSet
 import java.util.List
+import java.util.Map
+import java.util.Optional
 import java.util.Set
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
@@ -38,6 +41,7 @@ import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.mapF
 class TransactionalChangeImpl<Element> implements TransactionalChange<Element> {
 	var List<? extends EChange<Element>> eChanges
 	val List<UserInteractionBase> userInteractions = new ArrayList()
+	val Map<Class<?>, Object> annotations = new HashMap()
 
 	new(Iterable<? extends EChange<Element>> eChanges) {
 		this.eChanges = checkNotNull(eChanges, "eChanges").toList
@@ -118,12 +122,26 @@ class TransactionalChangeImpl<Element> implements TransactionalChange<Element> {
 		this.userInteractions += userInteractions
 	}
 	
+	override <T> setAnnotation(Class<T> type, T value) {
+		annotations.put(type, value)
+	}
+
+	override <T> getAnnotation(Class<T> type) {
+		Optional.ofNullable(type.cast(annotations.get(type)))
+	}
+
+	override getAnnotations() {
+		Collections.unmodifiableMap(annotations)
+	}
+
 	def protected getClonedEChanges() {
 		eChanges.mapFixed[EcoreUtil.copy(it)]
 	}
-		
+
 	override TransactionalChangeImpl<Element> copy() {
-		new TransactionalChangeImpl(clonedEChanges)
+		val copy = new TransactionalChangeImpl(clonedEChanges)
+		copy.annotations.putAll(annotations)
+		copy
 	}
 
 	override equals(Object obj) {

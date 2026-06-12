@@ -26,6 +26,7 @@ abstract class AbstractVitruviusChangeResolver<Id> implements VitruviusChangeRes
    *     change is a composite change.
    * @throws IllegalStateException if the change cannot be resolved or applied.
    */
+  @SuppressWarnings("unchecked")
   protected <Source, Target> VitruviusChange<Target> transformVitruviusChange(
       VitruviusChange<Source> change,
       Function<EChange<Source>, EChange<Target>> changeHandler,
@@ -38,8 +39,11 @@ abstract class AbstractVitruviusChangeResolver<Id> implements VitruviusChangeRes
     } else if (change instanceof TransactionalChangeImpl<Source> transactionalChange) {
       List<EChange<Target>> resolvedChanges =
           transactionalChange.getEChanges().stream().map(changeHandler::apply).toList();
-      TransactionalChange<Target> result = new TransactionalChangeImpl<>(resolvedChanges);
+      TransactionalChangeImpl<Target> result = new TransactionalChangeImpl<>(resolvedChanges);
       result.setUserInteractions(change.getUserInteractions());
+      // Annotations must be carried over to the new instance; assignIds creates a fresh object
+      // so without this copy they would be silently dropped before reaching commitViewChanges.
+      change.getAnnotations().forEach((type, value) -> result.setAnnotation((Class) type, value));
       onTransactionEnd.accept(result);
       return result;
     }

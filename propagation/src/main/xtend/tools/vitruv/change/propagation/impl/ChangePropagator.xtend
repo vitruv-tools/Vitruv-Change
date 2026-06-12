@@ -183,8 +183,8 @@ class ChangePropagator {
 		) {
 			val transitiveChanges = modelRepository.recordChanges [
 				for (eChange : change.EChanges) {
-					propagationSpecification.propagateChange(eChange, modelRepository.correspondenceModel,
-						modelRepository)
+					propagationSpecification.propagateChange(eChange, change,
+						modelRepository.correspondenceModel, modelRepository)
 				}
 			]
 

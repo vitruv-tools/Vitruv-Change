@@ -12,6 +12,8 @@ class CompositeContainerChangeImpl<Element> extends AbstractCompositeChangeImpl<
 	}
 	
 	override CompositeContainerChangeImpl<Element> copy() {
-		new CompositeContainerChangeImpl(changes.mapFixed [copy()])
+		val copy = new CompositeContainerChangeImpl(changes.mapFixed [copy()])
+		copy.annotations.putAll(annotations)
+		copy
 	}
 }

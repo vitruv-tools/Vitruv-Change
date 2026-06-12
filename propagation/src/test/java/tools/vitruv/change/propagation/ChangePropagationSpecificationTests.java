@@ -2,11 +2,14 @@ package tools.vitruv.change.propagation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.junit.jupiter.api.Test;
@@ -19,7 +22,8 @@ import tools.vitruv.change.atomic.feature.attribute.AttributeFactory;
 import tools.vitruv.change.atomic.feature.attribute.AttributePackage;
 import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute;
 import tools.vitruv.change.composite.MetamodelDescriptor;
-import tools.vitruv.change.correspondence.Correspondence; 
+import tools.vitruv.change.composite.description.AnnotationSource;
+import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.interaction.UserInteractionFactory;
 import tools.vitruv.change.interaction.impl.PredefinedInteractionResultProviderImpl;
@@ -109,6 +113,37 @@ class ChangePropagationSpecificationTests {
   }
 
   @Test
+  void annotationsForwardedThroughCompositeSpec() {
+    var mockUserInteractor = UserInteractionFactory.instance.createUserInteractor(
+        new PredefinedInteractionResultProviderImpl(null));
+    var recordingPreprocessor = new AnnotationRecordingSpec(descriptorA, descriptorB);
+    var recordingMainprocessor = new AnnotationRecordingSpec(descriptorA, descriptorB);
+    var composite = new CompositeChangePropagationSpecification(descriptorA, descriptorB);
+    composite.setUserInteractor(mockUserInteractor);
+    composite.addChangePreprocessor(recordingPreprocessor);
+    composite.addChangeMainprocessor(recordingMainprocessor);
+
+    record Tag(String value) {}
+    var tag = new Tag("hello");
+    // AnnotationSource.of() is needed because the generic SAM prevents a direct lambda assignment.
+    AnnotationSource annotations = AnnotationSource.of(type -> type == Tag.class ? Optional.of(tag) : Optional.empty());
+
+    CreateEObject<EObject> change = EobjectFactory.eINSTANCE.createCreateEObject();
+    composite.propagateChange(change, annotations, null, null);
+
+    assertSame(tag, recordingPreprocessor.lastAnnotations.getAnnotation(Tag.class).orElseThrow());
+    assertSame(tag, recordingMainprocessor.lastAnnotations.getAnnotation(Tag.class).orElseThrow());
+  }
+
+  @Test
+  void defaultPropagateOverloadUsesEmptyAnnotations() {
+    var recordingSpec = new AnnotationRecordingSpec(descriptorA, descriptorB);
+    CreateEObject<EObject> change = EobjectFactory.eINSTANCE.createCreateEObject();
+    recordingSpec.propagateChange(change, null, null);
+    assertTrue(recordingSpec.lastAnnotations.getAnnotation(Object.class).isEmpty());
+  }
+
+  @Test
   void handleIncompatibleSubprocessors() {
     var compositeSpecificationForDescriptorsBAndA =
         new CompositeChangePropagationSpecification(descriptorB, descriptorA);
@@ -143,10 +178,41 @@ class ChangePropagationSpecificationTests {
     }
   }
 
+  /** Records the {@link AnnotationSource} passed to the annotated propagateChange overload. */
+  private static class AnnotationRecordingSpec extends AbstractChangePropagationSpecification {
+    AnnotationSource lastAnnotations;
+
+    private AnnotationRecordingSpec(
+        MetamodelDescriptor sourceDescriptor, MetamodelDescriptor targetDescriptor) {
+      super(sourceDescriptor, targetDescriptor);
+    }
+
+    @Override
+    public boolean doesHandleChange(EChange<EObject> change,
+        EditableCorrespondenceModelView<Correspondence> correspondenceModel) {
+      return true;
+    }
+
+    @Override
+    public void propagateChange(EChange<EObject> change,
+        EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+        ResourceAccess resourceAccess) {
+      lastAnnotations = AnnotationSource.EMPTY;
+    }
+
+    @Override
+    public void propagateChange(EChange<EObject> change,
+        AnnotationSource changeAnnotations,
+        EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+        ResourceAccess resourceAccess) {
+      lastAnnotations = changeAnnotations;
+    }
+  }
+
   /**
    * A mock change propagation specification.
    * It "handles" changes for a given change type (a concrete subclass of {@link EChange})
-   * by doing nothing, expect calling notifiers. 
+   * by doing nothing, expect calling notifiers.
    */
   private static class MockChangePropagationSpecification extends
       AbstractChangePropagationSpecification {
