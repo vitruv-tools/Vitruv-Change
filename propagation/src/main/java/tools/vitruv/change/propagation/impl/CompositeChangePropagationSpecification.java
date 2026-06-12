@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.composite.MetamodelDescriptor;
+import tools.vitruv.change.composite.description.AnnotationSource;
 import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.interaction.UserInteractor;
@@ -98,24 +99,35 @@ public class CompositeChangePropagationSpecification
       EChange<EObject> change,
       EditableCorrespondenceModelView<Correspondence> correspondenceModel,
       ResourceAccess resourceAccess) {
-    this.propagateChangeViaPreprocessors(change, correspondenceModel, resourceAccess);
-    this.propagateChangeViaMainprocessors(change, correspondenceModel, resourceAccess);
+    propagateChange(change, AnnotationSource.EMPTY, correspondenceModel, resourceAccess);
+  }
+
+  @Override
+  public void propagateChange(
+      EChange<EObject> change,
+      AnnotationSource changeAnnotations,
+      EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+      ResourceAccess resourceAccess) {
+    this.propagateChangeViaPreprocessors(change, changeAnnotations, correspondenceModel, resourceAccess);
+    this.propagateChangeViaMainprocessors(change, changeAnnotations, correspondenceModel, resourceAccess);
   }
 
   /**
    * Propagates <code>change</code> via the preprocessors.
    *
    * @param change - {@link EChange}
+   * @param changeAnnotations - {@link AnnotationSource}
    * @param correspondenceModel - {@link EditableCorrespondenceModelView}
    * @param resourceAccess - {@link ResourceAccess}
    */
   protected void propagateChangeViaPreprocessors(
       EChange<EObject> change,
+      AnnotationSource changeAnnotations,
       EditableCorrespondenceModelView<Correspondence> correspondenceModel,
       ResourceAccess resourceAccess) {
     for (var changeProcessor : changePreprocessors) {
       logger.trace("Calling change preprocessor %s for change event %s", changeProcessor, change);
-      changeProcessor.propagateChange(change, correspondenceModel, resourceAccess);
+      changeProcessor.propagateChange(change, changeAnnotations, correspondenceModel, resourceAccess);
     }
   }
 
@@ -123,16 +135,18 @@ public class CompositeChangePropagationSpecification
    * Propagates <code>change</code> via the main processors.
    *
    * @param change - {@link EChange}
+   * @param changeAnnotations - {@link AnnotationSource}
    * @param correspondenceModel - {@link EditableCorrespondenceModelView}
    * @param resourceAccess - {@link ResourceAccess}
    */
   protected void propagateChangeViaMainprocessors(
       EChange<EObject> change,
+      AnnotationSource changeAnnotations,
       EditableCorrespondenceModelView<Correspondence> correspondenceModel,
       ResourceAccess resourceAccess) {
     for (var changeProcessor : this.changeMainprocessors) {
       logger.trace("Calling change main processor %s for change event %s", changeProcessor, change);
-      changeProcessor.propagateChange(change, correspondenceModel, resourceAccess);
+      changeProcessor.propagateChange(change, changeAnnotations, correspondenceModel, resourceAccess);
     }
   }
 

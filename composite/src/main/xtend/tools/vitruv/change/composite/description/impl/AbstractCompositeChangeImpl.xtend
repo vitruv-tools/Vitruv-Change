@@ -1,8 +1,12 @@
 package tools.vitruv.change.composite.description.impl
 
+import java.util.Collections
+import java.util.HashMap
 import java.util.HashSet
 import java.util.LinkedHashSet
 import java.util.List
+import java.util.Map
+import java.util.Optional
 import java.util.Set
 import tools.vitruv.change.atomic.EChange
 import tools.vitruv.change.composite.MetamodelDescriptor
@@ -13,6 +17,7 @@ import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.*
 
 abstract class AbstractCompositeChangeImpl<Element, ContanedChange extends VitruviusChange<Element>> implements CompositeChange<Element, ContanedChange> {
 	List<ContanedChange> changes
+	protected val Map<Class<?>, Object> annotations = new HashMap()
 
 	new(List<? extends ContanedChange> changes) {
 		this.changes = List.copyOf(changes)
@@ -48,6 +53,18 @@ abstract class AbstractCompositeChangeImpl<Element, ContanedChange extends Vitru
 
 	override getUserInteractions() {
 		return changes.flatMap [userInteractions]
+	}
+
+	override <T> setAnnotation(Class<T> type, T value) {
+		annotations.put(type, value)
+	}
+
+	override <T> getAnnotation(Class<T> type) {
+		Optional.ofNullable(type.cast(annotations.get(type)))
+	}
+
+	override getAnnotations() {
+		Collections.unmodifiableMap(annotations)
 	}
 
 	override toString() {
