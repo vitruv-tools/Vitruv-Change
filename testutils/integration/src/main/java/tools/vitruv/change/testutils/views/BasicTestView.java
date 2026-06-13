@@ -22,7 +22,8 @@ import tools.vitruv.change.composite.description.PropagatedChange;
 import tools.vitruv.change.testutils.TestUserInteraction;
 
 /**
- * A minimal test view that gives access to resources, but does not record any changes.
+ * A minimal test view that gives access to resources, but does not record any
+ * changes.
  */
 public class BasicTestView implements TestView {
   private final Path persistenceDirectory;
@@ -42,20 +43,25 @@ public class BasicTestView implements TestView {
 
   /**
    * Creates a test view that will store its persisted resources in the
-   * provided {@code persistenceDirectory}, allow to program interactions through the provided {@code userInteraction},
+   * provided {@code persistenceDirectory}, allow to program interactions through
+   * the provided {@code userInteraction},
    * and use the provided {@code uriMode}.
    */
-  public BasicTestView(final Path persistenceDirectory, final TestUserInteraction userInteraction, final UriMode uriMode) {
+  public BasicTestView(final Path persistenceDirectory, final TestUserInteraction userInteraction,
+      final UriMode uriMode) {
     this(persistenceDirectory,
-      ResourceSetUtil.withGlobalFactories(new ResourceSetImpl()), userInteraction, uriMode);
+        ResourceSetUtil.withGlobalFactories(new ResourceSetImpl()), userInteraction, uriMode);
   }
 
   /**
-   * Creates a test view that will store its persisted resources in the provided {@code persistenceDirectory}, access
-   * resources through the provided {@code resourceSet}, allow to program interactions through the provided
+   * Creates a test view that will store its persisted resources in the provided
+   * {@code persistenceDirectory}, access
+   * resources through the provided {@code resourceSet}, allow to program
+   * interactions through the provided
    * {@code userInteraction}, and use the provided {@code uriMode}.
    */
-  public BasicTestView(final Path persistenceDirectory, final ResourceSet resourceSet, final TestUserInteraction userInteraction, final UriMode uriMode) {
+  public BasicTestView(final Path persistenceDirectory, final ResourceSet resourceSet,
+      final TestUserInteraction userInteraction, final UriMode uriMode) {
     this.persistenceDirectory = persistenceDirectory;
     this.resourceSet = resourceSet;
     this.userInteraction = userInteraction;
@@ -130,7 +136,9 @@ public class BasicTestView implements TestView {
     switch (this.uriMode) {
       case PLATFORM_URIS:
         return URI.createPlatformResourceURI(
-            StreamSupport.stream(this.persistenceDirectory.getFileName().resolve(viewRelativePath).normalize().spliterator(), false)
+            StreamSupport
+                .stream(this.persistenceDirectory.getFileName().resolve(viewRelativePath).normalize().spliterator(),
+                    false)
                 .map(Object::toString)
                 .collect(Collectors.joining("/")),
             true);

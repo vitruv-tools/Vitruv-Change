@@ -97,7 +97,7 @@ jobs:
       uses: actions/setup-java@v5.2.0
       with:
         distribution: 'temurin'
-        java-version: '17'
+        java-version: '21'
         check-latest: true
         cache: 'maven'
 
@@ -121,7 +121,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
       - name: Run checkstyle
-        uses: dbelyaev/action-checkstyle@v3.10.0
+        uses: dbelyaev/action-checkstyle@v3.11.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
