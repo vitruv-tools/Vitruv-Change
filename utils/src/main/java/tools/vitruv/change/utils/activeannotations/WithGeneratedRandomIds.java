@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.eclipse.emf.ecore.EFactory;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtend.lib.macro.Active;
 
 /**
  * Can be applied to a custom {@link EFactory} implementation to have EObjects'
@@ -16,6 +17,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
  * their id attribute initialized with the
  * result of invoking {@link EcoreUtil#generateUUID}
  */
+@Active(WithGeneratedIdsProcessor.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface WithGeneratedRandomIds {

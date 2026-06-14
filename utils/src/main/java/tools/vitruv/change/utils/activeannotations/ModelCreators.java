@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EFactory;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtend.lib.macro.Active;
 import org.junit.jupiter.params.converter.ArgumentConverter;
 
 /**
@@ -24,6 +25,7 @@ import org.junit.jupiter.params.converter.ArgumentConverter;
  * {@linkplain org.eclipse.emf.ecore.EClassifier#getName name}.
  * </ul>
  */
+@Active(ModelCreatorsProcessor.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface ModelCreators {
