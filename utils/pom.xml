@@ -6,7 +6,7 @@
   <parent>
     <groupId>tools.vitruv</groupId>
     <artifactId>tools.vitruv.change</artifactId>
-    <version>3.2.4-SNAPSHOT</version>
+    <version>4.0.0</version>
   </parent>
   <artifactId>tools.vitruv.change.utils</artifactId>
   <name>Vitruv Change Utilities</name>
