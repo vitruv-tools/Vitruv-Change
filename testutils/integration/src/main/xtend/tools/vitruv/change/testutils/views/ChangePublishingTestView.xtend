@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.xtend.lib.annotations.Delegate
 import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.atomic.uuid.UuidResolver
+import tools.vitruv.change.atomic.uuid.UuidResolverFactory
 import tools.vitruv.change.composite.description.PropagatedChange
 import tools.vitruv.change.composite.description.TransactionalChange
 import tools.vitruv.change.composite.description.VitruviusChangeResolver
@@ -69,7 +70,7 @@ class ChangePublishingTestView implements NonTransactionalTestView {
 		BiConsumer<Resource, UuidResolver> uuidResolution
 	) {
 		this.resourceSet = new ResourceSetImpl().withGlobalFactories()
-		this.uuidResolver = UuidResolver.create(resourceSet)
+		this.uuidResolver = UuidResolverFactory.create(resourceSet)
 		this.modelRepository = changeableModelRepository
 		this.delegate = new BasicTestView(persistenceDirectory, resourceSet, userInteraction, uriMode)
 		this.changeRecorder = new ChangeRecorder(resourceSet)

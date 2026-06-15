@@ -7,6 +7,7 @@ import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.resolve.AtomicEChangeResolverHelper;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.atomic.uuid.UuidResolver;
+import tools.vitruv.change.atomic.uuid.UuidResolverFactory;
 
 /**
  * Utility class to allow unresolving changes that were created using the atomic change factories.
@@ -35,7 +36,7 @@ public class AtomicEChangeUnresolver {
    * @return The unresolving {@link EChange}.
    */
   public EChange<Uuid> unresolve(EChange<? extends EObject> eChange) {
-    UuidResolver temporaryUuidResolver = UuidResolver.create(uuidResolverResourceSet);
+    UuidResolver temporaryUuidResolver = UuidResolverFactory.create(uuidResolverResourceSet);
     return unresolve(eChange, temporaryUuidResolver);
   }
 
@@ -46,7 +47,7 @@ public class AtomicEChangeUnresolver {
    * @return The list of unresolving {@link EChange}s.
    */
   public List<EChange<Uuid>> unresolve(List<? extends EChange<? extends EObject>> eChanges) {
-    UuidResolver temporaryUuidResolver = UuidResolver.create(uuidResolverResourceSet);
+    UuidResolver temporaryUuidResolver = UuidResolverFactory.create(uuidResolverResourceSet);
     return eChanges.stream().map(eChange -> unresolve(eChange, temporaryUuidResolver)).toList();
   }
 

@@ -16,6 +16,7 @@ import tools.vitruv.change.atomic.util.EChangeAssertHelper
 import tools.vitruv.change.atomic.uuid.AtomicEChangeUuidResolver
 import tools.vitruv.change.atomic.uuid.Uuid
 import tools.vitruv.change.atomic.uuid.UuidResolver
+import tools.vitruv.change.atomic.uuid.UuidResolverFactory
 
 import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.*
 
@@ -62,7 +63,7 @@ abstract class EChangeTest {
 
 		// Create model
 		resourceSet = new ResourceSetImpl().withGlobalFactories
-		uuidResolver = UuidResolver.create(resourceSet)
+		uuidResolver = UuidResolverFactory.create(resourceSet)
 		atomicChangeResolver = new AtomicEChangeUuidResolver(uuidResolver)
 		resource = resourceSet.createResource(fileUri)
 
