@@ -365,6 +365,6 @@ public class DefaultModelPrinterTest {
     final DefaultPrintTarget target = new DefaultPrintTarget();
     DefaultPrintIdProvider _defaultPrintIdProvider = new DefaultPrintIdProvider();
     printer.accept(target, _defaultPrintIdProvider);
-    return target.toString();
+    return target.toString().replace("\r\n", "\n");
   }
 }
