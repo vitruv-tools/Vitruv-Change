@@ -39,7 +39,7 @@ import tools.vitruv.change.testutils.TestProjectManager;
 import tools.vitruv.change.testutils.matchers.ModelMatchers;
 import tools.vitruv.change.testutils.metamodels.AllElementTypesCreators;
 
-@ExtendWith({ TestProjectManager.class, RegisterMetamodelsInStandalone.class })
+@ExtendWith({TestProjectManager.class, RegisterMetamodelsInStandalone.class})
 public abstract class ChangeDescription2ChangeTransformationTest {
   private ChangeRecorder changeRecorder;
 
@@ -51,9 +51,7 @@ public abstract class ChangeDescription2ChangeTransformationTest {
 
   private Path tempFolder;
 
-  /**
-   * Create a new model and initialize the change monitoring
-   */
+  /** Create a new model and initialize the change monitoring */
   @BeforeEach
   public void beforeTest(@TestProject final Path tempFolder) {
     this.tempFolder = tempFolder;
@@ -70,28 +68,34 @@ public abstract class ChangeDescription2ChangeTransformationTest {
     this.changeRecorder.close();
   }
 
-  protected <T extends Notifier> List<EChange<EObject>> record(final T objectToRecord, final Consumer<T> operationToRecord) {
-    final TransactionalChange<EObject> recordedChange = this.<T>recordComposite(objectToRecord, operationToRecord);
+  protected <T extends Notifier> List<EChange<EObject>> record(
+      final T objectToRecord, final Consumer<T> operationToRecord) {
+    final TransactionalChange<EObject> recordedChange =
+        this.<T>recordComposite(objectToRecord, operationToRecord);
     return recordedChange.getEChanges();
   }
 
-  protected <T extends Notifier> TransactionalChange<EObject> recordComposite(final T objectToRecord, final Consumer<T> operationToRecord) {
+  protected <T extends Notifier> TransactionalChange<EObject> recordComposite(
+      final T objectToRecord, final Consumer<T> operationToRecord) {
     this.stopRecording(this.resourceSet);
     this.changeResolver.assignIds(this.changeRecorder.getChange());
-    final Function<Consumer<VitruviusChange<Uuid>>, TransactionalChange<EObject>> _function = (Consumer<VitruviusChange<Uuid>> validationCallback) -> {
-      TransactionalChange<EObject> _xblockexpression = null;
-      {
-        this.startRecording(objectToRecord);
-        operationToRecord.accept(objectToRecord);
-        this.stopRecording(objectToRecord);
-        final TransactionalChange<EObject> recordedChange = this.changeRecorder.getChange();
-        final VitruviusChange<Uuid> unresolvedChange = this.changeResolver.assignIds(recordedChange);
-        validationCallback.accept(unresolvedChange);
-        _xblockexpression = recordedChange;
-      }
-      return _xblockexpression;
-    };
-    final TransactionalChange<EObject> recordedChange = this.<TransactionalChange<EObject>>validateChange(_function);
+    final Function<Consumer<VitruviusChange<Uuid>>, TransactionalChange<EObject>> _function =
+        (Consumer<VitruviusChange<Uuid>> validationCallback) -> {
+          TransactionalChange<EObject> _xblockexpression = null;
+          {
+            this.startRecording(objectToRecord);
+            operationToRecord.accept(objectToRecord);
+            this.stopRecording(objectToRecord);
+            final TransactionalChange<EObject> recordedChange = this.changeRecorder.getChange();
+            final VitruviusChange<Uuid> unresolvedChange =
+                this.changeResolver.assignIds(recordedChange);
+            validationCallback.accept(unresolvedChange);
+            _xblockexpression = recordedChange;
+          }
+          return _xblockexpression;
+        };
+    final TransactionalChange<EObject> recordedChange =
+        this.<TransactionalChange<EObject>>validateChange(_function);
     this.startRecording(this.resourceSet);
     return recordedChange;
   }
@@ -137,30 +141,41 @@ public abstract class ChangeDescription2ChangeTransformationTest {
   }
 
   /**
-   * Creates a comparison resource set mirroring the resource set before the given operation is executed.
-   * The provided operation must be called with the change describing the performed changes in the resource set.
-   * Validates that the given change results in the new state by replaying it in the comparison resource set.
-   * Returns the object returned by the given operation.
+   * Creates a comparison resource set mirroring the resource set before the given operation is
+   * executed. The provided operation must be called with the change describing the performed
+   * changes in the resource set. Validates that the given change results in the new state by
+   * replaying it in the comparison resource set. Returns the object returned by the given
+   * operation.
    */
-  private <T extends Object> T validateChange(final Function<Consumer<VitruviusChange<Uuid>>, T> operationToValidate) {
+  private <T extends Object> T validateChange(
+      final Function<Consumer<VitruviusChange<Uuid>>, T> operationToValidate) {
     T _xblockexpression = null;
     {
-      final ResourceSet comparisonResourceSet = ResourceSetUtil.withGlobalFactories(new ResourceSetImpl());
-      final HashMap<Resource, Resource> originalToComparisonResourceMapping = ChangeDescription2ChangeTransformationTest.copyTo(this.resourceSet, comparisonResourceSet);
+      final ResourceSet comparisonResourceSet =
+          ResourceSetUtil.withGlobalFactories(new ResourceSetImpl());
+      final HashMap<Resource, Resource> originalToComparisonResourceMapping =
+          ChangeDescription2ChangeTransformationTest.copyTo(
+              this.resourceSet, comparisonResourceSet);
       final UuidResolver comparisonUuidResolver = UuidResolver.create(comparisonResourceSet);
-      final VitruviusChangeResolver<Uuid> comparisonChangeResolver = VitruviusChangeResolverFactory.forUuids(comparisonUuidResolver);
-      this.uuidResolver.resolveResources(originalToComparisonResourceMapping, comparisonUuidResolver);
-      final Consumer<VitruviusChange<Uuid>> _function = (VitruviusChange<Uuid> unresolvedChange) -> {
-        comparisonChangeResolver.resolveAndApply(unresolvedChange);
-        ChangeDescription2ChangeTransformationTest.assertContains(this.resourceSet, comparisonResourceSet);
-        ChangeDescription2ChangeTransformationTest.assertContains(comparisonResourceSet, this.resourceSet);
-      };
+      final VitruviusChangeResolver<Uuid> comparisonChangeResolver =
+          VitruviusChangeResolverFactory.forUuids(comparisonUuidResolver);
+      this.uuidResolver.resolveResources(
+          originalToComparisonResourceMapping, comparisonUuidResolver);
+      final Consumer<VitruviusChange<Uuid>> _function =
+          (VitruviusChange<Uuid> unresolvedChange) -> {
+            comparisonChangeResolver.resolveAndApply(unresolvedChange);
+            ChangeDescription2ChangeTransformationTest.assertContains(
+                this.resourceSet, comparisonResourceSet);
+            ChangeDescription2ChangeTransformationTest.assertContains(
+                comparisonResourceSet, this.resourceSet);
+          };
       _xblockexpression = operationToValidate.apply(_function);
     }
     return _xblockexpression;
   }
 
-  private static HashMap<Resource, Resource> copyTo(final ResourceSet original, final ResourceSet target) {
+  private static HashMap<Resource, Resource> copyTo(
+      final ResourceSet original, final ResourceSet target) {
     HashMap<Resource, Resource> resourceMapping = new HashMap<Resource, Resource>();
     EList<Resource> _resources = original.getResources();
     for (final Resource originalResource : _resources) {
@@ -188,7 +203,10 @@ public abstract class ChangeDescription2ChangeTransformationTest {
         boolean _isEmpty = originalResource.getContents().isEmpty();
         boolean _not = (!_isEmpty);
         if (_not) {
-          MatcherAssert.<EObject>assertThat(ResourceUtil.getFirstRootEObject(comparisonResource), ModelMatchers.<EObject>equalsDeeply(ResourceUtil.getFirstRootEObject(originalResource)));
+          MatcherAssert.<EObject>assertThat(
+              ResourceUtil.getFirstRootEObject(comparisonResource),
+              ModelMatchers.<EObject>equalsDeeply(
+                  ResourceUtil.getFirstRootEObject(originalResource)));
         } else {
           Assertions.assertTrue(comparisonResource.getContents().isEmpty());
         }
@@ -196,9 +214,13 @@ public abstract class ChangeDescription2ChangeTransformationTest {
     }
   }
 
-  public static <E extends Object> Iterable<? extends EChange<E>> assertChangeCount(final Iterable<? extends EChange<E>> changes, final int expectedCount) {
+  public static <E extends Object> Iterable<? extends EChange<E>> assertChangeCount(
+      final Iterable<? extends EChange<E>> changes, final int expectedCount) {
     int _size = Iterables.size(changes);
-    Assertions.assertEquals(expectedCount, _size, "There were " + _size + " changes, although " + expectedCount + " were expected");
+    Assertions.assertEquals(
+        expectedCount,
+        _size,
+        "There were " + _size + " changes, although " + expectedCount + " were expected");
     return changes;
   }
 }
