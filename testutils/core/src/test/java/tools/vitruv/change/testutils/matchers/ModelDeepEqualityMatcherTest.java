@@ -1,5 +1,12 @@
 package tools.vitruv.change.testutils.matchers;
 
+import allElementTypes.AllElementTypesPackage;
+import allElementTypes.Containable;
+import allElementTypes.NonRoot;
+import allElementTypes.Root;
+import allElementTypes.ValueBased;
+import allElementTypes.impl.NonRootImpl;
+import com.google.common.collect.Iterables;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -8,7 +15,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.hamcrest.CoreMatchers;
@@ -22,15 +28,6 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import com.google.common.collect.Iterables;
-
-import allElementTypes.AllElementTypesPackage;
-import allElementTypes.Containable;
-import allElementTypes.NonRoot;
-import allElementTypes.Root;
-import allElementTypes.ValueBased;
-import allElementTypes.impl.NonRootImpl;
 import pcm_mockup.PInterface;
 import pcm_mockup.PMethod;
 import pcm_mockup.Repository;
@@ -43,42 +40,43 @@ import tools.vitruv.change.testutils.printing.UnsetFeaturesHidingModelPrinter;
 import tools.vitruv.change.testutils.printing.UseModelPrinter;
 
 @UseModelPrinter(UnsetFeaturesHidingModelPrinter.class)
-@ExtendWith({ RegisterMetamodelsInStandalone.class, ModelPrinterChange.class, TestLogging.class })
+@ExtendWith({RegisterMetamodelsInStandalone.class, ModelPrinterChange.class, TestLogging.class})
 public class ModelDeepEqualityMatcherTest {
   private static class ValueBasedNonRoot extends NonRootImpl {
     @Override
     public boolean equals(final Object object) {
-      boolean _xifexpression = false;
+      boolean xifexpression = false;
       if ((object == this)) {
-        _xifexpression = true;
+        xifexpression = true;
       } else {
-        boolean _xifexpression_1 = false;
+        boolean xifexpression1 = false;
         if ((object == null)) {
-          _xifexpression_1 = false;
+          xifexpression1 = false;
         } else {
-          boolean _xifexpression_2 = false;
+          boolean xifexpression2 = false;
           if ((object instanceof ModelDeepEqualityMatcherTest.ValueBasedNonRoot)) {
-            _xifexpression_2 = Objects.equals(this.value,
-                ((ModelDeepEqualityMatcherTest.ValueBasedNonRoot) object).value);
+            xifexpression2 =
+                Objects.equals(
+                    this.value, ((ModelDeepEqualityMatcherTest.ValueBasedNonRoot) object).value);
           } else {
-            _xifexpression_2 = false;
+            xifexpression2 = false;
           }
-          _xifexpression_1 = _xifexpression_2;
+          xifexpression1 = xifexpression2;
         }
-        _xifexpression = _xifexpression_1;
+        xifexpression = xifexpression1;
       }
-      return _xifexpression;
+      return xifexpression;
     }
 
     @Override
     public int hashCode() {
-      int _xifexpression = (int) 0;
+      int xifexpression = (int) 0;
       if ((this.value == null)) {
-        _xifexpression = 0;
+        xifexpression = 0;
       } else {
-        _xifexpression = this.value.hashCode();
+        xifexpression = this.value.hashCode();
       }
-      return _xifexpression;
+      return xifexpression;
     }
   }
 
@@ -87,16 +85,16 @@ public class ModelDeepEqualityMatcherTest {
     public EqualityStrategy.Result compare(final EObject left, final EObject right) {
       if ((left instanceof PInterface)) {
         if ((right instanceof PInterface)) {
-          EqualityStrategy.Result _xifexpression = null;
-          String _name = ((PInterface) left).getName();
-          String _name_1 = ((PInterface) right).getName();
-          boolean _equals = Objects.equals(_name, _name_1);
-          if (_equals) {
-            _xifexpression = EqualityStrategy.Result.EQUAL;
+          EqualityStrategy.Result xifexpression = null;
+          String name = ((PInterface) left).getName();
+          String name1 = ((PInterface) right).getName();
+          boolean equals = Objects.equals(name, name1);
+          if (equals) {
+            xifexpression = EqualityStrategy.Result.EQUAL;
           } else {
-            _xifexpression = EqualityStrategy.Result.UNEQUAL;
+            xifexpression = EqualityStrategy.Result.UNEQUAL;
           }
-          return _xifexpression;
+          return xifexpression;
         }
       }
       return EqualityStrategy.Result.UNKNOWN;
@@ -112,2809 +110,3589 @@ public class ModelDeepEqualityMatcherTest {
   @MethodSource("equalObjects")
   @DisplayName("accepts equal objects as equal")
   public void recognizesEquals(final String name, final EObject left, final EObject right) {
-    final Executable _function = () -> {
-      MatcherAssert.<EObject>assertThat(left, ModelMatchers.<EObject>equalsDeeply(right));
-    };
-    Assertions.assertDoesNotThrow(_function);
+    final Executable function =
+        () -> {
+          MatcherAssert.<EObject>assertThat(left, ModelMatchers.<EObject>equalsDeeply(right));
+        };
+    Assertions.assertDoesNotThrow(function);
   }
 
   public static Stream<Arguments> equalObjects() {
-    Root _Root = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function = (Root it) -> {
-      it.setId("id");
-    };
-    _function.accept(_Root);
-    Root _doubleArrow = _Root;
-    Root _Root_1 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_1 = (Root it) -> {
-      it.setId("id");
-    };
-    _function_1.accept(_Root_1);
-    Root _doubleArrow_1 = _Root_1;
-    Root _Root_2 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_2 = (Root it) -> {
-      it.setId("root");
-      EList<Integer> _multiValuedEAttribute = it.getMultiValuedEAttribute();
-      Iterables.<Integer>addAll(_multiValuedEAttribute, Collections.<Integer>unmodifiableList(
-          List.of(Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(42), Integer.valueOf(8))));
-    };
-    _function_2.accept(_Root_2);
-    Root _doubleArrow_2 = _Root_2;
-    Root _Root_3 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_3 = (Root it) -> {
-      it.setId("root");
-      EList<Integer> _multiValuedEAttribute = it.getMultiValuedEAttribute();
-      Iterables.<Integer>addAll(_multiValuedEAttribute, Collections.<Integer>unmodifiableList(
-          List.of(Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(42), Integer.valueOf(8))));
-    };
-    _function_3.accept(_Root_3);
-    Root _doubleArrow_3 = _Root_3;
-    Root _Root_4 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_4 = (Root it) -> {
-      it.setId("root");
-      EList<Integer> _multiValuedUnorderedEAttribute = it.getMultiValuedUnorderedEAttribute();
-      Iterables.<Integer>addAll(_multiValuedUnorderedEAttribute,
-          Collections.<Integer>unmodifiableList(List.of(Integer.valueOf(1),
-              Integer.valueOf(2), Integer.valueOf(42), Integer.valueOf(8))));
-    };
-    _function_4.accept(_Root_4);
-    Root _doubleArrow_4 = _Root_4;
-    Root _Root_5 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_5 = (Root it) -> {
-      it.setId("root");
-      EList<Integer> _multiValuedUnorderedEAttribute = it.getMultiValuedUnorderedEAttribute();
-      Iterables.<Integer>addAll(_multiValuedUnorderedEAttribute,
-          Collections.<Integer>unmodifiableList(List.of(Integer.valueOf(1),
-              Integer.valueOf(2), Integer.valueOf(42), Integer.valueOf(8))));
-    };
-    _function_5.accept(_Root_5);
-    Root _doubleArrow_5 = _Root_5;
-    Root _Root_6 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_6 = (Root it) -> {
-      it.setId("root");
-      EList<Integer> _multiValuedUnorderedEAttribute = it.getMultiValuedUnorderedEAttribute();
-      Iterables.<Integer>addAll(_multiValuedUnorderedEAttribute,
-          Collections.<Integer>unmodifiableList(List.of(Integer.valueOf(1),
-              Integer.valueOf(2), Integer.valueOf(42), Integer.valueOf(8))));
-    };
-    _function_6.accept(_Root_6);
-    Root _doubleArrow_6 = _Root_6;
-    Root _Root_7 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_7 = (Root it) -> {
-      it.setId("root");
-      EList<Integer> _multiValuedUnorderedEAttribute = it.getMultiValuedUnorderedEAttribute();
-      Iterables.<Integer>addAll(_multiValuedUnorderedEAttribute,
-          Collections.<Integer>unmodifiableList(List.of(Integer.valueOf(8),
-              Integer.valueOf(42), Integer.valueOf(2), Integer.valueOf(1))));
-    };
-    _function_7.accept(_Root_7);
-    Root _doubleArrow_7 = _Root_7;
-    Root _Root_8 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_8 = (Root it) -> {
-      it.setId("root");
-      NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_9 = (NonRoot it_1) -> {
-        it_1.setId("sub");
-      };
-      _function_9.accept(_inDifferentRoot);
-      NonRoot _doubleArrow_8 = _inDifferentRoot;
-      it.setSingleValuedNonContainmentEReference(_doubleArrow_8);
-    };
-    _function_8.accept(_Root_8);
-    Root _doubleArrow_8 = _Root_8;
-    Root _Root_9 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_9 = (Root it) -> {
-      it.setId("root");
-      NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_10 = (NonRoot it_1) -> {
-        it_1.setId("sub");
-      };
-      _function_10.accept(_inDifferentRoot);
-      NonRoot _doubleArrow_9 = _inDifferentRoot;
-      it.setSingleValuedNonContainmentEReference(_doubleArrow_9);
-    };
-    _function_9.accept(_Root_9);
-    Root _doubleArrow_9 = _Root_9;
-    Root _Root_10 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_10 = (Root it) -> {
-      it.setId("root");
-      NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_11 = (NonRoot it_1) -> {
-        it_1.setId("sub");
-        it_1.setValue("different");
-      };
-      _function_11.accept(_inDifferentRoot);
-      NonRoot _doubleArrow_10 = _inDifferentRoot;
-      it.setSingleValuedNonContainmentEReference(_doubleArrow_10);
-    };
-    _function_10.accept(_Root_10);
-    Root _doubleArrow_10 = _Root_10;
-    Root _Root_11 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_11 = (Root it) -> {
-      it.setId("root");
-      NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_12 = (NonRoot it_1) -> {
-        it_1.setId("sub");
-        it_1.setValue("test");
-      };
-      _function_12.accept(_inDifferentRoot);
-      NonRoot _doubleArrow_11 = _inDifferentRoot;
-      it.setSingleValuedNonContainmentEReference(_doubleArrow_11);
-    };
-    _function_11.accept(_Root_11);
-    Root _doubleArrow_11 = _Root_11;
-    Root _Root_12 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_12 = (Root it) -> {
-      it.setId("root");
-      EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-      NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_13 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_13.accept(_inDifferentRoot);
-      NonRoot _doubleArrow_12 = _inDifferentRoot;
-      NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_14 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_14.accept(_inDifferentRoot_1);
-      NonRoot _doubleArrow_13 = _inDifferentRoot_1;
-      NonRoot _inDifferentRoot_2 = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_15 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_15.accept(_inDifferentRoot_2);
-      NonRoot _doubleArrow_14 = _inDifferentRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_12, _doubleArrow_13, _doubleArrow_14)));
-    };
-    _function_12.accept(_Root_12);
-    Root _doubleArrow_12 = _Root_12;
-    Root _Root_13 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_13 = (Root it) -> {
-      it.setId("root");
-      EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-      NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_14 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_14.accept(_inDifferentRoot);
-      NonRoot _doubleArrow_13 = _inDifferentRoot;
-      NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_15 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_15.accept(_inDifferentRoot_1);
-      NonRoot _doubleArrow_14 = _inDifferentRoot_1;
-      NonRoot _inDifferentRoot_2 = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_16 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_16.accept(_inDifferentRoot_2);
-      NonRoot _doubleArrow_15 = _inDifferentRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_13, _doubleArrow_14, _doubleArrow_15)));
-    };
-    _function_13.accept(_Root_13);
-    Root _doubleArrow_13 = _Root_13;
-    Root _Root_14 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_14 = (Root it) -> {
-      it.setId("root");
-      EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-          .getMultiValuedUnorderedNonContainmentEReference();
-      NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_15 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_15.accept(_inDifferentRoot);
-      NonRoot _doubleArrow_14 = _inDifferentRoot;
-      NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_16 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_16.accept(_inDifferentRoot_1);
-      NonRoot _doubleArrow_15 = _inDifferentRoot_1;
-      NonRoot _inDifferentRoot_2 = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_17 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_17.accept(_inDifferentRoot_2);
-      NonRoot _doubleArrow_16 = _inDifferentRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_14, _doubleArrow_15, _doubleArrow_16)));
-    };
-    _function_14.accept(_Root_14);
-    Root _doubleArrow_14 = _Root_14;
-    Root _Root_15 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_15 = (Root it) -> {
-      it.setId("root");
-      EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-          .getMultiValuedUnorderedNonContainmentEReference();
-      NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_16 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_16.accept(_inDifferentRoot);
-      NonRoot _doubleArrow_15 = _inDifferentRoot;
-      NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_17 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_17.accept(_inDifferentRoot_1);
-      NonRoot _doubleArrow_16 = _inDifferentRoot_1;
-      NonRoot _inDifferentRoot_2 = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_18 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_18.accept(_inDifferentRoot_2);
-      NonRoot _doubleArrow_17 = _inDifferentRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_15, _doubleArrow_16, _doubleArrow_17)));
-    };
-    _function_15.accept(_Root_15);
-    Root _doubleArrow_15 = _Root_15;
-    Root _Root_16 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_16 = (Root it) -> {
-      it.setId("root");
-      EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-          .getMultiValuedUnorderedNonContainmentEReference();
-      NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_17 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_17.accept(_inDifferentRoot);
-      NonRoot _doubleArrow_16 = _inDifferentRoot;
-      NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_18 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_18.accept(_inDifferentRoot_1);
-      NonRoot _doubleArrow_17 = _inDifferentRoot_1;
-      NonRoot _inDifferentRoot_2 = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_19 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_19.accept(_inDifferentRoot_2);
-      NonRoot _doubleArrow_18 = _inDifferentRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_16, _doubleArrow_17, _doubleArrow_18)));
-    };
-    _function_16.accept(_Root_16);
-    Root _doubleArrow_16 = _Root_16;
-    Root _Root_17 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_17 = (Root it) -> {
-      it.setId("root");
-      EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-          .getMultiValuedUnorderedNonContainmentEReference();
-      NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_18 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_18.accept(_inDifferentRoot);
-      NonRoot _doubleArrow_17 = _inDifferentRoot;
-      NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_19 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_19.accept(_inDifferentRoot_1);
-      NonRoot _doubleArrow_18 = _inDifferentRoot_1;
-      NonRoot _inDifferentRoot_2 = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-      final Consumer<NonRoot> _function_20 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_20.accept(_inDifferentRoot_2);
-      NonRoot _doubleArrow_19 = _inDifferentRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_17, _doubleArrow_18, _doubleArrow_19)));
-    };
-    _function_17.accept(_Root_17);
-    Root _doubleArrow_17 = _Root_17;
-    Root _Root_18 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_18 = (Root it) -> {
-      it.setId("root");
-      NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_19 = (NonRoot it_1) -> {
-        it_1.setId("sub");
-      };
-      _function_19.accept(_nonRootInSameRoot);
-      NonRoot _doubleArrow_18 = _nonRootInSameRoot;
-      it.setSingleValuedNonContainmentEReference(_doubleArrow_18);
-    };
-    _function_18.accept(_Root_18);
-    Root _doubleArrow_18 = _Root_18;
-    Root _Root_19 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_19 = (Root it) -> {
-      it.setId("root");
-      NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_20 = (NonRoot it_1) -> {
-        it_1.setId("sub");
-      };
-      _function_20.accept(_nonRootInSameRoot);
-      NonRoot _doubleArrow_19 = _nonRootInSameRoot;
-      it.setSingleValuedNonContainmentEReference(_doubleArrow_19);
-    };
-    _function_19.accept(_Root_19);
-    Root _doubleArrow_19 = _Root_19;
-    Root _Root_20 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_20 = (Root it) -> {
-      it.setId("root");
-      EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-      NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_21 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_21.accept(_nonRootInSameRoot);
-      NonRoot _doubleArrow_20 = _nonRootInSameRoot;
-      NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_22 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_22.accept(_nonRootInSameRoot_1);
-      NonRoot _doubleArrow_21 = _nonRootInSameRoot_1;
-      NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_23 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_23.accept(_nonRootInSameRoot_2);
-      NonRoot _doubleArrow_22 = _nonRootInSameRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_20, _doubleArrow_21, _doubleArrow_22)));
-    };
-    _function_20.accept(_Root_20);
-    Root _doubleArrow_20 = _Root_20;
-    Root _Root_21 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_21 = (Root it) -> {
-      it.setId("root");
-      EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-      NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_22 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_22.accept(_nonRootInSameRoot);
-      NonRoot _doubleArrow_21 = _nonRootInSameRoot;
-      NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_23 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_23.accept(_nonRootInSameRoot_1);
-      NonRoot _doubleArrow_22 = _nonRootInSameRoot_1;
-      NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_24 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_24.accept(_nonRootInSameRoot_2);
-      NonRoot _doubleArrow_23 = _nonRootInSameRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_21, _doubleArrow_22, _doubleArrow_23)));
-    };
-    _function_21.accept(_Root_21);
-    Root _doubleArrow_21 = _Root_21;
-    Root _Root_22 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_22 = (Root it) -> {
-      it.setId("root");
-      EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-          .getMultiValuedUnorderedNonContainmentEReference();
-      NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_23 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_23.accept(_nonRootInSameRoot);
-      NonRoot _doubleArrow_22 = _nonRootInSameRoot;
-      NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_24 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_24.accept(_nonRootInSameRoot_1);
-      NonRoot _doubleArrow_23 = _nonRootInSameRoot_1;
-      NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_25 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_25.accept(_nonRootInSameRoot_2);
-      NonRoot _doubleArrow_24 = _nonRootInSameRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_22, _doubleArrow_23, _doubleArrow_24)));
-    };
-    _function_22.accept(_Root_22);
-    Root _doubleArrow_22 = _Root_22;
-    Root _Root_23 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_23 = (Root it) -> {
-      it.setId("root");
-      EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-          .getMultiValuedUnorderedNonContainmentEReference();
-      NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_24 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_24.accept(_nonRootInSameRoot);
-      NonRoot _doubleArrow_23 = _nonRootInSameRoot;
-      NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_25 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_25.accept(_nonRootInSameRoot_1);
-      NonRoot _doubleArrow_24 = _nonRootInSameRoot_1;
-      NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_26 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_26.accept(_nonRootInSameRoot_2);
-      NonRoot _doubleArrow_25 = _nonRootInSameRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_23, _doubleArrow_24, _doubleArrow_25)));
-    };
-    _function_23.accept(_Root_23);
-    Root _doubleArrow_23 = _Root_23;
-    Root _Root_24 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_24 = (Root it) -> {
-      it.setId("root");
-      EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-          .getMultiValuedUnorderedNonContainmentEReference();
-      NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_25 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_25.accept(_nonRootInSameRoot);
-      NonRoot _doubleArrow_24 = _nonRootInSameRoot;
-      NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_26 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_26.accept(_nonRootInSameRoot_1);
-      NonRoot _doubleArrow_25 = _nonRootInSameRoot_1;
-      NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_27 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_27.accept(_nonRootInSameRoot_2);
-      NonRoot _doubleArrow_26 = _nonRootInSameRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_24, _doubleArrow_25, _doubleArrow_26)));
-    };
-    _function_24.accept(_Root_24);
-    Root _doubleArrow_24 = _Root_24;
-    Root _Root_25 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_25 = (Root it) -> {
-      it.setId("root");
-      EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-          .getMultiValuedUnorderedNonContainmentEReference();
-      NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_26 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_26.accept(_nonRootInSameRoot);
-      NonRoot _doubleArrow_25 = _nonRootInSameRoot;
-      NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_27 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_27.accept(_nonRootInSameRoot_1);
-      NonRoot _doubleArrow_26 = _nonRootInSameRoot_1;
-      NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-      final Consumer<NonRoot> _function_28 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_28.accept(_nonRootInSameRoot_2);
-      NonRoot _doubleArrow_27 = _nonRootInSameRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_25, _doubleArrow_26, _doubleArrow_27)));
-    };
-    _function_25.accept(_Root_25);
-    Root _doubleArrow_25 = _Root_25;
-    Root _Root_26 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_26 = (Root it) -> {
-      it.setId("root");
-      NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_27 = (NonRoot it_1) -> {
-        it_1.setId("sub");
-      };
-      _function_27.accept(_NonRoot);
-      NonRoot _doubleArrow_26 = _NonRoot;
-      it.setSingleValuedContainmentEReference(_doubleArrow_26);
-    };
-    _function_26.accept(_Root_26);
-    Root _doubleArrow_26 = _Root_26;
-    Root _Root_27 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_27 = (Root it) -> {
-      it.setId("root");
-      NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_28 = (NonRoot it_1) -> {
-        it_1.setId("sub");
-      };
-      _function_28.accept(_NonRoot);
-      NonRoot _doubleArrow_27 = _NonRoot;
-      it.setSingleValuedContainmentEReference(_doubleArrow_27);
-    };
-    _function_27.accept(_Root_27);
-    Root _doubleArrow_27 = _Root_27;
-    Root _Root_28 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_28 = (Root it) -> {
-      it.setId("root");
-      EList<NonRoot> _multiValuedContainmentEReference = it.getMultiValuedContainmentEReference();
-      NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_29 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_29.accept(_NonRoot);
-      NonRoot _doubleArrow_28 = _NonRoot;
-      NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_30 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_30.accept(_NonRoot_1);
-      NonRoot _doubleArrow_29 = _NonRoot_1;
-      NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_31 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_31.accept(_NonRoot_2);
-      NonRoot _doubleArrow_30 = _NonRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_28, _doubleArrow_29, _doubleArrow_30)));
-    };
-    _function_28.accept(_Root_28);
-    Root _doubleArrow_28 = _Root_28;
-    Root _Root_29 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_29 = (Root it) -> {
-      it.setId("root");
-      EList<NonRoot> _multiValuedContainmentEReference = it.getMultiValuedContainmentEReference();
-      NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_30 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_30.accept(_NonRoot);
-      NonRoot _doubleArrow_29 = _NonRoot;
-      NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_31 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_31.accept(_NonRoot_1);
-      NonRoot _doubleArrow_30 = _NonRoot_1;
-      NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_32 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_32.accept(_NonRoot_2);
-      NonRoot _doubleArrow_31 = _NonRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_29, _doubleArrow_30, _doubleArrow_31)));
-    };
-    _function_29.accept(_Root_29);
-    Root _doubleArrow_29 = _Root_29;
-    Root _Root_30 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_30 = (Root it) -> {
-      it.setId("root");
-      EList<allElementTypes.NonRoot> _multiValuedUnorderedContainmentEReference = it
-          .getMultiValuedUnorderedContainmentEReference();
-      NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_31 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_31.accept(_NonRoot);
-      NonRoot _doubleArrow_30 = _NonRoot;
-      NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_32 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_32.accept(_NonRoot_1);
-      NonRoot _doubleArrow_31 = _NonRoot_1;
-      NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_33 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_33.accept(_NonRoot_2);
-      NonRoot _doubleArrow_32 = _NonRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedUnorderedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_30, _doubleArrow_31, _doubleArrow_32)));
-    };
-    _function_30.accept(_Root_30);
-    Root _doubleArrow_30 = _Root_30;
-    Root _Root_31 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_31 = (Root it) -> {
-      it.setId("root");
-      EList<allElementTypes.NonRoot> _multiValuedUnorderedContainmentEReference = it
-          .getMultiValuedUnorderedContainmentEReference();
-      NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_32 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_32.accept(_NonRoot);
-      NonRoot _doubleArrow_31 = _NonRoot;
-      NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_33 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_33.accept(_NonRoot_1);
-      NonRoot _doubleArrow_32 = _NonRoot_1;
-      NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_34 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_34.accept(_NonRoot_2);
-      NonRoot _doubleArrow_33 = _NonRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedUnorderedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_31, _doubleArrow_32, _doubleArrow_33)));
-    };
-    _function_31.accept(_Root_31);
-    Root _doubleArrow_31 = _Root_31;
-    Root _Root_32 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_32 = (Root it) -> {
-      it.setId("root");
-      EList<allElementTypes.NonRoot> _multiValuedUnorderedContainmentEReference = it
-          .getMultiValuedUnorderedContainmentEReference();
-      NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_33 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_33.accept(_NonRoot);
-      NonRoot _doubleArrow_32 = _NonRoot;
-      NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_34 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_34.accept(_NonRoot_1);
-      NonRoot _doubleArrow_33 = _NonRoot_1;
-      NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_35 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_35.accept(_NonRoot_2);
-      NonRoot _doubleArrow_34 = _NonRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedUnorderedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_32, _doubleArrow_33, _doubleArrow_34)));
-    };
-    _function_32.accept(_Root_32);
-    Root _doubleArrow_32 = _Root_32;
-    Root _Root_33 = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_33 = (Root it) -> {
-      it.setId("root");
-      EList<allElementTypes.NonRoot> _multiValuedUnorderedContainmentEReference = it
-          .getMultiValuedUnorderedContainmentEReference();
-      NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_34 = (NonRoot it_1) -> {
-        it_1.setId("sub3");
-      };
-      _function_34.accept(_NonRoot);
-      NonRoot _doubleArrow_33 = _NonRoot;
-      NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_35 = (NonRoot it_1) -> {
-        it_1.setId("sub1");
-      };
-      _function_35.accept(_NonRoot_1);
-      NonRoot _doubleArrow_34 = _NonRoot_1;
-      NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_36 = (NonRoot it_1) -> {
-        it_1.setId("sub2");
-      };
-      _function_36.accept(_NonRoot_2);
-      NonRoot _doubleArrow_35 = _NonRoot_2;
-      Iterables.<NonRoot>addAll(_multiValuedUnorderedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-          List.of(_doubleArrow_33, _doubleArrow_34, _doubleArrow_35)));
-    };
-    _function_33.accept(_Root_33);
-    Root _doubleArrow_33 = _Root_33;
+    Root root = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function =
+        (Root it) -> {
+          it.setId("id");
+        };
+    function.accept(root);
+    Root doubleArrow = root;
+    Root root1 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function1 =
+        (Root it) -> {
+          it.setId("id");
+        };
+    function1.accept(root1);
+    Root doubleArrow1 = root1;
+    Root root2 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function2 =
+        (Root it) -> {
+          it.setId("root");
+          EList<Integer> multiValuedEAttribute = it.getMultiValuedEAttribute();
+          Iterables.<Integer>addAll(
+              multiValuedEAttribute,
+              Collections.<Integer>unmodifiableList(
+                  List.of(
+                      Integer.valueOf(1),
+                      Integer.valueOf(2),
+                      Integer.valueOf(42),
+                      Integer.valueOf(8))));
+        };
+    function2.accept(root2);
+    Root doubleArrow2 = root2;
+    Root root3 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function3 =
+        (Root it) -> {
+          it.setId("root");
+          EList<Integer> multiValuedEAttribute = it.getMultiValuedEAttribute();
+          Iterables.<Integer>addAll(
+              multiValuedEAttribute,
+              Collections.<Integer>unmodifiableList(
+                  List.of(
+                      Integer.valueOf(1),
+                      Integer.valueOf(2),
+                      Integer.valueOf(42),
+                      Integer.valueOf(8))));
+        };
+    function3.accept(root3);
+    Root doubleArrow3 = root3;
+    Root root4 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function4 =
+        (Root it) -> {
+          it.setId("root");
+          EList<Integer> multiValuedUnorderedEAttribute = it.getMultiValuedUnorderedEAttribute();
+          Iterables.<Integer>addAll(
+              multiValuedUnorderedEAttribute,
+              Collections.<Integer>unmodifiableList(
+                  List.of(
+                      Integer.valueOf(1),
+                      Integer.valueOf(2),
+                      Integer.valueOf(42),
+                      Integer.valueOf(8))));
+        };
+    function4.accept(root4);
+    Root doubleArrow4 = root4;
+    Root root5 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function5 =
+        (Root it) -> {
+          it.setId("root");
+          EList<Integer> multiValuedUnorderedEAttribute = it.getMultiValuedUnorderedEAttribute();
+          Iterables.<Integer>addAll(
+              multiValuedUnorderedEAttribute,
+              Collections.<Integer>unmodifiableList(
+                  List.of(
+                      Integer.valueOf(1),
+                      Integer.valueOf(2),
+                      Integer.valueOf(42),
+                      Integer.valueOf(8))));
+        };
+    function5.accept(root5);
+    Root doubleArrow5 = root5;
+    Root root6 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function6 =
+        (Root it) -> {
+          it.setId("root");
+          EList<Integer> multiValuedUnorderedEAttribute = it.getMultiValuedUnorderedEAttribute();
+          Iterables.<Integer>addAll(
+              multiValuedUnorderedEAttribute,
+              Collections.<Integer>unmodifiableList(
+                  List.of(
+                      Integer.valueOf(1),
+                      Integer.valueOf(2),
+                      Integer.valueOf(42),
+                      Integer.valueOf(8))));
+        };
+    function6.accept(root6);
+    Root doubleArrow6 = root6;
+    Root root7 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function7 =
+        (Root it) -> {
+          it.setId("root");
+          EList<Integer> multiValuedUnorderedEAttribute = it.getMultiValuedUnorderedEAttribute();
+          Iterables.<Integer>addAll(
+              multiValuedUnorderedEAttribute,
+              Collections.<Integer>unmodifiableList(
+                  List.of(
+                      Integer.valueOf(8),
+                      Integer.valueOf(42),
+                      Integer.valueOf(2),
+                      Integer.valueOf(1))));
+        };
+    function7.accept(root7);
+    Root doubleArrow7 = root7;
+    Root root8 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function8 =
+        (Root it) -> {
+          it.setId("root");
+          NonRoot inDifferentRoot =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function9 =
+              (NonRoot it1) -> {
+                it1.setId("sub");
+              };
+          function9.accept(inDifferentRoot);
+          NonRoot doubleArrow8 = inDifferentRoot;
+          it.setSingleValuedNonContainmentEReference(doubleArrow8);
+        };
+    function8.accept(root8);
+    Root doubleArrow8 = root8;
+    Root root9 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function9 =
+        (Root it) -> {
+          it.setId("root");
+          NonRoot inDifferentRoot =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function10 =
+              (NonRoot it1) -> {
+                it1.setId("sub");
+              };
+          function10.accept(inDifferentRoot);
+          NonRoot doubleArrow9 = inDifferentRoot;
+          it.setSingleValuedNonContainmentEReference(doubleArrow9);
+        };
+    function9.accept(root9);
+    Root doubleArrow9 = root9;
+    Root root10 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function10 =
+        (Root it) -> {
+          it.setId("root");
+          NonRoot inDifferentRoot =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function11 =
+              (NonRoot it1) -> {
+                it1.setId("sub");
+                it1.setValue("different");
+              };
+          function11.accept(inDifferentRoot);
+          NonRoot doubleArrow10 = inDifferentRoot;
+          it.setSingleValuedNonContainmentEReference(doubleArrow10);
+        };
+    function10.accept(root10);
+    Root doubleArrow10 = root10;
+    Root root11 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function11 =
+        (Root it) -> {
+          it.setId("root");
+          NonRoot inDifferentRoot =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function12 =
+              (NonRoot it1) -> {
+                it1.setId("sub");
+                it1.setValue("test");
+              };
+          function12.accept(inDifferentRoot);
+          NonRoot doubleArrow11 = inDifferentRoot;
+          it.setSingleValuedNonContainmentEReference(doubleArrow11);
+        };
+    function11.accept(root11);
+    Root doubleArrow11 = root11;
+    Root root12 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function12 =
+        (Root it) -> {
+          it.setId("root");
+          EList<NonRoot> multiValuedNonContainmentEReference =
+              it.getMultiValuedNonContainmentEReference();
+          NonRoot inDifferentRoot =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function13 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function13.accept(inDifferentRoot);
+          NonRoot doubleArrow12 = inDifferentRoot;
+          NonRoot inDifferentRoot1 =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function14 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function14.accept(inDifferentRoot1);
+          NonRoot doubleArrow13 = inDifferentRoot1;
+          NonRoot inDifferentRoot2 =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function15 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function15.accept(inDifferentRoot2);
+          NonRoot doubleArrow14 = inDifferentRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedNonContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow12, doubleArrow13, doubleArrow14)));
+        };
+    function12.accept(root12);
+    Root doubleArrow12 = root12;
+    Root root13 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function13 =
+        (Root it) -> {
+          it.setId("root");
+          EList<NonRoot> multiValuedNonContainmentEReference =
+              it.getMultiValuedNonContainmentEReference();
+          NonRoot inDifferentRoot =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function14 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function14.accept(inDifferentRoot);
+          NonRoot doubleArrow13 = inDifferentRoot;
+          NonRoot inDifferentRoot1 =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function15 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function15.accept(inDifferentRoot1);
+          NonRoot doubleArrow14 = inDifferentRoot1;
+          NonRoot inDifferentRoot2 =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function16 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function16.accept(inDifferentRoot2);
+          NonRoot doubleArrow15 = inDifferentRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedNonContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow13, doubleArrow14, doubleArrow15)));
+        };
+    function13.accept(root13);
+    Root doubleArrow13 = root13;
+    Root root14 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function14 =
+        (Root it) -> {
+          it.setId("root");
+          EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+              it.getMultiValuedUnorderedNonContainmentEReference();
+          NonRoot inDifferentRoot =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function15 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function15.accept(inDifferentRoot);
+          NonRoot doubleArrow14 = inDifferentRoot;
+          NonRoot inDifferentRoot1 =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function16 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function16.accept(inDifferentRoot1);
+          NonRoot doubleArrow15 = inDifferentRoot1;
+          NonRoot inDifferentRoot2 =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function17 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function17.accept(inDifferentRoot2);
+          NonRoot doubleArrow16 = inDifferentRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedUnorderedNonContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow14, doubleArrow15, doubleArrow16)));
+        };
+    function14.accept(root14);
+    Root doubleArrow14 = root14;
+    Root root15 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function15 =
+        (Root it) -> {
+          it.setId("root");
+          EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+              it.getMultiValuedUnorderedNonContainmentEReference();
+          NonRoot inDifferentRoot =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function16 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function16.accept(inDifferentRoot);
+          NonRoot doubleArrow15 = inDifferentRoot;
+          NonRoot inDifferentRoot1 =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function17 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function17.accept(inDifferentRoot1);
+          NonRoot doubleArrow16 = inDifferentRoot1;
+          NonRoot inDifferentRoot2 =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function18 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function18.accept(inDifferentRoot2);
+          NonRoot doubleArrow17 = inDifferentRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedUnorderedNonContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow15, doubleArrow16, doubleArrow17)));
+        };
+    function15.accept(root15);
+    Root doubleArrow15 = root15;
+    Root root16 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function16 =
+        (Root it) -> {
+          it.setId("root");
+          EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+              it.getMultiValuedUnorderedNonContainmentEReference();
+          NonRoot inDifferentRoot =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function17 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function17.accept(inDifferentRoot);
+          NonRoot doubleArrow16 = inDifferentRoot;
+          NonRoot inDifferentRoot1 =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function18 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function18.accept(inDifferentRoot1);
+          NonRoot doubleArrow17 = inDifferentRoot1;
+          NonRoot inDifferentRoot2 =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function19 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function19.accept(inDifferentRoot2);
+          NonRoot doubleArrow18 = inDifferentRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedUnorderedNonContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow16, doubleArrow17, doubleArrow18)));
+        };
+    function16.accept(root16);
+    Root doubleArrow16 = root16;
+    Root root17 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function17 =
+        (Root it) -> {
+          it.setId("root");
+          EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+              it.getMultiValuedUnorderedNonContainmentEReference();
+          NonRoot inDifferentRoot =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function18 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function18.accept(inDifferentRoot);
+          NonRoot doubleArrow17 = inDifferentRoot;
+          NonRoot inDifferentRoot1 =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function19 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function19.accept(inDifferentRoot1);
+          NonRoot doubleArrow18 = inDifferentRoot1;
+          NonRoot inDifferentRoot2 =
+              ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
+          final Consumer<NonRoot> function20 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function20.accept(inDifferentRoot2);
+          NonRoot doubleArrow19 = inDifferentRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedUnorderedNonContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow17, doubleArrow18, doubleArrow19)));
+        };
+    function17.accept(root17);
+    Root doubleArrow17 = root17;
+    Root root18 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function18 =
+        (Root it) -> {
+          it.setId("root");
+          NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function19 =
+              (NonRoot it1) -> {
+                it1.setId("sub");
+              };
+          function19.accept(nonRootInSameRoot);
+          NonRoot doubleArrow18 = nonRootInSameRoot;
+          it.setSingleValuedNonContainmentEReference(doubleArrow18);
+        };
+    function18.accept(root18);
+    Root doubleArrow18 = root18;
+    Root root19 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function19 =
+        (Root it) -> {
+          it.setId("root");
+          NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function20 =
+              (NonRoot it1) -> {
+                it1.setId("sub");
+              };
+          function20.accept(nonRootInSameRoot);
+          NonRoot doubleArrow19 = nonRootInSameRoot;
+          it.setSingleValuedNonContainmentEReference(doubleArrow19);
+        };
+    function19.accept(root19);
+    Root doubleArrow19 = root19;
+    Root root20 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function20 =
+        (Root it) -> {
+          it.setId("root");
+          EList<NonRoot> multiValuedNonContainmentEReference =
+              it.getMultiValuedNonContainmentEReference();
+          NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function21 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function21.accept(nonRootInSameRoot);
+          NonRoot doubleArrow20 = nonRootInSameRoot;
+          NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function22 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function22.accept(nonRootInSameRoot1);
+          NonRoot doubleArrow21 = nonRootInSameRoot1;
+          NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function23 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function23.accept(nonRootInSameRoot2);
+          NonRoot doubleArrow22 = nonRootInSameRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedNonContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow20, doubleArrow21, doubleArrow22)));
+        };
+    function20.accept(root20);
+    Root doubleArrow20 = root20;
+    Root root21 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function21 =
+        (Root it) -> {
+          it.setId("root");
+          EList<NonRoot> multiValuedNonContainmentEReference =
+              it.getMultiValuedNonContainmentEReference();
+          NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function22 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function22.accept(nonRootInSameRoot);
+          NonRoot doubleArrow21 = nonRootInSameRoot;
+          NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function23 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function23.accept(nonRootInSameRoot1);
+          NonRoot doubleArrow22 = nonRootInSameRoot1;
+          NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function24 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function24.accept(nonRootInSameRoot2);
+          NonRoot doubleArrow23 = nonRootInSameRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedNonContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow21, doubleArrow22, doubleArrow23)));
+        };
+    function21.accept(root21);
+    Root doubleArrow21 = root21;
+    Root root22 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function22 =
+        (Root it) -> {
+          it.setId("root");
+          NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function23 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function23.accept(nonRootInSameRoot);
+          NonRoot doubleArrow22 = nonRootInSameRoot;
+          NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function24 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function24.accept(nonRootInSameRoot1);
+          NonRoot doubleArrow23 = nonRootInSameRoot1;
+          NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function25 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function25.accept(nonRootInSameRoot2);
+          NonRoot doubleArrow24 = nonRootInSameRoot2;
+          EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+              it.getMultiValuedUnorderedNonContainmentEReference();
+          Iterables.<NonRoot>addAll(
+              multiValuedUnorderedNonContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow22, doubleArrow23, doubleArrow24)));
+        };
+    function22.accept(root22);
+    Root doubleArrow22 = root22;
+    Root root23 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function23 =
+        (Root it) -> {
+          it.setId("root");
+          EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+              it.getMultiValuedUnorderedNonContainmentEReference();
+          NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function24 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function24.accept(nonRootInSameRoot);
+          NonRoot doubleArrow23 = nonRootInSameRoot;
+          NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function25 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function25.accept(nonRootInSameRoot1);
+          NonRoot doubleArrow24 = nonRootInSameRoot1;
+          NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function26 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function26.accept(nonRootInSameRoot2);
+          NonRoot doubleArrow25 = nonRootInSameRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedUnorderedNonContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow23, doubleArrow24, doubleArrow25)));
+        };
+    function23.accept(root23);
+    Root doubleArrow23 = root23;
+    Root root24 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function24 =
+        (Root it) -> {
+          it.setId("root");
+          EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+              it.getMultiValuedUnorderedNonContainmentEReference();
+          NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function25 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function25.accept(nonRootInSameRoot);
+          NonRoot doubleArrow24 = nonRootInSameRoot;
+          NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function26 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function26.accept(nonRootInSameRoot1);
+          NonRoot doubleArrow25 = nonRootInSameRoot1;
+          NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function27 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function27.accept(nonRootInSameRoot2);
+          NonRoot doubleArrow26 = nonRootInSameRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedUnorderedNonContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow24, doubleArrow25, doubleArrow26)));
+        };
+    function24.accept(root24);
+    Root doubleArrow24 = root24;
+    Root root25 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function25 =
+        (Root it) -> {
+          it.setId("root");
+          EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+              it.getMultiValuedUnorderedNonContainmentEReference();
+          NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function26 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function26.accept(nonRootInSameRoot);
+          NonRoot doubleArrow25 = nonRootInSameRoot;
+          NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function27 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function27.accept(nonRootInSameRoot1);
+          NonRoot doubleArrow26 = nonRootInSameRoot1;
+          NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+          final Consumer<NonRoot> function28 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function28.accept(nonRootInSameRoot2);
+          NonRoot doubleArrow27 = nonRootInSameRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedUnorderedNonContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow25, doubleArrow26, doubleArrow27)));
+        };
+    function25.accept(root25);
+    Root doubleArrow25 = root25;
+    Root root26 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function26 =
+        (Root it) -> {
+          it.setId("root");
+          NonRoot NonRoot = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function27 =
+              (NonRoot it1) -> {
+                it1.setId("sub");
+              };
+          function27.accept(NonRoot);
+          NonRoot doubleArrow26 = NonRoot;
+          it.setSingleValuedContainmentEReference(doubleArrow26);
+        };
+    function26.accept(root26);
+    Root doubleArrow26 = root26;
+    Root root27 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function27 =
+        (Root it) -> {
+          it.setId("root");
+          NonRoot NonRoot = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function28 =
+              (NonRoot it1) -> {
+                it1.setId("sub");
+              };
+          function28.accept(NonRoot);
+          NonRoot doubleArrow27 = NonRoot;
+          it.setSingleValuedContainmentEReference(doubleArrow27);
+        };
+    function27.accept(root27);
+    Root doubleArrow27 = root27;
+    Root root28 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function28 =
+        (Root it) -> {
+          it.setId("root");
+          NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function29 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function29.accept(nonRoot);
+          NonRoot doubleArrow28 = nonRoot;
+          NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function30 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function30.accept(nonRoot1);
+          NonRoot doubleArrow29 = nonRoot1;
+          NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function31 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function31.accept(nonRoot2);
+          NonRoot doubleArrow30 = nonRoot2;
+          EList<NonRoot> multiValuedContainmentEReference =
+              it.getMultiValuedContainmentEReference();
+          Iterables.<NonRoot>addAll(
+              multiValuedContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow28, doubleArrow29, doubleArrow30)));
+        };
+    function28.accept(root28);
+    Root doubleArrow28 = root28;
+    Root root29 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function29 =
+        (Root it) -> {
+          it.setId("root");
+          EList<NonRoot> multiValuedContainmentEReference =
+              it.getMultiValuedContainmentEReference();
+          NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function30 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function30.accept(nonRoot);
+          NonRoot doubleArrow29 = nonRoot;
+          NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function31 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function31.accept(nonRoot1);
+          NonRoot doubleArrow30 = nonRoot1;
+          NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function32 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function32.accept(nonRoot2);
+          NonRoot doubleArrow31 = nonRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow29, doubleArrow30, doubleArrow31)));
+        };
+    function29.accept(root29);
+    Root doubleArrow29 = root29;
+    Root root30 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function30 =
+        (Root it) -> {
+          it.setId("root");
+          EList<allElementTypes.NonRoot> multiValuedUnorderedContainmentEReference =
+              it.getMultiValuedUnorderedContainmentEReference();
+          NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function31 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function31.accept(nonRoot);
+          NonRoot doubleArrow30 = nonRoot;
+          NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function32 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function32.accept(nonRoot1);
+          NonRoot doubleArrow31 = nonRoot1;
+          NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function33 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function33.accept(nonRoot2);
+          NonRoot doubleArrow32 = nonRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedUnorderedContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow30, doubleArrow31, doubleArrow32)));
+        };
+    function30.accept(root30);
+    Root doubleArrow30 = root30;
+    Root root31 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function31 =
+        (Root it) -> {
+          it.setId("root");
+          EList<allElementTypes.NonRoot> multiValuedUnorderedContainmentEReference =
+              it.getMultiValuedUnorderedContainmentEReference();
+          NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function32 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function32.accept(nonRoot);
+          NonRoot doubleArrow31 = nonRoot;
+          NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function33 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function33.accept(nonRoot1);
+          NonRoot doubleArrow32 = nonRoot1;
+          NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function34 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function34.accept(nonRoot2);
+          NonRoot doubleArrow33 = nonRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedUnorderedContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow31, doubleArrow32, doubleArrow33)));
+        };
+    function31.accept(root31);
+    Root doubleArrow31 = root31;
+    Root root32 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function32 =
+        (Root it) -> {
+          it.setId("root");
+          EList<allElementTypes.NonRoot> multiValuedUnorderedContainmentEReference =
+              it.getMultiValuedUnorderedContainmentEReference();
+          NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function33 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function33.accept(nonRoot);
+          NonRoot doubleArrow32 = nonRoot;
+          NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function34 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function34.accept(nonRoot1);
+          NonRoot doubleArrow33 = nonRoot1;
+          NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function35 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function35.accept(nonRoot2);
+          NonRoot doubleArrow34 = nonRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedUnorderedContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow32, doubleArrow33, doubleArrow34)));
+        };
+    function32.accept(root32);
+    Root doubleArrow32 = root32;
+    Root root33 = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function33 =
+        (Root it) -> {
+          it.setId("root");
+          EList<allElementTypes.NonRoot> multiValuedUnorderedContainmentEReference =
+              it.getMultiValuedUnorderedContainmentEReference();
+          NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function34 =
+              (NonRoot it1) -> {
+                it1.setId("sub3");
+              };
+          function34.accept(nonRoot);
+          NonRoot doubleArrow33 = nonRoot;
+          NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function35 =
+              (NonRoot it1) -> {
+                it1.setId("sub1");
+              };
+          function35.accept(nonRoot1);
+          NonRoot doubleArrow34 = nonRoot1;
+          NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+          final Consumer<NonRoot> function36 =
+              (NonRoot it1) -> {
+                it1.setId("sub2");
+              };
+          function36.accept(nonRoot2);
+          NonRoot doubleArrow35 = nonRoot2;
+          Iterables.<NonRoot>addAll(
+              multiValuedUnorderedContainmentEReference,
+              Collections.<NonRoot>unmodifiableList(
+                  List.of(doubleArrow33, doubleArrow34, doubleArrow35)));
+        };
+    function33.accept(root33);
+    Root doubleArrow33 = root33;
     return Stream.<Arguments>of(
-        Arguments.of("simple object", _doubleArrow, _doubleArrow_1),
+        Arguments.of("simple object", doubleArrow, doubleArrow1),
+        Arguments.of("with ordered multi-valued attribute", doubleArrow2, doubleArrow3),
         Arguments.of(
-            "with ordered multi-valued attribute", _doubleArrow_2, _doubleArrow_3),
+            "with unordered multi-valued attribute (same order)", doubleArrow4, doubleArrow5),
         Arguments.of(
-            "with unordered multi-valued attribute (same order)", _doubleArrow_4, _doubleArrow_5),
+            "with unordered multi-valued attribute (different order)", doubleArrow6, doubleArrow7),
+        Arguments.of("with single-valued reference to the outside", doubleArrow8, doubleArrow9),
         Arguments.of(
-            "with unordered multi-valued attribute (different order)", _doubleArrow_6, _doubleArrow_7),
+            "with single-valued reference to the outside (same id but different content)",
+            doubleArrow10,
+            doubleArrow11),
         Arguments.of(
-            "with single-valued reference to the outside", _doubleArrow_8, _doubleArrow_9),
+            "with ordered multi-valued reference to the outside", doubleArrow12, doubleArrow13),
         Arguments.of(
-            "with single-valued reference to the outside (same id but different content)", _doubleArrow_10,
-            _doubleArrow_11),
+            "with unordered multi-valued reference to the outside (same order)",
+            doubleArrow14,
+            doubleArrow15),
         Arguments.of(
-            "with ordered multi-valued reference to the outside", _doubleArrow_12, _doubleArrow_13),
+            "with unordered multi-valued reference to the outside (different order)",
+            doubleArrow16,
+            doubleArrow17),
+        Arguments.of("with single-valued reference to the inside", doubleArrow18, doubleArrow19),
         Arguments.of(
-            "with unordered multi-valued reference to the outside (same order)", _doubleArrow_14, _doubleArrow_15),
+            "with ordered multi-valued reference to the inside", doubleArrow20, doubleArrow21),
         Arguments.of(
-            "with unordered multi-valued reference to the outside (different order)", _doubleArrow_16, _doubleArrow_17),
+            "with unordered multi-valued reference to the inside (same order)",
+            doubleArrow22,
+            doubleArrow23),
         Arguments.of(
-            "with single-valued reference to the inside", _doubleArrow_18, _doubleArrow_19),
+            "with unordered multi-valued reference to the inside (different order)",
+            doubleArrow24,
+            doubleArrow25),
+        Arguments.of("with single-valued containment reference", doubleArrow26, doubleArrow27),
         Arguments.of(
-            "with ordered multi-valued reference to the inside", _doubleArrow_20, _doubleArrow_21),
+            "with ordered multi-valued containment reference", doubleArrow28, doubleArrow29),
         Arguments.of(
-            "with unordered multi-valued reference to the inside (same order)", _doubleArrow_22, _doubleArrow_23),
+            "with unordered multi-valued containment reference (same order)",
+            doubleArrow30,
+            doubleArrow31),
         Arguments.of(
-            "with unordered multi-valued reference to the inside (different order)", _doubleArrow_24, _doubleArrow_25),
-        Arguments.of(
-            "with single-valued containment reference", _doubleArrow_26, _doubleArrow_27),
-        Arguments.of(
-            "with ordered multi-valued containment reference", _doubleArrow_28, _doubleArrow_29),
-        Arguments.of(
-            "with unordered multi-valued containment reference (same order)", _doubleArrow_30, _doubleArrow_31),
-        Arguments.of(
-            "with unordered multi-valued containment reference (different order)", _doubleArrow_32, _doubleArrow_33));
+            "with unordered multi-valued containment reference (different order)",
+            doubleArrow32,
+            doubleArrow33));
   }
 
   @Test
   @DisplayName("recognizes a changed single-valued attribute")
   public void changedAttribute() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("different");
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("test");
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(), CoreMatchers.containsString("wrong value: \"different\""));
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("different");
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("test");
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
+        };
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(), CoreMatchers.containsString("wrong value: \"different\""));
   }
 
   @Test
   @DisplayName("recognizes a different order in a multi-valued attribute")
   public void attributeListReorded() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<Integer> _multiValuedEAttribute = it.getMultiValuedEAttribute();
-        Iterables.<Integer>addAll(_multiValuedEAttribute, Collections.<Integer>unmodifiableList(
-            List.of(Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(42), Integer.valueOf(8))));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<Integer> _multiValuedEAttribute = it.getMultiValuedEAttribute();
-        Iterables.<Integer>addAll(_multiValuedEAttribute, Collections.<Integer>unmodifiableList(
-            List.of(Integer.valueOf(1), Integer.valueOf(8), Integer.valueOf(2), Integer.valueOf(42))));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow,
-          ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(), CoreMatchers.containsString("different position for: 8"));
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                EList<Integer> multiValuedEAttribute = it.getMultiValuedEAttribute();
+                Iterables.<Integer>addAll(
+                    multiValuedEAttribute,
+                    Collections.<Integer>unmodifiableList(
+                        List.of(
+                            Integer.valueOf(1),
+                            Integer.valueOf(2),
+                            Integer.valueOf(42),
+                            Integer.valueOf(8))));
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                EList<Integer> multiValuedEAttribute = it.getMultiValuedEAttribute();
+                Iterables.<Integer>addAll(
+                    multiValuedEAttribute,
+                    Collections.<Integer>unmodifiableList(
+                        List.of(
+                            Integer.valueOf(1),
+                            Integer.valueOf(8),
+                            Integer.valueOf(2),
+                            Integer.valueOf(42))));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
+        };
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(), CoreMatchers.containsString("different position for: 8"));
   }
 
   @Test
   @DisplayName("recognizes a changed single-valued reference to the outside")
   public void changedReferenceToOutside() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("different");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("different");
+                    };
+                function2.accept(inDifferentRoot);
+                NonRoot doubleArrow = inDifferentRoot;
+                it.setSingleValuedNonContainmentEReference(doubleArrow);
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub");
+                    };
+                function3.accept(inDifferentRoot);
+                NonRoot doubleArrow1 = inDifferentRoot;
+                it.setSingleValuedNonContainmentEReference(doubleArrow1);
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_inDifferentRoot);
-        NonRoot _doubleArrow = _inDifferentRoot;
-        it.setSingleValuedNonContainmentEReference(_doubleArrow);
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub");
-        };
-        _function_3.accept(_inDifferentRoot);
-        NonRoot _doubleArrow_1 = _inDifferentRoot;
-        it.setSingleValuedNonContainmentEReference(_doubleArrow_1);
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("wrong value: NonRoot(id=\"different\")"));
   }
 
   @Test
   @DisplayName("recognizes a changed single-valued reference to the inside")
   public void changedReferenceToInside() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("different");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("different");
+                    };
+                function2.accept(nonRootInSameRoot);
+                NonRoot doubleArrow = nonRootInSameRoot;
+                it.setSingleValuedNonContainmentEReference(doubleArrow);
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub");
+                    };
+                function3.accept(nonRootInSameRoot);
+                NonRoot doubleArrow1 = nonRootInSameRoot;
+                it.setSingleValuedNonContainmentEReference(doubleArrow1);
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_nonRootInSameRoot);
-        NonRoot _doubleArrow = _nonRootInSameRoot;
-        it.setSingleValuedNonContainmentEReference(_doubleArrow);
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub");
-        };
-        _function_3.accept(_nonRootInSameRoot);
-        NonRoot _doubleArrow_1 = _nonRootInSameRoot;
-        it.setSingleValuedNonContainmentEReference(_doubleArrow_1);
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("wrong value: NonRoot(id=\"different\")"));
   }
 
   @Test
   @DisplayName("recognizes a reordered multi-valued reference to the outside")
   public void reorderedReferenceToOutside() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function2.accept(inDifferentRoot);
+                NonRoot doubleArrow = inDifferentRoot;
+                NonRoot inDifferentRoot1 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function3.accept(inDifferentRoot1);
+                NonRoot doubleArrow1 = inDifferentRoot1;
+                NonRoot inDifferentRoot2 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function4.accept(inDifferentRoot2);
+                NonRoot doubleArrow2 = inDifferentRoot2;
+                Iterables.<NonRoot>addAll(
+                    multiValuedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow, doubleArrow1, doubleArrow2)));
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function3.accept(inDifferentRoot);
+                NonRoot doubleArrow1 = inDifferentRoot;
+                NonRoot inDifferentRoot1 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function4.accept(inDifferentRoot1);
+                NonRoot doubleArrow2 = inDifferentRoot1;
+                NonRoot inDifferentRoot2 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function5 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function5.accept(inDifferentRoot2);
+                NonRoot doubleArrow3 = inDifferentRoot2;
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                Iterables.<NonRoot>addAll(
+                    multiValuedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow1, doubleArrow2, doubleArrow3)));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_inDifferentRoot);
-        NonRoot _doubleArrow = _inDifferentRoot;
-        NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_3.accept(_inDifferentRoot_1);
-        NonRoot _doubleArrow_1 = _inDifferentRoot_1;
-        NonRoot _inDifferentRoot_2 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_4.accept(_inDifferentRoot_2);
-        NonRoot _doubleArrow_2 = _inDifferentRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow, _doubleArrow_1, _doubleArrow_2)));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_3.accept(_inDifferentRoot);
-        NonRoot _doubleArrow_1 = _inDifferentRoot;
-        NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_4.accept(_inDifferentRoot_1);
-        NonRoot _doubleArrow_2 = _inDifferentRoot_1;
-        NonRoot _inDifferentRoot_2 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_5 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_5.accept(_inDifferentRoot_2);
-        NonRoot _doubleArrow_3 = _inDifferentRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow_1, _doubleArrow_2, _doubleArrow_3)));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("different position for: NonRoot(id=\"sub1\")"));
   }
 
   @Test
   @DisplayName("recognizes a reordered multi-valued reference to the inside")
   public void reorderedReferenceToInside() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function2.accept(nonRootInSameRoot);
+                NonRoot doubleArrow = nonRootInSameRoot;
+                NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function3.accept(nonRootInSameRoot1);
+                NonRoot doubleArrow1 = nonRootInSameRoot1;
+                NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function4.accept(nonRootInSameRoot2);
+                NonRoot doubleArrow2 = nonRootInSameRoot2;
+                Iterables.<NonRoot>addAll(
+                    multiValuedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow, doubleArrow1, doubleArrow2)));
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function3.accept(nonRootInSameRoot);
+                NonRoot doubleArrow1 = nonRootInSameRoot;
+                NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function4.accept(nonRootInSameRoot1);
+                NonRoot doubleArrow2 = nonRootInSameRoot1;
+                NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function5 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function5.accept(nonRootInSameRoot2);
+                NonRoot doubleArrow3 = nonRootInSameRoot2;
+                Iterables.<NonRoot>addAll(
+                    multiValuedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow1, doubleArrow2, doubleArrow3)));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_nonRootInSameRoot);
-        NonRoot _doubleArrow = _nonRootInSameRoot;
-        NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_3.accept(_nonRootInSameRoot_1);
-        NonRoot _doubleArrow_1 = _nonRootInSameRoot_1;
-        NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_4.accept(_nonRootInSameRoot_2);
-        NonRoot _doubleArrow_2 = _nonRootInSameRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow, _doubleArrow_1, _doubleArrow_2)));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_3.accept(_nonRootInSameRoot);
-        NonRoot _doubleArrow_1 = _nonRootInSameRoot;
-        NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_4.accept(_nonRootInSameRoot_1);
-        NonRoot _doubleArrow_2 = _nonRootInSameRoot_1;
-        NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_5 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_5.accept(_nonRootInSameRoot_2);
-        NonRoot _doubleArrow_3 = _nonRootInSameRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow_1, _doubleArrow_2, _doubleArrow_3)));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("different position for: NonRoot(id=\"sub1\")"));
   }
 
   @Test
   @DisplayName("recognizes an insertion into a multi-valued unordered reference to the outside")
   public void insertionInUnorderedReferenceToOutside() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-            .getMultiValuedUnorderedNonContainmentEReference();
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+                    it.getMultiValuedUnorderedNonContainmentEReference();
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function2.accept(inDifferentRoot);
+                NonRoot doubleArrow = inDifferentRoot;
+                NonRoot inDifferentRoot1 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function3.accept(inDifferentRoot1);
+                NonRoot doubleArrow1 = inDifferentRoot1;
+                NonRoot inDifferentRoot2 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function4.accept(inDifferentRoot2);
+                NonRoot doubleArrow2 = inDifferentRoot2;
+                Iterables.<NonRoot>addAll(
+                    multiValuedUnorderedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow, doubleArrow1, doubleArrow2)));
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+                    it.getMultiValuedUnorderedNonContainmentEReference();
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function3.accept(inDifferentRoot);
+                NonRoot doubleArrow1 = inDifferentRoot;
+                NonRoot inDifferentRoot1 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function4.accept(inDifferentRoot1);
+                NonRoot doubleArrow2 = inDifferentRoot1;
+                Iterables.<NonRoot>addAll(
+                    multiValuedUnorderedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(List.of(doubleArrow1, doubleArrow2)));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_inDifferentRoot);
-        NonRoot _doubleArrow = _inDifferentRoot;
-        NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_3.accept(_inDifferentRoot_1);
-        NonRoot _doubleArrow_1 = _inDifferentRoot_1;
-        NonRoot _inDifferentRoot_2 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_4.accept(_inDifferentRoot_2);
-        NonRoot _doubleArrow_2 = _inDifferentRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow, _doubleArrow_1, _doubleArrow_2)));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-            .getMultiValuedUnorderedNonContainmentEReference();
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_3.accept(_inDifferentRoot);
-        NonRoot _doubleArrow_1 = _inDifferentRoot;
-        NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_4.accept(_inDifferentRoot_1);
-        NonRoot _doubleArrow_2 = _inDifferentRoot_1;
-        Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections
-            .<NonRoot>unmodifiableList(List.of(_doubleArrow_1, _doubleArrow_2)));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("unexpected value: NonRoot(id=\"sub2\")"));
   }
 
   @Test
   @DisplayName("recognizes an insertion into a multi-valued unordered ereference to the inside")
   public void insertionInUnuorderedReferenceToInside() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-            .getMultiValuedUnorderedNonContainmentEReference();
-        NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+                    it.getMultiValuedUnorderedNonContainmentEReference();
+                NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function2.accept(nonRootInSameRoot);
+                NonRoot doubleArrow = nonRootInSameRoot;
+                NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function3.accept(nonRootInSameRoot1);
+                NonRoot doubleArrow1 = nonRootInSameRoot1;
+                NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function4.accept(nonRootInSameRoot2);
+                NonRoot doubleArrow2 = nonRootInSameRoot2;
+                Iterables.<NonRoot>addAll(
+                    multiValuedUnorderedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow, doubleArrow1, doubleArrow2)));
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+                    it.getMultiValuedUnorderedNonContainmentEReference();
+                NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function3.accept(nonRootInSameRoot);
+                NonRoot doubleArrow1 = nonRootInSameRoot;
+                NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function4.accept(nonRootInSameRoot1);
+                NonRoot doubleArrow2 = nonRootInSameRoot1;
+                Iterables.<NonRoot>addAll(
+                    multiValuedUnorderedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(List.of(doubleArrow1, doubleArrow2)));
+                NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function5 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function5.accept(nonRootInSameRoot2);
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_nonRootInSameRoot);
-        NonRoot _doubleArrow = _nonRootInSameRoot;
-        NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_3.accept(_nonRootInSameRoot_1);
-        NonRoot _doubleArrow_1 = _nonRootInSameRoot_1;
-        NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_4.accept(_nonRootInSameRoot_2);
-        NonRoot _doubleArrow_2 = _nonRootInSameRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow, _doubleArrow_1, _doubleArrow_2)));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-            .getMultiValuedUnorderedNonContainmentEReference();
-        NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_3.accept(_nonRootInSameRoot);
-        NonRoot _doubleArrow_1 = _nonRootInSameRoot;
-        NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_4.accept(_nonRootInSameRoot_1);
-        NonRoot _doubleArrow_2 = _nonRootInSameRoot_1;
-        Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections
-            .<NonRoot>unmodifiableList(List.of(_doubleArrow_1, _doubleArrow_2)));
-        NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_5 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_5.accept(_nonRootInSameRoot_2);
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("unexpected value: NonRoot(id=\"sub2\")"));
   }
 
   @Test
   @DisplayName("recognizes a removal from a multi-valued unordered reference to the outside")
   public void removalFromUnorderedReferenceToOutside() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-            .getMultiValuedUnorderedNonContainmentEReference();
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+                    it.getMultiValuedUnorderedNonContainmentEReference();
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function2.accept(inDifferentRoot);
+                NonRoot doubleArrow = inDifferentRoot;
+                NonRoot inDifferentRoot1 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function3.accept(inDifferentRoot1);
+                NonRoot doubleArrow1 = inDifferentRoot1;
+                Iterables.<NonRoot>addAll(
+                    multiValuedUnorderedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(List.of(doubleArrow, doubleArrow1)));
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+                    it.getMultiValuedUnorderedNonContainmentEReference();
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function3.accept(inDifferentRoot);
+                NonRoot doubleArrow1 = inDifferentRoot;
+                NonRoot inDifferentRoot1 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function4.accept(inDifferentRoot1);
+                NonRoot doubleArrow2 = inDifferentRoot1;
+                NonRoot inDifferentRoot2 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function5 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function5.accept(inDifferentRoot2);
+                NonRoot doubleArrow3 = inDifferentRoot2;
+                Iterables.<NonRoot>addAll(
+                    multiValuedUnorderedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow1, doubleArrow2, doubleArrow3)));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_inDifferentRoot);
-        NonRoot _doubleArrow = _inDifferentRoot;
-        NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_3.accept(_inDifferentRoot_1);
-        NonRoot _doubleArrow_1 = _inDifferentRoot_1;
-        Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections
-            .<NonRoot>unmodifiableList(List.of(_doubleArrow, _doubleArrow_1)));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-            .getMultiValuedUnorderedNonContainmentEReference();
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_3.accept(_inDifferentRoot);
-        NonRoot _doubleArrow_1 = _inDifferentRoot;
-        NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_4.accept(_inDifferentRoot_1);
-        NonRoot _doubleArrow_2 = _inDifferentRoot_1;
-        NonRoot _inDifferentRoot_2 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_5 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_5.accept(_inDifferentRoot_2);
-        NonRoot _doubleArrow_3 = _inDifferentRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow_1, _doubleArrow_2, _doubleArrow_3)));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("missing the value: NonRoot(id=\"sub2\")"));
   }
 
   @Test
   @DisplayName("recognizes a removal from a multi-valued unordered reference to the inside")
   public void removalFromUnorderedReferenceToInside() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-            .getMultiValuedUnorderedNonContainmentEReference();
-        NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+                    it.getMultiValuedUnorderedNonContainmentEReference();
+                NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function2.accept(nonRootInSameRoot);
+                NonRoot doubleArrow = nonRootInSameRoot;
+                NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function3.accept(nonRootInSameRoot1);
+                NonRoot doubleArrow1 = nonRootInSameRoot1;
+                Iterables.<NonRoot>addAll(
+                    multiValuedUnorderedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(List.of(doubleArrow, doubleArrow1)));
+                NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function4.accept(nonRootInSameRoot2);
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+                    it.getMultiValuedUnorderedNonContainmentEReference();
+                NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function3.accept(nonRootInSameRoot);
+                NonRoot doubleArrow1 = nonRootInSameRoot;
+                NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function4.accept(nonRootInSameRoot1);
+                NonRoot doubleArrow2 = nonRootInSameRoot1;
+                NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function5 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function5.accept(nonRootInSameRoot2);
+                NonRoot doubleArrow3 = nonRootInSameRoot2;
+                Iterables.<NonRoot>addAll(
+                    multiValuedUnorderedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow1, doubleArrow2, doubleArrow3)));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_nonRootInSameRoot);
-        NonRoot _doubleArrow = _nonRootInSameRoot;
-        NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_3.accept(_nonRootInSameRoot_1);
-        NonRoot _doubleArrow_1 = _nonRootInSameRoot_1;
-        Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections
-            .<NonRoot>unmodifiableList(List.of(_doubleArrow, _doubleArrow_1)));
-        NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_4.accept(_nonRootInSameRoot_2);
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-            .getMultiValuedUnorderedNonContainmentEReference();
-        NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_3.accept(_nonRootInSameRoot);
-        NonRoot _doubleArrow_1 = _nonRootInSameRoot;
-        NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_4.accept(_nonRootInSameRoot_1);
-        NonRoot _doubleArrow_2 = _nonRootInSameRoot_1;
-        NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_5 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_5.accept(_nonRootInSameRoot_2);
-        NonRoot _doubleArrow_3 = _nonRootInSameRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedUnorderedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow_1, _doubleArrow_2, _doubleArrow_3)));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("missing the value: NonRoot(id=\"sub2\")"));
   }
 
   @Test
   @DisplayName("recognizes an insertion into a multi-valued reference to the outside")
   public void insertionInReferenceToOutside() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function2.accept(inDifferentRoot);
+                NonRoot doubleArrow = inDifferentRoot;
+                NonRoot inDifferentRoot1 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function3.accept(inDifferentRoot1);
+                NonRoot doubleArrow1 = inDifferentRoot1;
+                NonRoot inDifferentRoot2 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function4.accept(inDifferentRoot2);
+                NonRoot doubleArrow2 = inDifferentRoot2;
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                Iterables.<NonRoot>addAll(
+                    multiValuedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow, doubleArrow1, doubleArrow2)));
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function3.accept(inDifferentRoot);
+                NonRoot doubleArrow1 = inDifferentRoot;
+                NonRoot inDifferentRoot1 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function4.accept(inDifferentRoot1);
+                NonRoot doubleArrow2 = inDifferentRoot1;
+                Iterables.<NonRoot>addAll(
+                    multiValuedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(List.of(doubleArrow1, doubleArrow2)));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_inDifferentRoot);
-        NonRoot _doubleArrow = _inDifferentRoot;
-        NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_3.accept(_inDifferentRoot_1);
-        NonRoot _doubleArrow_1 = _inDifferentRoot_1;
-        NonRoot _inDifferentRoot_2 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_4.accept(_inDifferentRoot_2);
-        NonRoot _doubleArrow_2 = _inDifferentRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow, _doubleArrow_1, _doubleArrow_2)));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_3.accept(_inDifferentRoot);
-        NonRoot _doubleArrow_1 = _inDifferentRoot;
-        NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_4.accept(_inDifferentRoot_1);
-        NonRoot _doubleArrow_2 = _inDifferentRoot_1;
-        Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections
-            .<NonRoot>unmodifiableList(List.of(_doubleArrow_1, _doubleArrow_2)));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("unexpected value: NonRoot(id=\"sub2\")"));
   }
 
   @Test
   @DisplayName("recognizes an insertion into a multi-valued reference to the inside")
   public void insertionInReferenceToInside() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function2.accept(nonRootInSameRoot);
+                NonRoot doubleArrow = nonRootInSameRoot;
+                NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function3.accept(nonRootInSameRoot1);
+                NonRoot doubleArrow1 = nonRootInSameRoot1;
+                NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function4.accept(nonRootInSameRoot2);
+                NonRoot doubleArrow2 = nonRootInSameRoot2;
+                Iterables.<NonRoot>addAll(
+                    multiValuedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow, doubleArrow1, doubleArrow2)));
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function3.accept(nonRootInSameRoot);
+                NonRoot doubleArrow1 = nonRootInSameRoot;
+                NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function4.accept(nonRootInSameRoot1);
+                NonRoot doubleArrow2 = nonRootInSameRoot1;
+                Iterables.<NonRoot>addAll(
+                    multiValuedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(List.of(doubleArrow1, doubleArrow2)));
+                NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function5 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function5.accept(nonRootInSameRoot2);
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_nonRootInSameRoot);
-        NonRoot _doubleArrow = _nonRootInSameRoot;
-        NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_3.accept(_nonRootInSameRoot_1);
-        NonRoot _doubleArrow_1 = _nonRootInSameRoot_1;
-        NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_4.accept(_nonRootInSameRoot_2);
-        NonRoot _doubleArrow_2 = _nonRootInSameRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow, _doubleArrow_1, _doubleArrow_2)));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_3.accept(_nonRootInSameRoot);
-        NonRoot _doubleArrow_1 = _nonRootInSameRoot;
-        NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_4.accept(_nonRootInSameRoot_1);
-        NonRoot _doubleArrow_2 = _nonRootInSameRoot_1;
-        Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections
-            .<NonRoot>unmodifiableList(List.of(_doubleArrow_1, _doubleArrow_2)));
-        NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_5 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_5.accept(_nonRootInSameRoot_2);
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("unexpected value: NonRoot(id=\"sub2\")"));
   }
 
   @Test
   @DisplayName("recognizes a removal from a multi-valued reference to the outside")
   public void removalFromReferenceToOutside() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function2.accept(inDifferentRoot);
+                NonRoot doubleArrow = inDifferentRoot;
+                NonRoot inDifferentRoot1 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function3.accept(inDifferentRoot1);
+                NonRoot doubleArrow1 = inDifferentRoot1;
+                Iterables.<NonRoot>addAll(
+                    multiValuedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(List.of(doubleArrow, doubleArrow1)));
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function3.accept(inDifferentRoot);
+                NonRoot doubleArrow1 = inDifferentRoot;
+                NonRoot inDifferentRoot1 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function4.accept(inDifferentRoot1);
+                NonRoot doubleArrow2 = inDifferentRoot1;
+                NonRoot inDifferentRoot2 =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function5 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function5.accept(inDifferentRoot2);
+                NonRoot doubleArrow3 = inDifferentRoot2;
+                Iterables.<NonRoot>addAll(
+                    multiValuedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow1, doubleArrow2, doubleArrow3)));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_inDifferentRoot);
-        NonRoot _doubleArrow = _inDifferentRoot;
-        NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_3.accept(_inDifferentRoot_1);
-        NonRoot _doubleArrow_1 = _inDifferentRoot_1;
-        Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections
-            .<NonRoot>unmodifiableList(List.of(_doubleArrow, _doubleArrow_1)));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_3.accept(_inDifferentRoot);
-        NonRoot _doubleArrow_1 = _inDifferentRoot;
-        NonRoot _inDifferentRoot_1 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_4.accept(_inDifferentRoot_1);
-        NonRoot _doubleArrow_2 = _inDifferentRoot_1;
-        NonRoot _inDifferentRoot_2 = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_5 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_5.accept(_inDifferentRoot_2);
-        NonRoot _doubleArrow_3 = _inDifferentRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow_1, _doubleArrow_2, _doubleArrow_3)));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("missing the value: NonRoot(id=\"sub2\")"));
   }
 
   @Test
   @DisplayName("recognizes a removal from a multi-valued reference to the inside")
   public void removalFromReferenceToInside() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function2.accept(nonRootInSameRoot);
+                NonRoot doubleArrow = nonRootInSameRoot;
+                NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function3.accept(nonRootInSameRoot1);
+                NonRoot doubleArrow1 = nonRootInSameRoot1;
+                Iterables.<NonRoot>addAll(
+                    multiValuedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(List.of(doubleArrow, doubleArrow1)));
+                NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function4.accept(nonRootInSameRoot2);
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                NonRoot nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function3.accept(nonRootInSameRoot);
+                NonRoot doubleArrow1 = nonRootInSameRoot;
+                NonRoot nonRootInSameRoot1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function4.accept(nonRootInSameRoot1);
+                NonRoot doubleArrow2 = nonRootInSameRoot1;
+                NonRoot nonRootInSameRoot2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
+                final Consumer<NonRoot> function5 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function5.accept(nonRootInSameRoot2);
+                NonRoot doubleArrow3 = nonRootInSameRoot2;
+                Iterables.<NonRoot>addAll(
+                    multiValuedNonContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow1, doubleArrow2, doubleArrow3)));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_nonRootInSameRoot);
-        NonRoot _doubleArrow = _nonRootInSameRoot;
-        NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_3.accept(_nonRootInSameRoot_1);
-        NonRoot _doubleArrow_1 = _nonRootInSameRoot_1;
-        Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections
-            .<NonRoot>unmodifiableList(List.of(_doubleArrow, _doubleArrow_1)));
-        NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_4.accept(_nonRootInSameRoot_2);
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        NonRoot _nonRootInSameRoot = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_3.accept(_nonRootInSameRoot);
-        NonRoot _doubleArrow_1 = _nonRootInSameRoot;
-        NonRoot _nonRootInSameRoot_1 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_4.accept(_nonRootInSameRoot_1);
-        NonRoot _doubleArrow_2 = _nonRootInSameRoot_1;
-        NonRoot _nonRootInSameRoot_2 = ModelDeepEqualityMatcherTest.nonRootInSameRoot(it);
-        final Consumer<NonRoot> _function_5 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_5.accept(_nonRootInSameRoot_2);
-        NonRoot _doubleArrow_3 = _nonRootInSameRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedNonContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow_1, _doubleArrow_2, _doubleArrow_3)));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("missing the value: NonRoot(id=\"sub2\")"));
   }
 
   @Test
   @DisplayName("recognizes an id-changed single-valued containment reference")
   public void idChangedSingleContainmentReference() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("different");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot NonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("different");
+                    };
+                function2.accept(NonRoot);
+                NonRoot doubleArrow = NonRoot;
+                it.setSingleValuedContainmentEReference(doubleArrow);
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub");
+                    };
+                function3.accept(nonRoot);
+                NonRoot doubleArrow1 = nonRoot;
+                it.setSingleValuedContainmentEReference(doubleArrow1);
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_NonRoot);
-        NonRoot _doubleArrow = _NonRoot;
-        it.setSingleValuedContainmentEReference(_doubleArrow);
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub");
-        };
-        _function_3.accept(_NonRoot);
-        NonRoot _doubleArrow_1 = _NonRoot;
-        it.setSingleValuedContainmentEReference(_doubleArrow_1);
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("unexpected value: NonRoot(id=\"different\")"));
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("missing the value: NonRoot(id=\"sub\")"));
   }
 
   @Test
   @DisplayName("recognizes a value-changed single-valued containment reference")
   public void valueSingleChangedContainmentReference() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub");
-          it_1.setValue("different");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub");
+                      it1.setValue("different");
+                    };
+                function2.accept(nonRoot);
+                NonRoot doubleArrow = nonRoot;
+                it.setSingleValuedContainmentEReference(doubleArrow);
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub");
+                      it1.setValue("test");
+                    };
+                function3.accept(nonRoot);
+                NonRoot doubleArrow1 = nonRoot;
+                it.setSingleValuedContainmentEReference(doubleArrow1);
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_NonRoot);
-        NonRoot _doubleArrow = _NonRoot;
-        it.setSingleValuedContainmentEReference(_doubleArrow);
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub");
-          it_1.setValue("test");
-        };
-        _function_3.accept(_NonRoot);
-        NonRoot _doubleArrow_1 = _NonRoot;
-        it.setSingleValuedContainmentEReference(_doubleArrow_1);
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(), CoreMatchers.containsString("wrong value: \"different\""));
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(), CoreMatchers.containsString("wrong value: \"different\""));
   }
 
   @Test
   @DisplayName("recognizes a reordered multi-valued containment reference")
   public void reorderedContainmentReference() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedContainmentEReference = it.getMultiValuedContainmentEReference();
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function2.accept(nonRoot);
+                NonRoot doubleArrow = nonRoot;
+                NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function3.accept(nonRoot1);
+                NonRoot doubleArrow1 = nonRoot1;
+                NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function4.accept(nonRoot2);
+                NonRoot doubleArrow2 = nonRoot2;
+                EList<NonRoot> multiValuedContainmentEReference =
+                    it.getMultiValuedContainmentEReference();
+                Iterables.<NonRoot>addAll(
+                    multiValuedContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow, doubleArrow1, doubleArrow2)));
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot nonroot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function3.accept(nonroot);
+                NonRoot doubleArrow1 = nonroot;
+                NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function4.accept(nonRoot1);
+                NonRoot doubleArrow2 = nonRoot1;
+                NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function5 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function5.accept(nonRoot2);
+                NonRoot doubleArrow3 = nonRoot2;
+                EList<NonRoot> multiValuedContainmentEReference =
+                    it.getMultiValuedContainmentEReference();
+                Iterables.<NonRoot>addAll(
+                    multiValuedContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow1, doubleArrow2, doubleArrow3)));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_NonRoot);
-        NonRoot _doubleArrow = _NonRoot;
-        NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_3.accept(_NonRoot_1);
-        NonRoot _doubleArrow_1 = _NonRoot_1;
-        NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_4.accept(_NonRoot_2);
-        NonRoot _doubleArrow_2 = _NonRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow, _doubleArrow_1, _doubleArrow_2)));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedContainmentEReference = it.getMultiValuedContainmentEReference();
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_3.accept(_NonRoot);
-        NonRoot _doubleArrow_1 = _NonRoot;
-        NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_4.accept(_NonRoot_1);
-        NonRoot _doubleArrow_2 = _NonRoot_1;
-        NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_5 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_5.accept(_NonRoot_2);
-        NonRoot _doubleArrow_3 = _NonRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow_1, _doubleArrow_2, _doubleArrow_3)));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("different position for: NonRoot(id=\"sub1\")"));
   }
 
   @Test
   @DisplayName("recognizes an insertion into a multi-valued containment reference")
   public void insertionInContainmentReference() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedContainmentEReference = it.getMultiValuedContainmentEReference();
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedContainmentEReference =
+                    it.getMultiValuedContainmentEReference();
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function2.accept(nonRoot);
+                NonRoot doubleArrow = nonRoot;
+                NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function3.accept(nonRoot1);
+                NonRoot doubleArrow1 = nonRoot1;
+                NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function4.accept(nonRoot2);
+                NonRoot doubleArrow2 = nonRoot2;
+                Iterables.<NonRoot>addAll(
+                    multiValuedContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow, doubleArrow1, doubleArrow2)));
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedContainmentEReference =
+                    it.getMultiValuedContainmentEReference();
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function3.accept(nonRoot);
+                NonRoot doubleArrow1 = nonRoot;
+                NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function4.accept(nonRoot1);
+                NonRoot doubleArrow2 = nonRoot1;
+                Iterables.<NonRoot>addAll(
+                    multiValuedContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(List.of(doubleArrow1, doubleArrow2)));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_NonRoot);
-        NonRoot _doubleArrow = _NonRoot;
-        NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_3.accept(_NonRoot_1);
-        NonRoot _doubleArrow_1 = _NonRoot_1;
-        NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_4.accept(_NonRoot_2);
-        NonRoot _doubleArrow_2 = _NonRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow, _doubleArrow_1, _doubleArrow_2)));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedContainmentEReference = it.getMultiValuedContainmentEReference();
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_3.accept(_NonRoot);
-        NonRoot _doubleArrow_1 = _NonRoot;
-        NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_4.accept(_NonRoot_1);
-        NonRoot _doubleArrow_2 = _NonRoot_1;
-        Iterables.<NonRoot>addAll(_multiValuedContainmentEReference, Collections
-            .<NonRoot>unmodifiableList(List.of(_doubleArrow_1, _doubleArrow_2)));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("unexpected value: NonRoot(id=\"sub2\")"));
   }
 
   @Test
   @DisplayName("recognizes a removal from a multi-valued containment reference")
   public void removalFromContainmentReference() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedContainmentEReference = it.getMultiValuedContainmentEReference();
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
+    final Executable function =
+        () -> {
+          Root Root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedContainmentEReference =
+                    it.getMultiValuedContainmentEReference();
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function2.accept(nonRoot);
+                NonRoot doubleArrow = nonRoot;
+                NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function3.accept(nonRoot1);
+                NonRoot doubleArrow1 = nonRoot1;
+                Iterables.<NonRoot>addAll(
+                    multiValuedContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(List.of(doubleArrow, doubleArrow1)));
+              };
+          function1.accept(Root);
+          Root doubleArrow = Root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function3.accept(nonRoot);
+                NonRoot doubleArrow1 = nonRoot;
+                NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function4.accept(nonRoot1);
+                NonRoot doubleArrow2 = nonRoot1;
+                NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function5 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function5.accept(nonRoot2);
+                NonRoot doubleArrow3 = nonRoot2;
+                EList<NonRoot> multiValuedContainmentEReference =
+                    it.getMultiValuedContainmentEReference();
+                Iterables.<NonRoot>addAll(
+                    multiValuedContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow1, doubleArrow2, doubleArrow3)));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_NonRoot);
-        NonRoot _doubleArrow = _NonRoot;
-        NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_3.accept(_NonRoot_1);
-        NonRoot _doubleArrow_1 = _NonRoot_1;
-        Iterables.<NonRoot>addAll(_multiValuedContainmentEReference, Collections
-            .<NonRoot>unmodifiableList(List.of(_doubleArrow, _doubleArrow_1)));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedContainmentEReference = it.getMultiValuedContainmentEReference();
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_3.accept(_NonRoot);
-        NonRoot _doubleArrow_1 = _NonRoot;
-        NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_4.accept(_NonRoot_1);
-        NonRoot _doubleArrow_2 = _NonRoot_1;
-        NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_5 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_5.accept(_NonRoot_2);
-        NonRoot _doubleArrow_3 = _NonRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow_1, _doubleArrow_2, _doubleArrow_3)));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("missing the value: NonRoot(id=\"sub2\")"));
   }
 
   @Test
   @DisplayName("recognizes a value change in a multi-valued containment reference")
   public void valueChangedInMultiContainmentReference() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedContainmentEReference = it.getMultiValuedContainmentEReference();
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-          it_1.setValue("a");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedContainmentEReference =
+                    it.getMultiValuedContainmentEReference();
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                      it1.setValue("a");
+                    };
+                function2.accept(nonRoot);
+                NonRoot doubleArrow = nonRoot;
+                NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                      it1.setValue("different");
+                    };
+                function3.accept(nonRoot1);
+                NonRoot doubleArrow1 = nonRoot1;
+                NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                      it1.setValue("c");
+                    };
+                function4.accept(nonRoot2);
+                NonRoot doubleArrow2 = nonRoot2;
+                Iterables.<NonRoot>addAll(
+                    multiValuedContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow, doubleArrow1, doubleArrow2)));
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedContainmentEReference =
+                    it.getMultiValuedContainmentEReference();
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                      it1.setValue("a");
+                    };
+                function3.accept(nonRoot);
+                NonRoot doubleArrow1 = nonRoot;
+                NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                      it1.setValue("b");
+                    };
+                function4.accept(nonRoot1);
+                NonRoot doubleArrow2 = nonRoot1;
+                NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function5 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                      it1.setValue("c");
+                    };
+                function5.accept(nonRoot2);
+                NonRoot doubleArrow3 = nonRoot2;
+                Iterables.<NonRoot>addAll(
+                    multiValuedContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow1, doubleArrow2, doubleArrow3)));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_NonRoot);
-        NonRoot _doubleArrow = _NonRoot;
-        NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-          it_1.setValue("different");
-        };
-        _function_3.accept(_NonRoot_1);
-        NonRoot _doubleArrow_1 = _NonRoot_1;
-        NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-          it_1.setValue("c");
-        };
-        _function_4.accept(_NonRoot_2);
-        NonRoot _doubleArrow_2 = _NonRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow, _doubleArrow_1, _doubleArrow_2)));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedContainmentEReference = it.getMultiValuedContainmentEReference();
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-          it_1.setValue("a");
-        };
-        _function_3.accept(_NonRoot);
-        NonRoot _doubleArrow_1 = _NonRoot;
-        NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-          it_1.setValue("b");
-        };
-        _function_4.accept(_NonRoot_1);
-        NonRoot _doubleArrow_2 = _NonRoot_1;
-        NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_5 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-          it_1.setValue("c");
-        };
-        _function_5.accept(_NonRoot_2);
-        NonRoot _doubleArrow_3 = _NonRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow_1, _doubleArrow_2, _doubleArrow_3)));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(), CoreMatchers.containsString("wrong value: \"different\""));
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(), CoreMatchers.containsString("wrong value: \"different\""));
   }
 
   @Test
   @DisplayName("recognizes an insertion into a multi-valued undordered containment reference")
   public void insertionInUnorderedContainmentReference() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedContainmentEReference = it.getMultiValuedUnorderedContainmentEReference();
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function2.accept(nonRoot);
+                NonRoot doubleArrow = nonRoot;
+                NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function3.accept(nonRoot1);
+                NonRoot doubleArrow1 = nonRoot1;
+                NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function4.accept(nonRoot2);
+                NonRoot doubleArrow2 = nonRoot2;
+                EList<NonRoot> multiValuedUnorderedContainmentEReference =
+                    it.getMultiValuedUnorderedContainmentEReference();
+                Iterables.<NonRoot>addAll(
+                    multiValuedUnorderedContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow, doubleArrow1, doubleArrow2)));
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedUnorderedContainmentEReference =
+                    it.getMultiValuedUnorderedContainmentEReference();
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function3.accept(nonRoot);
+                NonRoot doubleArrow1 = nonRoot;
+                NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function4.accept(nonRoot1);
+                NonRoot doubleArrow2 = nonRoot1;
+                Iterables.<NonRoot>addAll(
+                    multiValuedUnorderedContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(List.of(doubleArrow1, doubleArrow2)));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_NonRoot);
-        NonRoot _doubleArrow = _NonRoot;
-        NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_3.accept(_NonRoot_1);
-        NonRoot _doubleArrow_1 = _NonRoot_1;
-        NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_4.accept(_NonRoot_2);
-        NonRoot _doubleArrow_2 = _NonRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedUnorderedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow, _doubleArrow_1, _doubleArrow_2)));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedContainmentEReference = it.getMultiValuedUnorderedContainmentEReference();
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_3.accept(_NonRoot);
-        NonRoot _doubleArrow_1 = _NonRoot;
-        NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_4.accept(_NonRoot_1);
-        NonRoot _doubleArrow_2 = _NonRoot_1;
-        Iterables.<NonRoot>addAll(_multiValuedUnorderedContainmentEReference, Collections
-            .<NonRoot>unmodifiableList(List.of(_doubleArrow_1, _doubleArrow_2)));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("unexpected value: NonRoot(id=\"sub2\")"));
   }
 
   @Test
   @DisplayName("recognizes a removal from a multi-valued unordered containment reference")
   public void removalFromUnorderedContainmentReference() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedContainmentEReference = it.getMultiValuedUnorderedContainmentEReference();
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedUnorderedContainmentEReference =
+                    it.getMultiValuedUnorderedContainmentEReference();
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function2.accept(nonRoot);
+                NonRoot doubleArrow = nonRoot;
+                NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function3.accept(nonRoot1);
+                NonRoot doubleArrow1 = nonRoot1;
+                Iterables.<NonRoot>addAll(
+                    multiValuedUnorderedContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(List.of(doubleArrow, doubleArrow1)));
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                    };
+                function3.accept(nonRoot);
+                NonRoot doubleArrow1 = nonRoot;
+                NonRoot nNonRoot1 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                    };
+                function4.accept(nNonRoot1);
+                NonRoot doubleArrow2 = nNonRoot1;
+                NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function5 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                    };
+                function5.accept(nonRoot2);
+                NonRoot doubleArrow3 = nonRoot2;
+                EList<NonRoot> multiValuedUnorderedContainmentEReference =
+                    it.getMultiValuedUnorderedContainmentEReference();
+                Iterables.<NonRoot>addAll(
+                    multiValuedUnorderedContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow1, doubleArrow2, doubleArrow3)));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_NonRoot);
-        NonRoot _doubleArrow = _NonRoot;
-        NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_3.accept(_NonRoot_1);
-        NonRoot _doubleArrow_1 = _NonRoot_1;
-        Iterables.<NonRoot>addAll(_multiValuedUnorderedContainmentEReference, Collections
-            .<NonRoot>unmodifiableList(List.of(_doubleArrow, _doubleArrow_1)));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedContainmentEReference = it.getMultiValuedUnorderedContainmentEReference();
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-        };
-        _function_3.accept(_NonRoot);
-        NonRoot _doubleArrow_1 = _NonRoot;
-        NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-        };
-        _function_4.accept(_NonRoot_1);
-        NonRoot _doubleArrow_2 = _NonRoot_1;
-        NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_5 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-        };
-        _function_5.accept(_NonRoot_2);
-        NonRoot _doubleArrow_3 = _NonRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedUnorderedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow_1, _doubleArrow_2, _doubleArrow_3)));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("missing the value: NonRoot(id=\"sub2\")"));
   }
 
   @Test
   @DisplayName("recognizes a value change in a multi-valued containment reference")
   public void valueChangedInUnorderedMultiContainmentReference() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedContainmentEReference = it.getMultiValuedUnorderedContainmentEReference();
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-          it_1.setValue("a");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                      it1.setValue("a");
+                    };
+                function2.accept(nonRoot);
+                NonRoot doubleArrow = nonRoot;
+                NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                      it1.setValue("different");
+                    };
+                function3.accept(nonRoot1);
+                NonRoot doubleArrow1 = nonRoot1;
+                NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                      it1.setValue("c");
+                    };
+                function4.accept(nonRoot2);
+                NonRoot doubleArrow2 = nonRoot2;
+                EList<NonRoot> multiValuedUnorderedContainmentEReference =
+                    it.getMultiValuedUnorderedContainmentEReference();
+                Iterables.<NonRoot>addAll(
+                    multiValuedUnorderedContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow, doubleArrow1, doubleArrow2)));
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub1");
+                      it1.setValue("a");
+                    };
+                function3.accept(nonRoot);
+                NonRoot doubleArrow1 = nonRoot;
+                NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function4 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub2");
+                      it1.setValue("b");
+                    };
+                function4.accept(nonRoot1);
+                NonRoot doubleArrow2 = nonRoot1;
+                NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function5 =
+                    (NonRoot it1) -> {
+                      it1.setId("sub3");
+                      it1.setValue("c");
+                    };
+                function5.accept(nonRoot2);
+                NonRoot doubleArrow3 = nonRoot2;
+                EList<NonRoot> multiValuedUnorderedContainmentEReference =
+                    it.getMultiValuedUnorderedContainmentEReference();
+                Iterables.<NonRoot>addAll(
+                    multiValuedUnorderedContainmentEReference,
+                    Collections.<NonRoot>unmodifiableList(
+                        List.of(doubleArrow1, doubleArrow2, doubleArrow3)));
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_NonRoot);
-        NonRoot _doubleArrow = _NonRoot;
-        NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-          it_1.setValue("different");
-        };
-        _function_3.accept(_NonRoot_1);
-        NonRoot _doubleArrow_1 = _NonRoot_1;
-        NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-          it_1.setValue("c");
-        };
-        _function_4.accept(_NonRoot_2);
-        NonRoot _doubleArrow_2 = _NonRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedUnorderedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow, _doubleArrow_1, _doubleArrow_2)));
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedContainmentEReference = it.getMultiValuedUnorderedContainmentEReference();
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("sub1");
-          it_1.setValue("a");
-        };
-        _function_3.accept(_NonRoot);
-        NonRoot _doubleArrow_1 = _NonRoot;
-        NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_4 = (NonRoot it_1) -> {
-          it_1.setId("sub2");
-          it_1.setValue("b");
-        };
-        _function_4.accept(_NonRoot_1);
-        NonRoot _doubleArrow_2 = _NonRoot_1;
-        NonRoot _NonRoot_2 = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_5 = (NonRoot it_1) -> {
-          it_1.setId("sub3");
-          it_1.setValue("c");
-        };
-        _function_5.accept(_NonRoot_2);
-        NonRoot _doubleArrow_3 = _NonRoot_2;
-        Iterables.<NonRoot>addAll(_multiValuedUnorderedContainmentEReference, Collections.<NonRoot>unmodifiableList(
-            List.of(_doubleArrow_1, _doubleArrow_2, _doubleArrow_3)));
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(), CoreMatchers.containsString("wrong value: \"different\""));
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(), CoreMatchers.containsString("wrong value: \"different\""));
   }
 
   @Test
   @DisplayName("reports a value change only via the containment reference (single-valued)")
   public void reportsValueChangeOnlyViaSingleContainmentReference() {
-    NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-    final Consumer<NonRoot> _function = (NonRoot it) -> {
-      it.setId("sub");
-      it.setValue("different");
-    };
-    _function.accept(_NonRoot);
-    final NonRoot actualNonRoot = _NonRoot;
-    NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-    final Consumer<NonRoot> _function_1 = (NonRoot it) -> {
-      it.setId("sub");
-      it.setValue("test");
-    };
-    _function_1.accept(_NonRoot_1);
-    final NonRoot expectedNonRoot = _NonRoot_1;
-    final Executable _function_2 = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_3 = (Root it) -> {
-        it.setId("root");
-        it.setSingleValuedContainmentEReference(actualNonRoot);
-        it.setSingleValuedNonContainmentEReference(actualNonRoot);
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        _multiValuedNonContainmentEReference.add(actualNonRoot);
-        EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-            .getMultiValuedUnorderedNonContainmentEReference();
-        _multiValuedUnorderedNonContainmentEReference.add(actualNonRoot);
-      };
-      _function_3.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_4 = (Root it) -> {
-        it.setId("root");
-        it.setSingleValuedContainmentEReference(expectedNonRoot);
-        it.setSingleValuedNonContainmentEReference(expectedNonRoot);
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        _multiValuedNonContainmentEReference.add(expectedNonRoot);
-        EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-            .getMultiValuedUnorderedNonContainmentEReference();
-        _multiValuedUnorderedNonContainmentEReference.add(expectedNonRoot);
-      };
-      _function_4.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function_2);
-    MatcherAssert.<String>assertThat(exception.getMessage(), ModelDeepEqualityMatcherTest.containsExactDifferences(
-        ".singleValuedContainmentEReference (NonRoot(id=\"sub\")).value had the wrong value: \"different\""));
+    NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+    final Consumer<NonRoot> function =
+        (NonRoot it) -> {
+          it.setId("sub");
+          it.setValue("different");
+        };
+    function.accept(nonRoot);
+    final NonRoot actualNonRoot = nonRoot;
+    NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+    final Consumer<NonRoot> function1 =
+        (NonRoot it) -> {
+          it.setId("sub");
+          it.setValue("test");
+        };
+    function1.accept(nonRoot1);
+    final NonRoot expectedNonRoot = nonRoot1;
+    final Executable function2 =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function3 =
+              (Root it) -> {
+                it.setId("root");
+                it.setSingleValuedContainmentEReference(actualNonRoot);
+                it.setSingleValuedNonContainmentEReference(actualNonRoot);
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                multiValuedNonContainmentEReference.add(actualNonRoot);
+                EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+                    it.getMultiValuedUnorderedNonContainmentEReference();
+                multiValuedUnorderedNonContainmentEReference.add(actualNonRoot);
+              };
+          function3.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function4 =
+              (Root it) -> {
+                it.setId("root");
+                it.setSingleValuedContainmentEReference(expectedNonRoot);
+                it.setSingleValuedNonContainmentEReference(expectedNonRoot);
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                multiValuedNonContainmentEReference.add(expectedNonRoot);
+                EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+                    it.getMultiValuedUnorderedNonContainmentEReference();
+                multiValuedUnorderedNonContainmentEReference.add(expectedNonRoot);
+              };
+          function4.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
+        };
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function2);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
+        ModelDeepEqualityMatcherTest.containsExactDifferences(
+            ".singleValuedContainmentEReference (NonRoot(id=\"sub\")).value had the wrong value:"
+                + " \"different\""));
   }
 
   @Test
   @DisplayName("reports a value change only via the containment reference (multi-valued)")
   public void reportsValueChangeOnlyViaMultiContainmentReference() {
-    NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-    final Consumer<NonRoot> _function = (NonRoot it) -> {
-      it.setId("sub");
-      it.setValue("different");
-    };
-    _function.accept(_NonRoot);
-    final NonRoot actualNonRoot = _NonRoot;
-    NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-    final Consumer<NonRoot> _function_1 = (NonRoot it) -> {
-      it.setId("sub");
-      it.setValue("test");
-    };
-    _function_1.accept(_NonRoot_1);
-    final NonRoot expectedNonRoot = _NonRoot_1;
-    final Executable _function_2 = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_3 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedContainmentEReference = it.getMultiValuedContainmentEReference();
-        _multiValuedContainmentEReference.add(actualNonRoot);
-        it.setSingleValuedNonContainmentEReference(actualNonRoot);
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        _multiValuedNonContainmentEReference.add(actualNonRoot);
-        EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-            .getMultiValuedUnorderedNonContainmentEReference();
-        _multiValuedUnorderedNonContainmentEReference.add(actualNonRoot);
-      };
-      _function_3.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_4 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedContainmentEReference = it.getMultiValuedContainmentEReference();
-        _multiValuedContainmentEReference.add(expectedNonRoot);
-        it.setSingleValuedNonContainmentEReference(expectedNonRoot);
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        _multiValuedNonContainmentEReference.add(expectedNonRoot);
-        EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-            .getMultiValuedUnorderedNonContainmentEReference();
-        _multiValuedUnorderedNonContainmentEReference.add(expectedNonRoot);
-      };
-      _function_4.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function_2);
-    MatcherAssert.<String>assertThat(exception.getMessage(), ModelDeepEqualityMatcherTest.containsExactDifferences(
-        ".multiValuedContainmentEReference[0] (NonRoot(id=\"sub\")).value had the wrong value: \"different\""));
+    NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+    final Consumer<NonRoot> function =
+        (NonRoot it) -> {
+          it.setId("sub");
+          it.setValue("different");
+        };
+    function.accept(nonRoot);
+    final NonRoot actualNonRoot = nonRoot;
+    NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+    final Consumer<NonRoot> function1 =
+        (NonRoot it) -> {
+          it.setId("sub");
+          it.setValue("test");
+        };
+    function1.accept(nonRoot1);
+    final NonRoot expectedNonRoot = nonRoot1;
+    final Executable function2 =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function3 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedContainmentEReference =
+                    it.getMultiValuedContainmentEReference();
+                multiValuedContainmentEReference.add(actualNonRoot);
+                it.setSingleValuedNonContainmentEReference(actualNonRoot);
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                multiValuedNonContainmentEReference.add(actualNonRoot);
+                EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+                    it.getMultiValuedUnorderedNonContainmentEReference();
+                multiValuedUnorderedNonContainmentEReference.add(actualNonRoot);
+              };
+          function3.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function4 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedContainmentEReference =
+                    it.getMultiValuedContainmentEReference();
+                multiValuedContainmentEReference.add(expectedNonRoot);
+                it.setSingleValuedNonContainmentEReference(expectedNonRoot);
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                multiValuedNonContainmentEReference.add(expectedNonRoot);
+                EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+                    it.getMultiValuedUnorderedNonContainmentEReference();
+                multiValuedUnorderedNonContainmentEReference.add(expectedNonRoot);
+              };
+          function4.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
+        };
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function2);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
+        ModelDeepEqualityMatcherTest.containsExactDifferences(
+            ".multiValuedContainmentEReference[0] (NonRoot(id=\"sub\")).value had the wrong value:"
+                + " \"different\""));
   }
 
   @Test
   @DisplayName("reports a value change only via the containment reference (multi-valued unordered)")
   public void reportsValueChangeOnlyViaMultiUnorderedContainmentReference() {
-    NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-    final Consumer<NonRoot> _function = (NonRoot it) -> {
-      it.setId("sub");
-      it.setValue("different");
-    };
-    _function.accept(_NonRoot);
-    final NonRoot actualNonRoot = _NonRoot;
-    NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-    final Consumer<NonRoot> _function_1 = (NonRoot it) -> {
-      it.setId("sub");
-      it.setValue("test");
-    };
-    _function_1.accept(_NonRoot_1);
-    final NonRoot expectedNonRoot = _NonRoot_1;
-    final Executable _function_2 = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_3 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedContainmentEReference = it.getMultiValuedUnorderedContainmentEReference();
-        _multiValuedUnorderedContainmentEReference.add(actualNonRoot);
-        it.setSingleValuedNonContainmentEReference(actualNonRoot);
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        _multiValuedNonContainmentEReference.add(actualNonRoot);
-        EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-            .getMultiValuedUnorderedNonContainmentEReference();
-        _multiValuedUnorderedNonContainmentEReference.add(actualNonRoot);
-      };
-      _function_3.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_4 = (Root it) -> {
-        it.setId("root");
-        EList<NonRoot> _multiValuedUnorderedContainmentEReference = it.getMultiValuedUnorderedContainmentEReference();
-        _multiValuedUnorderedContainmentEReference.add(expectedNonRoot);
-        it.setSingleValuedNonContainmentEReference(expectedNonRoot);
-        EList<NonRoot> _multiValuedNonContainmentEReference = it.getMultiValuedNonContainmentEReference();
-        _multiValuedNonContainmentEReference.add(expectedNonRoot);
-        EList<NonRoot> _multiValuedUnorderedNonContainmentEReference = it
-            .getMultiValuedUnorderedNonContainmentEReference();
-        _multiValuedUnorderedNonContainmentEReference.add(expectedNonRoot);
-      };
-      _function_4.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function_2);
-    MatcherAssert.<String>assertThat(exception.getMessage(), ModelDeepEqualityMatcherTest.containsExactDifferences(
-        ".multiValuedUnorderedContainmentEReference{0} (NonRoot(id=\"sub\")).value had the wrong value: \"different\""));
+    NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+    final Consumer<NonRoot> function =
+        (NonRoot it) -> {
+          it.setId("sub");
+          it.setValue("different");
+        };
+    function.accept(nonRoot);
+    final NonRoot actualNonRoot = nonRoot;
+    NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+    final Consumer<NonRoot> function1 =
+        (NonRoot it) -> {
+          it.setId("sub");
+          it.setValue("test");
+        };
+    function1.accept(nonRoot1);
+    final NonRoot expectedNonRoot = nonRoot1;
+    final Executable function2 =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function3 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedUnorderedContainmentEReference =
+                    it.getMultiValuedUnorderedContainmentEReference();
+                multiValuedUnorderedContainmentEReference.add(actualNonRoot);
+                it.setSingleValuedNonContainmentEReference(actualNonRoot);
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                multiValuedNonContainmentEReference.add(actualNonRoot);
+                EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+                    it.getMultiValuedUnorderedNonContainmentEReference();
+                multiValuedUnorderedNonContainmentEReference.add(actualNonRoot);
+              };
+          function3.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function4 =
+              (Root it) -> {
+                it.setId("root");
+                EList<NonRoot> multiValuedUnorderedContainmentEReference =
+                    it.getMultiValuedUnorderedContainmentEReference();
+                multiValuedUnorderedContainmentEReference.add(expectedNonRoot);
+                it.setSingleValuedNonContainmentEReference(expectedNonRoot);
+                EList<NonRoot> multiValuedNonContainmentEReference =
+                    it.getMultiValuedNonContainmentEReference();
+                multiValuedNonContainmentEReference.add(expectedNonRoot);
+                EList<NonRoot> multiValuedUnorderedNonContainmentEReference =
+                    it.getMultiValuedUnorderedNonContainmentEReference();
+                multiValuedUnorderedNonContainmentEReference.add(expectedNonRoot);
+              };
+          function4.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow, ModelMatchers.<Root>equalsDeeply(doubleArrow1));
+        };
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function2);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
+        ModelDeepEqualityMatcherTest.containsExactDifferences(
+            ".multiValuedUnorderedContainmentEReference{0} (NonRoot(id=\"sub\")).value had the"
+                + " wrong value: \"different\""));
   }
 
   @Test
-  @DisplayName("reports a value change via a non-containment reference if the containment reference is ignored")
+  @DisplayName(
+      "reports a value change via a non-containment reference if the containment reference is"
+          + " ignored")
   public void reportsValueChangeViaNonContainmentIfNecessary() {
-    NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-    final Consumer<NonRoot> _function = (NonRoot it) -> {
-      it.setId("sub");
-      it.setValue("different");
-    };
-    _function.accept(_NonRoot);
-    final NonRoot actualNonRoot = _NonRoot;
-    NonRoot _NonRoot_1 = AllElementTypesCreators.aet.NonRoot();
-    final Consumer<NonRoot> _function_1 = (NonRoot it) -> {
-      it.setId("sub");
-      it.setValue("test");
-    };
-    _function_1.accept(_NonRoot_1);
-    final NonRoot expectedNonRoot = _NonRoot_1;
-    final Executable _function_2 = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_3 = (Root it) -> {
-        it.setId("root");
-        it.setSingleValuedContainmentEReference(actualNonRoot);
-        it.setSingleValuedNonContainmentEReference(actualNonRoot);
-      };
-      _function_3.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_4 = (Root it) -> {
-        it.setId("root");
-        it.setSingleValuedContainmentEReference(expectedNonRoot);
-        it.setSingleValuedNonContainmentEReference(expectedNonRoot);
-      };
-      _function_4.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1,
-          ModelMatchers.ignoringFeatures(AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE)));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function_2);
-    MatcherAssert.<String>assertThat(exception.getMessage(), ModelDeepEqualityMatcherTest.containsExactDifferences(
-        ".singleValuedNonContainmentEReference (NonRoot(id=\"sub\")).value had the wrong value: \"different\""));
+    NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+    final Consumer<NonRoot> function =
+        (NonRoot it) -> {
+          it.setId("sub");
+          it.setValue("different");
+        };
+    function.accept(nonRoot);
+    final NonRoot actualNonRoot = nonRoot;
+    NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
+    final Consumer<NonRoot> function1 =
+        (NonRoot it) -> {
+          it.setId("sub");
+          it.setValue("test");
+        };
+    function1.accept(nonRoot1);
+    final NonRoot expectedNonRoot = nonRoot1;
+    final Executable function2 =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function3 =
+              (Root it) -> {
+                it.setId("root");
+                it.setSingleValuedContainmentEReference(actualNonRoot);
+                it.setSingleValuedNonContainmentEReference(actualNonRoot);
+              };
+          function3.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function4 =
+              (Root it) -> {
+                it.setId("root");
+                it.setSingleValuedContainmentEReference(expectedNonRoot);
+                it.setSingleValuedNonContainmentEReference(expectedNonRoot);
+              };
+          function4.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow,
+              ModelMatchers.<Root>equalsDeeply(
+                  doubleArrow1,
+                  ModelMatchers.ignoringFeatures(
+                      AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE)));
+        };
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function2);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
+        ModelDeepEqualityMatcherTest.containsExactDifferences(
+            ".singleValuedNonContainmentEReference (NonRoot(id=\"sub\")).value had the wrong value:"
+                + " \"different\""));
   }
 
   @Test
   @DisplayName("allows to change the value comparison to using #equals()")
   public void comparisonUsingEquals() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(new ModelDeepEqualityMatcherTest.ValueBasedNonRoot());
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("different");
-          it_1.setValue("test");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        new ModelDeepEqualityMatcherTest.ValueBasedNonRoot());
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("different");
+                      it1.setValue("test");
+                    };
+                function2.accept(inDifferentRoot);
+                NonRoot doubleArrow = inDifferentRoot;
+                it.setSingleValuedNonContainmentEReference(doubleArrow);
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        new ModelDeepEqualityMatcherTest.ValueBasedNonRoot());
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("test");
+                      it1.setValue("test");
+                    };
+                function3.accept(inDifferentRoot);
+                NonRoot doubleArrow1 = inDifferentRoot;
+                it.setSingleValuedNonContainmentEReference(doubleArrow1);
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow,
+              ModelMatchers.<Root>equalsDeeply(
+                  doubleArrow1,
+                  ModelMatchers.usingEqualsForReferencesTo(
+                      AllElementTypesPackage.Literals.NON_ROOT)));
         };
-        _function_2.accept(_inDifferentRoot);
-        NonRoot _doubleArrow = _inDifferentRoot;
-        it.setSingleValuedNonContainmentEReference(_doubleArrow);
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(new ModelDeepEqualityMatcherTest.ValueBasedNonRoot());
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("test");
-          it_1.setValue("test");
-        };
-        _function_3.accept(_inDifferentRoot);
-        NonRoot _doubleArrow_1 = _inDifferentRoot;
-        it.setSingleValuedNonContainmentEReference(_doubleArrow_1);
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1,
-          ModelMatchers.usingEqualsForReferencesTo(AllElementTypesPackage.Literals.NON_ROOT)));
-    };
-    Assertions.assertDoesNotThrow(_function);
+    Assertions.assertDoesNotThrow(function);
   }
 
   @Test
   @DisplayName("recognizes changed values when changing the value comparison to using #equals()")
   public void comparisonUsingEqualsFails() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(new ModelDeepEqualityMatcherTest.ValueBasedNonRoot());
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("test");
-          it_1.setValue("different");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        new ModelDeepEqualityMatcherTest.ValueBasedNonRoot());
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("test");
+                      it1.setValue("different");
+                    };
+                function2.accept(inDifferentRoot);
+                NonRoot doubleArrow = inDifferentRoot;
+                it.setSingleValuedNonContainmentEReference(doubleArrow);
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        new ModelDeepEqualityMatcherTest.ValueBasedNonRoot());
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("test");
+                      it1.setValue("test");
+                    };
+                function3.accept(inDifferentRoot);
+                NonRoot doubleArrow1 = inDifferentRoot;
+                it.setSingleValuedNonContainmentEReference(doubleArrow1);
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow,
+              ModelMatchers.<Root>equalsDeeply(
+                  doubleArrow1,
+                  ModelMatchers.usingEqualsForReferencesTo(
+                      AllElementTypesPackage.Literals.NON_ROOT)));
         };
-        _function_2.accept(_inDifferentRoot);
-        NonRoot _doubleArrow = _inDifferentRoot;
-        it.setSingleValuedNonContainmentEReference(_doubleArrow);
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest
-            .inDifferentRoot(new ModelDeepEqualityMatcherTest.ValueBasedNonRoot());
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("test");
-          it_1.setValue("test");
-        };
-        _function_3.accept(_inDifferentRoot);
-        NonRoot _doubleArrow_1 = _inDifferentRoot;
-        it.setSingleValuedNonContainmentEReference(_doubleArrow_1);
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1,
-          ModelMatchers.usingEqualsForReferencesTo(AllElementTypesPackage.Literals.NON_ROOT)));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
-        CoreMatchers.containsString("wrong value: NonRoot(id=\"test\")"));
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(), CoreMatchers.containsString("wrong value: NonRoot(id=\"test\")"));
   }
 
   @Test
   @DisplayName("recognizes changed values when changing the value comparison to using #equals()")
   public void comparisonUsingEqualsFails2() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("root");
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("test");
-          it_1.setValue("test");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("test");
+                      it1.setValue("test");
+                    };
+                function2.accept(inDifferentRoot);
+                NonRoot doubleArrow = inDifferentRoot;
+                it.setSingleValuedNonContainmentEReference(doubleArrow);
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot inDifferentRoot =
+                    ModelDeepEqualityMatcherTest.inDifferentRoot(
+                        AllElementTypesCreators.aet.NonRoot());
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("test");
+                      it1.setValue("test");
+                    };
+                function3.accept(inDifferentRoot);
+                NonRoot doubleArrow1 = inDifferentRoot;
+                it.setSingleValuedNonContainmentEReference(doubleArrow1);
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow,
+              ModelMatchers.<Root>equalsDeeply(
+                  doubleArrow1,
+                  ModelMatchers.usingEqualsForReferencesTo(
+                      AllElementTypesPackage.Literals.NON_ROOT)));
         };
-        _function_2.accept(_inDifferentRoot);
-        NonRoot _doubleArrow = _inDifferentRoot;
-        it.setSingleValuedNonContainmentEReference(_doubleArrow);
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest.inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("test");
-          it_1.setValue("test");
-        };
-        _function_3.accept(_inDifferentRoot);
-        NonRoot _doubleArrow_1 = _inDifferentRoot;
-        it.setSingleValuedNonContainmentEReference(_doubleArrow_1);
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1,
-          ModelMatchers.usingEqualsForReferencesTo(AllElementTypesPackage.Literals.NON_ROOT)));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
-        CoreMatchers.containsString("wrong value: NonRoot(id=\"test\")"));
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(), CoreMatchers.containsString("wrong value: NonRoot(id=\"test\")"));
   }
 
   @Test
   @DisplayName("allows defining custom strategies to compare referenced elements")
   public void customStrategyForComparison() {
-    final Executable _function = () -> {
-      PInterface _Interface = PcmMockupCreators.pcm.Interface();
-      final Consumer<PInterface> _function_1 = (PInterface it) -> {
-        it.setId("testInterface");
-        EList<PMethod> _methods = it.getMethods();
-        PMethod _Method = PcmMockupCreators.pcm.Method();
-        final Consumer<PMethod> _function_2 = (PMethod it_1) -> {
-          it_1.setId("testMethod");
-          it_1.setName("test");
-          PInterface _inDifferentRepository = ModelDeepEqualityMatcherTest
-              .inDifferentRepository(PcmMockupCreators.pcm.Interface());
-          final Consumer<PInterface> _function_3 = (PInterface it_2) -> {
-            it_2.setId("different");
-            it_2.setName("referenced");
-          };
-          _function_3.accept(_inDifferentRepository);
-          PInterface _doubleArrow = _inDifferentRepository;
-          it_1.setReturnType(_doubleArrow);
+    final Executable function =
+        () -> {
+          PInterface pcmInterface = PcmMockupCreators.pcm.Interface();
+          final Consumer<PInterface> function1 =
+              (PInterface it) -> {
+                it.setId("testInterface");
+                EList<PMethod> methods = it.getMethods();
+                PMethod pcmMethod = PcmMockupCreators.pcm.Method();
+                final Consumer<PMethod> function2 =
+                    (PMethod it1) -> {
+                      it1.setId("testMethod");
+                      it1.setName("test");
+                      PInterface inDifferentRepository =
+                          ModelDeepEqualityMatcherTest.inDifferentRepository(
+                              PcmMockupCreators.pcm.Interface());
+                      final Consumer<PInterface> function3 =
+                          (PInterface it2) -> {
+                            it2.setId("different");
+                            it2.setName("referenced");
+                          };
+                      function3.accept(inDifferentRepository);
+                      PInterface doubleArrow = inDifferentRepository;
+                      it1.setReturnType(doubleArrow);
+                    };
+                function2.accept(pcmMethod);
+                PMethod doubleArrow = pcmMethod;
+                methods.add(doubleArrow);
+              };
+          function1.accept(pcmInterface);
+          PInterface doubleArrow = pcmInterface;
+          PInterface pcmInterface1 = PcmMockupCreators.pcm.Interface();
+          final Consumer<PInterface> function2 =
+              (PInterface it) -> {
+                it.setId("testInterface");
+                EList<PMethod> methods = it.getMethods();
+                PMethod pcmMethod = PcmMockupCreators.pcm.Method();
+                final Consumer<PMethod> function3 =
+                    (PMethod it1) -> {
+                      it1.setId("testMethod");
+                      it1.setName("test");
+                      PInterface inDifferentRepository =
+                          ModelDeepEqualityMatcherTest.inDifferentRepository(
+                              PcmMockupCreators.pcm.Interface());
+                      final Consumer<PInterface> function4 =
+                          (PInterface it2) -> {
+                            it2.setId("referencedInterface");
+                            it2.setName("referenced");
+                          };
+                      function4.accept(inDifferentRepository);
+                      PInterface doubleArrow1 = inDifferentRepository;
+                      it1.setReturnType(doubleArrow1);
+                    };
+                function3.accept(pcmMethod);
+                PMethod doubleArrow1 = pcmMethod;
+                methods.add(doubleArrow1);
+              };
+          function2.accept(pcmInterface1);
+          PInterface doubleArrow1 = pcmInterface1;
+          MatcherAssert.<PInterface>assertThat(
+              doubleArrow,
+              ModelMatchers.<PInterface>equalsDeeply(
+                  doubleArrow1, ModelDeepEqualityMatcherTest.comaringPcmInterfacesByName()));
         };
-        _function_2.accept(_Method);
-        PMethod _doubleArrow = _Method;
-        _methods.add(_doubleArrow);
-      };
-      _function_1.accept(_Interface);
-      PInterface _doubleArrow = _Interface;
-      PInterface _Interface_1 = PcmMockupCreators.pcm.Interface();
-      final Consumer<PInterface> _function_2 = (PInterface it) -> {
-        it.setId("testInterface");
-        EList<PMethod> _methods = it.getMethods();
-        PMethod _Method = PcmMockupCreators.pcm.Method();
-        final Consumer<PMethod> _function_3 = (PMethod it_1) -> {
-          it_1.setId("testMethod");
-          it_1.setName("test");
-          PInterface _inDifferentRepository = ModelDeepEqualityMatcherTest
-              .inDifferentRepository(PcmMockupCreators.pcm.Interface());
-          final Consumer<PInterface> _function_4 = (PInterface it_2) -> {
-            it_2.setId("referencedInterface");
-            it_2.setName("referenced");
-          };
-          _function_4.accept(_inDifferentRepository);
-          PInterface _doubleArrow_1 = _inDifferentRepository;
-          it_1.setReturnType(_doubleArrow_1);
-        };
-        _function_3.accept(_Method);
-        PMethod _doubleArrow_1 = _Method;
-        _methods.add(_doubleArrow_1);
-      };
-      _function_2.accept(_Interface_1);
-      PInterface _doubleArrow_1 = _Interface_1;
-      MatcherAssert.<PInterface>assertThat(_doubleArrow, ModelMatchers.<PInterface>equalsDeeply(_doubleArrow_1,
-          ModelDeepEqualityMatcherTest.comaringPcmInterfacesByName()));
-    };
-    Assertions.assertDoesNotThrow(_function);
+    Assertions.assertDoesNotThrow(function);
   }
 
   @Test
   @DisplayName("ignores nested references when changing the value comparison")
   public void ignoresNestedDifferencesWhenUsingComparisonStrategy() {
-    final Executable _function = () -> {
-      PInterface _Interface = PcmMockupCreators.pcm.Interface();
-      final Consumer<PInterface> _function_1 = (PInterface it) -> {
-        it.setId("testInterface");
-        EList<PMethod> _methods = it.getMethods();
-        PMethod _Method = PcmMockupCreators.pcm.Method();
-        final Consumer<PMethod> _function_2 = (PMethod it_1) -> {
-          it_1.setId("testMethod");
-          it_1.setName("test");
-          PInterface _inDifferentRepository = ModelDeepEqualityMatcherTest
-              .inDifferentRepository(PcmMockupCreators.pcm.Interface());
-          final Consumer<PInterface> _function_3 = (PInterface it_2) -> {
-            it_2.setId("referencedInterface");
-            it_2.setName("referenced");
-            EList<PMethod> _methods_1 = it_2.getMethods();
-            PMethod _Method_1 = PcmMockupCreators.pcm.Method();
-            final Consumer<PMethod> _function_4 = (PMethod it_3) -> {
-              it_3.setId("different");
-              it_3.setName("different");
-            };
-            _function_4.accept(_Method_1);
-            PMethod _doubleArrow = _Method_1;
-            _methods_1.add(_doubleArrow);
-          };
-          _function_3.accept(_inDifferentRepository);
-          PInterface _doubleArrow = _inDifferentRepository;
-          it_1.setReturnType(_doubleArrow);
+    final Executable function =
+        () -> {
+          PInterface pcmInterface = PcmMockupCreators.pcm.Interface();
+          final Consumer<PInterface> function1 =
+              (PInterface it) -> {
+                it.setId("testInterface");
+                EList<PMethod> methods = it.getMethods();
+                PMethod pcmMethod = PcmMockupCreators.pcm.Method();
+                final Consumer<PMethod> function2 =
+                    (PMethod it1) -> {
+                      it1.setId("testMethod");
+                      it1.setName("test");
+                      PInterface inDifferentRepository =
+                          ModelDeepEqualityMatcherTest.inDifferentRepository(
+                              PcmMockupCreators.pcm.Interface());
+                      final Consumer<PInterface> function3 =
+                          (PInterface it2) -> {
+                            it2.setId("referencedInterface");
+                            it2.setName("referenced");
+                            EList<PMethod> methods1 = it2.getMethods();
+                            PMethod pcmMethod1 = PcmMockupCreators.pcm.Method();
+                            final Consumer<PMethod> function4 =
+                                (PMethod it3) -> {
+                                  it3.setId("different");
+                                  it3.setName("different");
+                                };
+                            function4.accept(pcmMethod1);
+                            PMethod doubleArrow = pcmMethod1;
+                            methods1.add(doubleArrow);
+                          };
+                      function3.accept(inDifferentRepository);
+                      PInterface doubleArrow = inDifferentRepository;
+                      it1.setReturnType(doubleArrow);
+                    };
+                function2.accept(pcmMethod);
+                PMethod doubleArrow = pcmMethod;
+                methods.add(doubleArrow);
+              };
+          function1.accept(pcmInterface);
+          PInterface doubleArrow = pcmInterface;
+          PInterface pcmInterface1 = PcmMockupCreators.pcm.Interface();
+          final Consumer<PInterface> function2 =
+              (PInterface it) -> {
+                it.setId("testInterface");
+                EList<PMethod> methods = it.getMethods();
+                PMethod pcmMethod = PcmMockupCreators.pcm.Method();
+                final Consumer<PMethod> function3 =
+                    (PMethod it1) -> {
+                      it1.setId("testMethod");
+                      it1.setName("test");
+                      PInterface inDifferentRepository =
+                          ModelDeepEqualityMatcherTest.inDifferentRepository(
+                              PcmMockupCreators.pcm.Interface());
+                      final Consumer<PInterface> function4 =
+                          (PInterface it2) -> {
+                            it2.setId("referencedInterface");
+                            it2.setName("referenced");
+                            EList<PMethod> methods1 = it2.getMethods();
+                            PMethod pcmMethod1 = PcmMockupCreators.pcm.Method();
+                            final Consumer<PMethod> function5 =
+                                (PMethod it3) -> {
+                                  it3.setId("fooMethod");
+                                  it3.setName("fooMethod");
+                                };
+                            function5.accept(pcmMethod1);
+                            PMethod doubleArrow1 = pcmMethod1;
+                            methods1.add(doubleArrow1);
+                            EList<PMethod> methods2 = it2.getMethods();
+                            PMethod pcmMethod2 = PcmMockupCreators.pcm.Method();
+                            final Consumer<PMethod> function6 =
+                                (PMethod it3) -> {
+                                  it3.setId("additionalMethod");
+                                  it3.setName("additionalMethod");
+                                };
+                            function6.accept(pcmMethod2);
+                            PMethod doubleArrow2 = pcmMethod2;
+                            methods2.add(doubleArrow2);
+                          };
+                      function4.accept(inDifferentRepository);
+                      PInterface doubleArrow1 = inDifferentRepository;
+                      it1.setReturnType(doubleArrow1);
+                    };
+                function3.accept(pcmMethod);
+                PMethod doubleArrow1 = pcmMethod;
+                methods.add(doubleArrow1);
+              };
+          function2.accept(pcmInterface1);
+          PInterface doubleArrow1 = pcmInterface1;
+          MatcherAssert.<PInterface>assertThat(
+              doubleArrow,
+              ModelMatchers.<PInterface>equalsDeeply(
+                  doubleArrow1, ModelDeepEqualityMatcherTest.comaringPcmInterfacesByName()));
         };
-        _function_2.accept(_Method);
-        PMethod _doubleArrow = _Method;
-        _methods.add(_doubleArrow);
-      };
-      _function_1.accept(_Interface);
-      PInterface _doubleArrow = _Interface;
-      PInterface _Interface_1 = PcmMockupCreators.pcm.Interface();
-      final Consumer<PInterface> _function_2 = (PInterface it) -> {
-        it.setId("testInterface");
-        EList<PMethod> _methods = it.getMethods();
-        PMethod _Method = PcmMockupCreators.pcm.Method();
-        final Consumer<PMethod> _function_3 = (PMethod it_1) -> {
-          it_1.setId("testMethod");
-          it_1.setName("test");
-          PInterface _inDifferentRepository = ModelDeepEqualityMatcherTest
-              .inDifferentRepository(PcmMockupCreators.pcm.Interface());
-          final Consumer<PInterface> _function_4 = (PInterface it_2) -> {
-            it_2.setId("referencedInterface");
-            it_2.setName("referenced");
-            EList<PMethod> _methods_1 = it_2.getMethods();
-            PMethod _Method_1 = PcmMockupCreators.pcm.Method();
-            final Consumer<PMethod> _function_5 = (PMethod it_3) -> {
-              it_3.setId("fooMethod");
-              it_3.setName("fooMethod");
-            };
-            _function_5.accept(_Method_1);
-            PMethod _doubleArrow_1 = _Method_1;
-            _methods_1.add(_doubleArrow_1);
-            EList<PMethod> _methods_2 = it_2.getMethods();
-            PMethod _Method_2 = PcmMockupCreators.pcm.Method();
-            final Consumer<PMethod> _function_6 = (PMethod it_3) -> {
-              it_3.setId("additionalMethod");
-              it_3.setName("additionalMethod");
-            };
-            _function_6.accept(_Method_2);
-            PMethod _doubleArrow_2 = _Method_2;
-            _methods_2.add(_doubleArrow_2);
-          };
-          _function_4.accept(_inDifferentRepository);
-          PInterface _doubleArrow_1 = _inDifferentRepository;
-          it_1.setReturnType(_doubleArrow_1);
-        };
-        _function_3.accept(_Method);
-        PMethod _doubleArrow_1 = _Method;
-        _methods.add(_doubleArrow_1);
-      };
-      _function_2.accept(_Interface_1);
-      PInterface _doubleArrow_1 = _Interface_1;
-      MatcherAssert.<PInterface>assertThat(_doubleArrow, ModelMatchers.<PInterface>equalsDeeply(_doubleArrow_1,
-          ModelDeepEqualityMatcherTest.comaringPcmInterfacesByName()));
-    };
-    Assertions.assertDoesNotThrow(_function);
+    Assertions.assertDoesNotThrow(function);
   }
 
   @Test
   @DisplayName("recognizes change values when using a custom value comparison")
   public void customStrategyForComparisonFailure() {
-    final Executable _function = () -> {
-      PInterface _Interface = PcmMockupCreators.pcm.Interface();
-      final Consumer<PInterface> _function_1 = (PInterface it) -> {
-        it.setId("testInterface");
-        EList<PMethod> _methods = it.getMethods();
-        PMethod _Method = PcmMockupCreators.pcm.Method();
-        final Consumer<PMethod> _function_2 = (PMethod it_1) -> {
-          it_1.setId("testMethod");
-          it_1.setName("test");
-          PInterface _inDifferentRepository = ModelDeepEqualityMatcherTest
-              .inDifferentRepository(PcmMockupCreators.pcm.Interface());
-          final Consumer<PInterface> _function_3 = (PInterface it_2) -> {
-            it_2.setId("referencedInterface");
-            it_2.setName("different");
-          };
-          _function_3.accept(_inDifferentRepository);
-          PInterface _doubleArrow = _inDifferentRepository;
-          it_1.setReturnType(_doubleArrow);
+    final Executable function =
+        () -> {
+          PInterface pcmInterface = PcmMockupCreators.pcm.Interface();
+          final Consumer<PInterface> function1 =
+              (PInterface it) -> {
+                it.setId("testInterface");
+                EList<PMethod> methods = it.getMethods();
+                PMethod pcmMethod = PcmMockupCreators.pcm.Method();
+                final Consumer<PMethod> function2 =
+                    (PMethod it1) -> {
+                      it1.setId("testMethod");
+                      it1.setName("test");
+                      PInterface inDifferentRepository =
+                          ModelDeepEqualityMatcherTest.inDifferentRepository(
+                              PcmMockupCreators.pcm.Interface());
+                      final Consumer<PInterface> function3 =
+                          (PInterface it2) -> {
+                            it2.setId("referencedInterface");
+                            it2.setName("different");
+                          };
+                      function3.accept(inDifferentRepository);
+                      PInterface doubleArrow = inDifferentRepository;
+                      it1.setReturnType(doubleArrow);
+                    };
+                function2.accept(pcmMethod);
+                PMethod doubleArrow = pcmMethod;
+                methods.add(doubleArrow);
+              };
+          function1.accept(pcmInterface);
+          PInterface doubleArrow = pcmInterface;
+          PInterface pcmInterface1 = PcmMockupCreators.pcm.Interface();
+          final Consumer<PInterface> function2 =
+              (PInterface it) -> {
+                it.setId("testInterface");
+                EList<PMethod> methods = it.getMethods();
+                PMethod pcmMethod = PcmMockupCreators.pcm.Method();
+                final Consumer<PMethod> function3 =
+                    (PMethod it1) -> {
+                      it1.setId("testMethod");
+                      it1.setName("test");
+                      PInterface inDifferentRepository =
+                          ModelDeepEqualityMatcherTest.inDifferentRepository(
+                              PcmMockupCreators.pcm.Interface());
+                      final Consumer<PInterface> function4 =
+                          (PInterface it2) -> {
+                            it2.setId("referencedInterface");
+                            it2.setName("referenced");
+                          };
+                      function4.accept(inDifferentRepository);
+                      PInterface doubleArrow1 = inDifferentRepository;
+                      it1.setReturnType(doubleArrow1);
+                    };
+                function3.accept(pcmMethod);
+                PMethod doubleArrow1 = pcmMethod;
+                methods.add(doubleArrow1);
+              };
+          function2.accept(pcmInterface1);
+          PInterface doubleArrow1 = pcmInterface1;
+          MatcherAssert.<PInterface>assertThat(
+              doubleArrow,
+              ModelMatchers.<PInterface>equalsDeeply(
+                  doubleArrow1, ModelDeepEqualityMatcherTest.comaringPcmInterfacesByName()));
         };
-        _function_2.accept(_Method);
-        PMethod _doubleArrow = _Method;
-        _methods.add(_doubleArrow);
-      };
-      _function_1.accept(_Interface);
-      PInterface _doubleArrow = _Interface;
-      PInterface _Interface_1 = PcmMockupCreators.pcm.Interface();
-      final Consumer<PInterface> _function_2 = (PInterface it) -> {
-        it.setId("testInterface");
-        EList<PMethod> _methods = it.getMethods();
-        PMethod _Method = PcmMockupCreators.pcm.Method();
-        final Consumer<PMethod> _function_3 = (PMethod it_1) -> {
-          it_1.setId("testMethod");
-          it_1.setName("test");
-          PInterface _inDifferentRepository = ModelDeepEqualityMatcherTest
-              .inDifferentRepository(PcmMockupCreators.pcm.Interface());
-          final Consumer<PInterface> _function_4 = (PInterface it_2) -> {
-            it_2.setId("referencedInterface");
-            it_2.setName("referenced");
-          };
-          _function_4.accept(_inDifferentRepository);
-          PInterface _doubleArrow_1 = _inDifferentRepository;
-          it_1.setReturnType(_doubleArrow_1);
-        };
-        _function_3.accept(_Method);
-        PMethod _doubleArrow_1 = _Method;
-        _methods.add(_doubleArrow_1);
-      };
-      _function_2.accept(_Interface_1);
-      PInterface _doubleArrow_1 = _Interface_1;
-      MatcherAssert.<PInterface>assertThat(_doubleArrow, ModelMatchers.<PInterface>equalsDeeply(_doubleArrow_1,
-          ModelDeepEqualityMatcherTest.comaringPcmInterfacesByName()));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    MatcherAssert.<String>assertThat(exception.getMessage(),
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    MatcherAssert.<String>assertThat(
+        exception.getMessage(),
         CoreMatchers.containsString("wrong value: PInterface(id=\"referencedInterface\""));
   }
 
   @Test
   @DisplayName("allows to ignore ID features")
   public void ignoreIdFeature() {
-    final Executable _function = () -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it) -> {
-        it.setId("differentRoot");
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_2 = (NonRoot it_1) -> {
-          it_1.setId("differentSub");
-          it_1.setValue("test");
+    final Executable function =
+        () -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it) -> {
+                it.setId("differentRoot");
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function2 =
+                    (NonRoot it1) -> {
+                      it1.setId("differentSub");
+                      it1.setValue("test");
+                    };
+                function2.accept(nonRoot);
+                NonRoot doubleArrow = nonRoot;
+                it.setSingleValuedContainmentEReference(doubleArrow);
+              };
+          function1.accept(root);
+          Root doubleArrow = root;
+          Root root1 = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function2 =
+              (Root it) -> {
+                it.setId("root");
+                NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+                final Consumer<NonRoot> function3 =
+                    (NonRoot it1) -> {
+                      it1.setId("test");
+                      it1.setValue("test");
+                    };
+                function3.accept(nonRoot);
+                NonRoot doubleArrow1 = nonRoot;
+                it.setSingleValuedContainmentEReference(doubleArrow1);
+              };
+          function2.accept(root1);
+          Root doubleArrow1 = root1;
+          MatcherAssert.<Root>assertThat(
+              doubleArrow,
+              ModelMatchers.<Root>equalsDeeply(
+                  doubleArrow1,
+                  ModelMatchers.ignoringFeatures(AllElementTypesPackage.Literals.IDENTIFIED__ID)));
         };
-        _function_2.accept(_NonRoot);
-        NonRoot _doubleArrow = _NonRoot;
-        it.setSingleValuedContainmentEReference(_doubleArrow);
-      };
-      _function_1.accept(_Root);
-      Root _doubleArrow = _Root;
-      Root _Root_1 = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_2 = (Root it) -> {
-        it.setId("root");
-        NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-        final Consumer<NonRoot> _function_3 = (NonRoot it_1) -> {
-          it_1.setId("test");
-          it_1.setValue("test");
-        };
-        _function_3.accept(_NonRoot);
-        NonRoot _doubleArrow_1 = _NonRoot;
-        it.setSingleValuedContainmentEReference(_doubleArrow_1);
-      };
-      _function_2.accept(_Root_1);
-      Root _doubleArrow_1 = _Root_1;
-      MatcherAssert.<Root>assertThat(_doubleArrow, ModelMatchers.<Root>equalsDeeply(_doubleArrow_1,
-          ModelMatchers.ignoringFeatures(AllElementTypesPackage.Literals.IDENTIFIED__ID)));
-    };
-    Assertions.assertDoesNotThrow(_function);
+    Assertions.assertDoesNotThrow(function);
   }
 
   @Test
   @DisplayName("allows to ignore references (missing object)")
   public void ignoreReferenceMissing() {
-    final Executable _function = () -> {
-      ValueBased _ValueBased = AllElementTypesCreators.aet.ValueBased();
-      final Consumer<ValueBased> _function_1 = (ValueBased it) -> {
-        EList<Containable> _children = it.getChildren();
-        ValueBased _ValueBased_1 = AllElementTypesCreators.aet.ValueBased();
-        _children.add(_ValueBased_1);
-      };
-      _function_1.accept(_ValueBased);
-      ValueBased _doubleArrow = _ValueBased;
-      ValueBased _ValueBased_1 = AllElementTypesCreators.aet.ValueBased();
-      final Consumer<ValueBased> _function_2 = (ValueBased it) -> {
-        EList<Containable> _children = it.getChildren();
-        ValueBased _ValueBased_2 = AllElementTypesCreators.aet.ValueBased();
-        final Consumer<ValueBased> _function_3 = (ValueBased it_1) -> {
-          EList<Containable> _referenced = it_1.getReferenced();
-          NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest
-              .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-          final Consumer<NonRoot> _function_4 = (NonRoot it_2) -> {
-            it_2.setId("test");
-          };
-          _function_4.accept(_inDifferentRoot);
-          NonRoot _doubleArrow_1 = _inDifferentRoot;
-          _referenced.add(_doubleArrow_1);
+    final Executable function =
+        () -> {
+          ValueBased valueBased = AllElementTypesCreators.aet.ValueBased();
+          final Consumer<ValueBased> function1 =
+              (ValueBased it) -> {
+                EList<Containable> children = it.getChildren();
+                ValueBased valueBased1 = AllElementTypesCreators.aet.ValueBased();
+                children.add(valueBased1);
+              };
+          function1.accept(valueBased);
+          ValueBased doubleArrow = valueBased;
+          ValueBased valueBased1 = AllElementTypesCreators.aet.ValueBased();
+          final Consumer<ValueBased> function2 =
+              (ValueBased it) -> {
+                EList<Containable> children = it.getChildren();
+                ValueBased valueBased2 = AllElementTypesCreators.aet.ValueBased();
+                final Consumer<ValueBased> function3 =
+                    (ValueBased it1) -> {
+                      EList<Containable> referenced = it1.getReferenced();
+                      NonRoot inDifferentRoot =
+                          ModelDeepEqualityMatcherTest.inDifferentRoot(
+                              AllElementTypesCreators.aet.NonRoot());
+                      final Consumer<NonRoot> function4 =
+                          (NonRoot it2) -> {
+                            it2.setId("test");
+                          };
+                      function4.accept(inDifferentRoot);
+                      NonRoot doubleArrow1 = inDifferentRoot;
+                      referenced.add(doubleArrow1);
+                    };
+                function3.accept(valueBased2);
+                ValueBased doubleArrow1 = valueBased2;
+                children.add(doubleArrow1);
+              };
+          function2.accept(valueBased1);
+          ValueBased doubleArrow1 = valueBased1;
+          MatcherAssert.<ValueBased>assertThat(
+              doubleArrow,
+              ModelMatchers.<ValueBased>equalsDeeply(
+                  doubleArrow1,
+                  ModelMatchers.ignoringFeatures(
+                      AllElementTypesPackage.Literals.VALUE_BASED__REFERENCED)));
         };
-        _function_3.accept(_ValueBased_2);
-        ValueBased _doubleArrow_1 = _ValueBased_2;
-        _children.add(_doubleArrow_1);
-      };
-      _function_2.accept(_ValueBased_1);
-      ValueBased _doubleArrow_1 = _ValueBased_1;
-      MatcherAssert.<ValueBased>assertThat(_doubleArrow, ModelMatchers.<ValueBased>equalsDeeply(_doubleArrow_1,
-          ModelMatchers.ignoringFeatures(AllElementTypesPackage.Literals.VALUE_BASED__REFERENCED)));
-    };
-    Assertions.assertDoesNotThrow(_function);
+    Assertions.assertDoesNotThrow(function);
   }
 
   @Test
   @DisplayName("allows to ignore references (additional object)")
   public void ignoreReferenceAdded() {
-    final Executable _function = () -> {
-      ValueBased _ValueBased = AllElementTypesCreators.aet.ValueBased();
-      final Consumer<ValueBased> _function_1 = (ValueBased it) -> {
-        EList<Containable> _children = it.getChildren();
-        ValueBased _ValueBased_1 = AllElementTypesCreators.aet.ValueBased();
-        final Consumer<ValueBased> _function_2 = (ValueBased it_1) -> {
-          EList<Containable> _referenced = it_1.getReferenced();
-          NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest
-              .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-          final Consumer<NonRoot> _function_3 = (NonRoot it_2) -> {
-            it_2.setId("test");
-          };
-          _function_3.accept(_inDifferentRoot);
-          NonRoot _doubleArrow = _inDifferentRoot;
-          _referenced.add(_doubleArrow);
+    final Executable function =
+        () -> {
+          ValueBased valueBased = AllElementTypesCreators.aet.ValueBased();
+          final Consumer<ValueBased> function1 =
+              (ValueBased it) -> {
+                EList<Containable> children = it.getChildren();
+                ValueBased valueBased1 = AllElementTypesCreators.aet.ValueBased();
+                final Consumer<ValueBased> function2 =
+                    (ValueBased it1) -> {
+                      EList<Containable> referenced = it1.getReferenced();
+                      NonRoot inDifferentRoot =
+                          ModelDeepEqualityMatcherTest.inDifferentRoot(
+                              AllElementTypesCreators.aet.NonRoot());
+                      final Consumer<NonRoot> function3 =
+                          (NonRoot it2) -> {
+                            it2.setId("test");
+                          };
+                      function3.accept(inDifferentRoot);
+                      NonRoot doubleArrow = inDifferentRoot;
+                      referenced.add(doubleArrow);
+                    };
+                function2.accept(valueBased1);
+                ValueBased doubleArrow = valueBased1;
+                children.add(doubleArrow);
+              };
+          function1.accept(valueBased);
+          ValueBased doubleArrow = valueBased;
+          ValueBased valueBased1 = AllElementTypesCreators.aet.ValueBased();
+          final Consumer<ValueBased> function2 =
+              (ValueBased it) -> {
+                EList<Containable> children = it.getChildren();
+                ValueBased valueBased2 = AllElementTypesCreators.aet.ValueBased();
+                children.add(valueBased2);
+              };
+          function2.accept(valueBased1);
+          ValueBased doubleArrow1 = valueBased1;
+          MatcherAssert.<ValueBased>assertThat(
+              doubleArrow,
+              ModelMatchers.<ValueBased>equalsDeeply(
+                  doubleArrow1,
+                  ModelMatchers.ignoringFeatures(
+                      AllElementTypesPackage.Literals.VALUE_BASED__REFERENCED)));
         };
-        _function_2.accept(_ValueBased_1);
-        ValueBased _doubleArrow = _ValueBased_1;
-        _children.add(_doubleArrow);
-      };
-      _function_1.accept(_ValueBased);
-      ValueBased _doubleArrow = _ValueBased;
-      ValueBased _ValueBased_1 = AllElementTypesCreators.aet.ValueBased();
-      final Consumer<ValueBased> _function_2 = (ValueBased it) -> {
-        EList<Containable> _children = it.getChildren();
-        ValueBased _ValueBased_2 = AllElementTypesCreators.aet.ValueBased();
-        _children.add(_ValueBased_2);
-      };
-      _function_2.accept(_ValueBased_1);
-      ValueBased _doubleArrow_1 = _ValueBased_1;
-      MatcherAssert.<ValueBased>assertThat(_doubleArrow, ModelMatchers.<ValueBased>equalsDeeply(_doubleArrow_1,
-          ModelMatchers.ignoringFeatures(AllElementTypesPackage.Literals.VALUE_BASED__REFERENCED)));
-    };
-    Assertions.assertDoesNotThrow(_function);
+    Assertions.assertDoesNotThrow(function);
   }
 
   @Test
   @DisplayName("allows to ignore references (changed object)")
   public void ignoreReferenceChanged() {
-    final Executable _function = () -> {
-      ValueBased _ValueBased = AllElementTypesCreators.aet.ValueBased();
-      final Consumer<ValueBased> _function_1 = (ValueBased it) -> {
-        EList<Containable> _children = it.getChildren();
-        ValueBased _ValueBased_1 = AllElementTypesCreators.aet.ValueBased();
-        final Consumer<ValueBased> _function_2 = (ValueBased it_1) -> {
-          EList<Containable> _referenced = it_1.getReferenced();
-          NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest
-              .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-          final Consumer<NonRoot> _function_3 = (NonRoot it_2) -> {
-            it_2.setId("different");
-          };
-          _function_3.accept(_inDifferentRoot);
-          NonRoot _doubleArrow = _inDifferentRoot;
-          _referenced.add(_doubleArrow);
+    final Executable function =
+        () -> {
+          ValueBased valueBased = AllElementTypesCreators.aet.ValueBased();
+          final Consumer<ValueBased> function1 =
+              (ValueBased it) -> {
+                EList<Containable> children = it.getChildren();
+                ValueBased valueBased1 = AllElementTypesCreators.aet.ValueBased();
+                final Consumer<ValueBased> function2 =
+                    (ValueBased it1) -> {
+                      EList<Containable> referenced = it1.getReferenced();
+                      NonRoot inDifferentRoot =
+                          ModelDeepEqualityMatcherTest.inDifferentRoot(
+                              AllElementTypesCreators.aet.NonRoot());
+                      final Consumer<NonRoot> function3 =
+                          (NonRoot it2) -> {
+                            it2.setId("different");
+                          };
+                      function3.accept(inDifferentRoot);
+                      NonRoot doubleArrow = inDifferentRoot;
+                      referenced.add(doubleArrow);
+                    };
+                function2.accept(valueBased1);
+                ValueBased doubleArrow = valueBased1;
+                children.add(doubleArrow);
+              };
+          function1.accept(valueBased);
+          ValueBased doubleArrow = valueBased;
+          ValueBased valueBased1 = AllElementTypesCreators.aet.ValueBased();
+          final Consumer<ValueBased> function2 =
+              (ValueBased it) -> {
+                EList<Containable> children = it.getChildren();
+                ValueBased valueBased2 = AllElementTypesCreators.aet.ValueBased();
+                final Consumer<ValueBased> function3 =
+                    (ValueBased it1) -> {
+                      EList<Containable> referenced = it1.getReferenced();
+                      NonRoot inDifferentRoot =
+                          ModelDeepEqualityMatcherTest.inDifferentRoot(
+                              AllElementTypesCreators.aet.NonRoot());
+                      final Consumer<NonRoot> function4 =
+                          (NonRoot it2) -> {
+                            it2.setId("test");
+                          };
+                      function4.accept(inDifferentRoot);
+                      NonRoot doubleArrow1 = inDifferentRoot;
+                      referenced.add(doubleArrow1);
+                    };
+                function3.accept(valueBased2);
+                ValueBased doubleArrow1 = valueBased2;
+                children.add(doubleArrow1);
+              };
+          function2.accept(valueBased1);
+          ValueBased doubleArrow1 = valueBased1;
+          MatcherAssert.<ValueBased>assertThat(
+              doubleArrow,
+              ModelMatchers.<ValueBased>equalsDeeply(
+                  doubleArrow1,
+                  ModelMatchers.ignoringFeatures(
+                      AllElementTypesPackage.Literals.VALUE_BASED__REFERENCED)));
         };
-        _function_2.accept(_ValueBased_1);
-        ValueBased _doubleArrow = _ValueBased_1;
-        _children.add(_doubleArrow);
-      };
-      _function_1.accept(_ValueBased);
-      ValueBased _doubleArrow = _ValueBased;
-      ValueBased _ValueBased_1 = AllElementTypesCreators.aet.ValueBased();
-      final Consumer<ValueBased> _function_2 = (ValueBased it) -> {
-        EList<Containable> _children = it.getChildren();
-        ValueBased _ValueBased_2 = AllElementTypesCreators.aet.ValueBased();
-        final Consumer<ValueBased> _function_3 = (ValueBased it_1) -> {
-          EList<Containable> _referenced = it_1.getReferenced();
-          NonRoot _inDifferentRoot = ModelDeepEqualityMatcherTest
-              .inDifferentRoot(AllElementTypesCreators.aet.NonRoot());
-          final Consumer<NonRoot> _function_4 = (NonRoot it_2) -> {
-            it_2.setId("test");
-          };
-          _function_4.accept(_inDifferentRoot);
-          NonRoot _doubleArrow_1 = _inDifferentRoot;
-          _referenced.add(_doubleArrow_1);
-        };
-        _function_3.accept(_ValueBased_2);
-        ValueBased _doubleArrow_1 = _ValueBased_2;
-        _children.add(_doubleArrow_1);
-      };
-      _function_2.accept(_ValueBased_1);
-      ValueBased _doubleArrow_1 = _ValueBased_1;
-      MatcherAssert.<ValueBased>assertThat(_doubleArrow, ModelMatchers.<ValueBased>equalsDeeply(_doubleArrow_1,
-          ModelMatchers.ignoringFeatures(AllElementTypesPackage.Literals.VALUE_BASED__REFERENCED)));
-    };
-    Assertions.assertDoesNotThrow(_function);
+    Assertions.assertDoesNotThrow(function);
   }
 
   @Test
   @DisplayName("uses the same fallback ID for matched objects in reporting")
   public void samefallbackIdInReporting() {
-    final Executable _function = () -> {
-      ValueBased _ValueBased = AllElementTypesCreators.aet.ValueBased();
-      final Consumer<ValueBased> _function_1 = (ValueBased it) -> {
-        it.setValue("test");
-        EList<Containable> _children = it.getChildren();
-        ValueBased _ValueBased_1 = AllElementTypesCreators.aet.ValueBased();
-        final Consumer<ValueBased> _function_2 = (ValueBased it_1) -> {
-          it_1.setValue("different");
+    final Executable function =
+        () -> {
+          ValueBased valueBased = AllElementTypesCreators.aet.ValueBased();
+          final Consumer<ValueBased> function1 =
+              (ValueBased it) -> {
+                it.setValue("test");
+                EList<Containable> children = it.getChildren();
+                ValueBased valueBased1 = AllElementTypesCreators.aet.ValueBased();
+                final Consumer<ValueBased> function2 =
+                    (ValueBased it1) -> {
+                      it1.setValue("different");
+                    };
+                function2.accept(valueBased1);
+                ValueBased doubleArrow = valueBased1;
+                children.add(doubleArrow);
+              };
+          function1.accept(valueBased);
+          ValueBased doubleArrow = valueBased;
+          ValueBased valueBased1 = AllElementTypesCreators.aet.ValueBased();
+          final Consumer<ValueBased> function2 =
+              (ValueBased it) -> {
+                it.setValue("test");
+                EList<Containable> children = it.getChildren();
+                ValueBased valueBased2 = AllElementTypesCreators.aet.ValueBased();
+                final Consumer<ValueBased> function3 =
+                    (ValueBased it1) -> {
+                      it1.setValue("test");
+                    };
+                function3.accept(valueBased2);
+                ValueBased doubleArrow1 = valueBased2;
+                children.add(doubleArrow1);
+              };
+          function2.accept(valueBased1);
+          ValueBased doubleArrow1 = valueBased1;
+          MatcherAssert.<ValueBased>assertThat(
+              doubleArrow, ModelMatchers.<ValueBased>equalsDeeply(doubleArrow1));
         };
-        _function_2.accept(_ValueBased_1);
-        ValueBased _doubleArrow = _ValueBased_1;
-        _children.add(_doubleArrow);
-      };
-      _function_1.accept(_ValueBased);
-      ValueBased _doubleArrow = _ValueBased;
-      ValueBased _ValueBased_1 = AllElementTypesCreators.aet.ValueBased();
-      final Consumer<ValueBased> _function_2 = (ValueBased it) -> {
-        it.setValue("test");
-        EList<Containable> _children = it.getChildren();
-        ValueBased _ValueBased_2 = AllElementTypesCreators.aet.ValueBased();
-        final Consumer<ValueBased> _function_3 = (ValueBased it_1) -> {
-          it_1.setValue("test");
-        };
-        _function_3.accept(_ValueBased_2);
-        ValueBased _doubleArrow_1 = _ValueBased_2;
-        _children.add(_doubleArrow_1);
-      };
-      _function_2.accept(_ValueBased_1);
-      ValueBased _doubleArrow_1 = _ValueBased_1;
-      MatcherAssert.<ValueBased>assertThat(_doubleArrow, ModelMatchers.<ValueBased>equalsDeeply(_doubleArrow_1));
-    };
-    final AssertionError exception = Assertions.<AssertionError>assertThrows(AssertionError.class, _function);
-    String _expected = System.lineSeparator()
-        + "Expected: a ValueBased deeply equal to <ValueBased#1(" + System.lineSeparator()
-        + "        value=\"test\"" + System.lineSeparator()
-        + "        children=[ValueBased#2(value=\"test\")]" + System.lineSeparator()
-        + ")>" + System.lineSeparator()
-        + "     but: found the following differences:" + System.lineSeparator()
-        + "        •  (ValueBased#1).children contained the unexpected value: ValueBased#3(value=\"different\")" + System.lineSeparator()
-        + "        •  (ValueBased#1).children was missing the value: ValueBased#2(value=\"test\")" + System.lineSeparator()
-        + "    for object <ValueBased#1(" + System.lineSeparator()
-        + "        value=\"test\"" + System.lineSeparator()
-        + "        children=[ValueBased#3(value=\"different\")]" + System.lineSeparator()
-        + ")>";
-    MatcherAssert.<String>assertThat(exception.getMessage().replaceAll("\r?\\n", System.lineSeparator()),
-        CoreMatchers.<String>is(_expected));
+    final AssertionError exception =
+        Assertions.<AssertionError>assertThrows(AssertionError.class, function);
+    String expected =
+        System.lineSeparator()
+            + "Expected: a ValueBased deeply equal to <ValueBased#1("
+            + System.lineSeparator()
+            + "        value=\"test\""
+            + System.lineSeparator()
+            + "        children=[ValueBased#2(value=\"test\")]"
+            + System.lineSeparator()
+            + ")>"
+            + System.lineSeparator()
+            + "     but: found the following differences:"
+            + System.lineSeparator()
+            + "        •  (ValueBased#1).children contained the unexpected value:"
+            + " ValueBased#3(value=\"different\")"
+            + System.lineSeparator()
+            + "        •  (ValueBased#1).children was missing the value:"
+            + " ValueBased#2(value=\"test\")"
+            + System.lineSeparator()
+            + "    for object <ValueBased#1("
+            + System.lineSeparator()
+            + "        value=\"test\""
+            + System.lineSeparator()
+            + "        children=[ValueBased#3(value=\"different\")]"
+            + System.lineSeparator()
+            + ")>";
+    MatcherAssert.<String>assertThat(
+        exception.getMessage().replaceAll("\r?\\n", System.lineSeparator()),
+        CoreMatchers.<String>is(expected));
   }
 
   private static NonRoot inDifferentRoot(final NonRoot nonRoot) {
-    final Consumer<NonRoot> _function = (NonRoot it) -> {
-      Root _Root = AllElementTypesCreators.aet.Root();
-      final Consumer<Root> _function_1 = (Root it_1) -> {
-        it_1.setId("foreignRoot");
-        it_1.setSingleValuedContainmentEReference(nonRoot);
-      };
-      _function_1.accept(_Root);
-    };
-    _function.accept(nonRoot);
+    final Consumer<NonRoot> function =
+        (NonRoot it) -> {
+          Root root = AllElementTypesCreators.aet.Root();
+          final Consumer<Root> function1 =
+              (Root it1) -> {
+                it1.setId("foreignRoot");
+                it1.setSingleValuedContainmentEReference(nonRoot);
+              };
+          function1.accept(root);
+        };
+    function.accept(nonRoot);
     return nonRoot;
   }
 
   private static PInterface inDifferentRepository(final PInterface content) {
-    final Consumer<PInterface> _function = (PInterface it) -> {
-      Repository _Repository = PcmMockupCreators.pcm.Repository();
-      final Consumer<Repository> _function_1 = (Repository it_1) -> {
-        it_1.setId("foreignRepository");
-        EList<PInterface> _interfaces = it_1.getInterfaces();
-        _interfaces.add(content);
-      };
-      _function_1.accept(_Repository);
-    };
-    _function.accept(content);
+    final Consumer<PInterface> function =
+        (PInterface it) -> {
+          Repository repository = PcmMockupCreators.pcm.Repository();
+          final Consumer<Repository> function1 =
+              (Repository it1) -> {
+                it1.setId("foreignRepository");
+                EList<PInterface> interfaces = it1.getInterfaces();
+                interfaces.add(content);
+              };
+          function1.accept(repository);
+        };
+    function.accept(content);
     return content;
   }
 
   private static NonRoot nonRootInSameRoot(final Root root) {
-    NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-    final Consumer<NonRoot> _function = (NonRoot it) -> {
-      EList<NonRoot> _multiValuedUnorderedContainmentEReference = root.getMultiValuedUnorderedContainmentEReference();
-      _multiValuedUnorderedContainmentEReference.add(it);
-    };
-    _function.accept(_NonRoot);
-    return _NonRoot;
+    NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+    final Consumer<NonRoot> function =
+        (NonRoot it) -> {
+          EList<NonRoot> multiValuedUnorderedContainmentEReference =
+              root.getMultiValuedUnorderedContainmentEReference();
+          multiValuedUnorderedContainmentEReference.add(it);
+        };
+    function.accept(nonRoot);
+    return nonRoot;
   }
 
   private static Matcher<String> containsExactDifferences(final String... differences) {
-    String _lineSeparator = System.lineSeparator();
-    String _plus = ("found the following differences:" + _lineSeparator);
-    final Function<String, CharSequence> _function = (String it) -> {
-      return ("        • " + it);
-    };
-    String _join = Arrays.stream(differences).map(_function).collect(Collectors.joining(System.lineSeparator()));
-    String _plus_1 = (_plus + _join);
-    String _lineSeparator_1 = System.lineSeparator();
-    String _plus_2 = (_plus_1 + _lineSeparator_1);
-    String _plus_3 = (_plus_2 +
-        "    for object");
-    return CoreMatchers.containsString(_plus_3);
+    String lineSeparator = System.lineSeparator();
+    String plus = ("found the following differences:" + lineSeparator);
+    final Function<String, CharSequence> function =
+        (String it) -> {
+          return ("        • " + it);
+        };
+    String join =
+        Arrays.stream(differences)
+            .map(function)
+            .collect(Collectors.joining(System.lineSeparator()));
+    String plus1 = (plus + join);
+    String lineSeparator1 = System.lineSeparator();
+    String plus2 = (plus1 + lineSeparator1);
+    String plus3 = (plus2 + "    for object");
+    return CoreMatchers.containsString(plus3);
   }
 
-  private static ModelDeepEqualityMatcherTest.PcmInterfaceNameEquality comaringPcmInterfacesByName() {
+  private static ModelDeepEqualityMatcherTest.PcmInterfaceNameEquality
+      comaringPcmInterfacesByName() {
     return new ModelDeepEqualityMatcherTest.PcmInterfaceNameEquality();
   }
 }

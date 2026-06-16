@@ -10,9 +10,8 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 
 /**
- * NotificationInfo is a type safe wrapper for EMF Notifications. It wraps a
- * {@link Notification}and implements a few
- * additional getter methods
+ * NotificationInfo is a type safe wrapper for EMF Notifications. It wraps a {@link Notification}and
+ * implements a few additional getter methods
  */
 class NotificationInfo implements Notification {
   private final Notification notification;
@@ -24,58 +23,58 @@ class NotificationInfo implements Notification {
   }
 
   public EventType getEventTypeEnum() {
-    EventType _switchResult = null;
-    int _eventType = this.notification.getEventType();
-    switch (_eventType) {
+    EventType switchResult = null;
+    int eventType = this.notification.getEventType();
+    switch (eventType) {
       case Notification.SET:
-        _switchResult = EventType.SET;
+        switchResult = EventType.SET;
         break;
       case Notification.UNSET:
-        _switchResult = EventType.UNSET;
+        switchResult = EventType.UNSET;
         break;
       case Notification.ADD:
-        _switchResult = EventType.ADD;
+        switchResult = EventType.ADD;
         break;
       case Notification.REMOVE:
-        _switchResult = EventType.REMOVE;
+        switchResult = EventType.REMOVE;
         break;
       case Notification.ADD_MANY:
-        _switchResult = EventType.ADD_MANY;
+        switchResult = EventType.ADD_MANY;
         break;
       case Notification.REMOVE_MANY:
-        _switchResult = EventType.REMOVE_MANY;
+        switchResult = EventType.REMOVE_MANY;
         break;
       case Notification.MOVE:
-        _switchResult = EventType.MOVE;
+        switchResult = EventType.MOVE;
         break;
       case Notification.REMOVING_ADAPTER:
-        _switchResult = EventType.REMOVING_ADAPTER;
+        switchResult = EventType.REMOVING_ADAPTER;
         break;
       case Notification.RESOLVE:
-        _switchResult = EventType.RESOLVE;
+        switchResult = EventType.RESOLVE;
         break;
       default:
         throw new IllegalArgumentException("Unexpected eventType.");
     }
-    return _switchResult;
+    return switchResult;
   }
 
   /**
    * @return the structural feature affected
    */
   public EStructuralFeature getStructuralFeature() {
-    EStructuralFeature _xblockexpression = null;
+    EStructuralFeature xblockexpression = null;
     {
       final Object feature = this.getFeature();
-      EStructuralFeature _xifexpression = null;
+      EStructuralFeature xifexpression = null;
       if ((feature instanceof EStructuralFeature)) {
-        _xifexpression = ((EStructuralFeature) feature);
+        xifexpression = ((EStructuralFeature) feature);
       } else {
-        _xifexpression = null;
+        xifexpression = null;
       }
-      _xblockexpression = _xifexpression;
+      xblockexpression = xifexpression;
     }
-    return _xblockexpression;
+    return xblockexpression;
   }
 
   public boolean isStructuralFeatureNotification() {
@@ -83,54 +82,52 @@ class NotificationInfo implements Notification {
   }
 
   public boolean isAttributeNotification() {
-    Object _feature = this.getFeature();
-    return (_feature instanceof EAttribute);
+    Object feature = this.getFeature();
+    return (feature instanceof EAttribute);
   }
 
   /**
    * @return whether this notification signals a change of a reference value
    */
   public boolean isReferenceNotification() {
-    Object _feature = this.getFeature();
-    return (_feature instanceof EReference);
+    Object feature = this.getFeature();
+    return (feature instanceof EReference);
   }
 
   /**
-   * @return the EAttribute if the notification relates to an attribute, null
-   *         otherwise
+   * @return the EAttribute if the notification relates to an attribute, null otherwise
    */
   public EAttribute getAttribute() {
-    EAttribute _xblockexpression = null;
+    EAttribute xblockexpression = null;
     {
       final Object feature = this.getFeature();
-      EAttribute _xifexpression = null;
+      EAttribute xifexpression = null;
       if ((feature instanceof EAttribute)) {
-        _xifexpression = ((EAttribute) feature);
+        xifexpression = ((EAttribute) feature);
       } else {
-        _xifexpression = null;
+        xifexpression = null;
       }
-      _xblockexpression = _xifexpression;
+      xblockexpression = xifexpression;
     }
-    return _xblockexpression;
+    return xblockexpression;
   }
 
   /**
-   * @return the EReference if the notification relates to a reference feature,
-   *         null otherwise
+   * @return the EReference if the notification relates to a reference feature, null otherwise
    */
   public EReference getReference() {
-    EReference _xblockexpression = null;
+    EReference xblockexpression = null;
     {
       final Object feature = this.getFeature();
-      EReference _xifexpression = null;
+      EReference xifexpression = null;
       if ((feature instanceof EReference)) {
-        _xifexpression = ((EReference) feature);
+        xifexpression = ((EReference) feature);
       } else {
-        _xifexpression = null;
+        xifexpression = null;
       }
-      _xblockexpression = _xifexpression;
+      xblockexpression = xifexpression;
     }
-    return _xblockexpression;
+    return xblockexpression;
   }
 
   /**
@@ -144,55 +141,53 @@ class NotificationInfo implements Notification {
    * @return true if the event is of type Notification.ADD, false otherwise
    */
   public boolean isAddEvent() {
-    int _eventType = this.getEventType();
-    return (_eventType == Notification.ADD);
+    int eventType = this.notification.getEventType();
+    return (eventType == Notification.ADD);
   }
 
   /**
    * @return true if the event is of type Notification.REMOVE, false otherwise
    */
   public boolean isRemoveEvent() {
-    int _eventType = this.getEventType();
-    return (_eventType == Notification.REMOVE);
+    int eventType = this.notification.getEventType();
+    return (eventType == Notification.REMOVE);
   }
 
   /**
    * @return true if the event is of type Notification.SET, false otherwise
    */
   public boolean isSetEvent() {
-    int _eventType = this.getEventType();
-    return (_eventType == Notification.SET);
+    int eventType = this.notification.getEventType();
+    return (eventType == Notification.SET);
   }
 
   /**
-   * @return true if the event is of type Notification.ADD_MANY, false otherwise
+   * @return true if the event is of type Notification.ADDMANY, false otherwise
    */
   public boolean isAddManyEvent() {
-    int _eventType = this.getEventType();
-    return (_eventType == Notification.ADD_MANY);
+    int eventType = this.notification.getEventType();
+    return (eventType == Notification.ADD_MANY);
   }
 
   /**
-   * @return true if the event is of type Notification.REMOVE_MANY, false
-   *         otherwise
+   * @return true if the event is of type Notification.REMOVEMANY, false otherwise
    */
   public boolean isRemoveManyEvent() {
-    int _eventType = this.getEventType();
-    return (_eventType == Notification.REMOVE_MANY);
+    int eventType = this.notification.getEventType();
+    return (eventType == Notification.REMOVE_MANY);
   }
 
   /**
    * @return true if the event is of type Notification.MOVE, false otherwise
    */
   public boolean isMoveEvent() {
-    int _eventType = this.getEventType();
-    return (_eventType == Notification.MOVE);
+    int eventType = this.notification.getEventType();
+    return (eventType == Notification.MOVE);
   }
 
   /**
-   * @return true if this notification is followed by more notifications in a
-   *         chain, false if this is the last
-   *         notification of a chain
+   * @return true if this notification is followed by more notifications in a chain, false if this
+   *     is the last notification of a chain
    */
   public boolean hasNext() {
     if ((!(this.notification instanceof NotificationImpl))) {
@@ -208,21 +203,21 @@ class NotificationInfo implements Notification {
       }
       final Object feature = nextNotification.getFeature();
       if ((feature instanceof EReference)) {
-        boolean _isTransient = ((EReference) feature).isTransient();
-        if (_isTransient) {
+        boolean isTransient = ((EReference) feature).isTransient();
+        if (isTransient) {
           return false;
         }
       }
       return true;
-    } catch (final Throwable _t) {
-      if (_t instanceof RuntimeException) {
+    } catch (final Throwable t) {
+      if (t instanceof RuntimeException) {
         return false;
-      } else if (_t instanceof IllegalAccessException) {
+      } else if (t instanceof IllegalAccessException) {
         return false;
-      } else if (_t instanceof NoSuchFieldException) {
+      } else if (t instanceof NoSuchFieldException) {
         return false;
       } else {
-        throw new RuntimeException(_t);
+        throw new RuntimeException(t);
       }
     }
   }
@@ -231,54 +226,53 @@ class NotificationInfo implements Notification {
    * @return @see Notification#getNewValue()
    */
   public EObject getNewModelElementValue() {
-    Object _newValue = this.notification.getNewValue();
-    return ((EObject) _newValue);
+    Object newValue = this.notification.getNewValue();
+    return ((EObject) newValue);
   }
 
   /**
    * @return @see Notification#getOldValue()
    */
   public EObject getOldModelElementValue() {
-    Object _oldValue = this.notification.getOldValue();
-    return ((EObject) _oldValue);
+    Object oldValue = this.notification.getOldValue();
+    return ((EObject) oldValue);
   }
 
   public int getInitialIndex() {
-    int _xifexpression = (int) 0;
-    int _position = this.getPosition();
-    boolean _tripleEquals = (_position == NotificationInfo.NO_INDEX);
-    if (_tripleEquals) {
-      _xifexpression = 0;
+    int xifexpression = (int) 0;
+    int position = this.getPosition();
+    boolean tripleEquals = (position == NotificationInfo.NO_INDEX);
+    if (tripleEquals) {
+      xifexpression = 0;
     } else {
-      _xifexpression = this.getPosition();
+      xifexpression = this.getPosition();
     }
-    return _xifexpression;
+    return xifexpression;
   }
 
   /**
-   * @return true if the feature is unsettable and was in the set state before
-   *         this notification.
+   * @return true if the feature is unsettable and was in the set state before this notification.
    */
   public boolean wasUnset() {
     return (((this.isStructuralFeatureNotification() && this.getStructuralFeature().isUnsettable())
-        && this.notification.wasSet()) &&
-        (!this.getNotifierModelElement().eIsSet(this.getStructuralFeature())));
+            && this.notification.wasSet())
+        && (!this.getNotifierModelElement().eIsSet(this.getStructuralFeature())));
   }
 
   /**
    * @return @see Notification#getNotifier()
    */
   public EObject getNotifierModelElement() {
-    Object _notifier = this.notification.getNotifier();
-    return ((EObject) _notifier);
+    Object notifier = this.notification.getNotifier();
+    return ((EObject) notifier);
   }
 
   /**
    * @return @see Notification#getNotifier()
    */
   public Resource getNotifierResource() {
-    Object _notifier = this.notification.getNotifier();
-    return ((Resource) _notifier);
+    Object notifier = this.notification.getNotifier();
+    return ((Resource) notifier);
   }
 
   /**
@@ -286,31 +280,31 @@ class NotificationInfo implements Notification {
    */
   public String getDebugString() {
     final StringBuilder sb = new StringBuilder();
-    boolean _isAddEvent = this.isAddEvent();
-    if (_isAddEvent) {
+    boolean isAddEvent = this.isAddEvent();
+    if (isAddEvent) {
       sb.append("ADD");
     } else {
-      boolean _isSetEvent = this.isSetEvent();
-      if (_isSetEvent) {
+      boolean isSetEvent = this.isSetEvent();
+      if (isSetEvent) {
         sb.append("SET");
       } else {
-        boolean _isAddManyEvent = this.isAddManyEvent();
-        if (_isAddManyEvent) {
-          sb.append("ADD_MANY");
+        boolean isAddManyEvent = this.isAddManyEvent();
+        if (isAddManyEvent) {
+          sb.append("ADDMANY");
         } else {
-          boolean _isRemoveEvent = this.isRemoveEvent();
-          if (_isRemoveEvent) {
+          boolean isRemoveEvent = this.isRemoveEvent();
+          if (isRemoveEvent) {
             sb.append("REMOVE");
           } else {
-            boolean _isRemoveManyEvent = this.isRemoveManyEvent();
-            if (_isRemoveManyEvent) {
-              sb.append("REMOVE_MANY");
+            boolean isRemoveManyEvent = this.isRemoveManyEvent();
+            if (isRemoveManyEvent) {
+              sb.append("REMOVEMANY");
             } else {
-              boolean _isMoveEvent = this.isMoveEvent();
-              if (_isMoveEvent) {
+              boolean isMoveEvent = this.isMoveEvent();
+              if (isMoveEvent) {
                 sb.append("MOVE");
               } else {
-                sb.append(this.getEventType());
+                sb.append(this.notification.getEventType());
               }
             }
           }
@@ -318,32 +312,32 @@ class NotificationInfo implements Notification {
       }
     }
     sb.append(" val: ").append(this.getValidationMessage());
-    Object _notifier = this.notification.getNotifier();
-    final EObject n = ((EObject) _notifier);
+    Object notifier = this.notification.getNotifier();
+    final EObject n = ((EObject) notifier);
     sb.append(" / on: ").append(this.extractName(n));
     sb.append(".");
-    boolean _isAttributeNotification = this.isAttributeNotification();
-    if (_isAttributeNotification) {
+    boolean isAttributeNotification = this.isAttributeNotification();
+    if (isAttributeNotification) {
       sb.append(this.getAttribute().getName());
     } else {
-      boolean _isReferenceNotification = this.isReferenceNotification();
-      if (_isReferenceNotification) {
+      boolean isReferenceNotification = this.isReferenceNotification();
+      if (isReferenceNotification) {
         sb.append(this.getReference().getName());
       }
     }
     sb.append(" / old: ");
-    Object _oldValue = this.getOldValue();
-    if ((_oldValue instanceof EObject)) {
-      Object _oldValue_1 = this.getOldValue();
-      sb.append(this.extractName(((EObject) _oldValue_1)));
+    Object oldValue = this.getOldValue();
+    if ((oldValue instanceof EObject)) {
+      Object oldValue1 = this.getOldValue();
+      sb.append(this.extractName(((EObject) oldValue1)));
     } else {
       sb.append(this.getOldValue());
     }
     sb.append(" / new: ");
-    Object _newValue = this.getNewValue();
-    if ((_newValue instanceof EObject)) {
-      Object _newValue_1 = this.getNewValue();
-      sb.append(this.extractName(((EObject) _newValue_1)));
+    Object newValue = this.getNewValue();
+    if ((newValue instanceof EObject)) {
+      Object newValue1 = this.getNewValue();
+      sb.append(this.extractName(((EObject) newValue1)));
     } else {
       sb.append(this.getNewValue());
     }
@@ -363,7 +357,7 @@ class NotificationInfo implements Notification {
 
   /**
    * Returns the type of the {@link Notification}.
-   * 
+   *
    * @return a {@link Notification} type
    */
   public Class<? extends Notification> getNotificationType() {
