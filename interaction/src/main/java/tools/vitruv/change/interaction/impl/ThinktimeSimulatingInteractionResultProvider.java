@@ -9,13 +9,13 @@ import tools.vitruv.change.interaction.InteractionResultProvider;
 import tools.vitruv.change.interaction.UserInteractionOptions;
 
 /**
- * A predefined result provider that also simulates a think time on each
- * request.
- * 
+ * A predefined result provider that also simulates a think time on each request.
+ *
  * @author Heiko Klare
  */
 public class ThinktimeSimulatingInteractionResultProvider implements InteractionResultProvider {
-  private static final Logger logger = LogManager.getLogger(ThinktimeSimulatingInteractionResultProvider.class);
+  private static final Logger logger =
+      LogManager.getLogger(ThinktimeSimulatingInteractionResultProvider.class);
 
   private final Random random = new Random();
 
@@ -31,11 +31,12 @@ public class ThinktimeSimulatingInteractionResultProvider implements Interaction
    * @param minWaittime - the minimum time to wait in milliseconds
    * @param maxWaittime - the maximum time to wait in milliseconds
    */
-  public ThinktimeSimulatingInteractionResultProvider(final InteractionResultProvider delegate, final int minWaittime,
-      final int maxWaittime) {
+  public ThinktimeSimulatingInteractionResultProvider(
+      final InteractionResultProvider delegate, final int minWaittime, final int maxWaittime) {
     if ((minWaittime > maxWaittime)) {
       throw new RuntimeException(
-          ((("Configure min and max waittime properly: Min" + Integer.valueOf(minWaittime)) + " Max: ")
+          ((("Configure min and max waittime properly: Min" + Integer.valueOf(minWaittime))
+                  + " Max: ")
               + Integer.valueOf(maxWaittime)));
     }
     this.delegate = delegate;
@@ -50,13 +51,14 @@ public class ThinktimeSimulatingInteractionResultProvider implements Interaction
       final int currentWaittime = (_nextInt + this.minWaittime);
       try {
         Thread.sleep(currentWaittime);
-      } catch (final Throwable _t) {
-        if (_t instanceof InterruptedException) {
-          final InterruptedException e = (InterruptedException) _t;
-          ThinktimeSimulatingInteractionResultProvider.logger
-              .trace(("User think time simulation thread interrupted: " + e), e);
+      } catch (final Throwable t) {
+        if (t instanceof InterruptedException) {
+          final InterruptedException e = (InterruptedException) t;
+          ThinktimeSimulatingInteractionResultProvider.logger.trace(
+              ("User think time simulation thread interrupted: " + e), e);
+          Thread.currentThread().interrupt();
         } else {
-          throw new RuntimeException(_t);
+          throw new RuntimeException(t);
         }
       }
     }
@@ -71,38 +73,72 @@ public class ThinktimeSimulatingInteractionResultProvider implements Interaction
     return _xblockexpression;
   }
 
-  public boolean getConfirmationInteractionResult(final UserInteractionOptions.WindowModality windowModality,
-      final String title, final String message, final String positiveDecisionText, final String negativeDecisionText,
+  public boolean getConfirmationInteractionResult(
+      final UserInteractionOptions.WindowModality windowModality,
+      final String title,
+      final String message,
+      final String positiveDecisionText,
+      final String negativeDecisionText,
       final String cancelDecisionText) {
-    return this.waitAndAccessDelegate().getConfirmationInteractionResult(windowModality, title, message,
-        positiveDecisionText, negativeDecisionText, cancelDecisionText);
+    return this.waitAndAccessDelegate()
+        .getConfirmationInteractionResult(
+            windowModality,
+            title,
+            message,
+            positiveDecisionText,
+            negativeDecisionText,
+            cancelDecisionText);
   }
 
   public Iterable<Integer> getMultipleChoiceMultipleSelectionInteractionResult(
-      final UserInteractionOptions.WindowModality windowModality, final String title, final String message,
-      final String positiveDecisionText, final String cancelDecisionText, final Iterable<String> choices) {
-    return this.waitAndAccessDelegate().getMultipleChoiceMultipleSelectionInteractionResult(windowModality, title,
-        message, positiveDecisionText, cancelDecisionText, choices);
+      final UserInteractionOptions.WindowModality windowModality,
+      final String title,
+      final String message,
+      final String positiveDecisionText,
+      final String cancelDecisionText,
+      final Iterable<String> choices) {
+    return this.waitAndAccessDelegate()
+        .getMultipleChoiceMultipleSelectionInteractionResult(
+            windowModality, title, message, positiveDecisionText, cancelDecisionText, choices);
   }
 
   public int getMultipleChoiceSingleSelectionInteractionResult(
-      final UserInteractionOptions.WindowModality windowModality, final String title, final String message,
-      final String positiveDecisionText, final String cancelDecisionText, final Iterable<String> choices) {
-    return this.waitAndAccessDelegate().getMultipleChoiceSingleSelectionInteractionResult(windowModality, title,
-        message, positiveDecisionText, cancelDecisionText, choices);
+      final UserInteractionOptions.WindowModality windowModality,
+      final String title,
+      final String message,
+      final String positiveDecisionText,
+      final String cancelDecisionText,
+      final Iterable<String> choices) {
+    return this.waitAndAccessDelegate()
+        .getMultipleChoiceSingleSelectionInteractionResult(
+            windowModality, title, message, positiveDecisionText, cancelDecisionText, choices);
   }
 
-  public void getNotificationInteractionResult(final UserInteractionOptions.WindowModality windowModality,
-      final String title, final String message, final String positiveDecisionText,
+  public void getNotificationInteractionResult(
+      final UserInteractionOptions.WindowModality windowModality,
+      final String title,
+      final String message,
+      final String positiveDecisionText,
       final UserInteractionOptions.NotificationType notificationType) {
-    this.waitAndAccessDelegate().getNotificationInteractionResult(windowModality, title, message, positiveDecisionText,
-        notificationType);
+    this.waitAndAccessDelegate()
+        .getNotificationInteractionResult(
+            windowModality, title, message, positiveDecisionText, notificationType);
   }
 
-  public String getTextInputInteractionResult(final UserInteractionOptions.WindowModality windowModality,
-      final String title, final String message, final String positiveDecisionText, final String cancelDecisionText,
+  public String getTextInputInteractionResult(
+      final UserInteractionOptions.WindowModality windowModality,
+      final String title,
+      final String message,
+      final String positiveDecisionText,
+      final String cancelDecisionText,
       final UserInteractionOptions.InputValidator inputValidator) {
-    return this.waitAndAccessDelegate().getTextInputInteractionResult(windowModality, title, message,
-        positiveDecisionText, cancelDecisionText, inputValidator);
+    return this.waitAndAccessDelegate()
+        .getTextInputInteractionResult(
+            windowModality,
+            title,
+            message,
+            positiveDecisionText,
+            cancelDecisionText,
+            inputValidator);
   }
 }
