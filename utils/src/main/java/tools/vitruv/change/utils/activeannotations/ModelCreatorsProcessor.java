@@ -1,10 +1,10 @@
 package tools.vitruv.change.utils.activeannotations;
 
-import com.google.common.base.Preconditions;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.StreamSupport;
+
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
@@ -21,9 +21,11 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.converter.ArgumentConversionException;
 import org.junit.jupiter.params.converter.ArgumentConverter;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Processes the {@link ModelCreators} annotation and generates shortcut methods for the create
- * methods of the provided {@link #factory}. Additionally generates:
+ * methods of the provided factory
  */
 public class ModelCreatorsProcessor extends AbstractClassProcessor {
 

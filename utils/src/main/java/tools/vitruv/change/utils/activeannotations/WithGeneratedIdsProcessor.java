@@ -1,6 +1,7 @@
 package tools.vitruv.change.utils.activeannotations;
 
 import java.util.stream.StreamSupport;
+
 import org.eclipse.emf.ecore.impl.EFactoryImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtend.lib.macro.AbstractClassProcessor;
@@ -12,10 +13,10 @@ import org.eclipse.xtend.lib.macro.declaration.TypeReference;
 import org.eclipse.xtend.lib.macro.declaration.Visibility;
 
 /**
- * Processes the {@link WithGeneratedRandomIds} annotation and generates overrides for all create
- * methods of the extended factory that return an instance of the configured {@link
- * #identifierMetaclass}. The generated overrides will call the super method and then set a
- * generated UUID as the ID of the created EObject.
+ * Processes the WithGeneratedRandomIds annotation and generates overrides for all create methods of
+ * the extended factory that return an instance of the configured identifierMetaclass. The generated
+ * overrides will call the super method and then set a generated UUID as the ID of the created
+ * EObject.
  */
 public class WithGeneratedIdsProcessor extends AbstractClassProcessor {
 
