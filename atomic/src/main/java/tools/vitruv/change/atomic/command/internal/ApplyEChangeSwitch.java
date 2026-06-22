@@ -8,6 +8,7 @@ import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.command.ApplyEChangeObserver;
+import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute;
 
 /**
  * Utility class for applying an EChange.
