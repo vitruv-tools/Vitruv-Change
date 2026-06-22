@@ -9,17 +9,17 @@ import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.eobject.DeleteEObject;
 import tools.vitruv.change.atomic.resolve.AtomicEChangeResolverHelper;
 
-/** A resolver for resolving a change with {@link Uuid} to {@link EObject} or vice versa. */
-public class AtomicEChangeUuidResolver {
-  private UuidResolver uuidResolver;
+/**
+ * A resolver for resolving a change with {@link Uuid} to {@link EObject} or vice versa.
+ */
+public record AtomicEChangeUuidResolver(UuidResolver uuidResolver) {
 
   /**
    * Creates a new {@link AtomicEChangeUuidResolver} with the given {@link UuidResolver}.
    *
    * @param uuidResolver the {@link UuidResolver} to use for resolving and applying atomic changes
    */
-  public AtomicEChangeUuidResolver(UuidResolver uuidResolver) {
-    this.uuidResolver = uuidResolver;
+  public AtomicEChangeUuidResolver {
   }
 
   /**
@@ -61,22 +61,22 @@ public class AtomicEChangeUuidResolver {
    */
   public EChange<Uuid> assignIdsWithoutUpdatingResolver(EChange<EObject> resolvedEChange) {
     return AtomicEChangeResolverHelper.resolveChange(
-      resolvedEChange,
-      eObject -> {
-        if (uuidResolver.hasUuid(eObject)) {
-          return uuidResolver.getUuid(eObject);
-        } else {
-          if (resolvedEChange instanceof CreateEObject<EObject> createChange
-              && createChange.getAffectedElement() == eObject) {
-            return uuidResolver.generateUuid(eObject);
+        resolvedEChange,
+        eObject -> {
+          if (uuidResolver.hasUuid(eObject)) {
+            return uuidResolver.getUuid(eObject);
           } else {
-            throw new IllegalStateException(
-                "trying to assign UUID for unknown element %s of change %s"
-                    .formatted(eObject, resolvedEChange));
+            if (resolvedEChange instanceof CreateEObject<EObject> createChange
+                && createChange.getAffectedElement() == eObject) {
+              return uuidResolver.generateUuid(eObject);
+            } else {
+              throw new IllegalStateException(
+                  "trying to assign UUID for unknown element %s of change %s"
+                      .formatted(eObject, resolvedEChange));
+            }
           }
-        }
-      },
-      this::resourceResolver);
+        },
+        this::resourceResolver);
   }
 
   /**
@@ -98,7 +98,7 @@ public class AtomicEChangeUuidResolver {
    * throws an error.
    *
    * @throws IllegalStateException if an uncontained element is registered in the {@link
-   *     UuidResolver}.
+   *                               UuidResolver}.
    */
   public void endTransaction() {
     uuidResolver.endTransaction();
