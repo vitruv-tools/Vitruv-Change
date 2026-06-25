@@ -407,61 +407,51 @@ public class ChangeRecorder implements AutoCloseable {
    * of the list. Contained elements are deleted before their container.
    */
   private List<EChange<EObject>> postprocessRemovals(final List<EChange<EObject>> changes) {
-    boolean _isEmpty = changes.isEmpty();
-    if (_isEmpty) {
+    if (changes.isEmpty()) {
       return changes;
     }
-    final Set<EObject> removedElements = new HashSet<EObject>();
-    for (final EChange<EObject> eChange : changes) {
-      {
-        boolean _matched = false;
-        if (eChange instanceof EObjectSubtractedEChange) {
-          _matched=true;
-          boolean _isContainmentRemoval = EChangeUtil.isContainmentRemoval(eChange);
-          if (_isContainmentRemoval) {
-            EObject _oldValue = ((EObjectSubtractedEChange<EObject>)eChange).getOldValue();
-            removedElements.add(_oldValue);
-          }
-        }
-        boolean _matched_1 = false;
-        if (eChange instanceof EObjectAddedEChange) {
-          _matched_1=true;
-          boolean _isContainmentInsertion = EChangeUtil.isContainmentInsertion(eChange);
-          if (_isContainmentInsertion) {
-            EObject _newValue = ((EObjectAddedEChange<EObject>)eChange).getNewValue();
-            removedElements.remove(_newValue);
-          }
-        }
-      }
-    }
-    boolean _isEmpty_1 = removedElements.isEmpty();
-    boolean _not = (!_isEmpty_1);
-    if (_not) {
-      final Map<EObject, Iterable<EObject>> allElementsToDelete = new HashMap<EObject, Iterable<EObject>>();
-      for (EObject element : removedElements) {
-        boolean _exists = allElementsToDelete.values().stream().anyMatch(it -> Iterables.contains(it, element));
-        if (_exists) {
-          continue;
-        }
-        List<EObject> elementsToDelete = new ArrayList<>(Lists.newArrayList(element.eAllContents()));
-        java.util.Collections.reverse(elementsToDelete);
-        for (EObject child : elementsToDelete) {
-          if (allElementsToDelete.containsKey(child)) {
-            allElementsToDelete.remove(child);
-          }
-        }
-        elementsToDelete.add(element);
-        allElementsToDelete.put(element, elementsToDelete);
-      }
-      List<EChange<EObject>> _list = new ArrayList<>();
-      for (Iterable<EObject> elementsToDelete : allElementsToDelete.values()) {
-        for (EObject it : elementsToDelete) {
-          _list.add(this.converter.createDeleteChange(it));
-        }
-      }
-      Iterables.<EChange<EObject>>addAll(changes, _list);
-    }
+    Set<EObject> removedElements = findRemovedElements(changes);
+    appendDeleteChanges(removedElements, changes);
     return changes;
+  }
+
+  private Set<EObject> findRemovedElements(final List<EChange<EObject>> changes) {
+    final Set<EObject> removedElements = new HashSet<>();
+    for (final EChange<EObject> eChange : changes) {
+      if (eChange instanceof EObjectSubtractedEChange && EChangeUtil.isContainmentRemoval(eChange)) {
+        removedElements.add(((EObjectSubtractedEChange<EObject>) eChange).getOldValue());
+      }
+      if (eChange instanceof EObjectAddedEChange && EChangeUtil.isContainmentInsertion(eChange)) {
+        removedElements.remove(((EObjectAddedEChange<EObject>) eChange).getNewValue());
+      }
+    }
+    return removedElements;
+  }
+
+  private void appendDeleteChanges(final Set<EObject> removedElements, final List<EChange<EObject>> changes) {
+    if (removedElements.isEmpty()) {
+      return;
+    }
+    final Map<EObject, Iterable<EObject>> allElementsToDelete = new HashMap<>();
+    for (EObject element : removedElements) {
+      boolean exists = allElementsToDelete.values().stream().anyMatch(it -> Iterables.contains(it, element));
+      if (exists) {
+        continue;
+      }
+      List<EObject> elementsToDelete = new ArrayList<>(Lists.newArrayList(element.eAllContents()));
+      java.util.Collections.reverse(elementsToDelete);
+      for (EObject child : elementsToDelete) {
+        allElementsToDelete.remove(child);
+      }
+      elementsToDelete.add(element);
+      allElementsToDelete.put(element, elementsToDelete);
+    }
+    
+    for (Iterable<EObject> elementsToDelete : allElementsToDelete.values()) {
+      for (EObject it : elementsToDelete) {
+        changes.add(this.converter.createDeleteChange(it));
+      }
+    }
   }
 
   public TransactionalChange<EObject> getChange() {
