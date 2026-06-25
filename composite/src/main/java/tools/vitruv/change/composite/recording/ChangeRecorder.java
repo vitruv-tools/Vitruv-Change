@@ -85,6 +85,8 @@ public class ChangeRecorder implements AutoCloseable {
           ((Iterable<? extends Resource>) notification.getNewValue())
                   .forEach(it -> this.startLoadingResource(it));
           break;
+        default:
+          break;
       }
     }
 
@@ -99,6 +101,8 @@ public class ChangeRecorder implements AutoCloseable {
         case Notification.REMOVE_MANY:
           ((Iterable<?>) notification.getOldValue()).forEach(it -> this.desinfect(it));
           break;
+        default:
+          break;
       }
 
       switch (eventType) {
@@ -109,10 +113,13 @@ public class ChangeRecorder implements AutoCloseable {
         case Notification.ADD_MANY:
           ((Iterable<?>) notification.getNewValue()).forEach(it -> this.infect(it));
           break;
+        default:
+          break;
       }
     }
 
-    private boolean isContainmentChange(final Notification notification, final boolean isResourceSetChange) {
+    private boolean isContainmentChange(
+            final Notification notification, final boolean isResourceSetChange) {
       return isContainmentEReference(notification)
               || isResourceContentsChange(notification)
               || isResourceSetChange;
