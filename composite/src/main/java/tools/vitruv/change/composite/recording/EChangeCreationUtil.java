@@ -17,9 +17,6 @@ import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory;
 import tools.vitruv.change.atomic.TypeInferringCompoundEChangeFactory;
 import tools.vitruv.change.atomic.feature.attribute.AdditiveAttributeEChange;
 import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute;
-import tools.vitruv.change.atomic.feature.reference.InsertEReference;
-import tools.vitruv.change.atomic.feature.reference.RemoveEReference;
-import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference;
 
 /**
  * A utility class providing extension methods for transforming change
