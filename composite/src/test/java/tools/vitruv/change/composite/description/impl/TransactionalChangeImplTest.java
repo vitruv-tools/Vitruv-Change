@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -119,7 +118,8 @@ class TransactionalChangeImplTest {
 
   @Test
   void toStringReplaceSingleValuedEAttribute() {
-    ReplaceSingleValuedEAttribute<EObject, Object> eChange = mock(ReplaceSingleValuedEAttribute.class);
+    ReplaceSingleValuedEAttribute<EObject, Object> eChange =
+        mock(ReplaceSingleValuedEAttribute.class);
     EAttribute feature = mock(EAttribute.class);
     when(feature.getName()).thenReturn(FEATURE_NAME);
     when(eChange.getAffectedElement()).thenReturn(affectedElement);
