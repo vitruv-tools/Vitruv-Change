@@ -350,6 +350,9 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
     }
   }
 
+  private static final String INDEX_PREFIX = " (index ";
+  private static final String WAS_PREFIX = " (was ";
+
   private CharSequence getStringRepresentation(final EChange<?> change) {
     if (change instanceof InsertRootEObject) {
       return getInsertRootEObjectString((InsertRootEObject<?>) change);
@@ -390,51 +393,51 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
   private CharSequence getInsertRootEObjectString(final InsertRootEObject<?> change) {
     return "insert " + change.getNewValue()
             + " at " + change.getUri()
-            + " (index " + change.getIndex() + ")";
+            + INDEX_PREFIX  + change.getIndex() + ")";
   }
 
   private CharSequence getRemoveRootEObjectString(final RemoveRootEObject<?> change) {
     return "remove " + change.getOldValue()
             + " from " + change.getUri()
-            + " (index " + change.getIndex() + ")";
+            + INDEX_PREFIX  + change.getIndex() + ")";
   }
 
   private CharSequence getReplaceSingleValuedEAttributeString(
           final ReplaceSingleValuedEAttribute<?, ?> change) {
     return getAffectedFeatureString(change)
             + " = " + change.getNewValue()
-            + " (was " + change.getOldValue() + ")";
+            + WAS_PREFIX + change.getOldValue() + ")";
   }
 
   private CharSequence getReplaceSingleValuedEReferenceString(
           final ReplaceSingleValuedEReference<?> change) {
     return getAffectedFeatureString(change)
             + " = " + change.getNewValue()
-            + " (was " + change.getOldValue() + ")";
+            + WAS_PREFIX + change.getOldValue() + ")";
   }
 
   private CharSequence getInsertEAttributeValueString(final InsertEAttributeValue<?, ?> change) {
     return getAffectedFeatureString(change)
             + " += " + change.getNewValue()
-            + " (index " + change.getIndex() + ")";
+            + INDEX_PREFIX  + change.getIndex() + ")";
   }
 
   private CharSequence getInsertEReferenceString(final InsertEReference<?> change) {
     return getAffectedFeatureString(change)
             + " += " + change.getNewValue()
-            + " (index " + change.getIndex() + ")";
+            + INDEX_PREFIX  + change.getIndex() + ")";
   }
 
   private CharSequence getRemoveEAttributeValueString(final RemoveEAttributeValue<?, ?> change) {
     return getAffectedFeatureString(change)
             + " -= " + change.getOldValue()
-            + " (index " + change.getIndex() + ")";
+            + INDEX_PREFIX  + change.getIndex() + ")";
   }
 
   private CharSequence getRemoveEReferenceString(final RemoveEReference<?> change) {
     return getAffectedFeatureString(change)
             + " -= " + change.getOldValue()
-            + " (index " + change.getIndex() + ")";
+            + INDEX_PREFIX  + change.getIndex() + ")";
   }
 
   private CharSequence getAffectedFeatureString(final FeatureEChange<?, ?> change) {
