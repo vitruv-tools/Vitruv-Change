@@ -41,11 +41,11 @@ final class EChangeCreationUtil {
     } else {
       final Object oldValue = affectedAttribute.getDefaultValue();
       final Object newValue = EObjectUtil.getFeatureValue(affectedEObject, affectedAttribute);
-      ReplaceSingleValuedEAttribute<A, Object> _createReplaceSingleAttributeChange =
+      ReplaceSingleValuedEAttribute<A, Object> createReplaceSingleAttributeChange =
           TypeInferringAtomicEChangeFactory.getInstance()
               .<A, Object>createReplaceSingleAttributeChange(affectedEObject, affectedAttribute,
                   oldValue, newValue);
-      return List.<AdditiveAttributeEChange<A, Object>>of(_createReplaceSingleAttributeChange);
+      return List.<AdditiveAttributeEChange<A, Object>>of(createReplaceSingleAttributeChange);
     }
     return xifexpression;
   }

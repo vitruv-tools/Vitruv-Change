@@ -35,6 +35,11 @@ import tools.vitruv.change.composite.MetamodelDescriptor;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.interaction.UserInteractionBase;
 
+/**
+ * Implementation of {@link TransactionalChange}.
+ *
+ * @param <Element> the type of the elements affected by the change
+ */
 public class TransactionalChangeImpl<Element extends Object>
     implements TransactionalChange<Element> {
   private List<? extends EChange<Element>> eChanges;

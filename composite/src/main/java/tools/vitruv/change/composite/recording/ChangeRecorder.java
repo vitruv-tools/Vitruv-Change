@@ -62,8 +62,8 @@ public class ChangeRecorder implements AutoCloseable {
 
     private void handleAdaptersForResourceAndResourceSetChanges(final Notification notification) {
       if (((notification.getNotifier() instanceof ResourceSet) && 
-        (notification.getFeatureID(ResourceSet.class)
-            == ResourceSet.RESOURCE_SET__RESOURCES))) {
+          (notification.getFeatureID(ResourceSet.class)
+              == ResourceSet.RESOURCE_SET__RESOURCES))) {
         int _eventType = notification.getEventType();
         switch (_eventType) {
           case Notification.ADD:
@@ -96,8 +96,8 @@ public class ChangeRecorder implements AutoCloseable {
       }
       if (!_matched) {
         if (((notification.getNotifier() instanceof ResourceSet) && 
-          (notification.getFeatureID(ResourceSet.class)
-              == ResourceSet.RESOURCE_SET__RESOURCES))) {
+            (notification.getFeatureID(ResourceSet.class)
+                == ResourceSet.RESOURCE_SET__RESOURCES))) {
           _matched=true;
         }
       }
@@ -296,9 +296,9 @@ public class ChangeRecorder implements AutoCloseable {
         (EObject affectedObject, EObject addedObject) -> {
       return Boolean.valueOf(this.isCreateChange(affectedObject, addedObject));
     };
-    NotificationToEChangeConverter _notificationToEChangeConverter =
+    NotificationToEChangeConverter notificationToEChangeConverter =
         new NotificationToEChangeConverter(_function);
-    this.converter = _notificationToEChangeConverter;
+    this.converter = notificationToEChangeConverter;
   }
 
   private boolean isCreateChange(final EObject affectedObject, final EObject addedObject) {
@@ -450,9 +450,9 @@ public class ChangeRecorder implements AutoCloseable {
       final Map<EObject, Iterable<EObject>> allElementsToDelete =
           new HashMap<EObject, Iterable<EObject>>();
       for (EObject element : removedElements) {
-        boolean _exists = allElementsToDelete.values().stream()
+        boolean exists = allElementsToDelete.values().stream()
             .anyMatch(it -> Iterables.contains(it, element));
-        if (_exists) {
+        if (exists) {
           continue;
         }
         List<EObject> elementsToDelete =
@@ -492,7 +492,7 @@ public class ChangeRecorder implements AutoCloseable {
     return this.isRecording;
   }
 
-  private static void _recursively(final ResourceSet resourceSet,
+  private static void doRecursively(final ResourceSet resourceSet,
       final Function<Notifier, Boolean> action) {
     Boolean _apply = action.apply(resourceSet);
     if ((_apply).booleanValue()) {
@@ -503,7 +503,7 @@ public class ChangeRecorder implements AutoCloseable {
     }
   }
 
-  private static void _recursively(final Resource resource,
+  private static void doRecursively(final Resource resource,
       final Function<Notifier, Boolean> action) {
     Boolean _apply = action.apply(resource);
     if ((_apply).booleanValue()) {
@@ -514,7 +514,7 @@ public class ChangeRecorder implements AutoCloseable {
     }
   }
 
-  private static void _recursively(final EObject object,
+  private static void doRecursively(final EObject object,
       final Function<Notifier, Boolean> action) {
     Boolean _apply = action.apply(object);
     if ((_apply).booleanValue()) {
@@ -587,15 +587,15 @@ public class ChangeRecorder implements AutoCloseable {
   private static void recursively(final Notifier object, final Function<Notifier, Boolean> action) {
     if (object instanceof EObject
          && action != null) {
-      _recursively((EObject)object, action);
+      doRecursively((EObject)object, action);
       return;
     } else if (object instanceof Resource
          && action != null) {
-      _recursively((Resource)object, action);
+      doRecursively((Resource)object, action);
       return;
     } else if (object instanceof ResourceSet
          && action != null) {
-      _recursively((ResourceSet)object, action);
+      doRecursively((ResourceSet)object, action);
       return;
     } else {
       throw new IllegalArgumentException("Unhandled parameter types: " +
