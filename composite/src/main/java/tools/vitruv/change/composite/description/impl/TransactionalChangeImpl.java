@@ -62,29 +62,29 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
     URI _switchResult = null;
     boolean _matched = false;
     if (eChange instanceof FeatureEChange) {
-      _matched=true;
-      EObject _affectedElement = ((FeatureEChange<EObject, ?>)eChange).getAffectedElement();
+      _matched = true;
+      EObject _affectedElement = ((FeatureEChange<EObject, ?>) eChange).getAffectedElement();
       URI _objectUri = null;
-      if (_affectedElement!=null) {
-        _objectUri=TransactionalChangeImpl.getObjectUri(_affectedElement);
+      if (_affectedElement != null) {
+        _objectUri = TransactionalChangeImpl.getObjectUri(_affectedElement);
       }
       _switchResult = _objectUri;
     }
     if (!_matched) {
       if (eChange instanceof EObjectExistenceEChange) {
-        _matched=true;
-        EObject _affectedElement = ((EObjectExistenceEChange<EObject>)eChange).getAffectedElement();
+        _matched = true;
+        EObject _affectedElement = ((EObjectExistenceEChange<EObject>) eChange).getAffectedElement();
         URI _objectUri = null;
-        if (_affectedElement!=null) {
-          _objectUri=TransactionalChangeImpl.getObjectUri(_affectedElement);
+        if (_affectedElement != null) {
+          _objectUri = TransactionalChangeImpl.getObjectUri(_affectedElement);
         }
         _switchResult = _objectUri;
       }
     }
     if (!_matched) {
       if (eChange instanceof RootEChange) {
-        _matched=true;
-        _switchResult = URI.createURI(((RootEChange<?>)eChange).getUri());
+        _matched = true;
+        _switchResult = URI.createURI(((RootEChange<?>) eChange).getUri());
       }
     }
     return _switchResult;
@@ -133,25 +133,25 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
     Set<EObject> _switchResult = null;
     boolean _matched = false;
     if (eChange instanceof FeatureEChange) {
-      _matched=true;
-      _switchResult = Set.<EObject>of(((FeatureEChange<EObject, ?>)eChange).getAffectedElement());
+      _matched = true;
+      _switchResult = Set.<EObject>of(((FeatureEChange<EObject, ?>) eChange).getAffectedElement());
     }
     if (!_matched) {
       if (eChange instanceof EObjectExistenceEChange) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((EObjectExistenceEChange<EObject>)eChange).getAffectedElement());
+        _matched = true;
+        _switchResult = Set.<EObject>of(((EObjectExistenceEChange<EObject>) eChange).getAffectedElement());
       }
     }
     if (!_matched) {
       if (eChange instanceof InsertRootEObject) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((InsertRootEObject<EObject>)eChange).getNewValue());
+        _matched = true;
+        _switchResult = Set.<EObject>of(((InsertRootEObject<EObject>) eChange).getNewValue());
       }
     }
     if (!_matched) {
       if (eChange instanceof RemoveRootEObject) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((RemoveRootEObject<EObject>)eChange).getOldValue());
+        _matched = true;
+        _switchResult = Set.<EObject>of(((RemoveRootEObject<EObject>) eChange).getOldValue());
       }
     }
     return _switchResult;
@@ -161,43 +161,48 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
     Set<EObject> _switchResult = null;
     boolean _matched = false;
     if (eChange instanceof UpdateAttributeEChange) {
-      _matched=true;
-      _switchResult = Set.<EObject>of(((UpdateAttributeEChange<EObject>)eChange).getAffectedElement());
+      _matched = true;
+      _switchResult = Set.<EObject>of(((UpdateAttributeEChange<EObject>) eChange).getAffectedElement());
     }
     if (!_matched) {
       if (eChange instanceof ReplaceSingleValuedEReference) {
-        _matched=true;
-        _switchResult = TransactionalChangeImpl.<EObject>setOfNotNull(((ReplaceSingleValuedEReference<EObject>)eChange).getAffectedElement(), ((ReplaceSingleValuedEReference<EObject>)eChange).getOldValue(), ((ReplaceSingleValuedEReference<EObject>)eChange).getNewValue());
+        _matched = true;
+        _switchResult = TransactionalChangeImpl.<EObject>setOfNotNull(
+            ((ReplaceSingleValuedEReference<EObject>) eChange).getAffectedElement(),
+            ((ReplaceSingleValuedEReference<EObject>) eChange).getOldValue(),
+            ((ReplaceSingleValuedEReference<EObject>) eChange).getNewValue());
       }
     }
     if (!_matched) {
       if (eChange instanceof InsertEReference) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((InsertEReference<EObject>)eChange).getAffectedElement(), ((InsertEReference<EObject>)eChange).getNewValue());
+        _matched = true;
+        _switchResult = Set.<EObject>of(((InsertEReference<EObject>) eChange).getAffectedElement(),
+            ((InsertEReference<EObject>) eChange).getNewValue());
       }
     }
     if (!_matched) {
       if (eChange instanceof RemoveEReference) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((RemoveEReference<EObject>)eChange).getAffectedElement(), ((RemoveEReference<EObject>)eChange).getOldValue());
+        _matched = true;
+        _switchResult = Set.<EObject>of(((RemoveEReference<EObject>) eChange).getAffectedElement(),
+            ((RemoveEReference<EObject>) eChange).getOldValue());
       }
     }
     if (!_matched) {
       if (eChange instanceof EObjectExistenceEChange) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((EObjectExistenceEChange<EObject>)eChange).getAffectedElement());
+        _matched = true;
+        _switchResult = Set.<EObject>of(((EObjectExistenceEChange<EObject>) eChange).getAffectedElement());
       }
     }
     if (!_matched) {
       if (eChange instanceof InsertRootEObject) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((InsertRootEObject<EObject>)eChange).getNewValue());
+        _matched = true;
+        _switchResult = Set.<EObject>of(((InsertRootEObject<EObject>) eChange).getNewValue());
       }
     }
     if (!_matched) {
       if (eChange instanceof RemoveRootEObject) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((RemoveRootEObject<EObject>)eChange).getOldValue());
+        _matched = true;
+        _switchResult = Set.<EObject>of(((RemoveRootEObject<EObject>) eChange).getOldValue());
       }
     }
     return _switchResult;
@@ -237,7 +242,7 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
       } else {
         boolean _xifexpression_2 = false;
         if ((obj instanceof TransactionalChange)) {
-          List _eChanges = ((TransactionalChange)obj).getEChanges();
+          List _eChanges = ((TransactionalChange) obj).getEChanges();
           _xifexpression_2 = Objects.equals(this.eChanges, _eChanges);
         } else {
           _xifexpression_2 = false;
@@ -353,67 +358,81 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
   private CharSequence getStringRepresentation(final EChange<?> change) {
     boolean _matched = false;
     if (change instanceof InsertRootEObject) {
-      _matched=true;
-      return "insert " + ((InsertRootEObject<?>)change).getNewValue() + " at " + ((InsertRootEObject<?>)change).getUri() + " (index " + ((InsertRootEObject<?>)change).getIndex() + ")";
+      _matched = true;
+      return "insert " + ((InsertRootEObject<?>) change).getNewValue() + " at "
+          + ((InsertRootEObject<?>) change).getUri() + " (index " + ((InsertRootEObject<?>) change).getIndex() + ")";
     }
     if (!_matched) {
       if (change instanceof RemoveRootEObject) {
-        _matched=true;
-        return "remove " + ((RemoveRootEObject<?>)change).getOldValue() + " from " + ((RemoveRootEObject<?>)change).getUri() + " (index " + ((RemoveRootEObject<?>)change).getIndex() + ")";
+        _matched = true;
+        return "remove " + ((RemoveRootEObject<?>) change).getOldValue() + " from "
+            + ((RemoveRootEObject<?>) change).getUri() + " (index " + ((RemoveRootEObject<?>) change).getIndex() + ")";
       }
     }
     if (!_matched) {
       if (change instanceof CreateEObject) {
-        _matched=true;
-        return "create " + ((CreateEObject<?>)change).getAffectedElement();
+        _matched = true;
+        return "create " + ((CreateEObject<?>) change).getAffectedElement();
       }
     }
     if (!_matched) {
       if (change instanceof DeleteEObject) {
-        _matched=true;
-        return "delete " + ((DeleteEObject<?>)change).getAffectedElement();
+        _matched = true;
+        return "delete " + ((DeleteEObject<?>) change).getAffectedElement();
       }
     }
     if (!_matched) {
       if (change instanceof UnsetFeature) {
-        _matched=true;
-        return this.getAffectedFeatureString(((FeatureEChange<?, ?>)change)) + " = ∅";
+        _matched = true;
+        return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " = ∅";
       }
     }
     if (!_matched) {
       if (change instanceof ReplaceSingleValuedEAttribute) {
-        _matched=true;
-        return this.getAffectedFeatureString(((FeatureEChange<?, ?>)change)) + " = " + ((ReplaceSingleValuedEAttribute<?, ?>)change).getNewValue() + " (was " + ((ReplaceSingleValuedEAttribute<?, ?>)change).getOldValue() + ")";
+        _matched = true;
+        return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " = "
+            + ((ReplaceSingleValuedEAttribute<?, ?>) change).getNewValue() + " (was "
+            + ((ReplaceSingleValuedEAttribute<?, ?>) change).getOldValue() + ")";
       }
     }
     if (!_matched) {
       if (change instanceof ReplaceSingleValuedEReference) {
-        _matched=true;
-        return this.getAffectedFeatureString(((FeatureEChange<?, ?>)change)) + " = " + ((ReplaceSingleValuedEReference<?>)change).getNewValue() + " (was " + ((ReplaceSingleValuedEReference<?>)change).getOldValue() + ")";
+        _matched = true;
+        return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " = "
+            + ((ReplaceSingleValuedEReference<?>) change).getNewValue() + " (was "
+            + ((ReplaceSingleValuedEReference<?>) change).getOldValue() + ")";
       }
     }
     if (!_matched) {
       if (change instanceof InsertEAttributeValue) {
-        _matched=true;
-        return this.getAffectedFeatureString(((FeatureEChange<?, ?>)change)) + " += " + ((InsertEAttributeValue<?, ?>)change).getNewValue() + " (index " + ((InsertEAttributeValue<?, ?>)change).getIndex() + ")";
+        _matched = true;
+        return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " += "
+            + ((InsertEAttributeValue<?, ?>) change).getNewValue() + " (index "
+            + ((InsertEAttributeValue<?, ?>) change).getIndex() + ")";
       }
     }
     if (!_matched) {
       if (change instanceof InsertEReference) {
-        _matched=true;
-        return this.getAffectedFeatureString(((FeatureEChange<?, ?>)change)) + " += " + ((InsertEReference<?>)change).getNewValue() + " (index " + ((InsertEReference<?>)change).getIndex() + ")";
+        _matched = true;
+        return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " += "
+            + ((InsertEReference<?>) change).getNewValue() + " (index " + ((InsertEReference<?>) change).getIndex()
+            + ")";
       }
     }
     if (!_matched) {
       if (change instanceof RemoveEAttributeValue) {
-        _matched=true;
-        return this.getAffectedFeatureString(((FeatureEChange<?, ?>)change)) + " -= " + ((RemoveEAttributeValue<?, ?>)change).getOldValue() + " (index " + ((RemoveEAttributeValue<?, ?>)change).getIndex() + ")";
+        _matched = true;
+        return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " -= "
+            + ((RemoveEAttributeValue<?, ?>) change).getOldValue() + " (index "
+            + ((RemoveEAttributeValue<?, ?>) change).getIndex() + ")";
       }
     }
     if (!_matched) {
       if (change instanceof RemoveEReference) {
-        _matched=true;
-        return this.getAffectedFeatureString(((FeatureEChange<?, ?>)change)) + " -= " + ((RemoveEReference<?>)change).getOldValue() + " (index " + ((RemoveEReference<?>)change).getIndex() + ")";
+        _matched = true;
+        return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " -= "
+            + ((RemoveEReference<?>) change).getOldValue() + " (index " + ((RemoveEReference<?>) change).getIndex()
+            + ")";
       }
     }
     return null;

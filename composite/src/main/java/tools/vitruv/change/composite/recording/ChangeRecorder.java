@@ -67,8 +67,8 @@ public class ChangeRecorder implements AutoCloseable {
     }
 
     private void handleAdaptersForResourceAndResourceSetChanges(final Notification notification) {
-      if (((notification.getNotifier() instanceof ResourceSet) &&
-          (notification.getFeatureID(ResourceSet.class) == ResourceSet.RESOURCE_SET__RESOURCES))) {
+      if (((notification.getNotifier() instanceof ResourceSet)
+          && (notification.getFeatureID(ResourceSet.class) == ResourceSet.RESOURCE_SET__RESOURCES))) {
         int _eventType = notification.getEventType();
         switch (_eventType) {
           case Notification.ADD:
@@ -88,20 +88,20 @@ public class ChangeRecorder implements AutoCloseable {
       final Object feature = _feature;
       boolean _matched = false;
       if (feature instanceof EReference) {
-        boolean _isContainment = ((EReference) feature).isContainment();
-        if (_isContainment) {
+        boolean isContainment = ((EReference) feature).isContainment();
+        if (isContainment) {
           _matched = true;
         }
       }
       if (!_matched) {
-        if (((notification.getNotifier() instanceof Resource) &&
-            (notification.getFeatureID(Resource.class) == Resource.RESOURCE__CONTENTS))) {
+        if (((notification.getNotifier() instanceof Resource)
+            && (notification.getFeatureID(Resource.class) == Resource.RESOURCE__CONTENTS))) {
           _matched = true;
         }
       }
       if (!_matched) {
-        if (((notification.getNotifier() instanceof ResourceSet) &&
-            (notification.getFeatureID(ResourceSet.class) == ResourceSet.RESOURCE_SET__RESOURCES))) {
+        if (((notification.getNotifier() instanceof ResourceSet)
+            && (notification.getFeatureID(ResourceSet.class) == ResourceSet.RESOURCE_SET__RESOURCES))) {
           _matched = true;
         }
       }
@@ -136,8 +136,8 @@ public class ChangeRecorder implements AutoCloseable {
         }
       }
       if (!_matched) {
-        if (((notification.getNotifier() instanceof Resource) &&
-            (notification.getFeatureID(Resource.class) == Resource.RESOURCE__IS_LOADED))) {
+        if (((notification.getNotifier() instanceof Resource)
+            && (notification.getFeatureID(Resource.class) == Resource.RESOURCE__IS_LOADED))) {
           _matched = true;
           Object _notifier = notification.getNotifier();
           this.finishLoadingResource(((Resource) _notifier));
@@ -168,8 +168,9 @@ public class ChangeRecorder implements AutoCloseable {
             boolean _matched_1 = false;
             if (it instanceof UpdateReferenceEChange) {
               _matched_1 = true;
-              EObject _affectedElement = ((UpdateReferenceEChange<EObject>) it).getAffectedElement();
-              this.outer.existingObjects.add(_affectedElement);
+              EObject affectedElement =
+                  ((UpdateReferenceEChange<EObject>) it).getAffectedElement();
+              this.outer.existingObjects.add(affectedElement);
             }
           }
         };
@@ -228,8 +229,8 @@ public class ChangeRecorder implements AutoCloseable {
         Object _notifier_1 = notification.getNotifier();
         final Resource resource = ((Resource) _notifier_1);
         final ResourceSet resourceSet = resource.getResourceSet();
-        return (((!resource.isLoaded()) && (resourceSet != null)) &&
-            resourceSet.getURIConverter().exists(resource.getURI(), Map.of()));
+        return (((!resource.isLoaded()) && (resourceSet != null))
+            && resourceSet.getURIConverter().exists(resource.getURI(), Map.of()));
       } else {
         return false;
       }
@@ -304,8 +305,8 @@ public class ChangeRecorder implements AutoCloseable {
 
   private boolean isCreateChange(final EObject affectedObject, final EObject addedObject) {
     boolean create = ((addedObject != null) && (!this.existingObjects.contains(addedObject)));
-    create = (create && (((addedObject.eResource() == null) || (affectedObject == null)) ||
-        Objects.equals(addedObject.eResource(), affectedObject.eResource())));
+    create = (create && (((addedObject.eResource() == null) || (affectedObject == null))
+        || Objects.equals(addedObject.eResource(), affectedObject.eResource())));
     if (create) {
       this.existingObjects.add(addedObject);
     }
@@ -492,7 +493,7 @@ public class ChangeRecorder implements AutoCloseable {
     return this.isRecording;
   }
 
-  private static void _recursively(final ResourceSet resourceSet,
+  private static void recursivelyInternal(final ResourceSet resourceSet,
       final Function<Notifier, Boolean> action) {
     Boolean _apply = action.apply(resourceSet);
     if ((_apply).booleanValue()) {
@@ -503,7 +504,7 @@ public class ChangeRecorder implements AutoCloseable {
     }
   }
 
-  private static void _recursively(final Resource resource,
+  private static void recursivelyInternal(final Resource resource,
       final Function<Notifier, Boolean> action) {
     Boolean _apply = action.apply(resource);
     if ((_apply).booleanValue()) {
@@ -514,7 +515,7 @@ public class ChangeRecorder implements AutoCloseable {
     }
   }
 
-  private static void _recursively(final EObject object, final Function<Notifier, Boolean> action) {
+  private static void recursivelyInternal(final EObject object, final Function<Notifier, Boolean> action) {
     Boolean _apply = action.apply(object);
     if ((_apply).booleanValue()) {
       for (final TreeIterator<Notifier> properContents = EcoreUtil.<Notifier>getAllProperContents(
@@ -587,15 +588,15 @@ public class ChangeRecorder implements AutoCloseable {
   private static void recursively(final Notifier object, final Function<Notifier, Boolean> action) {
     if (object instanceof EObject
         && action != null) {
-      _recursively((EObject) object, action);
+      recursivelyInternal((EObject) object, action);
       return;
     } else if (object instanceof Resource
         && action != null) {
-      _recursively((Resource) object, action);
+      recursivelyInternal((Resource) object, action);
       return;
     } else if (object instanceof ResourceSet
         && action != null) {
-      _recursively((ResourceSet) object, action);
+      recursivelyInternal((ResourceSet) object, action);
       return;
     } else {
       throw new IllegalArgumentException("Unhandled parameter types: " +
