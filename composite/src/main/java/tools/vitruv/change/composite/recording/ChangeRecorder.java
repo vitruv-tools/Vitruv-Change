@@ -74,8 +74,8 @@ public class ChangeRecorder implements AutoCloseable {
         int _eventType = notification.getEventType();
         switch (_eventType) {
           case Notification.ADD:
-            Object _newValue = notification.getNewValue();
-            this.startLoadingResource(((Resource) _newValue));
+            Object newValue = notification.getNewValue();
+            this.startLoadingResource(((Resource) newValue));
             break;
           case Notification.ADD_MANY:
             Object _newValue_1 = notification.getNewValue();
@@ -166,8 +166,8 @@ public class ChangeRecorder implements AutoCloseable {
           boolean _matched = false;
           if (it instanceof EObjectAddedEChange) {
             _matched = true;
-            EObject _newValue = ((EObjectAddedEChange<EObject>) it).getNewValue();
-            this.outer.existingObjects.add(_newValue);
+            EObject newValue = ((EObjectAddedEChange<EObject>) it).getNewValue();
+            this.outer.existingObjects.add(newValue);
             boolean _matched_1 = false;
             if (it instanceof UpdateReferenceEChange) {
               _matched_1 = true;
@@ -203,8 +203,8 @@ public class ChangeRecorder implements AutoCloseable {
 
     private boolean affectsLoadingResource(final Notification notification) {
       EObject _xifexpression = null;
-      Object _newValue = notification.getNewValue();
-      if ((_newValue instanceof EObject)) {
+      Object newValue = notification.getNewValue();
+      if ((newValue instanceof EObject)) {
         Object _newValue_1 = notification.getNewValue();
         _xifexpression = ((EObject) _newValue_1);
       } else {
@@ -304,9 +304,9 @@ public class ChangeRecorder implements AutoCloseable {
         (EObject affectedObject, EObject addedObject) -> {
       return Boolean.valueOf(this.isCreateChange(affectedObject, addedObject));
     };
-    NotificationToEChangeConverter _notificationToEChangeConverter =
+    NotificationToEChangeConverter notificationToEChangeConverter =
         new NotificationToEChangeConverter(_function);
-    this.converter = _notificationToEChangeConverter;
+    this.converter = notificationToEChangeConverter;
   }
 
   private boolean isCreateChange(final EObject affectedObject, final EObject addedObject) {
