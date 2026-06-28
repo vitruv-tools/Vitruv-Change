@@ -125,13 +125,6 @@ public class TransactionalChangeImpl<E extends Object>
         .collect(Collectors.toSet());
   }
 
-  @Override
-  public Set<EObject> getAffectedAndReferencedEObjects() {
-    return this.eChanges.stream()
-        .flatMap(it -> TransactionalChangeImpl.getAffectedAndReferencedEObjects(it).stream())
-        .collect(Collectors.toSet());
-  }
-
   private static Set<EObject> getAffectedEObjects(final EChange<?> eChange) {
     if (eChange instanceof FeatureEChange) {
       return Set.<EObject>of(((FeatureEChange<EObject, ?>) eChange).getAffectedElement());
@@ -147,6 +140,13 @@ public class TransactionalChangeImpl<E extends Object>
       return Set.<EObject>of(((RemoveRootEObject<EObject>) eChange).getOldValue());
     }
     return Collections.emptySet();
+  }
+
+  @Override
+  public Set<EObject> getAffectedAndReferencedEObjects() {
+    return this.eChanges.stream()
+        .flatMap(it -> TransactionalChangeImpl.getAffectedAndReferencedEObjects(it).stream())
+        .collect(Collectors.toSet());
   }
 
   private static Set<EObject> getAffectedAndReferencedEObjects(final EChange<?> eChange) {
@@ -192,6 +192,11 @@ public class TransactionalChangeImpl<E extends Object>
     Iterables.<UserInteractionBase>addAll(this.userInteractions, userInteractions);
   }
 
+  /**
+   * Creates deep copies of the {@link EChange}s contained in this change.
+   *
+   * @return a list with a copy of each contained change
+   */
   protected List<EChange<E>> getClonedEChanges() {
     @SuppressWarnings("unchecked")
     List<EChange<E>> result = (List<EChange<E>>) (List<?>) this.eChanges.stream()
@@ -300,7 +305,7 @@ public class TransactionalChangeImpl<E extends Object>
       return "delete " + ((DeleteEObject<?>) change).getAffectedElement();
     }
     if (change instanceof UnsetFeature) {
-      return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " = \u2205";
+      return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " = ∅";
     }
     if (change instanceof ReplaceSingleValuedEAttribute) {
       return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " = "
