@@ -35,8 +35,15 @@ import tools.vitruv.change.composite.MetamodelDescriptor;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.interaction.UserInteractionBase;
 
+/**
+ * Implementation of {@link TransactionalChange}.
+ *
+ * @param <Element> the type of the elements affected by the change
+ */
 public class TransactionalChangeImpl<Element extends Object>
     implements TransactionalChange<Element> {
+  private static final String INDEX_LABEL = " (index ";
+
   private List<? extends EChange<Element>> eChanges;
 
   private final List<UserInteractionBase> userInteractions = new ArrayList<UserInteractionBase>();
@@ -346,14 +353,14 @@ public class TransactionalChangeImpl<Element extends Object>
     if (change instanceof InsertRootEObject) {
       _matched=true;
       return "insert " + ((InsertRootEObject<?>) change).getNewValue() + " at "
-          + ((InsertRootEObject<?>) change).getUri() + " (index "
+          + ((InsertRootEObject<?>) change).getUri() + INDEX_LABEL
           + ((InsertRootEObject<?>) change).getIndex() + ")";
     }
     if (!_matched) {
       if (change instanceof RemoveRootEObject) {
         _matched=true;
         return "remove " + ((RemoveRootEObject<?>) change).getOldValue() + " from "
-            + ((RemoveRootEObject<?>) change).getUri() + " (index "
+            + ((RemoveRootEObject<?>) change).getUri() + INDEX_LABEL
             + ((RemoveRootEObject<?>) change).getIndex() + ")";
       }
     }
@@ -395,7 +402,7 @@ public class TransactionalChangeImpl<Element extends Object>
       if (change instanceof InsertEAttributeValue) {
         _matched=true;
         return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " += "
-            + ((InsertEAttributeValue<?, ?>) change).getNewValue() + " (index "
+            + ((InsertEAttributeValue<?, ?>) change).getNewValue() + INDEX_LABEL
             + ((InsertEAttributeValue<?, ?>) change).getIndex() + ")";
       }
     }
@@ -403,7 +410,7 @@ public class TransactionalChangeImpl<Element extends Object>
       if (change instanceof InsertEReference) {
         _matched=true;
         return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " += "
-            + ((InsertEReference<?>) change).getNewValue() + " (index "
+            + ((InsertEReference<?>) change).getNewValue() + INDEX_LABEL
             + ((InsertEReference<?>) change).getIndex() + ")";
       }
     }
@@ -411,7 +418,7 @@ public class TransactionalChangeImpl<Element extends Object>
       if (change instanceof RemoveEAttributeValue) {
         _matched=true;
         return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " -= "
-            + ((RemoveEAttributeValue<?, ?>) change).getOldValue() + " (index "
+            + ((RemoveEAttributeValue<?, ?>) change).getOldValue() + INDEX_LABEL
             + ((RemoveEAttributeValue<?, ?>) change).getIndex() + ")";
       }
     }
@@ -419,7 +426,7 @@ public class TransactionalChangeImpl<Element extends Object>
       if (change instanceof RemoveEReference) {
         _matched=true;
         return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " -= "
-            + ((RemoveEReference<?>) change).getOldValue() + " (index "
+            + ((RemoveEReference<?>) change).getOldValue() + INDEX_LABEL
             + ((RemoveEReference<?>) change).getIndex() + ")";
       }
     }
