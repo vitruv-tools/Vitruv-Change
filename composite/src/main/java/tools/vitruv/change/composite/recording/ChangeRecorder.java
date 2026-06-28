@@ -587,15 +587,15 @@ public class ChangeRecorder implements AutoCloseable {
   private static void recursively(final Notifier object, final Function<Notifier, Boolean> action) {
     if (object instanceof EObject
          && action != null) {
-      doRecursively((EObject)object, action);
+      doRecursively((EObject) object, action);
       return;
     } else if (object instanceof Resource
          && action != null) {
-      doRecursively((Resource)object, action);
+      doRecursively((Resource) object, action);
       return;
     } else if (object instanceof ResourceSet
          && action != null) {
-      doRecursively((ResourceSet)object, action);
+      doRecursively((ResourceSet) object, action);
       return;
     } else {
       throw new IllegalArgumentException("Unhandled parameter types: " +
