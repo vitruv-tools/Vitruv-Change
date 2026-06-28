@@ -53,7 +53,8 @@ public class ChangeRecorder implements AutoCloseable {
     @Override
     public void notifyChanged(final Notification notification) {
       this.handleAdaptersForResourceAndResourceSetChanges(notification);
-      final Iterable<? extends EChange<EObject>> newChanges = this.extractRelevantChanges(notification);
+      final Iterable<? extends EChange<EObject>> newChanges =
+          this.extractRelevantChanges(notification);
       if (this.outer.isRecording) {
         Iterables.<EChange<EObject>>addAll(this.outer.resultChanges, newChanges);
       }
@@ -61,7 +62,8 @@ public class ChangeRecorder implements AutoCloseable {
 
     private void handleAdaptersForResourceAndResourceSetChanges(final Notification notification) {
       if (((notification.getNotifier() instanceof ResourceSet) && 
-        (notification.getFeatureID(ResourceSet.class) == ResourceSet.RESOURCE_SET__RESOURCES))) {
+        (notification.getFeatureID(ResourceSet.class)
+            == ResourceSet.RESOURCE_SET__RESOURCES))) {
         int _eventType = notification.getEventType();
         switch (_eventType) {
           case Notification.ADD:
@@ -94,7 +96,8 @@ public class ChangeRecorder implements AutoCloseable {
       }
       if (!_matched) {
         if (((notification.getNotifier() instanceof ResourceSet) && 
-          (notification.getFeatureID(ResourceSet.class) == ResourceSet.RESOURCE_SET__RESOURCES))) {
+          (notification.getFeatureID(ResourceSet.class)
+              == ResourceSet.RESOURCE_SET__RESOURCES))) {
           _matched=true;
         }
       }
@@ -138,9 +141,11 @@ public class ChangeRecorder implements AutoCloseable {
       }
     }
 
-    private Iterable<? extends EChange<EObject>> extractRelevantChanges(final Notification notification) {
+    private Iterable<? extends EChange<EObject>> extractRelevantChanges(
+        final Notification notification) {
       Iterable<? extends EChange<EObject>> _xifexpression = null;
-      if ((this.affectsLoadingResource(notification) || this.affectsUnloadingResource(notification))) {
+      if ((this.affectsLoadingResource(notification)
+          || this.affectsUnloadingResource(notification))) {
         _xifexpression = List.of();
       } else {
         NotificationInfo _notificationInfo = new NotificationInfo(notification);
@@ -268,7 +273,8 @@ public class ChangeRecorder implements AutoCloseable {
     }
   }
 
-  private final ChangeRecorder.NotificationRecorder recordingAdapter = new ChangeRecorder.NotificationRecorder(this);
+  private final ChangeRecorder.NotificationRecorder recordingAdapter =
+      new ChangeRecorder.NotificationRecorder(this);
 
   private final Set<Notifier> rootObjects = new HashSet<Notifier>();
 
@@ -286,10 +292,12 @@ public class ChangeRecorder implements AutoCloseable {
 
   public ChangeRecorder(final ResourceSet resourceSet) {
     this.resourceSet = resourceSet;
-    final BiFunction<EObject, EObject, Boolean> _function = (EObject affectedObject, EObject addedObject) -> {
+    final BiFunction<EObject, EObject, Boolean> _function =
+        (EObject affectedObject, EObject addedObject) -> {
       return Boolean.valueOf(this.isCreateChange(affectedObject, addedObject));
     };
-    NotificationToEChangeConverter _notificationToEChangeConverter = new NotificationToEChangeConverter(_function);
+    NotificationToEChangeConverter _notificationToEChangeConverter =
+        new NotificationToEChangeConverter(_function);
     this.converter = _notificationToEChangeConverter;
   }
 
@@ -384,7 +392,8 @@ public class ChangeRecorder implements AutoCloseable {
   }
 
   private void checkNotDisposed() {
-    Preconditions.checkState((this.resultChanges != null), "This recorder has already been disposed!");
+    Preconditions.checkState((this.resultChanges != null),
+        "This recorder has already been disposed!");
   }
 
   /**
@@ -397,7 +406,8 @@ public class ChangeRecorder implements AutoCloseable {
     this.checkNotDisposed();
     Preconditions.checkState(this.isRecording, "This recorder is not recording");
     this.isRecording = false;
-    this.resultChanges = List.<EChange<EObject>>copyOf(this.postprocessRemovals(this.resultChanges));
+    this.resultChanges =
+        List.<EChange<EObject>>copyOf(this.postprocessRemovals(this.resultChanges));
     return this.getChange();
   }
 
@@ -437,13 +447,16 @@ public class ChangeRecorder implements AutoCloseable {
     boolean _isEmpty_1 = removedElements.isEmpty();
     boolean _not = (!_isEmpty_1);
     if (_not) {
-      final Map<EObject, Iterable<EObject>> allElementsToDelete = new HashMap<EObject, Iterable<EObject>>();
+      final Map<EObject, Iterable<EObject>> allElementsToDelete =
+          new HashMap<EObject, Iterable<EObject>>();
       for (EObject element : removedElements) {
-        boolean _exists = allElementsToDelete.values().stream().anyMatch(it -> Iterables.contains(it, element));
+        boolean _exists = allElementsToDelete.values().stream()
+            .anyMatch(it -> Iterables.contains(it, element));
         if (_exists) {
           continue;
         }
-        List<EObject> elementsToDelete = new ArrayList<>(Lists.newArrayList(element.eAllContents()));
+        List<EObject> elementsToDelete =
+            new ArrayList<>(Lists.newArrayList(element.eAllContents()));
         java.util.Collections.reverse(elementsToDelete);
         for (EObject child : elementsToDelete) {
           if (allElementsToDelete.containsKey(child)) {
@@ -469,7 +482,8 @@ public class ChangeRecorder implements AutoCloseable {
     {
       this.checkNotDisposed();
       Preconditions.checkState((!this.isRecording), "This recorder is still recording!");
-      _xblockexpression = VitruviusChangeFactory.getInstance().<EObject>createTransactionalChange(this.resultChanges);
+      _xblockexpression = VitruviusChangeFactory.getInstance()
+          .<EObject>createTransactionalChange(this.resultChanges);
     }
     return _xblockexpression;
   }
@@ -478,7 +492,8 @@ public class ChangeRecorder implements AutoCloseable {
     return this.isRecording;
   }
 
-  private static void _recursively(final ResourceSet resourceSet, final Function<Notifier, Boolean> action) {
+  private static void _recursively(final ResourceSet resourceSet,
+      final Function<Notifier, Boolean> action) {
     Boolean _apply = action.apply(resourceSet);
     if ((_apply).booleanValue()) {
       final Consumer<Resource> _function = (Resource it) -> {
@@ -488,7 +503,8 @@ public class ChangeRecorder implements AutoCloseable {
     }
   }
 
-  private static void _recursively(final Resource resource, final Function<Notifier, Boolean> action) {
+  private static void _recursively(final Resource resource,
+      final Function<Notifier, Boolean> action) {
     Boolean _apply = action.apply(resource);
     if ((_apply).booleanValue()) {
       final Consumer<EObject> _function = (EObject it) -> {
@@ -498,10 +514,12 @@ public class ChangeRecorder implements AutoCloseable {
     }
   }
 
-  private static void _recursively(final EObject object, final Function<Notifier, Boolean> action) {
+  private static void _recursively(final EObject object,
+      final Function<Notifier, Boolean> action) {
     Boolean _apply = action.apply(object);
     if ((_apply).booleanValue()) {
-      for (final TreeIterator<Notifier> properContents = EcoreUtil.<Notifier>getAllProperContents(object, true); properContents.hasNext();) {
+      for (final TreeIterator<Notifier> properContents = EcoreUtil.<Notifier>getAllProperContents(
+          object, true); properContents.hasNext();) {
         Boolean _apply_1 = action.apply(properContents.next());
         boolean _not = (!(_apply_1).booleanValue());
         if (_not) {
@@ -512,14 +530,16 @@ public class ChangeRecorder implements AutoCloseable {
   }
 
   private boolean removeAdapter(final Notifier notifier) {
-    return ((!this.rootObjects.contains(notifier)) && notifier.eAdapters().remove(this.recordingAdapter));
+    return ((!this.rootObjects.contains(notifier))
+        && notifier.eAdapters().remove(this.recordingAdapter));
   }
 
   private boolean addAdapter(final Notifier notifier) {
     boolean _xblockexpression = false;
     {
       final EList<Adapter> eAdapters = notifier.eAdapters();
-      _xblockexpression = ((!eAdapters.contains(this.recordingAdapter)) && eAdapters.add(this.recordingAdapter));
+      _xblockexpression = ((!eAdapters.contains(this.recordingAdapter))
+          && eAdapters.add(this.recordingAdapter));
     }
     return _xblockexpression;
   }

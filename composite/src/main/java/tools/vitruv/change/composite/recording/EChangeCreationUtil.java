@@ -24,23 +24,27 @@ import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribut
  */
 final class EChangeCreationUtil {
   public static <A extends EObject> List<AdditiveAttributeEChange<A, Object>>
-      createAdditiveEChangeForAttribute(final A affectedEObject, final EAttribute affectedAttribute) {
+      createAdditiveEChangeForAttribute(final A affectedEObject,
+          final EAttribute affectedAttribute) {
     List<AdditiveAttributeEChange<A, Object>> xifexpression = null;
     boolean _isMany = affectedAttribute.isMany();
     if (_isMany) {
-      final List<?> _featureValues = EObjectUtil.getFeatureValues(affectedEObject, affectedAttribute);
+      final List<?> _featureValues =
+          EObjectUtil.getFeatureValues(affectedEObject, affectedAttribute);
       final List<AdditiveAttributeEChange<A, Object>> _result = new ArrayList<>();
       for (int _i = 0; _i < _featureValues.size(); _i++) {
         _result.add(TypeInferringAtomicEChangeFactory.getInstance()
-            .<A, Object>createInsertAttributeChange(affectedEObject, affectedAttribute, _i, _featureValues.get(_i)));
+            .<A, Object>createInsertAttributeChange(affectedEObject, affectedAttribute, _i,
+                _featureValues.get(_i)));
       }
       xifexpression = _result;
     } else {
       final Object oldValue = affectedAttribute.getDefaultValue();
       final Object newValue = EObjectUtil.getFeatureValue(affectedEObject, affectedAttribute);
-      ReplaceSingleValuedEAttribute<A, Object> _createReplaceSingleAttributeChange = TypeInferringAtomicEChangeFactory
-          .getInstance()
-          .<A, Object>createReplaceSingleAttributeChange(affectedEObject, affectedAttribute, oldValue, newValue);
+      ReplaceSingleValuedEAttribute<A, Object> _createReplaceSingleAttributeChange =
+          TypeInferringAtomicEChangeFactory.getInstance()
+              .<A, Object>createReplaceSingleAttributeChange(affectedEObject, affectedAttribute,
+                  oldValue, newValue);
       return List.<AdditiveAttributeEChange<A, Object>>of(_createReplaceSingleAttributeChange);
     }
     return xifexpression;
@@ -54,14 +58,17 @@ final class EChangeCreationUtil {
   }
 
   public static List<EChange<EObject>> createAdditiveEChangeForReferencedObject(
-      final EObject referencingEObject, final EReference reference, final Function<EObject, Boolean> isCreate) {
+      final EObject referencingEObject, final EReference reference,
+      final Function<EObject, Boolean> isCreate) {
     List<EChange<EObject>> xifexpression = null;
     boolean _isMany = reference.isMany();
     if (_isMany) {
       final List<EChange<EObject>> _result = new ArrayList<>();
-      for (EObject referenceValue : EChangeCreationUtil.getReferenceValueList(referencingEObject, reference)) {
+      for (EObject referenceValue :
+          EChangeCreationUtil.getReferenceValueList(referencingEObject, reference)) {
         Object _eGet = referencingEObject.eGet(reference);
-        _result.addAll(EChangeCreationUtil.createInsertReferenceChange(referencingEObject, reference,
+        _result.addAll(EChangeCreationUtil.createInsertReferenceChange(referencingEObject,
+            reference,
             ((EList<?>) _eGet).indexOf(referenceValue), referenceValue,
             (isCreate.apply(referenceValue)).booleanValue()));
       }
@@ -69,8 +76,10 @@ final class EChangeCreationUtil {
     } else {
       List<EChange<EObject>> xblockexpression = null;
       {
-        final EObject referenceValue = EChangeCreationUtil.getReferenceValueList(referencingEObject, reference).get(0);
-        xblockexpression = EChangeCreationUtil.createReplaceSingleValuedReferenceChange(referencingEObject, reference,
+        final EObject referenceValue =
+            EChangeCreationUtil.getReferenceValueList(referencingEObject, reference).get(0);
+        xblockexpression = EChangeCreationUtil.createReplaceSingleValuedReferenceChange(
+            referencingEObject, reference,
             null, referenceValue, (isCreate.apply(referenceValue)).booleanValue());
       }
       xifexpression = xblockexpression;
@@ -84,7 +93,8 @@ final class EChangeCreationUtil {
         (!Objects.equals(eObject.eContainer(), eObject.eGet(feature))));
   }
 
-  private static boolean valueIsNonDefault(final EObject eObject, final EStructuralFeature feature) {
+  private static boolean valueIsNonDefault(final EObject eObject,
+      final EStructuralFeature feature) {
     final Object value = eObject.eGet(feature);
     boolean _isMany = feature.isMany();
     if (_isMany) {
@@ -98,31 +108,37 @@ final class EChangeCreationUtil {
 
   public static boolean hasChangeableUnderivedPersistedNotContainingNonDefaultValue(final EObject eObject,
       final EStructuralFeature feature) {
-    return (EChangeCreationUtil.isChangeableUnderivedPersistedNotContainingFeature(eObject, feature) &&
+    return (EChangeCreationUtil.isChangeableUnderivedPersistedNotContainingFeature(eObject, feature)
+        &&
         EChangeCreationUtil.valueIsNonDefault(eObject, feature));
   }
 
   public static boolean isDelete(final EObject newContainer, final Resource newResource) {
-    return (((newContainer == null) || (newContainer instanceof ChangeDescription)) && (newResource == null));
+    return (((newContainer == null) || (newContainer instanceof ChangeDescription))
+        && (newResource == null));
   }
 
   public static List<EChange<EObject>> createInsertReferenceChange(final EObject affectedEObject,
-      final EReference affectedReference, final int index, final EObject referenceValue, final boolean forceCreate) {
+      final EReference affectedReference, final int index, final EObject referenceValue,
+      final boolean forceCreate) {
     final boolean isContainment = affectedReference.isContainment();
     final Resource oldResource = referenceValue.eResource();
     final boolean isCreate = (forceCreate || (isContainment && (oldResource == null)));
     if (isCreate) {
-      return TypeInferringCompoundEChangeFactory.getInstance().<EObject, EObject>createCreateAndInsertNonRootChange(
-          affectedEObject, affectedReference, referenceValue, index);
+      return TypeInferringCompoundEChangeFactory.getInstance()
+          .<EObject, EObject>createCreateAndInsertNonRootChange(
+              affectedEObject, affectedReference, referenceValue, index);
     } else {
       return List.<EChange<EObject>>of(
-          TypeInferringAtomicEChangeFactory.getInstance().<EObject>createInsertReferenceChange(affectedEObject,
-              affectedReference, referenceValue, index));
+          TypeInferringAtomicEChangeFactory.getInstance()
+              .<EObject>createInsertReferenceChange(affectedEObject,
+                  affectedReference, referenceValue, index));
     }
   }
 
   public static List<EChange<EObject>> createRemoveReferenceChange(final EObject affectedEObject,
-      final EReference affectedReference, final int index, final EObject referenceValue, final EObject newContainer,
+      final EReference affectedReference, final int index, final EObject referenceValue,
+      final EObject newContainer,
       final Resource newResource, final boolean forceDelete) {
     final boolean isContainment = affectedReference.isContainment();
     final boolean isDelete = (forceDelete
@@ -130,11 +146,13 @@ final class EChangeCreationUtil {
     List<EChange<EObject>> xifexpression = null;
     if (isDelete) {
       xifexpression = TypeInferringCompoundEChangeFactory.getInstance()
-          .<EObject, EObject>createRemoveAndDeleteNonRootChange(affectedEObject, affectedReference, referenceValue,
+          .<EObject, EObject>createRemoveAndDeleteNonRootChange(affectedEObject, affectedReference,
+              referenceValue,
               index);
     } else {
       xifexpression = List.<EChange<EObject>>of(
-          TypeInferringAtomicEChangeFactory.getInstance().<EObject>createRemoveReferenceChange(affectedEObject,
+          TypeInferringAtomicEChangeFactory.getInstance()
+              .<EObject>createRemoveReferenceChange(affectedEObject,
               affectedReference, referenceValue, index));
     }
     return xifexpression;
@@ -149,17 +167,20 @@ final class EChangeCreationUtil {
       List<EChange<EObject>> xifexpression1 = null;
       if ((oldReferenceValue == null)) {
         xifexpression1 = TypeInferringCompoundEChangeFactory.getInstance()
-            .<EObject, EObject>createCreateAndReplaceNonRootChange(affectedEObject, affectedReference,
+            .<EObject, EObject>createCreateAndReplaceNonRootChange(affectedEObject,
+                affectedReference,
                 newReferenceValue);
       } else {
         List<EChange<EObject>> xifexpression2 = null;
         if ((newReferenceValue == null)) {
           xifexpression2 = TypeInferringCompoundEChangeFactory.getInstance()
-              .<EObject, EObject>createReplaceAndDeleteNonRootChange(affectedEObject, affectedReference,
+              .<EObject, EObject>createReplaceAndDeleteNonRootChange(affectedEObject,
+                  affectedReference,
                   oldReferenceValue);
         } else {
           xifexpression2 = TypeInferringCompoundEChangeFactory.getInstance()
-              .<EObject, EObject>createCreateAndReplaceAndDeleteNonRootChange(affectedEObject, affectedReference,
+              .<EObject, EObject>createCreateAndReplaceAndDeleteNonRootChange(affectedEObject,
+                  affectedReference,
                   oldReferenceValue, newReferenceValue);
         }
         xifexpression1 = xifexpression2;
@@ -167,7 +188,8 @@ final class EChangeCreationUtil {
       xifexpression = xifexpression1;
     } else {
       xifexpression = List.<EChange<EObject>>of(
-          TypeInferringAtomicEChangeFactory.getInstance().<EObject>createReplaceSingleReferenceChange(affectedEObject,
+          TypeInferringAtomicEChangeFactory.getInstance()
+              .<EObject>createReplaceSingleReferenceChange(affectedEObject,
               affectedReference, oldReferenceValue, newReferenceValue));
     }
     return xifexpression;
