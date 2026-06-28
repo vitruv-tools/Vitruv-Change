@@ -38,26 +38,26 @@ import tools.vitruv.change.interaction.UserInteractionBase;
 /**
  * Implementation of {@link TransactionalChange}.
  *
- * @param <Element> the type of the elements affected by the change
+ * @param <E> the type of the elements affected by the change
  */
-public class TransactionalChangeImpl<Element extends Object>
-    implements TransactionalChange<Element> {
+public class TransactionalChangeImpl<E extends Object>
+    implements TransactionalChange<E> {
   private static final String INDEX_LABEL = " (index ";
 
-  private List<? extends EChange<Element>> eChanges;
+  private List<? extends EChange<E>> eChanges;
 
   private final List<UserInteractionBase> userInteractions = new ArrayList<UserInteractionBase>();
 
-  public TransactionalChangeImpl(final Iterable<? extends EChange<Element>> eChanges) {
+  public TransactionalChangeImpl(final Iterable<? extends EChange<E>> eChanges) {
     Preconditions.checkNotNull(eChanges, "eChanges");
-    List<EChange<Element>> _list = new ArrayList<>();
+    List<EChange<E>> _list = new ArrayList<>();
     eChanges.forEach(_list::add);
     this.eChanges = _list;
   }
 
   @Override
-  public List<EChange<Element>> getEChanges() {
-    return Collections.<EChange<Element>>unmodifiableList(this.eChanges);
+  public List<EChange<E>> getEChanges() {
+    return Collections.<EChange<E>>unmodifiableList(this.eChanges);
   }
 
   @Override
@@ -195,7 +195,7 @@ public class TransactionalChangeImpl<Element extends Object>
     if (eChange instanceof RemoveRootEObject) {
       return Set.<EObject>of(((RemoveRootEObject<EObject>) eChange).getOldValue());
     }
-    return null;
+    return Collections.emptySet();
   }
 
   @Override
@@ -211,14 +211,14 @@ public class TransactionalChangeImpl<Element extends Object>
     Iterables.<UserInteractionBase>addAll(this.userInteractions, userInteractions);
   }
 
-  protected List<EChange<Element>> getClonedEChanges() {
-    return this.eChanges.stream().map(it -> EcoreUtil.<EChange<Element>>copy(it)).toList();
+  protected List<EChange<E>> getClonedEChanges() {
+    return this.eChanges.stream().map(it -> EcoreUtil.<EChange<E>>copy(it)).toList();
   }
 
   @Override
-  public TransactionalChangeImpl<Element> copy() {
-    List<EChange<Element>> _clonedEChanges = this.getClonedEChanges();
-    return new TransactionalChangeImpl<Element>(_clonedEChanges);
+  public TransactionalChangeImpl<E> copy() {
+    List<EChange<E>> _clonedEChanges = this.getClonedEChanges();
+    return new TransactionalChangeImpl<E>(_clonedEChanges);
   }
 
   @Override
@@ -339,7 +339,7 @@ public class TransactionalChangeImpl<Element extends Object>
     } else {
       StringBuilder _builder = new StringBuilder();
       _builder.append(this.getClass().getSimpleName()).append(": [").append(System.lineSeparator());
-      for (EChange<Element> eChange : this.eChanges) {
+      for (EChange<E> eChange : this.eChanges) {
         _builder.append("\t").append(this.getStringRepresentation(eChange))
             .append(System.lineSeparator());
       }
