@@ -60,7 +60,8 @@ public class ChangeRecorder implements AutoCloseable {
     @Override
     public void notifyChanged(final Notification notification) {
       this.handleAdaptersForResourceAndResourceSetChanges(notification);
-      final Iterable<? extends EChange<EObject>> newChanges = this.extractRelevantChanges(notification);
+      final Iterable<? extends EChange<EObject>> newChanges =
+          this.extractRelevantChanges(notification);
       if (this.outer.isRecording) {
         Iterables.<EChange<EObject>>addAll(this.outer.resultChanges, newChanges);
       }
@@ -68,7 +69,8 @@ public class ChangeRecorder implements AutoCloseable {
 
     private void handleAdaptersForResourceAndResourceSetChanges(final Notification notification) {
       if (((notification.getNotifier() instanceof ResourceSet)
-          && (notification.getFeatureID(ResourceSet.class) == ResourceSet.RESOURCE_SET__RESOURCES))) {
+          && (notification.getFeatureID(ResourceSet.class)
+              == ResourceSet.RESOURCE_SET__RESOURCES))) {
         int _eventType = notification.getEventType();
         switch (_eventType) {
           case Notification.ADD:
@@ -101,7 +103,8 @@ public class ChangeRecorder implements AutoCloseable {
       }
       if (!_matched) {
         if (((notification.getNotifier() instanceof ResourceSet)
-            && (notification.getFeatureID(ResourceSet.class) == ResourceSet.RESOURCE_SET__RESOURCES))) {
+            && (notification.getFeatureID(ResourceSet.class)
+                == ResourceSet.RESOURCE_SET__RESOURCES))) {
           _matched = true;
         }
       }
@@ -278,7 +281,8 @@ public class ChangeRecorder implements AutoCloseable {
     }
   }
 
-  private final ChangeRecorder.NotificationRecorder recordingAdapter = new ChangeRecorder.NotificationRecorder(this);
+  private final ChangeRecorder.NotificationRecorder recordingAdapter =
+      new ChangeRecorder.NotificationRecorder(this);
 
   private final Set<Notifier> rootObjects = new HashSet<Notifier>();
 
@@ -296,10 +300,12 @@ public class ChangeRecorder implements AutoCloseable {
 
   public ChangeRecorder(final ResourceSet resourceSet) {
     this.resourceSet = resourceSet;
-    final BiFunction<EObject, EObject, Boolean> _function = (EObject affectedObject, EObject addedObject) -> {
+    final BiFunction<EObject, EObject, Boolean> _function =
+        (EObject affectedObject, EObject addedObject) -> {
       return Boolean.valueOf(this.isCreateChange(affectedObject, addedObject));
     };
-    NotificationToEChangeConverter _notificationToEChangeConverter = new NotificationToEChangeConverter(_function);
+    NotificationToEChangeConverter _notificationToEChangeConverter =
+        new NotificationToEChangeConverter(_function);
     this.converter = _notificationToEChangeConverter;
   }
 
@@ -415,7 +421,8 @@ public class ChangeRecorder implements AutoCloseable {
     this.checkNotDisposed();
     Preconditions.checkState(this.isRecording, "This recorder is not recording");
     this.isRecording = false;
-    this.resultChanges = List.<EChange<EObject>>copyOf(this.postprocessRemovals(this.resultChanges));
+    this.resultChanges =
+        List.<EChange<EObject>>copyOf(this.postprocessRemovals(this.resultChanges));
     return this.getChange();
   }
 
@@ -515,7 +522,8 @@ public class ChangeRecorder implements AutoCloseable {
     }
   }
 
-  private static void recursivelyInternal(final EObject object, final Function<Notifier, Boolean> action) {
+  private static void recursivelyInternal(final EObject object,
+      final Function<Notifier, Boolean> action) {
     Boolean _apply = action.apply(object);
     if ((_apply).booleanValue()) {
       for (final TreeIterator<Notifier> properContents = EcoreUtil.<Notifier>getAllProperContents(

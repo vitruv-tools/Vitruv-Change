@@ -35,7 +35,8 @@ import tools.vitruv.change.composite.MetamodelDescriptor;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.interaction.UserInteractionBase;
 
-public class TransactionalChangeImpl<Element extends Object> implements TransactionalChange<Element> {
+public class TransactionalChangeImpl<Element extends Object>
+    implements TransactionalChange<Element> {
   private List<? extends EChange<Element>> eChanges;
 
   private final List<UserInteractionBase> userInteractions = new ArrayList<UserInteractionBase>();
@@ -63,20 +64,21 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
     boolean _matched = false;
     if (eChange instanceof FeatureEChange) {
       _matched = true;
-      EObject _affectedElement = ((FeatureEChange<EObject, ?>) eChange).getAffectedElement();
+      EObject affectedElement = ((FeatureEChange<EObject, ?>) eChange).getAffectedElement();
       URI _objectUri = null;
-      if (_affectedElement != null) {
-        _objectUri = TransactionalChangeImpl.getObjectUri(_affectedElement);
+      if (affectedElement != null) {
+        _objectUri = TransactionalChangeImpl.getObjectUri(affectedElement);
       }
       _switchResult = _objectUri;
     }
     if (!_matched) {
       if (eChange instanceof EObjectExistenceEChange) {
         _matched = true;
-        EObject _affectedElement = ((EObjectExistenceEChange<EObject>) eChange).getAffectedElement();
+        EObject affectedElement =
+            ((EObjectExistenceEChange<EObject>) eChange).getAffectedElement();
         URI _objectUri = null;
-        if (_affectedElement != null) {
-          _objectUri = TransactionalChangeImpl.getObjectUri(_affectedElement);
+        if (affectedElement != null) {
+          _objectUri = TransactionalChangeImpl.getObjectUri(affectedElement);
         }
         _switchResult = _objectUri;
       }
@@ -110,7 +112,8 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
         changedPackages.add(currentPackage);
       }
     }
-    Preconditions.checkState(!changedPackages.isEmpty(), "Cannot identify the packages of this change:%s%s",
+    Preconditions.checkState(!changedPackages.isEmpty(),
+        "Cannot identify the packages of this change:%s%s",
         System.lineSeparator(), this);
     return MetamodelDescriptor.of(changedPackages);
   }
@@ -139,7 +142,8 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
     if (!_matched) {
       if (eChange instanceof EObjectExistenceEChange) {
         _matched = true;
-        _switchResult = Set.<EObject>of(((EObjectExistenceEChange<EObject>) eChange).getAffectedElement());
+        _switchResult = Set.<EObject>of(
+            ((EObjectExistenceEChange<EObject>) eChange).getAffectedElement());
       }
     }
     if (!_matched) {
@@ -162,7 +166,8 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
     boolean _matched = false;
     if (eChange instanceof UpdateAttributeEChange) {
       _matched = true;
-      _switchResult = Set.<EObject>of(((UpdateAttributeEChange<EObject>) eChange).getAffectedElement());
+      _switchResult = Set.<EObject>of(
+          ((UpdateAttributeEChange<EObject>) eChange).getAffectedElement());
     }
     if (!_matched) {
       if (eChange instanceof ReplaceSingleValuedEReference) {
@@ -190,7 +195,8 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
     if (!_matched) {
       if (eChange instanceof EObjectExistenceEChange) {
         _matched = true;
-        _switchResult = Set.<EObject>of(((EObjectExistenceEChange<EObject>) eChange).getAffectedElement());
+        _switchResult = Set.<EObject>of(
+            ((EObjectExistenceEChange<EObject>) eChange).getAffectedElement());
       }
     }
     if (!_matched) {
@@ -215,7 +221,8 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
 
   @Override
   public void setUserInteractions(final Iterable<UserInteractionBase> userInteractions) {
-    Preconditions.<Iterable<UserInteractionBase>>checkNotNull(userInteractions, "Interactions must not be null");
+    Preconditions.<Iterable<UserInteractionBase>>checkNotNull(userInteractions,
+        "Interactions must not be null");
     this.userInteractions.clear();
     Iterables.<UserInteractionBase>addAll(this.userInteractions, userInteractions);
   }
@@ -242,8 +249,8 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
       } else {
         boolean _xifexpression_2 = false;
         if ((obj instanceof TransactionalChange)) {
-          List _eChanges = ((TransactionalChange) obj).getEChanges();
-          _xifexpression_2 = Objects.equals(this.eChanges, _eChanges);
+          List objEChanges = ((TransactionalChange) obj).getEChanges();
+          _xifexpression_2 = Objects.equals(this.eChanges, objEChanges);
         } else {
           _xifexpression_2 = false;
         }
@@ -318,7 +325,8 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
     return _xifexpression;
   }
 
-  private static <T extends Object> Set<T> setOfNotNull(final T element1, final T element2, final T element3) {
+  private static <T extends Object> Set<T> setOfNotNull(final T element1, final T element2,
+      final T element3) {
     Set<T> _xifexpression = null;
     if ((element1 == null)) {
       _xifexpression = TransactionalChangeImpl.<T>setOfNotNull(element2, element3);
@@ -348,7 +356,8 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
       StringBuilder _builder = new StringBuilder();
       _builder.append(this.getClass().getSimpleName()).append(": [").append(System.lineSeparator());
       for (EChange<Element> eChange : this.eChanges) {
-        _builder.append("\t").append(this.getStringRepresentation(eChange)).append(System.lineSeparator());
+        _builder.append("\t").append(this.getStringRepresentation(eChange))
+            .append(System.lineSeparator());
       }
       _builder.append("]").append(System.lineSeparator());
       return _builder.toString();
@@ -360,13 +369,15 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
     if (change instanceof InsertRootEObject) {
       _matched = true;
       return "insert " + ((InsertRootEObject<?>) change).getNewValue() + " at "
-          + ((InsertRootEObject<?>) change).getUri() + " (index " + ((InsertRootEObject<?>) change).getIndex() + ")";
+          + ((InsertRootEObject<?>) change).getUri() + " (index "
+          + ((InsertRootEObject<?>) change).getIndex() + ")";
     }
     if (!_matched) {
       if (change instanceof RemoveRootEObject) {
         _matched = true;
         return "remove " + ((RemoveRootEObject<?>) change).getOldValue() + " from "
-            + ((RemoveRootEObject<?>) change).getUri() + " (index " + ((RemoveRootEObject<?>) change).getIndex() + ")";
+            + ((RemoveRootEObject<?>) change).getUri() + " (index "
+            + ((RemoveRootEObject<?>) change).getIndex() + ")";
       }
     }
     if (!_matched) {
@@ -415,7 +426,8 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
       if (change instanceof InsertEReference) {
         _matched = true;
         return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " += "
-            + ((InsertEReference<?>) change).getNewValue() + " (index " + ((InsertEReference<?>) change).getIndex()
+            + ((InsertEReference<?>) change).getNewValue() + " (index "
+            + ((InsertEReference<?>) change).getIndex()
             + ")";
       }
     }
@@ -431,7 +443,8 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
       if (change instanceof RemoveEReference) {
         _matched = true;
         return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " -= "
-            + ((RemoveEReference<?>) change).getOldValue() + " (index " + ((RemoveEReference<?>) change).getIndex()
+            + ((RemoveEReference<?>) change).getOldValue() + " (index "
+            + ((RemoveEReference<?>) change).getIndex()
             + ")";
       }
     }
