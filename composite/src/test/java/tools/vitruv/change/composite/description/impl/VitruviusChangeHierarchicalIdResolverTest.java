@@ -18,8 +18,6 @@ class VitruviusChangeHierarchicalIdResolverTest {
   void assignIdsAppliesCompositeChangesBackwardInReverseOrder() {
     AtomicEChangeHierarchicalIdResolver atomicChangeResolver =
         mock(AtomicEChangeHierarchicalIdResolver.class);
-    VitruviusChangeHierarchicalIdResolver resolver =
-        new VitruviusChangeHierarchicalIdResolver(atomicChangeResolver);
 
     EChange<EObject> firstChange = mock(EChange.class);
     EChange<EObject> secondChange = mock(EChange.class);
@@ -45,6 +43,8 @@ class VitruviusChangeHierarchicalIdResolverTest {
     CompositeContainerChangeImpl<EObject> compositeChange =
         new CompositeContainerChangeImpl<>(List.of(firstTransaction, secondTransaction));
 
+    VitruviusChangeHierarchicalIdResolver resolver =
+        new VitruviusChangeHierarchicalIdResolver(atomicChangeResolver);
     resolver.assignIds(compositeChange);
 
     InOrder inOrder = inOrder(atomicChangeResolver);
