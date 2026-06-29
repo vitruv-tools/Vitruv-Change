@@ -159,41 +159,41 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
 
   private static Set<EObject> getAffectedAndReferencedEObjects(final EChange<?> eChange) {
     if (eChange instanceof UpdateAttributeEChange) {
-      return Set.<EObject>of(((UpdateAttributeEChange<EObject>)eChange).getAffectedElement());
+      return Set.<EObject>of(((UpdateAttributeEChange<EObject>) eChange).getAffectedElement());
     }
 
     if (eChange instanceof ReplaceSingleValuedEReference) {
       return TransactionalChangeImpl.<EObject>setOfNotNull(
-              ((ReplaceSingleValuedEReference<EObject>)eChange).getAffectedElement(),
-              ((ReplaceSingleValuedEReference<EObject>)eChange).getOldValue(),
-              ((ReplaceSingleValuedEReference<EObject>)eChange).getNewValue()
+              ((ReplaceSingleValuedEReference<EObject>) eChange).getAffectedElement(),
+              ((ReplaceSingleValuedEReference<EObject>) eChange).getOldValue(),
+              ((ReplaceSingleValuedEReference<EObject>) eChange).getNewValue()
       );
     }
 
     if (eChange instanceof InsertEReference) {
       return Set.<EObject>of(
-              ((InsertEReference<EObject>)eChange).getAffectedElement(),
-              ((InsertEReference<EObject>)eChange).getNewValue()
+              ((InsertEReference<EObject>) eChange).getAffectedElement(),
+              ((InsertEReference<EObject>) eChange).getNewValue()
       );
     }
 
     if (eChange instanceof RemoveEReference) {
       return Set.<EObject>of(
-              ((RemoveEReference<EObject>)eChange).getAffectedElement(),
-              ((RemoveEReference<EObject>)eChange).getOldValue()
+              ((RemoveEReference<EObject>) eChange).getAffectedElement(),
+              ((RemoveEReference<EObject>) eChange).getOldValue()
       );
     }
 
     if (eChange instanceof EObjectExistenceEChange) {
-      return Set.<EObject>of(((EObjectExistenceEChange<EObject>)eChange).getAffectedElement());
+      return Set.<EObject>of(((EObjectExistenceEChange<EObject>) eChange).getAffectedElement());
     }
 
     if (eChange instanceof InsertRootEObject) {
-      return Set.<EObject>of(((InsertRootEObject<EObject>)eChange).getNewValue());
+      return Set.<EObject>of(((InsertRootEObject<EObject>) eChange).getNewValue());
     }
 
     if (eChange instanceof RemoveRootEObject) {
-      return Set.<EObject>of(((RemoveRootEObject<EObject>)eChange).getOldValue());
+      return Set.<EObject>of(((RemoveRootEObject<EObject>) eChange).getOldValue());
     }
     return null;
   }
