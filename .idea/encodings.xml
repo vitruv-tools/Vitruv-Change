@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/atomic/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/atomic/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/changederivation/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/changederivation/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/composite/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/composite/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/correspondence/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/correspondence/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/interaction.model/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/interaction.model/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/interaction/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/interaction/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/p2wrappers/activextendannotations/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/p2wrappers/activextendannotations/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/p2wrappers/eclipseutils/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/p2wrappers/eclipseutils/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/p2wrappers/emfcompare/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/p2wrappers/emfcompare/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/p2wrappers/emfutils/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/p2wrappers/emfutils/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/p2wrappers/javautils/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/p2wrappers/javautils/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/p2wrappers/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/p2wrappers/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/propagation/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/propagation/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/testutils/changevisualization/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/testutils/changevisualization/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/testutils/core/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/testutils/core/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/testutils/integration/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/testutils/integration/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/testutils/metamodels/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/testutils/metamodels/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/testutils/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/testutils/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/utils/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/utils/src/main/resources" charset="UTF-8" />
+  </component>
+</project>
