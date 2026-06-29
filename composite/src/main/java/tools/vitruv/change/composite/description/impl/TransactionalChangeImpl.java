@@ -370,89 +370,94 @@ public class TransactionalChangeImpl<Element extends Object>
     }
   }
 
+  private static final String INDEX_PREFIX = " (index ";
+  private static final String WAS_PREFIX = " (was ";
+
   private CharSequence getStringRepresentation(final EChange<?> change) {
-    boolean _matched = false;
     if (change instanceof InsertRootEObject) {
-      _matched=true;
-      return "insert " + ((InsertRootEObject<?>) change).getNewValue() + " at "
-          + ((InsertRootEObject<?>) change).getUri() + " (index "
-          + ((InsertRootEObject<?>) change).getIndex() + ")";
+      return getInsertRootEObjectString((InsertRootEObject<?>) change);
     }
-    if (!_matched) {
-      if (change instanceof RemoveRootEObject) {
-        _matched=true;
-        return "remove " + ((RemoveRootEObject<?>) change).getOldValue() + " from "
-            + ((RemoveRootEObject<?>) change).getUri() + " (index "
-            + ((RemoveRootEObject<?>) change).getIndex() + ")";
-      }
+    if (change instanceof RemoveRootEObject) {
+      return getRemoveRootEObjectString((RemoveRootEObject<?>) change);
     }
-    if (!_matched) {
-      if (change instanceof CreateEObject) {
-        _matched=true;
-        return "create " + ((CreateEObject<?>)change).getAffectedElement();
-      }
+    if (change instanceof CreateEObject) {
+      return "create " + ((CreateEObject<?>) change).getAffectedElement();
     }
-    if (!_matched) {
-      if (change instanceof DeleteEObject) {
-        _matched=true;
-        return "delete " + ((DeleteEObject<?>)change).getAffectedElement();
-      }
+    if (change instanceof DeleteEObject) {
+      return "delete " + ((DeleteEObject<?>) change).getAffectedElement();
     }
-    if (!_matched) {
-      if (change instanceof UnsetFeature) {
-        _matched=true;
-        return this.getAffectedFeatureString(((FeatureEChange<?, ?>)change)) + " = ∅";
-      }
+    if (change instanceof UnsetFeature) {
+      return getAffectedFeatureString((FeatureEChange<?, ?>) change) + " = ∅";
     }
-    if (!_matched) {
-      if (change instanceof ReplaceSingleValuedEAttribute) {
-        _matched=true;
-        return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " = "
-            + ((ReplaceSingleValuedEAttribute<?, ?>) change).getNewValue() + " (was "
-            + ((ReplaceSingleValuedEAttribute<?, ?>) change).getOldValue() + ")";
-      }
+    if (change instanceof ReplaceSingleValuedEAttribute) {
+      return getReplaceSingleValuedEAttributeString((ReplaceSingleValuedEAttribute<?, ?>) change);
     }
-    if (!_matched) {
-      if (change instanceof ReplaceSingleValuedEReference) {
-        _matched=true;
-        return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " = "
-            + ((ReplaceSingleValuedEReference<?>) change).getNewValue() + " (was "
-            + ((ReplaceSingleValuedEReference<?>) change).getOldValue() + ")";
-      }
+    if (change instanceof ReplaceSingleValuedEReference) {
+      return getReplaceSingleValuedEReferenceString((ReplaceSingleValuedEReference<?>) change);
     }
-    if (!_matched) {
-      if (change instanceof InsertEAttributeValue) {
-        _matched=true;
-        return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " += "
-            + ((InsertEAttributeValue<?, ?>) change).getNewValue() + " (index "
-            + ((InsertEAttributeValue<?, ?>) change).getIndex() + ")";
-      }
+    if (change instanceof InsertEAttributeValue) {
+      return getInsertEAttributeValueString((InsertEAttributeValue<?, ?>) change);
     }
-    if (!_matched) {
-      if (change instanceof InsertEReference) {
-        _matched=true;
-        return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " += "
-            + ((InsertEReference<?>) change).getNewValue() + " (index "
-            + ((InsertEReference<?>) change).getIndex() + ")";
-      }
+    if (change instanceof InsertEReference) {
+      return getInsertEReferenceString((InsertEReference<?>) change);
     }
-    if (!_matched) {
-      if (change instanceof RemoveEAttributeValue) {
-        _matched=true;
-        return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " -= "
-            + ((RemoveEAttributeValue<?, ?>) change).getOldValue() + " (index "
-            + ((RemoveEAttributeValue<?, ?>) change).getIndex() + ")";
-      }
+    if (change instanceof RemoveEAttributeValue) {
+      return getRemoveEAttributeValueString((RemoveEAttributeValue<?, ?>) change);
     }
-    if (!_matched) {
-      if (change instanceof RemoveEReference) {
-        _matched=true;
-        return this.getAffectedFeatureString(((FeatureEChange<?, ?>) change)) + " -= "
-            + ((RemoveEReference<?>) change).getOldValue() + " (index "
-            + ((RemoveEReference<?>) change).getIndex() + ")";
-      }
+    if (change instanceof RemoveEReference) {
+      return getRemoveEReferenceString((RemoveEReference<?>) change);
     }
     return null;
+  }
+
+  private CharSequence getInsertRootEObjectString(final InsertRootEObject<?> change) {
+    return "insert " + change.getNewValue()
+            + " at " + change.getUri()
+            + INDEX_PREFIX  + change.getIndex() + ")";
+  }
+
+  private CharSequence getRemoveRootEObjectString(final RemoveRootEObject<?> change) {
+    return "remove " + change.getOldValue()
+            + " from " + change.getUri()
+            + INDEX_PREFIX  + change.getIndex() + ")";
+  }
+
+  private CharSequence getReplaceSingleValuedEAttributeString(
+          final ReplaceSingleValuedEAttribute<?, ?> change) {
+    return getAffectedFeatureString(change)
+            + " = " + change.getNewValue()
+            + WAS_PREFIX + change.getOldValue() + ")";
+  }
+
+  private CharSequence getReplaceSingleValuedEReferenceString(
+          final ReplaceSingleValuedEReference<?> change) {
+    return getAffectedFeatureString(change)
+            + " = " + change.getNewValue()
+            + WAS_PREFIX + change.getOldValue() + ")";
+  }
+
+  private CharSequence getInsertEAttributeValueString(final InsertEAttributeValue<?, ?> change) {
+    return getAffectedFeatureString(change)
+            + " += " + change.getNewValue()
+            + INDEX_PREFIX  + change.getIndex() + ")";
+  }
+
+  private CharSequence getInsertEReferenceString(final InsertEReference<?> change) {
+    return getAffectedFeatureString(change)
+            + " += " + change.getNewValue()
+            + INDEX_PREFIX  + change.getIndex() + ")";
+  }
+
+  private CharSequence getRemoveEAttributeValueString(final RemoveEAttributeValue<?, ?> change) {
+    return getAffectedFeatureString(change)
+            + " -= " + change.getOldValue()
+            + INDEX_PREFIX  + change.getIndex() + ")";
+  }
+
+  private CharSequence getRemoveEReferenceString(final RemoveEReference<?> change) {
+    return getAffectedFeatureString(change)
+            + " -= " + change.getOldValue()
+            + INDEX_PREFIX  + change.getIndex() + ")";
   }
 
   private CharSequence getAffectedFeatureString(final FeatureEChange<?, ?> change) {
