@@ -16,7 +16,7 @@ import tools.vitruv.change.testutils.metamodels.AllElementTypesCreators;
  * Test class for the {@link RemoveAtCommand} which removes
  * elements at a specific index in a EList.
  */
-public class RemoveAtCommandTest extends CommandTest {
+class RemoveAtCommandTest extends CommandTest {
   private EditingDomain editingDomain;
 
   private EObject owner;
@@ -26,7 +26,7 @@ public class RemoveAtCommandTest extends CommandTest {
   private EList<Integer> list;
 
   @BeforeEach
-  public final void beforeTest() {
+  final void beforeTest() {
     this.owner = AllElementTypesCreators.aet.Root();
     this.feature = AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE;
     this.editingDomain = ChangeCommandUtil.getEditingDomain(this.owner);
@@ -41,7 +41,7 @@ public class RemoveAtCommandTest extends CommandTest {
    * Tests both creation methods and constructors of the class.
    */
   @Test
-  public void createCommandTest() {
+  void createCommandTest() {
     RemoveAtCommand command = new RemoveAtCommand(this.editingDomain, this.list, Integer.valueOf(2), 3);
     RemoveAtCommandTest.assertIsRemoveAtCommand(command, this.list, Integer.valueOf(2), 3);
     RemoveAtCommand command2 = new RemoveAtCommand(this.editingDomain, this.owner, this.feature, Integer.valueOf(4), 8);
@@ -53,7 +53,7 @@ public class RemoveAtCommandTest extends CommandTest {
    * whether the command can be executed or not.
    */
   @Test
-  public void prepareTest() {
+  void prepareTest() {
     CommandTest.assertIsPreparable(this.createRemoveAtCommand(this.list, Integer.valueOf(0), 0));
     CommandTest.assertIsPreparable(this.createRemoveAtCommand(this.list, Integer.valueOf(4), 4));
     CommandTest.assertIsPreparable(this.createRemoveAtCommand(this.list, Integer.valueOf(9), 9));
@@ -70,7 +70,7 @@ public class RemoveAtCommandTest extends CommandTest {
    * Tests the execution of the command.
    */
   @Test
-  public void executeTest() {
+  void executeTest() {
     RemoveAtCommandTest.assertRemovedCorrectValueFrom(this.createRemoveAtCommand(this.list, Integer.valueOf(8), 8), this.list);
     RemoveAtCommandTest.assertRemovedCorrectValueFrom(this.createRemoveAtCommand(this.list, Integer.valueOf(0), 0), this.list);
     RemoveAtCommandTest.assertRemovedCorrectValueFrom(this.createRemoveAtCommand(this.list, Integer.valueOf(1), 0), this.list);
