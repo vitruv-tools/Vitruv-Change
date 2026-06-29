@@ -75,6 +75,8 @@ public class ChangeRecorder implements AutoCloseable {
             };
             ((Iterable<? extends Resource>) _newValue_1).forEach(_function);
             break;
+          default:
+            break;
         }
       }
       Object _feature = notification.getFeature();
@@ -112,6 +114,8 @@ public class ChangeRecorder implements AutoCloseable {
             };
             ((Iterable<?>) _oldValue).forEach(_function_1);
             break;
+          default:
+            break;
         }
         int _eventType_2 = notification.getEventType();
         switch (_eventType_2) {
@@ -125,6 +129,8 @@ public class ChangeRecorder implements AutoCloseable {
               this.infect(it);
             };
             ((Iterable<?>) _newValue_2).forEach(_function_2);
+            break;
+          default:
             break;
         }
       }
