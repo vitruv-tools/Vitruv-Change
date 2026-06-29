@@ -19,7 +19,7 @@ import tools.vitruv.change.atomic.uuid.Uuid;
  * Test class for the concrete {@link ExplicitUnsetEAttribute} EChange,
  * which unsets a single or multi valued attribute.
  */
-public class ExplicitUnsetEAttributeTest extends EChangeTest {
+class ExplicitUnsetEAttributeTest extends EChangeTest {
   private Root affectedEObject;
 
   private EAttribute affectedFeature;
@@ -33,7 +33,7 @@ public class ExplicitUnsetEAttributeTest extends EChangeTest {
   private static final Integer OLD_VALUE_3 = Integer.valueOf(333);
 
   @BeforeEach
-  public void beforeTest() {
+  void beforeTest() {
     this.affectedEObject = this.getRootObject();
   }
 
@@ -42,7 +42,7 @@ public class ExplicitUnsetEAttributeTest extends EChangeTest {
    * returns the same class.
    */
   @Test
-  public void resolveToCorrectType() {
+  void resolveToCorrectType() {
     this.isSingleValuedAttributeTest();
     final List<? extends EChange<Uuid>> unresolvedChange = this.createUnresolvedChange();
     final List<EChange<EObject>> resolvedChange = this.applyForwardAndResolve(unresolvedChange);
@@ -54,7 +54,7 @@ public class ExplicitUnsetEAttributeTest extends EChangeTest {
    * Unsets a single valued unsettable attribute.
    */
   @Test
-  public void applyForwardUnsetSingleValuedAttributeTest() {
+  void applyForwardUnsetSingleValuedAttributeTest() {
     this.isSingleValuedAttributeTest();
     this.applyForwardTest();
   }
@@ -64,7 +64,7 @@ public class ExplicitUnsetEAttributeTest extends EChangeTest {
    * Unsets a multi valued unsettable attribute.
    */
   @Test
-  public void applyForwardUnsetMulitValuedAttributeTest() {
+  void applyForwardUnsetMulitValuedAttributeTest() {
     this.isMultiValuedAttributeTest();
     this.applyForwardTest();
   }
@@ -74,7 +74,7 @@ public class ExplicitUnsetEAttributeTest extends EChangeTest {
    * Unsets a single valued unsettable attribute.
    */
   @Test
-  public void applyBackwardUnsetSingleValuedAttributeTest() {
+  void applyBackwardUnsetSingleValuedAttributeTest() {
     this.isSingleValuedAttributeTest();
     this.applyBackwardTest();
   }
@@ -84,7 +84,7 @@ public class ExplicitUnsetEAttributeTest extends EChangeTest {
    * Unsets a multi valued unsettable attribute.
    */
   @Test
-  public void applyBackwardUnsetMulitValuedAttributeTest() {
+  void applyBackwardUnsetMulitValuedAttributeTest() {
     this.isMultiValuedAttributeTest();
     this.applyBackwardTest();
   }
