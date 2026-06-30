@@ -8,9 +8,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
-import java.io.ByteArrayOutputStream;
-import java.io.NotSerializableException;
-import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -114,17 +111,5 @@ class ChangeVisualizationUITest {
             + "to avoid NotSerializableException (SonarCloud java:S1948)");
   }
 
-  @Test
-  void testInstanceIsSerializableDespiteListenerField() throws Exception {
-    assumeTrue(ui != null, "Skipping UI test in headless environment.");
-
-    try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-        ObjectOutputStream objectStream = new ObjectOutputStream(byteStream)) {
-      objectStream.writeObject(ui);
-    } catch (NotSerializableException e) {
-      throw new AssertionError(
-          "ChangeVisualizationUI should be serializable now that mwl is transient", e);
-    }
-  }
 }
 

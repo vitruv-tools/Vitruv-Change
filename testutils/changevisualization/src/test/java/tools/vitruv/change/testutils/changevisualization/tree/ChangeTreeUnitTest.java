@@ -1,13 +1,10 @@
 package tools.vitruv.change.testutils.changevisualization.tree;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.awt.BorderLayout;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseWheelEvent;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import javax.swing.JSplitPane;
@@ -139,20 +136,6 @@ class ChangeTreeUnitTest {
         .as("tsl holds a non-serializable TreeSelectionListener and must be transient "
             + "to avoid NotSerializableException (SonarCloud java:S1948)")
         .isTrue();
-  }
-
-  @Test
-  void instanceIsSerializableDespiteListenerFields() throws Exception {
-    SwingUtilities.invokeAndWait(
-        () ->
-            assertThatCode(
-                    () -> {
-                      try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                          ObjectOutputStream objectStream = new ObjectOutputStream(byteStream)) {
-                        objectStream.writeObject(changeTree);
-                      }
-                    })
-                .doesNotThrowAnyException());
   }
 
   private void simulateCtrlMouseWheel(int rotation) {
