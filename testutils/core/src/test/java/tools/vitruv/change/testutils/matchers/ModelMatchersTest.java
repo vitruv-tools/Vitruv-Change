@@ -28,6 +28,7 @@
   import static tools.vitruv.change.testutils.matchers.ModelMatchers.whose;
 
   import java.util.List;
+  import java.util.Map;
   import org.eclipse.emf.common.util.URI;
   import org.eclipse.emf.ecore.EClass;
   import org.eclipse.emf.ecore.EObject;
@@ -37,6 +38,7 @@
   import org.eclipse.emf.ecore.resource.Resource;
   import org.eclipse.emf.ecore.resource.ResourceSet;
   import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+  import org.eclipse.emf.ecore.resource.impl.URIHandlerImpl;
   import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
   import org.hamcrest.Matcher;
   import org.junit.jupiter.api.BeforeEach;
@@ -70,6 +72,13 @@
       resourceSet.getResourceFactoryRegistry()
           .getExtensionToFactoryMap()
           .put("xmi", new XMIResourceFactoryImpl());
+
+      resourceSet.getURIConverter().getURIHandlers().add(0, new URIHandlerImpl() {
+        @Override
+        public boolean exists(URI uri, Map<?, ?> options) {
+          return true;
+        }
+      });
     }
 
     // -------------------------------------------------------------------------
