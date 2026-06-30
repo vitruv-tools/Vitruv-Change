@@ -1,5 +1,6 @@
 package tools.vitruv.change.testutils.changevisualization;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -183,7 +184,9 @@ class ChangeVisualizationUITest {
             -1);
 
     // Should simply return without throwing for a non-JTextArea source.
-    listener.mouseWheelMoved(event);
+    assertDoesNotThrow(
+        () -> listener.mouseWheelMoved(event),
+        "A non-JTextArea wheel source should be ignored without throwing");
   }
 
   private static MouseWheelEvent ctrlWheelEvent(JTextArea source, int rotation) {

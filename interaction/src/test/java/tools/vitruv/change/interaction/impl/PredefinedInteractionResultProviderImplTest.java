@@ -1,6 +1,6 @@
 package tools.vitruv.change.interaction.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -97,8 +97,10 @@ class PredefinedInteractionResultProviderImplTest {
         new PredefinedInteractionResultProviderImpl(null);
 
     // Without a fallback and without a match, the notification is simply ignored.
-    provider.getNotificationInteractionResult(
-        WindowModality.MODAL, TITLE, MESSAGE, "Ok", NotificationType.INFORMATION);
+    assertDoesNotThrow(
+        () -> provider.getNotificationInteractionResult(
+            WindowModality.MODAL, TITLE, MESSAGE, "Ok", NotificationType.INFORMATION),
+        "Notification without a match or fallback should be silently ignored");
   }
 
   /** Minimal {@link InteractionResultProvider} stub recording whether each method was invoked. */
