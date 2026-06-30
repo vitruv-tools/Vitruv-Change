@@ -8,7 +8,12 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
+import java.io.ByteArrayOutputStream;
+import java.io.NotSerializableException;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,6 +103,28 @@ class ChangeVisualizationUITest {
     assertNotNull(font, "Font should be created with valid key");
     assertEquals(18, font.getSize(), "Font size should be 18");
     assertEquals(Font.ITALIC, font.getStyle(), "Font style should be italic");
+  }
+
+  @Test
+  void testMouseWheelListenerFieldIsTransient() throws Exception {
+    Field mwlField = ChangeVisualizationUI.class.getDeclaredField("mwl");
+
+    assertTrue(Modifier.isTransient(mwlField.getModifiers()),
+        "mwl is a non-serializable MouseWheelListener and must be transient "
+            + "to avoid NotSerializableException (SonarCloud java:S1948)");
+  }
+
+  @Test
+  void testInstanceIsSerializableDespiteListenerField() throws Exception {
+    assumeTrue(ui != null, "Skipping UI test in headless environment.");
+
+    try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectStream = new ObjectOutputStream(byteStream)) {
+      objectStream.writeObject(ui);
+    } catch (NotSerializableException e) {
+      throw new AssertionError(
+          "ChangeVisualizationUI should be serializable now that mwl is transient", e);
+    }
   }
 }
 
