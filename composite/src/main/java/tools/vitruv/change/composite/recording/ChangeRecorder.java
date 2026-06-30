@@ -83,7 +83,7 @@ public class ChangeRecorder implements AutoCloseable {
           break;
         case Notification.ADD_MANY:
           ((Iterable<? extends Resource>) notification.getNewValue())
-                  .forEach(it -> this.startLoadingResource(it));
+                  .forEach(this::startLoadingResource);
           break;
         default:
           break;
@@ -99,7 +99,7 @@ public class ChangeRecorder implements AutoCloseable {
           this.desinfect(notification.getOldValue());
           break;
         case Notification.REMOVE_MANY:
-          ((Iterable<?>) notification.getOldValue()).forEach(it -> this.desinfect(it));
+          ((Iterable<?>) notification.getOldValue()).forEach(this::desinfect);
           break;
         default:
           break;
@@ -111,7 +111,7 @@ public class ChangeRecorder implements AutoCloseable {
           this.infect(notification.getNewValue());
           break;
         case Notification.ADD_MANY:
-          ((Iterable<?>) notification.getNewValue()).forEach(it -> this.infect(it));
+          ((Iterable<?>) notification.getNewValue()).forEach(this::infect);
           break;
         default:
           break;
@@ -127,7 +127,7 @@ public class ChangeRecorder implements AutoCloseable {
 
     private boolean isContainmentEReference(final Notification notification) {
       Object feature = notification.getFeature();
-      return feature instanceof EReference && ((EReference) feature).isContainment();
+      return feature instanceof EReference eReference && eReference.isContainment();
     }
 
     private boolean isResourceContentsChange(final Notification notification) {
