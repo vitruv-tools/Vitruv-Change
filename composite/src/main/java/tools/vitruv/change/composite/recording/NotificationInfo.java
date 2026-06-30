@@ -280,68 +280,52 @@ class NotificationInfo implements Notification {
    */
   public String getDebugString() {
     final StringBuilder sb = new StringBuilder();
-    boolean isAddEvent = this.isAddEvent();
-    if (isAddEvent) {
-      sb.append("ADD");
-    } else {
-      boolean isSetEvent = this.isSetEvent();
-      if (isSetEvent) {
-        sb.append("SET");
-      } else {
-        boolean isAddManyEvent = this.isAddManyEvent();
-        if (isAddManyEvent) {
-          sb.append("ADDMANY");
-        } else {
-          boolean isRemoveEvent = this.isRemoveEvent();
-          if (isRemoveEvent) {
-            sb.append("REMOVE");
-          } else {
-            boolean isRemoveManyEvent = this.isRemoveManyEvent();
-            if (isRemoveManyEvent) {
-              sb.append("REMOVEMANY");
-            } else {
-              boolean isMoveEvent = this.isMoveEvent();
-              if (isMoveEvent) {
-                sb.append("MOVE");
-              } else {
-                sb.append(this.notification.getEventType());
-              }
-            }
-          }
-        }
-      }
-    }
+    sb.append(this.getEventTypeDebugName());
     sb.append(" val: ").append(this.getValidationMessage());
     Object notifier = this.notification.getNotifier();
     final EObject n = ((EObject) notifier);
     sb.append(" / on: ").append(this.extractName(n));
     sb.append(".");
-    boolean isAttributeNotification = this.isAttributeNotification();
-    if (isAttributeNotification) {
-      sb.append(this.getAttribute().getName());
-    } else {
-      boolean isReferenceNotification = this.isReferenceNotification();
-      if (isReferenceNotification) {
-        sb.append(this.getReference().getName());
-      }
-    }
-    sb.append(" / old: ");
-    Object oldValue = this.getOldValue();
-    if ((oldValue instanceof EObject)) {
-      Object oldValue1 = this.getOldValue();
-      sb.append(this.extractName(((EObject) oldValue1)));
-    } else {
-      sb.append(this.getOldValue());
-    }
-    sb.append(" / new: ");
-    Object newValue = this.getNewValue();
-    if ((newValue instanceof EObject)) {
-      Object newValue1 = this.getNewValue();
-      sb.append(this.extractName(((EObject) newValue1)));
-    } else {
-      sb.append(this.getNewValue());
-    }
+    sb.append(this.getFeatureDebugName());
+    sb.append(" / old: ").append(this.getValueDebugString(this.getOldValue()));
+    sb.append(" / new: ").append(this.getValueDebugString(this.getNewValue()));
     return sb.toString();
+  }
+
+  private String getEventTypeDebugName() {
+    switch (this.notification.getEventType()) {
+      case Notification.ADD:
+        return "ADD";
+      case Notification.SET:
+        return "SET";
+      case Notification.ADD_MANY:
+        return "ADDMANY";
+      case Notification.REMOVE:
+        return "REMOVE";
+      case Notification.REMOVE_MANY:
+        return "REMOVEMANY";
+      case Notification.MOVE:
+        return "MOVE";
+      default:
+        return String.valueOf(this.notification.getEventType());
+    }
+  }
+
+  private String getFeatureDebugName() {
+    if (this.isAttributeNotification()) {
+      return this.getAttribute().getName();
+    }
+    if (this.isReferenceNotification()) {
+      return this.getReference().getName();
+    }
+    return "";
+  }
+
+  private Object getValueDebugString(final Object value) {
+    if ((value instanceof EObject)) {
+      return this.extractName(((EObject) value));
+    }
+    return value;
   }
 
   private String extractName(final EObject o) {
