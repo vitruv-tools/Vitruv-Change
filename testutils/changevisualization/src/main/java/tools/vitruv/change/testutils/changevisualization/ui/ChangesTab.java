@@ -32,7 +32,7 @@ public class ChangesTab extends JPanel
    * The table responsible for the display of the general changeDataSet
    * information.
    */
-  private ChangeDataSetTableView changeDataSetTable;
+  private transient ChangeDataSetTableView changeDataSetTable;
 
   /** The affectedEOject id to highlight. */
   private String highlightID;
