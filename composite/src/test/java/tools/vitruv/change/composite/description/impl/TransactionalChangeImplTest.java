@@ -6,6 +6,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Set;
+
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -15,10 +17,12 @@ import org.junit.jupiter.api.Test;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.eobject.DeleteEObject;
+import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange;
 import tools.vitruv.change.atomic.feature.UnsetFeature;
 import tools.vitruv.change.atomic.feature.attribute.InsertEAttributeValue;
 import tools.vitruv.change.atomic.feature.attribute.RemoveEAttributeValue;
 import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute;
+import tools.vitruv.change.atomic.feature.attribute.UpdateAttributeEChange;
 import tools.vitruv.change.atomic.feature.reference.InsertEReference;
 import tools.vitruv.change.atomic.feature.reference.RemoveEReference;
 import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference;
@@ -240,5 +244,96 @@ class TransactionalChangeImplTest {
     String result = new TransactionalChangeImpl<>(List.of(eChange)).toString();
 
     assertTrue(result.contains("null"));
+  }
+
+  @Test
+  void getAffectedAndReferencedEObjectsForUpdateAttributeEChange() {
+    UpdateAttributeEChange<EObject> eChange = mock(UpdateAttributeEChange.class);
+    when(eChange.getAffectedElement()).thenReturn(affectedElement);
+
+    Set<EObject> result =
+            new TransactionalChangeImpl<>(List.of(eChange)).getAffectedAndReferencedEObjects();
+
+    assertEquals(Set.of(affectedElement), result);
+  }
+
+  @Test
+  void getAffectedAndReferencedEObjectsForReplaceSingleValuedEReference() {
+    ReplaceSingleValuedEReference<EObject> eChange = mock(ReplaceSingleValuedEReference.class);
+    when(eChange.getAffectedElement()).thenReturn(affectedElement);
+    when(eChange.getOldValue()).thenReturn(oldValue);
+    when(eChange.getNewValue()).thenReturn(newValue);
+
+    Set<EObject> result =
+            new TransactionalChangeImpl<>(List.of(eChange)).getAffectedAndReferencedEObjects();
+
+    assertEquals(Set.of(affectedElement, oldValue, newValue), result);
+  }
+
+  @Test
+  void getAffectedAndReferencedEObjectsForInsertEReference() {
+    InsertEReference<EObject> eChange = mock(InsertEReference.class);
+    when(eChange.getAffectedElement()).thenReturn(affectedElement);
+    when(eChange.getNewValue()).thenReturn(newValue);
+
+    Set<EObject> result =
+            new TransactionalChangeImpl<>(List.of(eChange)).getAffectedAndReferencedEObjects();
+
+    assertEquals(Set.of(affectedElement, newValue), result);
+  }
+
+  @Test
+  void getAffectedAndReferencedEObjectsForRemoveEReference() {
+    RemoveEReference<EObject> eChange = mock(RemoveEReference.class);
+    when(eChange.getAffectedElement()).thenReturn(affectedElement);
+    when(eChange.getOldValue()).thenReturn(oldValue);
+
+    Set<EObject> result =
+            new TransactionalChangeImpl<>(List.of(eChange)).getAffectedAndReferencedEObjects();
+
+    assertEquals(Set.of(affectedElement, oldValue), result);
+  }
+
+  @Test
+  void getAffectedAndReferencedEObjectsForEObjectExistenceEChange() {
+    EObjectExistenceEChange<EObject> eChange = mock(EObjectExistenceEChange.class);
+    when(eChange.getAffectedElement()).thenReturn(affectedElement);
+
+    Set<EObject> result =
+            new TransactionalChangeImpl<>(List.of(eChange)).getAffectedAndReferencedEObjects();
+
+    assertEquals(Set.of(affectedElement), result);
+  }
+
+  @Test
+  void getAffectedAndReferencedEObjectsForInsertRootEObject() {
+    InsertRootEObject<EObject> eChange = mock(InsertRootEObject.class);
+    when(eChange.getNewValue()).thenReturn(newValue);
+
+    Set<EObject> result =
+            new TransactionalChangeImpl<>(List.of(eChange)).getAffectedAndReferencedEObjects();
+
+    assertEquals(Set.of(newValue), result);
+  }
+
+  @Test
+  void getAffectedAndReferencedEObjectsForRemoveRootEObject() {
+    RemoveRootEObject<EObject> eChange = mock(RemoveRootEObject.class);
+    when(eChange.getOldValue()).thenReturn(oldValue);
+
+    Set<EObject> result =
+            new TransactionalChangeImpl<>(List.of(eChange)).getAffectedAndReferencedEObjects();
+
+    assertEquals(Set.of(oldValue), result);
+  }
+
+  @Test
+  void getAffectedAndReferencedEObjectsForUnknownChangeTypeReturnsEmptySet() {
+    EChange<EObject> eChange = mock(EChange.class);
+
+    Set<EObject> result =
+            new TransactionalChangeImpl<>(List.of(eChange)).getAffectedAndReferencedEObjects();
+
+    assertTrue(result.isEmpty());
   }
 }
