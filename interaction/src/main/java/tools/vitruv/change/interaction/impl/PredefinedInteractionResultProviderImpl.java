@@ -82,8 +82,8 @@ public class PredefinedInteractionResultProviderImpl implements PredefinedIntera
     {
       String result = this.predefinedInteractionMatcher.getTextInputResult(message);
       if (((result == null) && (this.fallback != null))) {
-        result = this.fallback.getTextInputInteractionResult(windowModality, title, message, positiveDecisionText,
-            cancelDecisionText, inputValidator);
+        result = this.fallback.getTextInputInteractionResult(windowModality, title, message,
+            positiveDecisionText, cancelDecisionText, inputValidator);
       }
       final Supplier<String> _function = () -> {
         String _printInteraction = this.printInteraction(title, message);

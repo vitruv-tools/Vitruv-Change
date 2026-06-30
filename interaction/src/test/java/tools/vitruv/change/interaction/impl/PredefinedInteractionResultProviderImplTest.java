@@ -1,6 +1,9 @@
 package tools.vitruv.change.interaction.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,33 +25,43 @@ class PredefinedInteractionResultProviderImplTest {
     // A simple dummy fallback to test when predefined answers are not found
     dummyFallback = new InteractionResultProvider() {
       @Override
-      public boolean getConfirmationInteractionResult(WindowModality windowModality, String title, String message,
-                                                      String positiveDecisionText, String negativeDecisionText, String cancelDecisionText) {
+      public boolean getConfirmationInteractionResult(
+          WindowModality windowModality, String title, String message,
+          String positiveDecisionText, String negativeDecisionText, String cancelDecisionText)
+      {
         return true; // dummy response
       }
 
       @Override
-      public void getNotificationInteractionResult(WindowModality windowModality, String title, String message,
-                                                   String positiveDecisionText, NotificationType notificationType) {
+      public void getNotificationInteractionResult(
+          WindowModality windowModality, String title, String message,
+          String positiveDecisionText, NotificationType notificationType)
+      {
         // Do nothing
       }
 
       @Override
-      public String getTextInputInteractionResult(WindowModality windowModality, String title, String message,
-                                                  String positiveDecisionText, String cancelDecisionText, InputValidator inputValidator) {
+      public String getTextInputInteractionResult(
+          WindowModality windowModality, String title, String message,
+          String positiveDecisionText, String cancelDecisionText, InputValidator inputValidator)
+      {
         return "fallbackText";
       }
 
       @Override
-      public int getMultipleChoiceSingleSelectionInteractionResult(WindowModality windowModality, String title,
-                                                                   String message, String positiveDecisionText, String cancelDecisionText, Iterable<String> choices) {
+      public int getMultipleChoiceSingleSelectionInteractionResult(
+          WindowModality windowModality, String title, String message,
+          String positiveDecisionText, String cancelDecisionText, Iterable<String> choices)
+      {
         return 99; // dummy index
       }
 
       @Override
-      public Iterable<Integer> getMultipleChoiceMultipleSelectionInteractionResult(WindowModality windowModality,
-                                                                                   String title, String message, String positiveDecisionText, String cancelDecisionText,
-                                                                                   Iterable<String> choices) {
+      public Iterable<Integer> getMultipleChoiceMultipleSelectionInteractionResult(
+          WindowModality windowModality, String title, String message,
+          String positiveDecisionText, String cancelDecisionText,
+          Iterable<String> choices)
+      {
         return Arrays.asList(98, 99);
       }
     };
@@ -116,7 +129,8 @@ class PredefinedInteractionResultProviderImplTest {
   @Test
   void testSingleSelectionThrowsExceptionWhenNoFallbackAndNoPredefinedResult() {
     List<String> choices = Arrays.asList("A", "B");
-    IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+    IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+    {
       providerWithoutFallback.getMultipleChoiceSingleSelectionInteractionResult(
           WindowModality.MODAL, "Title", "Message", "OK", "Cancel", choices);
     });
@@ -130,8 +144,10 @@ class PredefinedInteractionResultProviderImplTest {
   @Test
   void testMultipleSelectionFallbackUsedWhenNoPredefinedResult() {
     List<String> choices = Arrays.asList("A", "B");
-    Iterable<Integer> result = providerWithFallback.getMultipleChoiceMultipleSelectionInteractionResult(
-        WindowModality.MODAL, "Title", "Message", "OK", "Cancel", choices);
+    Iterable<Integer> result = providerWithFallback.
+        getMultipleChoiceMultipleSelectionInteractionResult(
+          WindowModality.MODAL, "Title", "Message", "OK", "Cancel", choices
+        );
 
     List<Integer> resultList = (List<Integer>) result;
     assertEquals(2, resultList.size());
