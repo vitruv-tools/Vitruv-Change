@@ -80,9 +80,9 @@ public class PredefinedInteractionResultProviderImpl implements PredefinedIntera
       final UserInteractionOptions.InputValidator inputValidator) {
     String _xblockexpression = null;
     {
-      final String result = this.predefinedInteractionMatcher.getTextInputResult(message);
+      String result = this.predefinedInteractionMatcher.getTextInputResult(message);
       if (((result == null) && (this.fallback != null))) {
-        this.fallback.getTextInputInteractionResult(windowModality, title, message, positiveDecisionText,
+        result = this.fallback.getTextInputInteractionResult(windowModality, title, message, positiveDecisionText,
             cancelDecisionText, inputValidator);
       }
       final Supplier<String> _function = () -> {
