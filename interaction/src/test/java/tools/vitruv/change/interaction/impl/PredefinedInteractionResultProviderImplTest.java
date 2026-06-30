@@ -1,7 +1,7 @@
 package tools.vitruv.change.interaction.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -58,8 +58,8 @@ class PredefinedInteractionResultProviderImplTest {
           WindowModality windowModality, String title, String message,
           String positiveDecisionText, String cancelDecisionText,
           Iterable<String> choices) {
-          return Arrays.asList(98, 99);
-        }
+        return Arrays.asList(98, 99);
+      }
     };
 
     providerWithFallback = new PredefinedInteractionResultProviderImpl(dummyFallback);
@@ -125,8 +125,7 @@ class PredefinedInteractionResultProviderImplTest {
   @Test
   void testSingleSelectionThrowsExceptionWhenNoFallbackAndNoPredefinedResult() {
     List<String> choices = Arrays.asList("A", "B");
-    IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-    {
+    IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
       providerWithoutFallback.getMultipleChoiceSingleSelectionInteractionResult(
           WindowModality.MODAL, "Title", "Message", "OK", "Cancel", choices);
     });
@@ -140,8 +139,8 @@ class PredefinedInteractionResultProviderImplTest {
   @Test
   void testMultipleSelectionFallbackUsedWhenNoPredefinedResult() {
     List<String> choices = Arrays.asList("A", "B");
-    Iterable<Integer> result = providerWithFallback.
-        getMultipleChoiceMultipleSelectionInteractionResult(
+    Iterable<Integer> result = providerWithFallback
+        .getMultipleChoiceMultipleSelectionInteractionResult(
             WindowModality.MODAL, "Title", "Message", "OK", "Cancel", choices
         );
 
