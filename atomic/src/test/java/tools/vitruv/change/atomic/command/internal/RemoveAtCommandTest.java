@@ -91,7 +91,7 @@ class RemoveAtCommandTest extends CommandTest {
     RemoveAtCommand removeAtCommand = CommandTest.<RemoveAtCommand>assertIsInstanceOf(command, RemoveAtCommand.class);
     Assertions.assertSame(removeAtCommand.getOwnerList(), list);
     Assertions.assertTrue(removeAtCommand.getCollection().contains(value));
-    Assertions.assertEquals(removeAtCommand.getCollection().size(), 1);
+    Assertions.assertEquals(1, removeAtCommand.getCollection().size());
     Assertions.assertEquals(removeAtCommand.getIndex(), index);
     return removeAtCommand;
   }

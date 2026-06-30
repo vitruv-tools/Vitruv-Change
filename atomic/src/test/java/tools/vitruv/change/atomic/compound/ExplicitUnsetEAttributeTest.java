@@ -130,11 +130,23 @@ class ExplicitUnsetEAttributeTest extends EChangeTest {
     boolean _isMany = this.affectedFeature.isMany();
     boolean _not = (!_isMany);
     if (_not) {
-      Assertions.assertEquals(this.affectedEObject.eGet(this.affectedFeature), ExplicitUnsetEAttributeTest.OLD_VALUE);
+      Assertions.assertEquals(
+              ExplicitUnsetEAttributeTest.OLD_VALUE,
+              this.affectedEObject.eGet(this.affectedFeature)
+      );
     } else {
-      Assertions.assertEquals(this.attributeContent.get(0), ExplicitUnsetEAttributeTest.OLD_VALUE);
-      Assertions.assertEquals(this.attributeContent.get(1), ExplicitUnsetEAttributeTest.OLD_VALUE_2);
-      Assertions.assertEquals(this.attributeContent.get(2), ExplicitUnsetEAttributeTest.OLD_VALUE_3);
+      Assertions.assertEquals(
+              ExplicitUnsetEAttributeTest.OLD_VALUE,
+              this.attributeContent.get(0)
+      );
+      Assertions.assertEquals(
+              ExplicitUnsetEAttributeTest.OLD_VALUE_2,
+              this.attributeContent.get(1)
+      );
+      Assertions.assertEquals(
+              ExplicitUnsetEAttributeTest.OLD_VALUE_3,
+              this.attributeContent.get(2)
+      );
     }
   }
 
