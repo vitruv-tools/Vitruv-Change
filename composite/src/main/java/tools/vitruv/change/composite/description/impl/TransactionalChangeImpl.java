@@ -184,7 +184,7 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
     if (eChange instanceof RemoveRootEObject) {
       return Set.<EObject>of(((RemoveRootEObject<EObject>) eChange).getOldValue());
     }
-    return null;
+    return Set.of();
   }
 
   @Override

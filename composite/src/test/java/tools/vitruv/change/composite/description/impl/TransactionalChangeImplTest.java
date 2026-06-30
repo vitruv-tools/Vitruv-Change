@@ -327,4 +327,14 @@ class TransactionalChangeImplTest {
 
     assertEquals(Set.of(oldValue), result);
   }
+
+  @Test
+  void affectedAndReferencedUnknownChangeTypeContributesNoEObjects() {
+    EChange<EObject> eChange = mock(EChange.class);
+
+    Set<EObject> result =
+        new TransactionalChangeImpl<>(List.of(eChange)).getAffectedAndReferencedEObjects();
+
+    assertEquals(Set.of(), result);
+  }
 }
