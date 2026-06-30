@@ -6,6 +6,7 @@ import allElementTypes.Root;
 import com.google.common.collect.Iterables;
 import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -13,7 +14,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -1156,5 +1162,76 @@ public class ChangeRecorderTest {
       _xblockexpression = eObject;
     }
     return _xblockexpression;
+  }
+
+  @Test
+  @DisplayName("adds delete changes for removed containment tree")
+  public void endRecordingAddsDeleteChangesForRemovedContainmentTree() {
+    final EPackage rootPackage = EcoreFactory.eINSTANCE.createEPackage();
+    rootPackage.setName("root");
+    rootPackage.setNsPrefix("root");
+    rootPackage.setNsURI("test://root");
+
+    final EClass removedClass = EcoreFactory.eINSTANCE.createEClass();
+    removedClass.setName("RemovedClass");
+
+    final EAttribute containedAttribute = EcoreFactory.eINSTANCE.createEAttribute();
+    containedAttribute.setName("containedAttribute");
+    containedAttribute.setEType(EcorePackage.Literals.ESTRING);
+
+    removedClass.getEStructuralFeatures().add(containedAttribute);
+    rootPackage.getEClassifiers().add(removedClass);
+
+    this.<EPackage>wrapIntoRecordedResource(rootPackage);
+
+    final Runnable _function = () -> {
+      rootPackage.getEClassifiers().remove(removedClass);
+    };
+    this.record(_function);
+
+    final List<EObject> deletedObjects = this.getDeletedObjects(this.changeRecorder.getChange());
+
+    Assertions.assertTrue(deletedObjects.contains(containedAttribute));
+    Assertions.assertTrue(deletedObjects.contains(removedClass));
+    Assertions.assertTrue(
+            deletedObjects.indexOf(containedAttribute) < deletedObjects.indexOf(removedClass));
+  }
+
+  private List<EObject> getDeletedObjects(final TransactionalChange<EObject> change) {
+    final List<EObject> deletedObjects = new ArrayList<>();
+
+    for (final EChange<EObject> eChange : change.getEChanges()) {
+      if (eChange instanceof DeleteEObject<?>) {
+        final DeleteEObject<?> deleteChange = (DeleteEObject<?>) eChange;
+        deletedObjects.add((EObject) deleteChange.getAffectedElement());
+      }
+    }
+
+    return deletedObjects;
+  }
+
+  @Test
+  @DisplayName("does not delete an element that is removed and inserted again")
+  public void endRecordingDoesNotDeleteReinsertedElement() {
+    final EPackage rootPackage = EcoreFactory.eINSTANCE.createEPackage();
+    rootPackage.setName("root");
+    rootPackage.setNsPrefix("root");
+    rootPackage.setNsURI("test://root");
+
+    final EClass movedClass = EcoreFactory.eINSTANCE.createEClass();
+    movedClass.setName("MovedClass");
+    rootPackage.getEClassifiers().add(movedClass);
+
+    this.<EPackage>wrapIntoRecordedResource(rootPackage);
+
+    final Runnable _function = () -> {
+      rootPackage.getEClassifiers().remove(movedClass);
+      rootPackage.getEClassifiers().add(movedClass);
+    };
+    this.record(_function);
+
+    final List<EObject> deletedObjects = this.getDeletedObjects(this.changeRecorder.getChange());
+
+    Assertions.assertFalse(deletedObjects.contains(movedClass));
   }
 }
