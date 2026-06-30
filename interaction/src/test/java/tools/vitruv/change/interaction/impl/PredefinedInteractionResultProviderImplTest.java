@@ -1,12 +1,13 @@
 package tools.vitruv.change.interaction.impl;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tools.vitruv.change.interaction.InteractionResultProvider;
@@ -27,32 +28,28 @@ class PredefinedInteractionResultProviderImplTest {
       @Override
       public boolean getConfirmationInteractionResult(
           WindowModality windowModality, String title, String message,
-          String positiveDecisionText, String negativeDecisionText, String cancelDecisionText)
-      {
+          String positiveDecisionText, String negativeDecisionText, String cancelDecisionText) {
         return true; // dummy response
       }
 
       @Override
       public void getNotificationInteractionResult(
           WindowModality windowModality, String title, String message,
-          String positiveDecisionText, NotificationType notificationType)
-      {
+          String positiveDecisionText, NotificationType notificationType) {
         // Do nothing
       }
 
       @Override
       public String getTextInputInteractionResult(
           WindowModality windowModality, String title, String message,
-          String positiveDecisionText, String cancelDecisionText, InputValidator inputValidator)
-      {
+          String positiveDecisionText, String cancelDecisionText, InputValidator inputValidator) {
         return "fallbackText";
       }
 
       @Override
       public int getMultipleChoiceSingleSelectionInteractionResult(
           WindowModality windowModality, String title, String message,
-          String positiveDecisionText, String cancelDecisionText, Iterable<String> choices)
-      {
+          String positiveDecisionText, String cancelDecisionText, Iterable<String> choices) {
         return 99; // dummy index
       }
 
@@ -60,10 +57,9 @@ class PredefinedInteractionResultProviderImplTest {
       public Iterable<Integer> getMultipleChoiceMultipleSelectionInteractionResult(
           WindowModality windowModality, String title, String message,
           String positiveDecisionText, String cancelDecisionText,
-          Iterable<String> choices)
-      {
-        return Arrays.asList(98, 99);
-      }
+          Iterable<String> choices) {
+          return Arrays.asList(98, 99);
+        }
     };
 
     providerWithFallback = new PredefinedInteractionResultProviderImpl(dummyFallback);
@@ -146,7 +142,7 @@ class PredefinedInteractionResultProviderImplTest {
     List<String> choices = Arrays.asList("A", "B");
     Iterable<Integer> result = providerWithFallback.
         getMultipleChoiceMultipleSelectionInteractionResult(
-          WindowModality.MODAL, "Title", "Message", "OK", "Cancel", choices
+            WindowModality.MODAL, "Title", "Message", "OK", "Cancel", choices
         );
 
     List<Integer> resultList = (List<Integer>) result;
