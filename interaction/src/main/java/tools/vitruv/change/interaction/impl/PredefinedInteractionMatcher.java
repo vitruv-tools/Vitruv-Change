@@ -3,6 +3,7 @@ package tools.vitruv.change.interaction.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -64,28 +65,28 @@ public class PredefinedInteractionMatcher {
     return inputToReuse;
   }
 
-  public Boolean getNotificationResult(final String message) {
+  public Optional<Boolean> getNotificationResult(final String message) {
     final Iterable<ConfirmationUserInteraction> inputToReuseCandidates = this
         .<ConfirmationUserInteraction>getMatchingInput(message, ConfirmationUserInteraction.class);
     boolean _isEmpty = Iterables.isEmpty(inputToReuseCandidates);
     if (_isEmpty) {
-      return null;
+      return Optional.empty();
     }
     final ConfirmationUserInteraction inputToReuse = inputToReuseCandidates.iterator().next();
     this.userInteractions.remove(inputToReuse);
-    return Boolean.valueOf(true);
+    return Optional.of(Boolean.TRUE);
   }
 
-  public Boolean getConfirmationResult(final String message) {
+  public Optional<Boolean> getConfirmationResult(final String message) {
     final Iterable<ConfirmationUserInteraction> inputToReuseCandidates = this
         .<ConfirmationUserInteraction>getMatchingInput(message, ConfirmationUserInteraction.class);
     boolean _isEmpty = Iterables.isEmpty(inputToReuseCandidates);
     if (_isEmpty) {
-      return null;
+      return Optional.empty();
     }
     final ConfirmationUserInteraction inputToReuse = inputToReuseCandidates.iterator().next();
     this.userInteractions.remove(inputToReuse);
-    return Boolean.valueOf(inputToReuse.isConfirmed());
+    return Optional.of(Boolean.valueOf(inputToReuse.isConfirmed()));
   }
 
   public String getTextInputResult(final String message) {

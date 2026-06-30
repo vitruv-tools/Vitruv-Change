@@ -53,5 +53,12 @@
       <artifactId>tools.vitruv.change.p2wrappers.javautils</artifactId>
       <version>${project.version}</version>
     </dependency>
+
+    <!-- test dependencies -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

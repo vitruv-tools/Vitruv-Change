@@ -48,7 +48,7 @@ public class PredefinedInteractionResultProviderImpl implements PredefinedIntera
   public boolean getConfirmationInteractionResult(final UserInteractionOptions.WindowModality windowModality,
       final String title, final String message, final String positiveDecisionText, final String negativeDecisionText,
       final String cancelDecisionText) {
-    Boolean result = this.predefinedInteractionMatcher.getConfirmationResult(message);
+    Boolean result = this.predefinedInteractionMatcher.getConfirmationResult(message).orElse(null);
     if (((result == null) && (this.fallback != null))) {
       result = Boolean.valueOf(this.fallback.getConfirmationInteractionResult(windowModality, title, message,
           positiveDecisionText, negativeDecisionText, cancelDecisionText));
@@ -64,8 +64,9 @@ public class PredefinedInteractionResultProviderImpl implements PredefinedIntera
   public void getNotificationInteractionResult(final UserInteractionOptions.WindowModality windowModality,
       final String title, final String message, final String positiveDecisionText,
       final UserInteractionOptions.NotificationType notificationType) {
-    final Boolean result = this.predefinedInteractionMatcher.getNotificationResult(message);
-    if (((result == null) && (this.fallback != null))) {
+    final boolean noPredefinedResult =
+        this.predefinedInteractionMatcher.getNotificationResult(message).isEmpty();
+    if ((noPredefinedResult && (this.fallback != null))) {
       this.fallback.getNotificationInteractionResult(windowModality, title, message, positiveDecisionText,
           notificationType);
     }
