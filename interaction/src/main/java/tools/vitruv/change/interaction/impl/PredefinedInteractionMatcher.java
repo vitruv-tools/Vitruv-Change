@@ -65,6 +65,12 @@ public class PredefinedInteractionMatcher {
     return inputToReuse;
   }
 
+  /**
+   * Returns the predefined notification result for the given message, if one is available.
+   *
+   * @param message the message to find a matching predefined notification for
+   * @return present if a predefined interaction matched, empty otherwise
+   */
   public Optional<Boolean> getNotificationResult(final String message) {
     final Iterable<ConfirmationUserInteraction> inputToReuseCandidates = this
         .<ConfirmationUserInteraction>getMatchingInput(message, ConfirmationUserInteraction.class);
@@ -77,6 +83,12 @@ public class PredefinedInteractionMatcher {
     return Optional.of(Boolean.TRUE);
   }
 
+  /**
+   * Returns the predefined confirmation result for the given message, if one is available.
+   *
+   * @param message the message to find a matching predefined confirmation for
+   * @return the confirmation result, or empty if no input was predefined
+   */
   public Optional<Boolean> getConfirmationResult(final String message) {
     final Iterable<ConfirmationUserInteraction> inputToReuseCandidates = this
         .<ConfirmationUserInteraction>getMatchingInput(message, ConfirmationUserInteraction.class);

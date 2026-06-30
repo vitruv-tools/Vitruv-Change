@@ -1,6 +1,7 @@
 package tools.vitruv.change.interaction.impl;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -48,16 +49,17 @@ public class PredefinedInteractionResultProviderImpl implements PredefinedIntera
   public boolean getConfirmationInteractionResult(final UserInteractionOptions.WindowModality windowModality,
       final String title, final String message, final String positiveDecisionText, final String negativeDecisionText,
       final String cancelDecisionText) {
-    Boolean result = this.predefinedInteractionMatcher.getConfirmationResult(message).orElse(null);
-    if (((result == null) && (this.fallback != null))) {
-      result = Boolean.valueOf(this.fallback.getConfirmationInteractionResult(windowModality, title, message,
-          positiveDecisionText, negativeDecisionText, cancelDecisionText));
+    final Optional<Boolean> predefinedResult =
+        this.predefinedInteractionMatcher.getConfirmationResult(message);
+    if (predefinedResult.isPresent()) {
+      return predefinedResult.get().booleanValue();
     }
-    final Supplier<String> _function = () -> {
-      String _printInteraction = this.printInteraction(title, message);
-      return ("No input given for confirmation:" + _printInteraction);
-    };
-    return (this.<Boolean>ifNullThrow(result, _function)).booleanValue();
+    if (this.fallback == null) {
+      throw new IllegalStateException(
+          "No input given for confirmation:" + this.printInteraction(title, message));
+    }
+    return this.fallback.getConfirmationInteractionResult(windowModality, title, message,
+        positiveDecisionText, negativeDecisionText, cancelDecisionText);
   }
 
   @Override
