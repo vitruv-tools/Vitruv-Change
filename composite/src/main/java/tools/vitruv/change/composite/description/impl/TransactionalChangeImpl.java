@@ -158,49 +158,44 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
   }
 
   private static Set<EObject> getAffectedAndReferencedEObjects(final EChange<?> eChange) {
-    Set<EObject> _switchResult = null;
-    boolean _matched = false;
     if (eChange instanceof UpdateAttributeEChange) {
-      _matched=true;
-      _switchResult = Set.<EObject>of(((UpdateAttributeEChange<EObject>)eChange).getAffectedElement());
+      return Set.<EObject>of(((UpdateAttributeEChange<EObject>) eChange).getAffectedElement());
     }
-    if (!_matched) {
-      if (eChange instanceof ReplaceSingleValuedEReference) {
-        _matched=true;
-        _switchResult = TransactionalChangeImpl.<EObject>setOfNotNull(((ReplaceSingleValuedEReference<EObject>)eChange).getAffectedElement(), ((ReplaceSingleValuedEReference<EObject>)eChange).getOldValue(), ((ReplaceSingleValuedEReference<EObject>)eChange).getNewValue());
-      }
+
+    if (eChange instanceof ReplaceSingleValuedEReference) {
+      return TransactionalChangeImpl.<EObject>setOfNotNull(
+              ((ReplaceSingleValuedEReference<EObject>) eChange).getAffectedElement(),
+              ((ReplaceSingleValuedEReference<EObject>) eChange).getOldValue(),
+              ((ReplaceSingleValuedEReference<EObject>) eChange).getNewValue()
+      );
     }
-    if (!_matched) {
-      if (eChange instanceof InsertEReference) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((InsertEReference<EObject>)eChange).getAffectedElement(), ((InsertEReference<EObject>)eChange).getNewValue());
-      }
+
+    if (eChange instanceof InsertEReference) {
+      return Set.<EObject>of(
+              ((InsertEReference<EObject>) eChange).getAffectedElement(),
+              ((InsertEReference<EObject>) eChange).getNewValue()
+      );
     }
-    if (!_matched) {
-      if (eChange instanceof RemoveEReference) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((RemoveEReference<EObject>)eChange).getAffectedElement(), ((RemoveEReference<EObject>)eChange).getOldValue());
-      }
+
+    if (eChange instanceof RemoveEReference) {
+      return Set.<EObject>of(
+              ((RemoveEReference<EObject>) eChange).getAffectedElement(),
+              ((RemoveEReference<EObject>) eChange).getOldValue()
+      );
     }
-    if (!_matched) {
-      if (eChange instanceof EObjectExistenceEChange) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((EObjectExistenceEChange<EObject>)eChange).getAffectedElement());
-      }
+
+    if (eChange instanceof EObjectExistenceEChange) {
+      return Set.<EObject>of(((EObjectExistenceEChange<EObject>) eChange).getAffectedElement());
     }
-    if (!_matched) {
-      if (eChange instanceof InsertRootEObject) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((InsertRootEObject<EObject>)eChange).getNewValue());
-      }
+
+    if (eChange instanceof InsertRootEObject) {
+      return Set.<EObject>of(((InsertRootEObject<EObject>) eChange).getNewValue());
     }
-    if (!_matched) {
-      if (eChange instanceof RemoveRootEObject) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((RemoveRootEObject<EObject>)eChange).getOldValue());
-      }
+
+    if (eChange instanceof RemoveRootEObject) {
+      return Set.<EObject>of(((RemoveRootEObject<EObject>) eChange).getOldValue());
     }
-    return _switchResult;
+    return Set.of();
   }
 
   @Override
