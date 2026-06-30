@@ -322,8 +322,8 @@ class NotificationInfo implements Notification {
   }
 
   private Object getValueDebugString(final Object value) {
-    if ((value instanceof EObject)) {
-      return this.extractName(((EObject) value));
+    if ((value instanceof EObject eObject)) {
+      return this.extractName(eObject);
     }
     return value;
   }
