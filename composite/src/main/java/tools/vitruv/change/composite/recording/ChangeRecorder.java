@@ -60,88 +60,89 @@ public class ChangeRecorder implements AutoCloseable {
     }
 
     private void handleAdaptersForResourceAndResourceSetChanges(final Notification notification) {
-      if (((notification.getNotifier() instanceof ResourceSet) && 
-        (notification.getFeatureID(ResourceSet.class) == ResourceSet.RESOURCE_SET__RESOURCES))) {
-        int _eventType = notification.getEventType();
-        switch (_eventType) {
-          case Notification.ADD:
-            Object _newValue = notification.getNewValue();
-            this.startLoadingResource(((Resource) _newValue));
-            break;
-          case Notification.ADD_MANY:
-            Object _newValue_1 = notification.getNewValue();
-            final Consumer<Resource> _function = (Resource it) -> {
-              this.startLoadingResource(it);
-            };
-            ((Iterable<? extends Resource>) _newValue_1).forEach(_function);
-            break;
-          default:
-            break;
-        }
+      boolean isResourceSetChange = isResourceSetResourcesChange(notification);
+
+      if (isResourceSetChange) {
+        handleResourceSetLoading(notification);
       }
-      Object _feature = notification.getFeature();
-      final Object feature = _feature;
-      boolean _matched = false;
-      if (feature instanceof EReference) {
-        boolean _isContainment = ((EReference)feature).isContainment();
-        if (_isContainment) {
-          _matched=true;
-        }
+
+      if (isContainmentChange(notification, isResourceSetChange)) {
+        handleInfectionAndDesinfection(notification);
+        return;
       }
-      if (!_matched) {
-        if (((notification.getNotifier() instanceof Resource) && 
-          (notification.getFeatureID(Resource.class) == Resource.RESOURCE__CONTENTS))) {
-          _matched=true;
-        }
+
+      if (isResourceIsLoadedChange(notification)) {
+        this.finishLoadingResource((Resource) notification.getNotifier());
       }
-      if (!_matched) {
-        if (((notification.getNotifier() instanceof ResourceSet) && 
-          (notification.getFeatureID(ResourceSet.class) == ResourceSet.RESOURCE_SET__RESOURCES))) {
-          _matched=true;
-        }
+    }
+
+    private void handleResourceSetLoading(final Notification notification) {
+      switch (notification.getEventType()) {
+        case Notification.ADD:
+          this.startLoadingResource((Resource) notification.getNewValue());
+          break;
+        case Notification.ADD_MANY:
+          ((Iterable<? extends Resource>) notification.getNewValue())
+                  .forEach(this::startLoadingResource);
+          break;
+        default:
+          break;
       }
-      if (_matched) {
-        int _eventType_1 = notification.getEventType();
-        switch (_eventType_1) {
-          case Notification.SET:
-          case Notification.REMOVE:
-            this.desinfect(notification.getOldValue());
-            break;
-          case Notification.REMOVE_MANY:
-            Object _oldValue = notification.getOldValue();
-            final Consumer<Object> _function_1 = (Object it) -> {
-              this.desinfect(it);
-            };
-            ((Iterable<?>) _oldValue).forEach(_function_1);
-            break;
-          default:
-            break;
-        }
-        int _eventType_2 = notification.getEventType();
-        switch (_eventType_2) {
-          case Notification.ADD:
-          case Notification.SET:
-            this.infect(notification.getNewValue());
-            break;
-          case Notification.ADD_MANY:
-            Object _newValue_2 = notification.getNewValue();
-            final Consumer<Object> _function_2 = (Object it) -> {
-              this.infect(it);
-            };
-            ((Iterable<?>) _newValue_2).forEach(_function_2);
-            break;
-          default:
-            break;
-        }
+    }
+
+    private void handleInfectionAndDesinfection(final Notification notification) {
+      int eventType = notification.getEventType();
+
+      switch (eventType) {
+        case Notification.SET:
+        case Notification.REMOVE:
+          this.desinfect(notification.getOldValue());
+          break;
+        case Notification.REMOVE_MANY:
+          ((Iterable<?>) notification.getOldValue()).forEach(this::desinfect);
+          break;
+        default:
+          break;
       }
-      if (!_matched) {
-        if (((notification.getNotifier() instanceof Resource) && 
-          (notification.getFeatureID(Resource.class) == Resource.RESOURCE__IS_LOADED))) {
-          _matched=true;
-          Object _notifier = notification.getNotifier();
-          this.finishLoadingResource(((Resource) _notifier));
-        }
+
+      switch (eventType) {
+        case Notification.ADD:
+        case Notification.SET:
+          this.infect(notification.getNewValue());
+          break;
+        case Notification.ADD_MANY:
+          ((Iterable<?>) notification.getNewValue()).forEach(this::infect);
+          break;
+        default:
+          break;
       }
+    }
+
+    private boolean isContainmentChange(
+            final Notification notification, final boolean isResourceSetChange) {
+      return isContainmentEReference(notification)
+              || isResourceContentsChange(notification)
+              || isResourceSetChange;
+    }
+
+    private boolean isContainmentEReference(final Notification notification) {
+      Object feature = notification.getFeature();
+      return feature instanceof EReference eReference && eReference.isContainment();
+    }
+
+    private boolean isResourceContentsChange(final Notification notification) {
+      return notification.getNotifier() instanceof Resource
+              && notification.getFeatureID(Resource.class) == Resource.RESOURCE__CONTENTS;
+    }
+
+    private boolean isResourceSetResourcesChange(final Notification notification) {
+      return notification.getNotifier() instanceof ResourceSet
+              && notification.getFeatureID(ResourceSet.class) == ResourceSet.RESOURCE_SET__RESOURCES;
+    }
+
+    private boolean isResourceIsLoadedChange(final Notification notification) {
+      return notification.getNotifier() instanceof Resource
+              && notification.getFeatureID(Resource.class) == Resource.RESOURCE__IS_LOADED;
     }
 
     private Iterable<? extends EChange<EObject>> extractRelevantChanges(final Notification notification) {
