@@ -12,6 +12,9 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.hamcrest.Matcher;
 
 public final class ModelMatchers {
+  /**
+   * Matches resources that contain a model deeply equal to the expected resource.
+   */
   public static Matcher<Resource> containsModelOf(final Resource expected,
       final ModelDeepEqualityOption... options) {
     return ModelMatchers.contains(ModelMatchers.checkResourceContent(expected), options);
@@ -35,10 +38,17 @@ public final class ModelMatchers {
     return _xblockexpression;
   }
 
-  public static Matcher<Resource> contains(final EObject root, final ModelDeepEqualityOption... options) {
+  /**
+   * Matches resources that contain a root object deeply equal to {@code root}.
+   */
+  public static Matcher<Resource> contains(final EObject root,
+      final ModelDeepEqualityOption... options) {
     return ModelMatchers.contains(ModelMatchers.<EObject>equalsDeeply(root, options));
   }
 
+  /**
+   * Matches resources whose single root object satisfies the given matcher.
+   */
   public static Matcher<Resource> contains(final Matcher<? super EObject> rootMatcher) {
     return new ResourceContainmentMatcher(rootMatcher);
   }
@@ -54,7 +64,8 @@ public final class ModelMatchers {
    */
   public static <T extends Iterable<? extends EObject>> Matcher<T> containsAllOf(
       final Iterable<? extends EObject> searchedItems, final ModelDeepEqualityOption... options) {
-    return ModelMatchers.<T>asIterableMatcher(new EListMultipleContainmentMatcher(searchedItems, true, options));
+    return ModelMatchers.<T>asIterableMatcher(
+        new EListMultipleContainmentMatcher(searchedItems, true, options));
   }
 
   /**
@@ -68,7 +79,8 @@ public final class ModelMatchers {
    */
   public static <T extends Iterable<? extends EObject>> Matcher<T> containsNoneOf(
       final Iterable<? extends EObject> searchedItems, final ModelDeepEqualityOption... options) {
-    return ModelMatchers.<T>asIterableMatcher(new EListMultipleContainmentMatcher(searchedItems, false, options));
+    return ModelMatchers.<T>asIterableMatcher(
+        new EListMultipleContainmentMatcher(searchedItems, false, options));
   }
 
   /**
@@ -79,9 +91,10 @@ public final class ModelMatchers {
    * @param searchedItem item, which should be contained.
    * @param options      ...
    */
-  public static <T extends Iterable<? extends EObject>> Matcher<T> listContains(final EObject searchedItem,
-      final ModelDeepEqualityOption... options) {
-    return ModelMatchers.<T>asIterableMatcher(new EListSingleContainmentMatcher(searchedItem, true, options));
+  public static <T extends Iterable<? extends EObject>> Matcher<T> listContains(
+      final EObject searchedItem, final ModelDeepEqualityOption... options) {
+    return ModelMatchers.<T>asIterableMatcher(
+        new EListSingleContainmentMatcher(searchedItem, true, options));
   }
 
   private static <T extends Iterable<? extends EObject>> Matcher<T> asIterableMatcher(
@@ -91,22 +104,37 @@ public final class ModelMatchers {
     return typedMatcher;
   }
 
+  /**
+   * Matches URIs that point to existing resources.
+   */
   public static Matcher<URI> isResource() {
     return new ResourceExistingMatcher(true);
   }
 
+  /**
+   * Matches URIs that do not point to existing resources.
+   */
   public static Matcher<URI> isNoResource() {
     return new ResourceExistingMatcher(false);
   }
 
+  /**
+   * Matches resources whose URI exists.
+   */
   public static Matcher<Resource> exists() {
     return new ResourceExistenceMatcher(true);
   }
 
+  /**
+   * Matches resources whose URI does not exist.
+   */
   public static Matcher<Resource> doesNotExist() {
     return new ResourceExistenceMatcher(false);
   }
 
+  /**
+   * Matches objects contained in the given resource.
+   */
   public static Matcher<EObject> isContainedIn(final Resource resource) {
     return new EObjectResourceMatcher(resource);
   }
@@ -160,14 +188,24 @@ public final class ModelMatchers {
     return new EqualsBasedEqualityStrategy(_of);
   }
 
-  public static Matcher<EObject> whose(final EStructuralFeature feature, final Matcher<?> featureMatcher) {
+  /**
+   * Matches objects whose feature value satisfies the given matcher.
+   */
+  public static Matcher<EObject> whose(final EStructuralFeature feature,
+      final Matcher<?> featureMatcher) {
     return new EObjectFeatureMatcher(feature, featureMatcher);
   }
 
+  /**
+   * Matches values that are instances of the given Ecore classifier.
+   */
   public static Matcher<Object> isInstanceOf(final EClassifier classifier) {
     return new InstanceOfEClassifierMatcher(classifier);
   }
 
+  /**
+   * Matches resources without diagnostics.
+   */
   public static Matcher<Resource> hasNoErrors() {
     return new ResourceHasNoErrorsMatcher();
   }
