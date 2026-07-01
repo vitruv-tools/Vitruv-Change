@@ -106,18 +106,26 @@ class ModelDeepEqualityMatcher<O extends EObject> extends TypeSafeMatcher<O> {
 
     @Override
     public void postComparison(final Comparison comparison, final Monitor monitor) {
+      // Intentionally empty: matching the two roots only requires the postMatch hook,
+      // so this lifecycle callback of IPostProcessor is deliberately a no-op.
     }
 
     @Override
     public void postConflicts(final Comparison comparison, final Monitor monitor) {
+      // Intentionally empty: matching the two roots only requires the postMatch hook,
+      // so this lifecycle callback of IPostProcessor is deliberately a no-op.
     }
 
     @Override
     public void postDiff(final Comparison comparison, final Monitor monitor) {
+      // Intentionally empty: matching the two roots only requires the postMatch hook,
+      // so this lifecycle callback of IPostProcessor is deliberately a no-op.
     }
 
     @Override
     public void postEquivalences(final Comparison comparison, final Monitor monitor) {
+      // Intentionally empty: matching the two roots only requires the postMatch hook,
+      // so this lifecycle callback of IPostProcessor is deliberately a no-op.
     }
 
     @Override
@@ -159,6 +167,8 @@ class ModelDeepEqualityMatcher<O extends EObject> extends TypeSafeMatcher<O> {
 
     @Override
     public void postRequirements(final Comparison comparison, final Monitor monitor) {
+      // Intentionally empty: matching the two roots only requires the postMatch hook,
+      // so this lifecycle callback of IPostProcessor is deliberately a no-op.
     }
 
     public MatchRoots(final EObject leftRoot, final EObject rightRoot) {
