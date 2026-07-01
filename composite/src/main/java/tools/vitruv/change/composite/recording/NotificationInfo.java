@@ -241,7 +241,7 @@ class NotificationInfo implements Notification {
   public int getInitialIndex() {
     int xifexpression = (int) 0;
     int position = this.getPosition();
-    boolean tripleEquals = (position == NotificationInfo.NO_INDEX);
+    boolean tripleEquals = (position == Notification.NO_INDEX);
     if (tripleEquals) {
       xifexpression = 0;
     } else {
