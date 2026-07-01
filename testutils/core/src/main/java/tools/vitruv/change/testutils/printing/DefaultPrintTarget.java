@@ -74,8 +74,8 @@ public class DefaultPrintTarget implements PrintTarget {
       final BiFunction<PrintTarget, T, PrintResult> elementPrinter) {
     this.checkIsOpen();
     final ArrayList<DefaultPrintTarget> preprinted = this.newPreprintedTargets(elements);
-    boolean _preprintElements = this.<T>preprintElements(elements, elementPrinter, preprinted);
-    if (!_preprintElements) {
+    boolean preprintElements = this.<T>preprintElements(elements, elementPrinter, preprinted);
+    if (!preprintElements) {
       return PrintResult.NOT_RESPONSIBLE;
     }
     return this.printPreprinted(start, end, mode, preprinted);
@@ -83,8 +83,8 @@ public class DefaultPrintTarget implements PrintTarget {
 
   private ArrayList<DefaultPrintTarget> newPreprintedTargets(final Iterable<?> elements) {
     if ((elements instanceof Collection<?>)) {
-      int _size = ((Collection<?>) elements).size();
-      return new ArrayList<DefaultPrintTarget>(_size);
+      int size = ((Collection<?>) elements).size();
+      return new ArrayList<DefaultPrintTarget>(size);
     }
     return new ArrayList<DefaultPrintTarget>();
   }
@@ -94,8 +94,8 @@ public class DefaultPrintTarget implements PrintTarget {
       final ArrayList<DefaultPrintTarget> preprinted) {
     for (final Iterator<? extends T> elementsIterator = elements.iterator(); elementsIterator.hasNext();) {
       final T element = elementsIterator.next();
-      boolean _preprintElement = this.<T>preprintElement(element, elementPrinter, preprinted);
-      if (!_preprintElement) {
+      boolean preprintElement = this.<T>preprintElement(element, elementPrinter, preprinted);
+      if (!preprintElement) {
         return false;
       }
     }
@@ -106,9 +106,9 @@ public class DefaultPrintTarget implements PrintTarget {
       final BiFunction<PrintTarget, T, PrintResult> elementPrinter,
       final ArrayList<DefaultPrintTarget> preprinted) {
     final DefaultPrintTarget subTarget = new DefaultPrintTarget();
-    PrintResult _apply = elementPrinter.apply(subTarget, element);
-    if (_apply != null) {
-      switch (_apply) {
+    PrintResult printResult = elementPrinter.apply(subTarget, element);
+    if (printResult != null) {
+      switch (printResult) {
         case NOT_RESPONSIBLE:
           return this.handleNotResponsibleElement(element, preprinted);
         case PRINTED:
@@ -125,8 +125,8 @@ public class DefaultPrintTarget implements PrintTarget {
 
   private <T extends Object> boolean handleNotResponsibleElement(final T element,
       final ArrayList<DefaultPrintTarget> preprinted) {
-    boolean _isEmpty = preprinted.isEmpty();
-    if (_isEmpty) {
+    boolean isEmpty = preprinted.isEmpty();
+    if (isEmpty) {
       return false;
     }
     throw new IllegalStateException(
@@ -135,16 +135,16 @@ public class DefaultPrintTarget implements PrintTarget {
 
   private PrintResult printPreprinted(final String start, final String end, final PrintMode mode,
       final ArrayList<DefaultPrintTarget> preprinted) {
-    boolean _isEmpty = preprinted.isEmpty();
-    if (_isEmpty) {
-      PrintResult _print = this.print(start);
-      PrintResult _print_1 = this.print(end);
-      return PrintResultExtension.operator_plus(_print, _print_1);
+    boolean isEmpty = preprinted.isEmpty();
+    if (isEmpty) {
+      PrintResult startResult = this.print(start);
+      PrintResult endResult = this.print(end);
+      return PrintResultExtension.operator_plus(startResult, endResult);
     }
-    int _size = preprinted.size();
-    int _multiLineIfAtLeastItemCount = mode.getMultiLineIfAtLeastItemCount();
-    boolean _greaterEqualsThan = (_size >= _multiLineIfAtLeastItemCount);
-    if (_greaterEqualsThan) {
+    int size = preprinted.size();
+    int multiLineIfAtLeastItemCount = mode.getMultiLineIfAtLeastItemCount();
+    boolean shouldPrintMultiLine = (size >= multiLineIfAtLeastItemCount);
+    if (shouldPrintMultiLine) {
       return this.<Object>printMultiLine(start, end, mode.getSeparator(), preprinted);
     }
     return this.<Object>printSingleLine(start, end, mode.getSeparator(), preprinted);
