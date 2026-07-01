@@ -168,8 +168,12 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
     }
   }
 
-  /** Listener for the usual zoom in/out on text elements. */
-  private final MouseWheelListener mwl =
+  /**
+   * Listener for the usual zoom in/out on text elements. Stateless, so it is shared as a static
+   * field instead of being held per instance; this also keeps it out of instance serialization
+   * without needing {@code transient} (SonarCloud java:S1948).
+   */
+  private static final MouseWheelListener mwl =
       (MouseWheelEvent e) -> {
         if (!(e.getSource() instanceof JTextArea)) {
           return;

@@ -1,5 +1,6 @@
 package tools.vitruv.change.testutils.changevisualization;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -8,7 +9,15 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,6 +107,101 @@ class ChangeVisualizationUITest {
     assertNotNull(font, "Font should be created with valid key");
     assertEquals(18, font.getSize(), "Font size should be 18");
     assertEquals(Font.ITALIC, font.getStyle(), "Font style should be italic");
+  }
+
+  @Test
+  void testMouseWheelListenerFieldIsStatic() throws Exception {
+    Field mwlField = ChangeVisualizationUI.class.getDeclaredField("mwl");
+
+    assertTrue(Modifier.isStatic(mwlField.getModifiers()),
+        "mwl is a stateless MouseWheelListener and should be static so it is excluded "
+            + "from instance serialization without needing transient (SonarCloud java:S1948)");
+  }
+
+  @Test
+  void testMouseWheelListenerZoomsTextAreaFontOnCtrlScroll() throws Exception {
+    Field mwlField = ChangeVisualizationUI.class.getDeclaredField("mwl");
+    mwlField.setAccessible(true);
+    MouseWheelListener listener = (MouseWheelListener) mwlField.get(null);
+    assertNotNull(listener, "static mwl listener should be initialized on class load");
+
+    JTextArea area = new JTextArea();
+    area.setFont(area.getFont().deriveFont(16f));
+
+    listener.mouseWheelMoved(ctrlWheelEvent(area, -1));
+    assertEquals(18, area.getFont().getSize(), "Ctrl+scroll up should increase font size");
+
+    listener.mouseWheelMoved(ctrlWheelEvent(area, 1));
+    assertEquals(16, area.getFont().getSize(), "Ctrl+scroll down should decrease font size");
+  }
+
+  @Test
+  void testMouseWheelListenerIgnoresScrollWithoutCtrl() throws Exception {
+    Field mwlField = ChangeVisualizationUI.class.getDeclaredField("mwl");
+    mwlField.setAccessible(true);
+    MouseWheelListener listener = (MouseWheelListener) mwlField.get(null);
+
+    JTextArea area = new JTextArea();
+    area.setFont(area.getFont().deriveFont(16f));
+
+    MouseWheelEvent plainScroll =
+        new MouseWheelEvent(
+            area,
+            MouseEvent.MOUSE_WHEEL,
+            0,
+            0,
+            0,
+            0,
+            0,
+            false,
+            MouseWheelEvent.WHEEL_UNIT_SCROLL,
+            1,
+            -1);
+    listener.mouseWheelMoved(plainScroll);
+
+    assertEquals(16, area.getFont().getSize(), "Scroll without Ctrl should not change font size");
+  }
+
+  @Test
+  void testMouseWheelListenerIgnoresNonTextAreaSource() throws Exception {
+    Field mwlField = ChangeVisualizationUI.class.getDeclaredField("mwl");
+    mwlField.setAccessible(true);
+    MouseWheelListener listener = (MouseWheelListener) mwlField.get(null);
+
+    JLabel label = new JLabel();
+    MouseWheelEvent event =
+        new MouseWheelEvent(
+            label,
+            MouseEvent.MOUSE_WHEEL,
+            0,
+            InputEvent.CTRL_DOWN_MASK,
+            0,
+            0,
+            0,
+            false,
+            MouseWheelEvent.WHEEL_UNIT_SCROLL,
+            1,
+            -1);
+
+    // Should simply return without throwing for a non-JTextArea source.
+    assertDoesNotThrow(
+        () -> listener.mouseWheelMoved(event),
+        "A non-JTextArea wheel source should be ignored without throwing");
+  }
+
+  private static MouseWheelEvent ctrlWheelEvent(JTextArea source, int rotation) {
+    return new MouseWheelEvent(
+        source,
+        MouseEvent.MOUSE_WHEEL,
+        0,
+        InputEvent.CTRL_DOWN_MASK,
+        0,
+        0,
+        0,
+        false,
+        MouseWheelEvent.WHEEL_UNIT_SCROLL,
+        1,
+        rotation);
   }
 }
 
