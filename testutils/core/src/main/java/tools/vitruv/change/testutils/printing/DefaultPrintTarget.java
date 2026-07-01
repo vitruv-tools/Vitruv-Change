@@ -73,59 +73,81 @@ public class DefaultPrintTarget implements PrintTarget {
       final Iterable<? extends T> elements, final PrintMode mode,
       final BiFunction<PrintTarget, T, PrintResult> elementPrinter) {
     this.checkIsOpen();
-    ArrayList<DefaultPrintTarget> _xifexpression = null;
+    final ArrayList<DefaultPrintTarget> preprinted = this.newPreprintedTargets(elements);
+    boolean _preprintElements = this.<T>preprintElements(elements, elementPrinter, preprinted);
+    if (!_preprintElements) {
+      return PrintResult.NOT_RESPONSIBLE;
+    }
+    return this.printPreprinted(start, end, mode, preprinted);
+  }
+
+  private ArrayList<DefaultPrintTarget> newPreprintedTargets(final Iterable<?> elements) {
     if ((elements instanceof Collection<?>)) {
       int _size = ((Collection<?>) elements).size();
-      _xifexpression = new ArrayList<DefaultPrintTarget>(_size);
-    } else {
-      _xifexpression = new ArrayList<DefaultPrintTarget>();
+      return new ArrayList<DefaultPrintTarget>(_size);
     }
-    ArrayList<DefaultPrintTarget> preprinted = _xifexpression;
+    return new ArrayList<DefaultPrintTarget>();
+  }
+
+  private <T extends Object> boolean preprintElements(final Iterable<? extends T> elements,
+      final BiFunction<PrintTarget, T, PrintResult> elementPrinter,
+      final ArrayList<DefaultPrintTarget> preprinted) {
     for (final Iterator<? extends T> elementsIterator = elements.iterator(); elementsIterator.hasNext();) {
-      {
-        final T element = elementsIterator.next();
-        final DefaultPrintTarget subTarget = new DefaultPrintTarget();
-        PrintResult _apply = elementPrinter.apply(subTarget, element);
-        if (_apply != null) {
-          switch (_apply) {
-            case NOT_RESPONSIBLE:
-              boolean _isEmpty = preprinted.isEmpty();
-              if (_isEmpty) {
-                return PrintResult.NOT_RESPONSIBLE;
-              } else {
-                throw new IllegalStateException(
-                    "Got NOT_RESPONSIBLE for ‹" + element + "› after already having printed something!");
-              }
-            case PRINTED:
-              preprinted.add(subTarget);
-              break;
-            case PRINTED_NO_OUTPUT:
-              break;
-            default:
-              break;
-          }
-        }
+      final T element = elementsIterator.next();
+      boolean _preprintElement = this.<T>preprintElement(element, elementPrinter, preprinted);
+      if (!_preprintElement) {
+        return false;
       }
     }
-    PrintResult _xifexpression_1 = null;
+    return true;
+  }
+
+  private <T extends Object> boolean preprintElement(final T element,
+      final BiFunction<PrintTarget, T, PrintResult> elementPrinter,
+      final ArrayList<DefaultPrintTarget> preprinted) {
+    final DefaultPrintTarget subTarget = new DefaultPrintTarget();
+    PrintResult _apply = elementPrinter.apply(subTarget, element);
+    if (_apply != null) {
+      switch (_apply) {
+        case NOT_RESPONSIBLE:
+          return this.handleNotResponsibleElement(element, preprinted);
+        case PRINTED:
+          preprinted.add(subTarget);
+          break;
+        case PRINTED_NO_OUTPUT:
+          break;
+        default:
+          break;
+      }
+    }
+    return true;
+  }
+
+  private <T extends Object> boolean handleNotResponsibleElement(final T element,
+      final ArrayList<DefaultPrintTarget> preprinted) {
+    boolean _isEmpty = preprinted.isEmpty();
+    if (_isEmpty) {
+      return false;
+    }
+    throw new IllegalStateException(
+        "Got NOT_RESPONSIBLE for ‹" + element + "› after already having printed something!");
+  }
+
+  private PrintResult printPreprinted(final String start, final String end, final PrintMode mode,
+      final ArrayList<DefaultPrintTarget> preprinted) {
     boolean _isEmpty = preprinted.isEmpty();
     if (_isEmpty) {
       PrintResult _print = this.print(start);
       PrintResult _print_1 = this.print(end);
-      _xifexpression_1 = PrintResultExtension.operator_plus(_print, _print_1);
-    } else {
-      PrintResult _xifexpression_2 = null;
-      int _size_1 = preprinted.size();
-      int _multiLineIfAtLeastItemCount = mode.getMultiLineIfAtLeastItemCount();
-      boolean _greaterEqualsThan = (_size_1 >= _multiLineIfAtLeastItemCount);
-      if (_greaterEqualsThan) {
-        _xifexpression_2 = this.<Object>printMultiLine(start, end, mode.getSeparator(), preprinted);
-      } else {
-        _xifexpression_2 = this.<Object>printSingleLine(start, end, mode.getSeparator(), preprinted);
-      }
-      _xifexpression_1 = _xifexpression_2;
+      return PrintResultExtension.operator_plus(_print, _print_1);
     }
-    return _xifexpression_1;
+    int _size = preprinted.size();
+    int _multiLineIfAtLeastItemCount = mode.getMultiLineIfAtLeastItemCount();
+    boolean _greaterEqualsThan = (_size >= _multiLineIfAtLeastItemCount);
+    if (_greaterEqualsThan) {
+      return this.<Object>printMultiLine(start, end, mode.getSeparator(), preprinted);
+    }
+    return this.<Object>printSingleLine(start, end, mode.getSeparator(), preprinted);
   }
 
   private <T extends Object> PrintResult printSingleLine(final String start, final String end, final String separator,
