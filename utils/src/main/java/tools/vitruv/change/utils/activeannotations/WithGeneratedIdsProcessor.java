@@ -1,14 +1,17 @@
 package tools.vitruv.change.utils.activeannotations;
 
+import java.util.List;
 import java.util.stream.StreamSupport;
 
 import org.eclipse.emf.ecore.impl.EFactoryImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtend.lib.macro.AbstractClassProcessor;
 import org.eclipse.xtend.lib.macro.TransformationContext;
+import org.eclipse.xtend.lib.macro.declaration.CompilationStrategy.CompilationContext;
 import org.eclipse.xtend.lib.macro.declaration.MethodDeclaration;
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration;
 import org.eclipse.xtend.lib.macro.declaration.MutableMethodDeclaration;
+import org.eclipse.xtend.lib.macro.declaration.ResolvedMethod;
 import org.eclipse.xtend.lib.macro.declaration.TypeReference;
 import org.eclipse.xtend.lib.macro.declaration.Visibility;
 
@@ -23,15 +26,8 @@ public class WithGeneratedIdsProcessor extends AbstractClassProcessor {
   @Override
   public void doTransform(MutableClassDeclaration annotatedClass, TransformationContext context) {
     TypeReference extendedFactory = annotatedClass.getExtendedClass();
-    if (extendedFactory == null
-        || !context.newTypeReference(EFactoryImpl.class).isAssignableFrom(extendedFactory)) {
-      context.addError(
-          annotatedClass,
-          "A class annotated with "
-              + WithGeneratedRandomIds.class.getSimpleName()
-              + " must extend an extension of "
-              + EFactoryImpl.class.getSimpleName()
-              + ".");
+    if (!isSupportedFactory(extendedFactory, context)) {
+      addInvalidFactoryError(annotatedClass, context);
       return;
     }
 
@@ -48,15 +44,7 @@ public class WithGeneratedIdsProcessor extends AbstractClassProcessor {
     }
     TypeReference identifierMetaclass = annotation.getClassValue("identifierMetaclass");
 
-    var createMethods =
-        StreamSupport.stream(extendedFactory.getDeclaredResolvedMethods().spliterator(), false)
-            .filter(
-                rm ->
-                    rm.getDeclaration().getSimpleName().startsWith("create")
-                        && !rm.getDeclaration().getParameters().iterator().hasNext()
-                        && identifierMetaclass.isAssignableFrom(
-                            rm.getDeclaration().getReturnType()))
-            .toList();
+    var createMethods = getMatchingCreateMethods(extendedFactory, identifierMetaclass);
 
     if (createMethods.isEmpty()) {
       context.addWarning(
@@ -65,78 +53,143 @@ public class WithGeneratedIdsProcessor extends AbstractClassProcessor {
     }
 
     for (var createMethod : createMethods) {
-      MutableMethodDeclaration existingMethod = null;
-      for (var m : annotatedClass.getDeclaredMethods()) {
-        if (m.getSimpleName().equals(createMethod.getDeclaration().getSimpleName())
-            && !m.getParameters().iterator().hasNext()
-            && !m.isStatic()) {
-          existingMethod = m;
-          break;
-        }
-      }
+      addGeneratedIdOverride(annotatedClass, context, createMethod);
+    }
+  }
 
-      TypeReference resolvedReturn = createMethod.getResolvedReturnType();
+  private static boolean isSupportedFactory(
+      TypeReference extendedFactory, TransformationContext context) {
+    return extendedFactory != null
+        && context.newTypeReference(EFactoryImpl.class).isAssignableFrom(extendedFactory);
+  }
 
-      if (existingMethod != null) {
-        String newName = existingMethod.getSimpleName();
-        do {
-          newName = "_" + newName;
-        } while (existsWithName(annotatedClass.getDeclaredMethods(), newName));
+  private static void addInvalidFactoryError(
+      MutableClassDeclaration annotatedClass, TransformationContext context) {
+    context.addError(
+        annotatedClass,
+        "A class annotated with "
+            + WithGeneratedRandomIds.class.getSimpleName()
+            + " must extend an extension of "
+            + EFactoryImpl.class.getSimpleName()
+            + ".");
+  }
 
-        final String privateName = newName;
-        final TypeReference originalReturnType = existingMethod.getReturnType();
-        final var originalBody = existingMethod.getBody();
-        final MutableMethodDeclaration sourceRef = existingMethod;
+  private static List<? extends ResolvedMethod> getMatchingCreateMethods(
+      TypeReference extendedFactory, TypeReference identifierMetaclass) {
+    return StreamSupport.stream(extendedFactory.getDeclaredResolvedMethods().spliterator(), false)
+        .filter(method -> isMatchingCreateMethod(method, identifierMetaclass))
+        .toList();
+  }
 
-        annotatedClass.addMethod(
-            privateName,
-            m -> {
-              m.setVisibility(Visibility.PRIVATE);
-              m.setReturnType(originalReturnType);
-              m.setBody(originalBody);
-              context.setPrimarySourceElement(m, sourceRef);
-            });
+  private static boolean isMatchingCreateMethod(
+      ResolvedMethod method, TypeReference identifierMetaclass) {
+    MethodDeclaration declaration = method.getDeclaration();
+    return declaration.getSimpleName().startsWith("create")
+        && hasNoParameters(declaration)
+        && identifierMetaclass.isAssignableFrom(declaration.getReturnType());
+  }
 
-        existingMethod.setBody(
-            ctx -> {
-              String resolvedCode = ctx.toJavaCode(resolvedReturn);
-              String ecoreUtil = ctx.toJavaCode(context.newTypeReference(EcoreUtil.class));
-              return "final "
-                  + resolvedCode
-                  + " created = "
-                  + privateName
-                  + "();\n"
-                  + ecoreUtil
-                  + ".setID(created, "
-                  + ecoreUtil
-                  + ".generateUUID());\n"
-                  + "return created;";
-            });
-      } else {
-        final String superCall = "super." + createMethod.getDeclaration().getSimpleName();
-        annotatedClass.addMethod(
-            createMethod.getDeclaration().getSimpleName(),
-            m -> {
-              m.setReturnType(resolvedReturn);
-              m.setBody(
-                  ctx -> {
-                    String resolvedCode = ctx.toJavaCode(resolvedReturn);
-                    String ecoreUtil = ctx.toJavaCode(context.newTypeReference(EcoreUtil.class));
-                    return "final "
-                        + resolvedCode
-                        + " created = "
-                        + superCall
-                        + "();\n"
-                        + ecoreUtil
-                        + ".setID(created, "
-                        + ecoreUtil
-                        + ".generateUUID());\n"
-                        + "return created;";
-                  });
-              context.setPrimarySourceElement(m, annotatedClass);
-            });
+  private static boolean hasNoParameters(MethodDeclaration method) {
+    return !method.getParameters().iterator().hasNext();
+  }
+
+  private static void addGeneratedIdOverride(
+      MutableClassDeclaration annotatedClass,
+      TransformationContext context,
+      ResolvedMethod createMethod) {
+    MutableMethodDeclaration existingMethod =
+        getExistingCreateOverride(
+            annotatedClass.getDeclaredMethods(), createMethod.getDeclaration().getSimpleName());
+    TypeReference resolvedReturn = createMethod.getResolvedReturnType();
+
+    if (existingMethod != null) {
+      wrapExistingCreateMethod(annotatedClass, context, existingMethod, resolvedReturn);
+      return;
+    }
+    addSuperCreateOverride(annotatedClass, context, createMethod, resolvedReturn);
+  }
+
+  private static MutableMethodDeclaration getExistingCreateOverride(
+      Iterable<? extends MutableMethodDeclaration> methods, String methodName) {
+    for (var method : methods) {
+      if (isExistingCreateOverride(method, methodName)) {
+        return method;
       }
     }
+    return null;
+  }
+
+  private static boolean isExistingCreateOverride(
+      MutableMethodDeclaration method, String methodName) {
+    return method.getSimpleName().equals(methodName)
+        && hasNoParameters(method)
+        && !method.isStatic();
+  }
+
+  private static void wrapExistingCreateMethod(
+      MutableClassDeclaration annotatedClass,
+      TransformationContext context,
+      MutableMethodDeclaration existingMethod,
+      TypeReference resolvedReturn) {
+    String privateName = getAvailablePrivateMethodName(annotatedClass, existingMethod);
+    TypeReference originalReturnType = existingMethod.getReturnType();
+    var originalBody = existingMethod.getBody();
+    MutableMethodDeclaration sourceRef = existingMethod;
+
+    annotatedClass.addMethod(
+        privateName,
+        method -> {
+          method.setVisibility(Visibility.PRIVATE);
+          method.setReturnType(originalReturnType);
+          method.setBody(originalBody);
+          context.setPrimarySourceElement(method, sourceRef);
+        });
+
+    existingMethod.setBody(ctx -> createGeneratedIdBody(ctx, context, resolvedReturn, privateName));
+  }
+
+  private static String getAvailablePrivateMethodName(
+      MutableClassDeclaration annotatedClass, MutableMethodDeclaration existingMethod) {
+    String newName = existingMethod.getSimpleName();
+    do {
+      newName = "_" + newName;
+    } while (existsWithName(annotatedClass.getDeclaredMethods(), newName));
+    return newName;
+  }
+
+  private static void addSuperCreateOverride(
+      MutableClassDeclaration annotatedClass,
+      TransformationContext context,
+      ResolvedMethod createMethod,
+      TypeReference resolvedReturn) {
+    String methodName = createMethod.getDeclaration().getSimpleName();
+    String superCall = "super." + methodName;
+    annotatedClass.addMethod(
+        methodName,
+        method -> {
+          method.setReturnType(resolvedReturn);
+          method.setBody(ctx -> createGeneratedIdBody(ctx, context, resolvedReturn, superCall));
+          context.setPrimarySourceElement(method, annotatedClass);
+        });
+  }
+
+  private static String createGeneratedIdBody(
+      CompilationContext ctx,
+      TransformationContext context,
+      TypeReference resolvedReturn,
+      String createCall) {
+    String resolvedCode = ctx.toJavaCode(resolvedReturn);
+    String ecoreUtil = ctx.toJavaCode(context.newTypeReference(EcoreUtil.class));
+    return "final "
+        + resolvedCode
+        + " created = "
+        + createCall
+        + "();\n"
+        + ecoreUtil
+        + ".setID(created, "
+        + ecoreUtil
+        + ".generateUUID());\n"
+        + "return created;";
   }
 
   private static boolean existsWithName(
