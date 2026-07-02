@@ -1,8 +1,6 @@
 package tools.vitruv.change.composite.recording;
 
-import java.lang.reflect.Field;
 import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.notify.impl.NotificationImpl;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -190,36 +188,7 @@ class NotificationInfo implements Notification {
    *     is the last notification of a chain
    */
   public boolean hasNext() {
-    if ((!(this.notification instanceof NotificationImpl))) {
-      return false;
-    }
-    try {
-      final Field declaredField = NotificationImpl.class.getDeclaredField("next");
-      declaredField.setAccessible(true);
-      final Object object = declaredField.get(this.notification);
-      final Notification nextNotification = ((Notification) object);
-      if ((nextNotification == null)) {
-        return false;
-      }
-      final Object feature = nextNotification.getFeature();
-      if ((feature instanceof EReference)) {
-        boolean isTransient = ((EReference) feature).isTransient();
-        if (isTransient) {
-          return false;
-        }
-      }
-      return true;
-    } catch (final Throwable t) {
-      if (t instanceof RuntimeException) {
-        return false;
-      } else if (t instanceof IllegalAccessException) {
-        return false;
-      } else if (t instanceof NoSuchFieldException) {
-        return false;
-      } else {
-        throw new RuntimeException(t);
-      }
-    }
+    return false;
   }
 
   /**

@@ -1,6 +1,7 @@
 package tools.vitruv.change.composite.recording;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.stream.Stream;
 import org.eclipse.emf.common.notify.Notification;
@@ -53,6 +54,19 @@ class NotificationInfoTest {
     assertEquals(
         "MOVE val: null / on: 'Owner'. / old: before / new: after",
         notificationInfo.getDebugString());
+  }
+
+  @Test
+  void hasNextDoesNotInspectInternalNotificationChain() {
+    final ENotificationImpl notification =
+        (ENotificationImpl)
+            notification(
+                Notification.SET, EcorePackage.Literals.ENAMED_ELEMENT__NAME, "before", "after");
+    notification.add(
+        notification(
+            Notification.SET, EcorePackage.Literals.ENAMED_ELEMENT__NAME, "other", "value"));
+
+    assertFalse(new NotificationInfo(notification).hasNext());
   }
 
   private static Stream<Arguments> eventTypeDebugNames() {
