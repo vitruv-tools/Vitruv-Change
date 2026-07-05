@@ -64,21 +64,21 @@ final class NotificationToEChangeConverter {
    * @param notification the notification to convert
    * @return the {@link Iterable} of {@link EChange}s
    */
-  public Iterable<? extends EChange<EObject>> convert(final NotificationInfo notification) {
+  public Iterable<EChange<EObject>> convert(final NotificationInfo notification) {
     if (isIrrelevantNotification(notification)) {
       return List.of();
     }
 
     if (notification.isAttributeNotification()) {
-      return convertAttributeNotification(notification);
+      return new ArrayList<>(convertAttributeNotification(notification));
     }
 
     if (notification.isReferenceNotification()) {
-      return convertReferenceNotification(notification);
+      return new ArrayList<>(convertReferenceNotification(notification));
     }
 
     if (notification.getNotifier() instanceof Resource) {
-      return convertResourceNotification(notification);
+      return new ArrayList<>(convertResourceNotification(notification));
     }
 
     return List.of();
