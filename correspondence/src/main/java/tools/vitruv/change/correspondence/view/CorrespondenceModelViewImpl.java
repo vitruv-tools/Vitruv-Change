@@ -25,8 +25,13 @@ class CorrespondenceModelViewImpl<C extends Correspondence> implements Correspon
   }
 
   @Override
+  public Set<EObject> getAllEObjectsInACorrespondence() {
+    return this.correspondenceModel.getAllEObjectsInACorrespondence();
+  }
+
+  @Override
   public boolean hasCorrespondences(List<EObject> sourceEObjects) {
-    return this.getCorrespondingEObjects(sourceEObjects).size() > 0;
+    return !this.getCorrespondingEObjects(sourceEObjects).isEmpty();
   }
 
   @Override

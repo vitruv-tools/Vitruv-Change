@@ -12,9 +12,17 @@ import tools.vitruv.change.correspondence.Correspondence;
  * the actual correspondence type to be handled.
  *
  * @author Heiko Klare
+ * @author Benedikt Jutz
  * @param <C> - the type of correspondences to be handled, i.e., to be retrieved, added or removed
  */
 public interface CorrespondenceModelView<C extends Correspondence> {
+  /**
+   * Returns all objects that correspond to some other object.
+   *
+   * @return {@link Set} all corresponding {@link EObject}s.
+   */
+  Set<EObject> getAllEObjectsInACorrespondence();
+
   /**
    * Returns whether at least one object corresponds to the given objects.
    *
@@ -22,7 +30,7 @@ public interface CorrespondenceModelView<C extends Correspondence> {
    *     null} or empty
    * @return {@code true} if number of corresponding objects > 0
    */
-  public boolean hasCorrespondences(List<EObject> eObjects);
+  boolean hasCorrespondences(List<EObject> eObjects);
 
   /**
    * Returns whether at least one object corresponds to the given object.
@@ -31,7 +39,7 @@ public interface CorrespondenceModelView<C extends Correspondence> {
    *     null}
    * @return {@code true} if number of corresponding objects > 0
    */
-  public default boolean hasCorrespondences(EObject eObject) {
+  default boolean hasCorrespondences(EObject eObject) {
     if (eObject == null) {
       return false;
     }
@@ -45,7 +53,7 @@ public interface CorrespondenceModelView<C extends Correspondence> {
    *     empty
    * @return the elements corresponding to the given ones
    */
-  public Set<List<EObject>> getCorrespondingEObjects(List<EObject> sourceObjects);
+  Set<List<EObject>> getCorrespondingEObjects(List<EObject> sourceObjects);
 
   /**
    * Returns the elements corresponding to the given one.
@@ -54,7 +62,7 @@ public interface CorrespondenceModelView<C extends Correspondence> {
    * @return the elements corresponding to the given one. Is empty if the {@code sourceObject} is
    *     {@code null}.
    */
-  public default Set<EObject> getCorrespondingEObjects(EObject sourceObject) {
+  default Set<EObject> getCorrespondingEObjects(EObject sourceObject) {
     if (sourceObject == null) {
       return Collections.emptySet();
     }
@@ -71,7 +79,7 @@ public interface CorrespondenceModelView<C extends Correspondence> {
    *     correspondences will be checked
    * @return the elements corresponding to the given ones
    */
-  public Set<List<EObject>> getCorrespondingEObjects(List<EObject> sourceObjects, String tag);
+  Set<List<EObject>> getCorrespondingEObjects(List<EObject> sourceObjects, String tag);
 
   /**
    * Returns the elements corresponding to the given ones for all correspondences between these
@@ -83,7 +91,7 @@ public interface CorrespondenceModelView<C extends Correspondence> {
    * @return the elements corresponding to the given one. Is empty if the {@code sourceObject} is
    *     {@code null}.
    */
-  public default Set<EObject> getCorrespondingEObjects(EObject sourceObject, String tag) {
+  default Set<EObject> getCorrespondingEObjects(EObject sourceObject, String tag) {
     if (sourceObject == null) {
       return Collections.emptySet();
     }

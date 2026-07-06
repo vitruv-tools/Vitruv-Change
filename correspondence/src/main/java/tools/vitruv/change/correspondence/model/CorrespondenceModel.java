@@ -16,6 +16,7 @@ import tools.vitruv.change.correspondence.view.CorrespondenceModelView;
  *
  * @author kramerm
  * @author Heiko Klare
+ * @author Benedikt Jutz
  */
 public interface CorrespondenceModel extends AutoCloseable {
   /**
@@ -30,7 +31,7 @@ public interface CorrespondenceModel extends AutoCloseable {
    * @param <C> the type of correspondence to create
    * @return the created correspondence
    */
-  public <C extends Correspondence> C addCorrespondenceBetween(
+  <C extends Correspondence> C addCorrespondenceBetween(
       List<EObject> firstEObjects,
       List<EObject> secondEObjects,
       String tag,
@@ -43,7 +44,18 @@ public interface CorrespondenceModel extends AutoCloseable {
    *     {@code null} or empty
    * @return {@code true} if number of corresponding objects > 0
    */
-  public boolean hasCorrespondences(List<EObject> sourceEObjects);
+  boolean hasCorrespondences(List<EObject> sourceEObjects);
+
+  /**
+   * Returns a set of {@link EObject}s that occur in a correspondence.
+   *
+   * <p>The set does not distinguish between the direction of the correspondence,
+   * so if e.g. {@code (e1, e2, tag1)} is a correspondence, then the result will contain both
+   * e1 and e2.
+   *
+   * @return {@link Set} a set of {@link EObject}s.
+   */
+  Set<EObject> getAllEObjectsInACorrespondence();
 
   /**
    * Returns the elements corresponding to the given ones, if the correspondence is of the given
@@ -55,7 +67,7 @@ public interface CorrespondenceModel extends AutoCloseable {
    *     correspondences will be returned
    * @return the elements corresponding to the given ones
    */
-  public Set<List<EObject>> getCorrespondingEObjects(
+  Set<List<EObject>> getCorrespondingEObjects(
       Class<? extends Correspondence> correspondenceType, List<EObject> sourceEObjects, String tag);
 
   /**
@@ -72,7 +84,7 @@ public interface CorrespondenceModel extends AutoCloseable {
    * @param <C> the type of correspondence to remove
    * @return the removed correspondences
    */
-  public <C extends Correspondence> Set<C> removeCorrespondencesBetween(
+  <C extends Correspondence> Set<C> removeCorrespondencesBetween(
       Class<C> correspondenceType,
       List<EObject> firstEObjects,
       List<EObject> secondEObjects,

@@ -1,5 +1,8 @@
 package tools.vitruv.change.correspondence;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil;
 import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil;
 import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil;
@@ -34,8 +37,12 @@ import uml_mockup.UInterface;
 import uml_mockup.UPackage;
 import uml_mockup.Uml_mockupFactory;
 
+/**
+ * Tests for the {@link PersistableCorrespondenceModel}
+ * and {@link EditableCorrespondenceModelView} classes.
+ */
 @ExtendWith({TestProjectManager.class, TestLogging.class, RegisterMetamodelsInStandalone.class})
-public class CorrespondenceTest {
+class CorrespondenceTest {
   private static final Logger LOGGER = LogManager.getLogger(CorrespondenceTest.class);
 
   private static final String CORRESPONDENCE_MODEL_NAME = "correspondence.correspondence";
@@ -44,8 +51,13 @@ public class CorrespondenceTest {
 
   private Path testProjectFolder;
 
+  /**
+   * Sets up the test to store data under {@code testProjectFolder}.
+   *
+   * @param testProjectFolder {@link Path}
+   */
   @BeforeEach
-  public void acquireTestProjectFolder(@TestProject final Path testProjectFolder) {
+  void acquireTestProjectFolder(@TestProject final Path testProjectFolder) {
     this.testProjectFolder = testProjectFolder;
     this.testResourceSet = ResourceSetUtil.withGlobalFactories(new ResourceSetImpl());
   }
@@ -72,7 +84,7 @@ public class CorrespondenceTest {
   }
 
   @Test
-  public void testCorrespondenceAfterModelPersistence() {
+  void testCorrespondenceAfterModelPersistence() {
     final Repository repo = this.createPcmRepositoryWithInterfaceAndComponent();
     final UPackage pkg = this.createUmlPackageWithInterfaceAndClass();
     final EditableCorrespondenceModelView<Correspondence> correspondenceModel =
@@ -83,7 +95,7 @@ public class CorrespondenceTest {
   }
 
   @Test
-  public void testCorrespondenceAfterMovingRootEObjectBetweenResources() {
+  void testCorrespondenceAfterMovingRootEObjectBetweenResources() {
     final Repository repo = this.createPcmRepositoryWithInterfaceAndComponent();
     final UPackage pkg = this.createUmlPackageWithInterfaceAndClass();
     final EditableCorrespondenceModelView<Correspondence> correspondenceModel =
@@ -95,7 +107,7 @@ public class CorrespondenceTest {
   }
 
   @Test
-  public void testReloadingCorrespondencesFromPersistence() {
+  void testReloadingCorrespondencesFromPersistence() {
     final Repository repo = this.createPcmRepositoryWithInterfaceAndComponent();
     final UPackage pkg = this.createUmlPackageWithInterfaceAndClass();
     final PersistableCorrespondenceModel firstCorrespondenceModel =
@@ -115,12 +127,12 @@ public class CorrespondenceTest {
         secondCorrespondenceModel.getCorrespondingEObjects(repo2));
     Set<EObject> allEObjects = new HashSet<>(secondCorrespondence.getLeftEObjects());
     allEObjects.addAll(secondCorrespondence.getRightEObjects());
-    Assertions.assertEquals(Set.<EObject>of(repo2, pkg2), allEObjects);
+    assertEquals(Set.<EObject>of(repo2, pkg2), allEObjects);
     this.validateSingleCorrespondence(secondCorrespondenceModel, repo2, pkg2);
   }
 
   @Test
-  public void testRemoveCorrespondence() {
+  void testRemoveCorrespondence() {
     final Repository repo = this.createPcmRepositoryWithInterfaceAndComponent();
     final UPackage pkg = this.createUmlPackageWithInterfaceAndClass();
     final PInterface repoInterface =
@@ -129,8 +141,14 @@ public class CorrespondenceTest {
         IterableUtil.<EList<UInterface>, UInterface>claimOne(pkg.getInterfaces());
     final EditableCorrespondenceModelView<Correspondence> correspondenceModel =
         this.createCorrespondenceModelAndReturnView();
+
     correspondenceModel.addCorrespondenceBetween(repoInterface, pkgInterface, null);
+    final Set<EObject> allCorrespondingEObjects =
+        correspondenceModel.getAllEObjectsInACorrespondence();
+    assertEquals(Set.of(repoInterface, pkgInterface), allCorrespondingEObjects);
     correspondenceModel.removeCorrespondencesBetween(repoInterface, pkgInterface, null);
+    assertTrue(correspondenceModel.getAllEObjectsInACorrespondence().isEmpty());
+
     final Set<EObject> correspForRepoInterface =
         correspondenceModel.getCorrespondingEObjects(repoInterface);
     Assertions.assertTrue(correspForRepoInterface.isEmpty());
@@ -146,29 +164,29 @@ public class CorrespondenceTest {
     final EObject correspForRepo =
         IterableUtil.<Set<EObject>, EObject>claimOne(
             correspondenceModel.getCorrespondingEObjects(repo));
-    Assertions.assertEquals(pkg, correspForRepo);
+    assertEquals(pkg, correspForRepo);
     final EObject correspForPkg =
         IterableUtil.<Set<EObject>, EObject>claimOne(
             correspondenceModel.getCorrespondingEObjects(pkg));
-    Assertions.assertEquals(repo, correspForPkg);
+    assertEquals(repo, correspForPkg);
     final List<PInterface> interfaces = repo.getInterfaces();
-    Assertions.assertEquals(1, interfaces.size());
+    assertEquals(1, interfaces.size());
     final PInterface iface = interfaces.get(0);
     Assertions.assertFalse(correspondenceModel.hasCorrespondences(iface));
     final EObject correspondingPkg =
         IterableUtil.<Set<EObject>, EObject>claimOne(
             correspondenceModel.getCorrespondingEObjects(repo));
-    Assertions.assertEquals(pkg, correspondingPkg);
+    assertEquals(pkg, correspondingPkg);
     final EObject correspondingRepo =
         IterableUtil.<Set<EObject>, EObject>claimOne(
             correspondenceModel.getCorrespondingEObjects(pkg));
-    Assertions.assertEquals(repo, correspondingRepo);
+    assertEquals(repo, correspondingRepo);
   }
 
   private void assertRepositoryCorrespondences(
       final EditableCorrespondenceModelView<?> correspondenceModel, final Repository repo) {
     final Set<EObject> correspondingObjects = correspondenceModel.getCorrespondingEObjects(repo);
-    Assertions.assertEquals(
+    assertEquals(
         1,
         correspondingObjects.size(),
         "Only one corresponding object is expected for the repository.");
@@ -180,7 +198,7 @@ public class CorrespondenceTest {
           IterableUtil.<Set<EObject>, EObject>claimOne(reverseCorrespondingObjects),
           "Reverse corresponding object is null");
       CorrespondenceTest.LOGGER.info(
-          "A: " + reverseCorrespondingObjects + " corresponds to B: " + correspondingObject);
+          "A: {} corresponds to B: {}", reverseCorrespondingObjects, correspondingObject);
     }
   }
 

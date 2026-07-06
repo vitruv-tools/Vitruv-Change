@@ -5,6 +5,7 @@ import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.Resour
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -56,7 +57,8 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
         loadOrCreateResource(
             withGlobalFactories(new ResourceSetImpl()), correspondencesResource.getURI());
     if (!loadedResource.getContents().isEmpty()) {
-      Correspondences loadedCorrespondences = (Correspondences) loadedResource.getContents().get(0);
+      Correspondences loadedCorrespondences = (Correspondences)
+          loadedResource.getContents().getFirst();
       for (Correspondence correspondence : loadedCorrespondences.getCorrespondences()) {
         List<EObject> resolvedLeftObjects = resolve(correspondence.getLeftEObjects(), resolveIn);
         replace(correspondence.getLeftEObjects(), resolvedLeftObjects);
@@ -153,7 +155,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
     Set<Correspondence> correspondencesBetween = getCorrespondencesBetween(aEObjects, bEObjects);
     Set<C> correspondencesToRemove =
         filterCorrespondenceTypeAndTag(correspondencesBetween, correspondenceType, tag);
-    correspondencesToRemove.stream().forEach(this::removeCorrespondence);
+    correspondencesToRemove.forEach(this::removeCorrespondence);
     return correspondencesToRemove;
   }
 
@@ -222,6 +224,17 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   public boolean hasCorrespondences(List<EObject> eObjects) {
     Set<Correspondence> tempCorrespondences = this.getCorrespondences(eObjects);
     return tempCorrespondences != null && tempCorrespondences.isEmpty();
+  }
+
+  @Override
+  public Set<EObject> getAllEObjectsInACorrespondence() {
+    Set<EObject> allCorrespondences = HashSet.newHashSet(
+        correspondences.getCorrespondences().size());
+    for (var correspondence : correspondences.getCorrespondences()) {
+      allCorrespondences.addAll(correspondence.getLeftEObjects());
+      allCorrespondences.addAll(correspondence.getRightEObjects());
+    }
+    return Set.copyOf(allCorrespondences);
   }
 
   @Override
