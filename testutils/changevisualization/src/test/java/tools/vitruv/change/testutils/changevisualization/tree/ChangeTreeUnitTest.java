@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.awt.BorderLayout;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseWheelEvent;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import org.junit.jupiter.api.BeforeEach;
@@ -119,6 +121,21 @@ class ChangeTreeUnitTest {
           float newSize = tree.getFont().getSize2D();
           assertThat(newSize).isEqualTo(5.0f);
         });
+  }
+
+  @Test
+  void mouseAndSelectionListenerFieldsAreTransient() throws Exception {
+    Field mlField = ChangeTree.class.getDeclaredField("ml");
+    Field tslField = ChangeTree.class.getDeclaredField("tsl");
+
+    assertThat(Modifier.isTransient(mlField.getModifiers()))
+        .as("ml holds a non-serializable TreeMouseListener and must be transient "
+            + "to avoid NotSerializableException (SonarCloud java:S1948)")
+        .isTrue();
+    assertThat(Modifier.isTransient(tslField.getModifiers()))
+        .as("tsl holds a non-serializable TreeSelectionListener and must be transient "
+            + "to avoid NotSerializableException (SonarCloud java:S1948)")
+        .isTrue();
   }
 
   private void simulateCtrlMouseWheel(int rotation) {
