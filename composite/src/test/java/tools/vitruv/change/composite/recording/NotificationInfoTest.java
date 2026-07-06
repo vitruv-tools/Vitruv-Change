@@ -2,11 +2,13 @@ package tools.vitruv.change.composite.recording;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.stream.Stream;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
@@ -57,7 +59,16 @@ class NotificationInfoTest {
   }
 
   @Test
-  void hasNextDoesNotInspectInternalNotificationChain() {
+  void hasNextReturnsFalseForUnchainedNotification() {
+    final Notification notification =
+        notification(
+            Notification.SET, EcorePackage.Literals.ENAMED_ELEMENT__NAME, "before", "after");
+
+    assertFalse(new NotificationInfo(notification).hasNext());
+  }
+
+  @Test
+  void hasNextReturnsTrueForChainedNotification() {
     final ENotificationImpl notification =
         (ENotificationImpl)
             notification(
@@ -65,6 +76,19 @@ class NotificationInfoTest {
     notification.add(
         notification(
             Notification.SET, EcorePackage.Literals.ENAMED_ELEMENT__NAME, "other", "value"));
+
+    assertTrue(new NotificationInfo(notification).hasNext());
+  }
+
+  @Test
+  void hasNextReturnsFalseForTransientReferenceNotificationChain() {
+    final ENotificationImpl notification =
+        (ENotificationImpl)
+            notification(
+                Notification.SET, EcorePackage.Literals.ENAMED_ELEMENT__NAME, "before", "after");
+    final EReference transientReference = EcoreFactory.eINSTANCE.createEReference();
+    transientReference.setTransient(true);
+    notification.add(notification(Notification.SET, transientReference, "other", "value"));
 
     assertFalse(new NotificationInfo(notification).hasNext());
   }

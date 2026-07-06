@@ -1,6 +1,10 @@
 package tools.vitruv.change.composite.recording;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.notify.NotificationChain;
+import org.eclipse.emf.common.notify.impl.NotificationImpl;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -12,6 +16,7 @@ import org.eclipse.emf.ecore.resource.Resource;
  * implements a few additional getter methods
  */
 class NotificationInfo implements Notification {
+  private static final VarHandle NEXT_NOTIFICATION_HANDLE = createNextNotificationHandle();
   private final Notification notification;
   private String validationMessage;
 
@@ -188,7 +193,28 @@ class NotificationInfo implements Notification {
    *     is the last notification of a chain
    */
   public boolean hasNext() {
-    return false;
+    if (!(this.notification instanceof NotificationImpl notificationImpl)) {
+      return false;
+    }
+    NotificationChain next = getNextNotification(notificationImpl);
+    if (!(next instanceof Notification nextNotification)) {
+      return false;
+    }
+    Object feature = nextNotification.getFeature();
+    return !(feature instanceof EReference reference) || !reference.isTransient();
+  }
+
+  private static VarHandle createNextNotificationHandle() {
+    try {
+      return MethodHandles.privateLookupIn(NotificationImpl.class, MethodHandles.lookup())
+          .findVarHandle(NotificationImpl.class, "next", NotificationChain.class);
+    } catch (final ReflectiveOperationException e) {
+      throw new ExceptionInInitializerError(e);
+    }
+  }
+
+  private static NotificationChain getNextNotification(final NotificationImpl notification) {
+    return (NotificationChain) NEXT_NOTIFICATION_HANDLE.get(notification);
   }
 
   /**
