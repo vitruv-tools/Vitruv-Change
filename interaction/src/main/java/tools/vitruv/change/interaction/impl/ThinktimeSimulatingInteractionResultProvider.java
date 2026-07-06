@@ -34,7 +34,7 @@ public class ThinktimeSimulatingInteractionResultProvider implements Interaction
   public ThinktimeSimulatingInteractionResultProvider(
       final InteractionResultProvider delegate, final int minWaittime, final int maxWaittime) {
     if ((minWaittime > maxWaittime)) {
-      throw new RuntimeException(
+      throw new IllegalArgumentException(
           ((("Configure min and max waittime properly: Min" + Integer.valueOf(minWaittime))
                   + " Max: ")
               + Integer.valueOf(maxWaittime)));
@@ -51,15 +51,10 @@ public class ThinktimeSimulatingInteractionResultProvider implements Interaction
       final int currentWaittime = (_nextInt + this.minWaittime);
       try {
         Thread.sleep(currentWaittime);
-      } catch (final Throwable t) {
-        if (t instanceof InterruptedException) {
-          final InterruptedException e = (InterruptedException) t;
-          ThinktimeSimulatingInteractionResultProvider.logger.trace(
-              ("User think time simulation thread interrupted: " + e), e);
-          Thread.currentThread().interrupt();
-        } else {
-          throw new RuntimeException(t);
-        }
+      } catch (final InterruptedException e) {
+        ThinktimeSimulatingInteractionResultProvider.logger.trace(
+            ("User think time simulation thread interrupted: " + e), e);
+        Thread.currentThread().interrupt();
       }
     }
   }

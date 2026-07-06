@@ -161,8 +161,14 @@ public class HierarchicalIdResolverTest {
       _contents.add(root);
     };
     _function.accept(_createResource);
-    Assertions.assertEquals(root, this.idResolver.getEObject(initialRootId));
-    Assertions.assertEquals(nonRoot, this.idResolver.getEObject(initialNonRootId));
+    final HierarchicalId updatedRootId = this.idResolver.getAndUpdateId(root);
+    final HierarchicalId updatedNonRootId = this.idResolver.getAndUpdateId(nonRoot);
+    Assertions.assertNotEquals(initialRootId, updatedRootId);
+    Assertions.assertNotEquals(initialNonRootId, updatedNonRootId);
+    Assertions.assertEquals(updatedRootId, this.idResolver.getAndUpdateId(root));
+    Assertions.assertEquals(updatedNonRootId, this.idResolver.getAndUpdateId(nonRoot));
+    Assertions.assertEquals(root, this.idResolver.getEObject(updatedRootId));
+    Assertions.assertEquals(nonRoot, this.idResolver.getEObject(updatedNonRootId));
   }
 
   @Test

@@ -267,6 +267,9 @@ public class ChangeRecorder implements AutoCloseable {
 
     @Override
     public void setTarget(final Notifier newTarget) {
+      // Intentionally empty: this recorder does not track a single adapter target
+      // (getTarget() always returns null). It is attached to and detached from notifiers
+      // explicitly by the enclosing ChangeRecorder, so EMF's target callback needs no action.
     }
 
     public NotificationRecorder(final ChangeRecorder outer) {
@@ -527,44 +530,22 @@ public class ChangeRecorder implements AutoCloseable {
   }
 
   private boolean isInOurResourceSet(final Notifier notifier) {
-    boolean _switchResult = false;
-    boolean _matched = false;
-    if (Objects.equals(notifier, null)) {
-      _matched=true;
-      _switchResult = true;
+    if (notifier == null) {
+      return true;
     }
-    if (!_matched) {
-      if (notifier instanceof EObject) {
-        _matched=true;
-        Resource _eResource = null;
-        if (((EObject)notifier)!=null) {
-          _eResource=((EObject)notifier).eResource();
-        }
-        _switchResult = this.isInOurResourceSet(_eResource);
-      }
+    if (notifier instanceof EObject) {
+      return this.isInOurResourceSet(((EObject) notifier).eResource());
     }
-    if (!_matched) {
-      if (notifier instanceof Resource) {
-        _matched=true;
-        ResourceSet _resourceSet = null;
-        if (((Resource)notifier)!=null) {
-          _resourceSet=((Resource)notifier).getResourceSet();
-        }
-        _switchResult = this.isInOurResourceSet(_resourceSet);
-      }
+    if (notifier instanceof Resource) {
+      return this.isInOurResourceSet(((Resource) notifier).getResourceSet());
     }
-    if (!_matched) {
-      if (notifier instanceof ResourceSet) {
-        _matched=true;
-        _switchResult = Objects.equals(notifier, this.resourceSet);
-      }
+    if (notifier instanceof ResourceSet) {
+      return Objects.equals(notifier, this.resourceSet);
     }
-    if (!_matched) {
-      String _simpleName = notifier.getClass().getSimpleName();
-      String _plus = ("Unexpected notifier type: " + _simpleName);
-      throw new IllegalStateException(_plus);
-    }
-    return _switchResult;
+
+    String simpleName = notifier.getClass().getSimpleName();
+    String message = ("Unexpected notifier type: " + simpleName);
+    throw new IllegalStateException(message);
   }
   private static void recursively(final Notifier object, final Function<Notifier, Boolean> action) {
     if (object instanceof EObject

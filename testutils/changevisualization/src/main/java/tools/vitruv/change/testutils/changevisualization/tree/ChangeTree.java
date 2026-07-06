@@ -87,10 +87,10 @@ public class ChangeTree extends ChangeComponent {
   private JScrollPane detailsScroller;
 
   /** The TreeMouseListener responding to mouse interaction . */
-  private final TreeMouseListener ml;
+  private final transient TreeMouseListener ml;
 
   /** The listener processing tree selection events of the JTree component. */
-  private final TreeSelectionListener tsl =
+  private final transient TreeSelectionListener tsl =
       new TreeSelectionListener() {
         @Override
         public void valueChanged(TreeSelectionEvent e) {
