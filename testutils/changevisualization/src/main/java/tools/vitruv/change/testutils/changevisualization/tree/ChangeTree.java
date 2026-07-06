@@ -3,9 +3,9 @@ package tools.vitruv.change.testutils.changevisualization.tree;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
@@ -20,7 +20,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -91,58 +90,68 @@ public class ChangeTree extends ChangeComponent {
 
   /** The listener processing tree selection events of the JTree component. */
   private final transient TreeSelectionListener tsl =
-      new TreeSelectionListener() {
-        @Override
-        public void valueChanged(TreeSelectionEvent e) {
-          // reset details display to default behavior
-          detailsUI.setText("");
-          int divLocation = detailsSplitpane.getDividerLocation();
-          detailsSplitpane.setRightComponent(detailsScroller);
+      e -> {
+        // reset details display to default behavior
+        detailsUI.setText("");
+        int divLocation = detailsSplitpane.getDividerLocation();
+        detailsSplitpane.setRightComponent(detailsScroller);
 
-          // We have single selection mode ==> only one selected path
-          TreePath path = e.getNewLeadSelectionPath();
+        // We have single selection mode ==> only one selected path
+        TreePath path = e.getNewLeadSelectionPath();
 
-          // Update the detailsUI (if necessary)
-          updateDetailsUI(path);
+        // Update the detailsUI (if necessary)
+        updateDetailsUI(path);
 
-          // Restore the divider location, changing of the displayed components could have changed
-          // it
-          detailsSplitpane.setDividerLocation(divLocation);
-        }
-
-        /**
-         * Updates the detailsUI, if necessary.
-         *
-         * @param path The path pointing to the selected node
-         */
-        private void updateDetailsUI(TreePath path) {
-          if (path != null) {
-            DefaultMutableTreeNode selectedNode =
-                (DefaultMutableTreeNode) path.getLastPathComponent();
-            if (selectedNode != null) {
-              Object userObj = selectedNode.getUserObject();
-              if (userObj != null) {
-                if (userObj instanceof FeatureNode) {
-                  String details = ((FeatureNode) userObj).getDetails();
-                  String[][] detailsArray = ((FeatureNode) userObj).getDetailsArray();
-                  Component detailsComp = ((FeatureNode) userObj).getDetailsUI();
-                  if (details != null) {
-                    detailsUI.setText(details);
-                  } else if (detailsArray != null) {
-                    detailsSplitpane.setRightComponent(new LabelValuePanel(detailsArray));
-                  } else if (detailsComp != null) {
-                    detailsSplitpane.setRightComponent(detailsComp);
-                  }
-                } else if (userObj instanceof ChangeNode) {
-                  // ChangeNode creates the component on the fly for us
-                  Component detailsComp = ((ChangeNode) userObj).getDetailsUI();
-                  detailsSplitpane.setRightComponent(detailsComp);
-                }
-              }
-            }
-          }
-        }
+        // Restore the divider location, changing of the displayed components could have changed
+        // it
+        detailsSplitpane.setDividerLocation(divLocation);
       };
+
+  /**
+   * Updates the detailsUI, if necessary.
+   *
+   * @param path The path pointing to the selected node
+   */
+  private void updateDetailsUI(TreePath path) {
+    if (path == null) {
+      return;
+    }
+
+    DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+    if (selectedNode == null) {
+      return;
+    }
+
+    updateDetailsForUserObject(selectedNode.getUserObject());
+  }
+
+  private void updateDetailsForUserObject(Object userObj) {
+    if (userObj instanceof FeatureNode) {
+      updateDetailsForFeatureNode((FeatureNode) userObj);
+    } else if (userObj instanceof ChangeNode) {
+      updateDetailsForChangeNode((ChangeNode) userObj);
+    }
+  }
+
+  private void updateDetailsForFeatureNode(FeatureNode featureNode) {
+    String details = featureNode.getDetails();
+    String[][] detailsArray = featureNode.getDetailsArray();
+    Component detailsComp = featureNode.getDetailsUI();
+
+    if (details != null) {
+      detailsUI.setText(details);
+    } else if (detailsArray != null) {
+      detailsSplitpane.setRightComponent(new LabelValuePanel(detailsArray));
+    } else if (detailsComp != null) {
+      detailsSplitpane.setRightComponent(detailsComp);
+    }
+  }
+
+  private void updateDetailsForChangeNode(ChangeNode changeNode) {
+    // ChangeNode creates the component on the fly for us
+    Component detailsComp = changeNode.getDetailsUI();
+    detailsSplitpane.setRightComponent(detailsComp);
+  }
 
   /** The actual changeDataSet. */
   private TreeChangeDataSet actualChangeDataSet = null;
@@ -193,6 +202,22 @@ public class ChangeTree extends ChangeComponent {
             treeUI.setRowHeight((int) (newSize + 10f));
           }
         });
+  }
+
+  public JTree getTreeUI() {
+    return treeUI;
+  }
+
+  public JTextArea getDetailsUI() {
+    return detailsUI;
+  }
+
+  public JSplitPane getDetailsSplitpane() {
+    return detailsSplitpane;
+  }
+
+  public JScrollPane getTreeScroller() {
+    return treeScroller;
   }
 
   /** Sets the enabled state of the ChangeTree. */
@@ -262,24 +287,18 @@ public class ChangeTree extends ChangeComponent {
     simpleEChangeTextBox = new JCheckBox("Simple EChange text", SIMPLE_ECHANGE_TEXT_DEFAULT_VALUE);
     simpleEChangeTextBox.setFont(ChangeVisualizationUI.DEFAULT_CHECKBOX_FONT);
     simpleEChangeTextBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            boolean simpleEChangeText = ((JCheckBox) e.getSource()).isSelected();
-            updateSimpleEChangeText(simpleEChangeText);
-          }
+        e -> {
+          boolean simpleEChangeText = ((JCheckBox) e.getSource()).isSelected();
+          updateSimpleEChangeText(simpleEChangeText);
         });
     toolbar.add(simpleEChangeTextBox);
 
     showIDTextBox = new JCheckBox("Show IDs", SHOW_ID_DEFAULT_VALUE);
     showIDTextBox.setFont(ChangeVisualizationUI.DEFAULT_CHECKBOX_FONT);
     showIDTextBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            boolean showID = ((JCheckBox) e.getSource()).isSelected();
-            updateShowID(showID);
-          }
+        e -> {
+          boolean showID = ((JCheckBox) e.getSource()).isSelected();
+          updateShowID(showID);
         });
     toolbar.add(showIDTextBox);
   }
@@ -389,21 +408,18 @@ public class ChangeTree extends ChangeComponent {
 
     // Create listener
     ActionListener behaviorListener =
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            if (((JCheckBox) e.getSource()).isSelected()) {
-              if (expandPChange == e.getSource()) {
-                expandBehavior = ExpandBehavior.EXPAND_PROPAGATED_CHANGES;
-              } else if (expandVChange == e.getSource()) {
-                expandBehavior = ExpandBehavior.EXPAND_VCHANGES;
-              } else if (expandEChange == e.getSource()) {
-                expandBehavior = ExpandBehavior.EXPAND_ECHANGES;
-              }
-              expandNodes();
-            } else {
-              // we react only to the selection
+        e -> {
+          if (((JCheckBox) e.getSource()).isSelected()) {
+            if (expandPChange == e.getSource()) {
+              expandBehavior = ExpandBehavior.EXPAND_PROPAGATED_CHANGES;
+            } else if (expandVChange == e.getSource()) {
+              expandBehavior = ExpandBehavior.EXPAND_VCHANGES;
+            } else if (expandEChange == e.getSource()) {
+              expandBehavior = ExpandBehavior.EXPAND_ECHANGES;
             }
+            expandNodes();
+          } else {
+            // we react only to the selection
           }
         };
 
@@ -421,7 +437,7 @@ public class ChangeTree extends ChangeComponent {
   @Override
   public void setData(ChangeDataSet changeDataSet) {
     if (!(changeDataSet instanceof TreeChangeDataSet)) {
-      throw new RuntimeException("Invalid ChangeDataSet");
+      throw new IllegalArgumentException("Invalid ChangeDataSet");
     }
 
     // If something visualized so far, store its state
@@ -514,10 +530,10 @@ public class ChangeTree extends ChangeComponent {
   public List<String> determineHighlightedCdsIds(
       String highlightID, List<ChangeDataSet> changeDataSets) {
     if (highlightID == null) {
-      return null;
+      return Collections.emptyList();
     }
     if (changeDataSets == null) {
-      return null;
+      return Collections.emptyList();
     }
     List<String> highlightedCdsIds = new Vector<String>();
 
