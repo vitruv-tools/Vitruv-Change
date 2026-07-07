@@ -48,36 +48,21 @@ public class ModelPrinterChange implements BeforeAllCallback, BeforeEachCallback
     }
     final Function<Class<? extends ModelPrinter>, ModelPrinter> _function = (
         Class<? extends ModelPrinter> printerClass) -> {
-      try {
-        ModelPrinter _xblockexpression = null;
-        {
-          final Constructor<?> constructor = Arrays.stream(printerClass.getConstructors())
-              .filter(it -> it.getParameterCount() == 0).findFirst().orElse(null);
-          Preconditions.checkArgument((constructor != null), printerClass + " has no zero-arg constructor!");
-          ModelPrinter _xtrycatchfinallyexpression = null;
-          try {
-            Object _newInstance = constructor.newInstance();
-            _xtrycatchfinallyexpression = ((ModelPrinter) _newInstance);
-          } catch (final Throwable _t) {
-            if (_t instanceof RuntimeException) {
-              final RuntimeException e = (RuntimeException) _t;
-              throw new IllegalStateException("Failed to create an instance of " + printerClass + "!", e);
-            } else if (_t instanceof Error) {
-              throw (Error) _t;
-            } else {
-              throw new RuntimeException(_t);
-            }
-          }
-          _xblockexpression = _xtrycatchfinallyexpression;
+      ModelPrinter _xblockexpression = null;
+      {
+        final Constructor<?> constructor = Arrays.stream(printerClass.getConstructors())
+            .filter(it -> it.getParameterCount() == 0).findFirst().orElse(null);
+        Preconditions.checkArgument((constructor != null), printerClass + " has no zero-arg constructor!");
+        ModelPrinter _xtrycatchfinallyexpression = null;
+        try {
+          Object _newInstance = constructor.newInstance();
+          _xtrycatchfinallyexpression = ((ModelPrinter) _newInstance);
+        } catch (final Exception e) {
+          throw new IllegalStateException("Failed to create an instance of " + printerClass + "!", e);
         }
-        return _xblockexpression;
-      } catch (Throwable _e) {
-        if (_e instanceof RuntimeException)
-          throw (RuntimeException) _e;
-        if (_e instanceof Error)
-          throw (Error) _e;
-        throw new RuntimeException(_e);
+        _xblockexpression = _xtrycatchfinallyexpression;
       }
+      return _xblockexpression;
     };
     final List<ModelPrinter> printers = Arrays.stream(annotation.get().value()).map(_function)
         .collect(Collectors.toList());
