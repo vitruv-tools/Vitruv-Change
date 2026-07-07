@@ -48,21 +48,23 @@ public class ModelPrinterChange implements BeforeAllCallback, BeforeEachCallback
     }
     final Function<Class<? extends ModelPrinter>, ModelPrinter> _function = (
         Class<? extends ModelPrinter> printerClass) -> {
-      ModelPrinter _xblockexpression = null;
+      ModelPrinter modelPrinter = null;
       {
         final Constructor<?> constructor = Arrays.stream(printerClass.getConstructors())
             .filter(it -> it.getParameterCount() == 0).findFirst().orElse(null);
-        Preconditions.checkArgument((constructor != null), printerClass + " has no zero-arg constructor!");
-        ModelPrinter _xtrycatchfinallyexpression = null;
+        Preconditions.checkArgument(
+            constructor != null, printerClass + " has no zero-arg constructor!");
+        ModelPrinter constructedPrinter = null;
         try {
-          Object _newInstance = constructor.newInstance();
-          _xtrycatchfinallyexpression = ((ModelPrinter) _newInstance);
+          Object newInstance = constructor.newInstance();
+          constructedPrinter = ((ModelPrinter) newInstance);
         } catch (final Exception e) {
-          throw new IllegalStateException("Failed to create an instance of " + printerClass + "!", e);
+          throw new IllegalStateException(
+              "Failed to create an instance of " + printerClass + "!", e);
         }
-        _xblockexpression = _xtrycatchfinallyexpression;
+        modelPrinter = constructedPrinter;
       }
-      return _xblockexpression;
+      return modelPrinter;
     };
     final List<ModelPrinter> printers = Arrays.stream(annotation.get().value()).map(_function)
         .collect(Collectors.toList());
