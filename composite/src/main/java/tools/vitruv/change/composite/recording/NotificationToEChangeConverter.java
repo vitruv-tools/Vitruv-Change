@@ -42,7 +42,11 @@ final class NotificationToEChangeConverter {
   }
 
   private String convertExceptionMessage(final EventType eventType, final String notificationType) {
-    return String.format("Event type {} for {} Notifications unexpected.");
+    return String.format(
+            "Event type %s for %s Notifications unexpected.",
+            eventType,
+            notificationType
+    );
   }
 
   private final String ATTRIBUTE_TYPE = "Attribute";
@@ -54,220 +58,143 @@ final class NotificationToEChangeConverter {
   /**
    * Converts the given notification to a list of {@link EChange}s.
    *
-   * @param n the notification to convert
+   * @param notification the notification to convert
    * @return the {@link Iterable} of {@link EChange}s
    */
   public Iterable<? extends EChange<EObject>> convert(final NotificationInfo notification) {
-    Iterable<? extends EChange<EObject>> _switchResult = null;
-    boolean _matched = false;
-    boolean _isTouch = notification.isTouch();
-    if (_isTouch) {
-      _matched = true;
+    if (isIrrelevantNotification(notification)) {
+      return List.of();
     }
-    if (!_matched) {
-      boolean _isTransient = notification.isTransient();
-      if (_isTransient) {
-        _matched = true;
+
+    if (notification.isAttributeNotification()) {
+      return convertAttributeNotification(notification);
+    }
+
+    if (notification.isReferenceNotification()) {
+      return convertReferenceNotification(notification);
+    }
+
+    if (notification.getNotifier() instanceof Resource) {
+      return convertResourceNotification(notification);
+    }
+
+    return List.of();
+  }
+
+  private boolean isIrrelevantNotification(final NotificationInfo notification) {
+    return notification.isTouch()
+            || notification.isTransient()
+            || Objects.equals(notification.getOldValue(), notification.getNewValue());
+  }
+
+  private Iterable<? extends EChange<EObject>> convertAttributeNotification(
+          final NotificationInfo notification) {
+    final EventType eventType = requireEventType(notification);
+
+    return switch (eventType) {
+      case SET -> this.handleSetAttribute(notification);
+      case UNSET -> this.handleUnsetAttribute(notification);
+      case ADD -> this.handleInsertAttribute(notification);
+      case ADD_MANY -> this.handleMultiInsertAttribute(notification);
+      case REMOVE -> this.handleRemoveAttribute(notification);
+      case REMOVE_MANY -> this.handleMultiRemoveAttribute(notification);
+      case MOVE -> this.handleMoveAttribute(notification);
+      case RESOLVE, REMOVING_ADAPTER -> {
+        throw unexpectedNotificationEvent(eventType, ATTRIBUTE_TYPE);
       }
-    }
-    if (!_matched) {
-      Object _oldValue = notification.getOldValue();
-      Object _newValue = notification.getNewValue();
-      boolean _equals = Objects.equals(_oldValue, _newValue);
-      if (_equals) {
-        _matched = true;
+      default -> throw unexpectedEventType(notification);
+    };
+  }
+
+  private Iterable<? extends EChange<EObject>> convertReferenceNotification(
+          final NotificationInfo notification) {
+    final EventType eventType = requireEventType(notification);
+
+    return switch (eventType) {
+      case SET -> this.handleSetReference(notification);
+      case UNSET -> this.handleUnsetReference(notification);
+      case ADD -> this.handleInsertReference(notification);
+      case ADD_MANY -> this.handleMultiInsertReference(notification);
+      case REMOVE -> this.handleRemoveReference(notification);
+      case REMOVE_MANY -> this.handleMultiRemoveReference(notification);
+      case MOVE -> this.handleMoveReference(notification);
+      case RESOLVE, REMOVING_ADAPTER -> {
+        throw unexpectedNotificationEvent(eventType, REFERENCE_TYPE);
       }
+      default -> throw unexpectedEventType(notification);
+    };
+  }
+
+  private Iterable<? extends EChange<EObject>> convertResourceNotification(
+          final NotificationInfo notification) {
+    return switch (notification.getFeatureID(Resource.class)) {
+      case Resource.RESOURCE__CONTENTS -> convertResourceContentsNotification(notification);
+      case Resource.RESOURCE__URI -> convertResourceUriNotification(notification);
+      default -> List.of();
+    };
+  }
+
+  private Iterable<? extends EChange<EObject>> convertResourceContentsNotification(
+          final NotificationInfo notification) {
+    final EventType eventType = requireEventType(notification);
+
+    return switch (eventType) {
+      case ADD -> this.handleInsertRootChange(notification);
+      case ADD_MANY -> this.handleMultiInsertRootChange(notification);
+      case REMOVE -> this.handleRemoveRootChange(notification);
+      case REMOVE_MANY -> this.handleMultiRemoveRootChange(notification);
+      case SET, UNSET, MOVE, RESOLVE, REMOVING_ADAPTER ->
+              throw unexpectedNotificationEvent(eventType, RESOURCE_CONTENTS_TYPE);
+      default -> throw unexpectedEventType(notification);
+    };
+  }
+
+  private Iterable<? extends EChange<EObject>> convertResourceUriNotification(
+          final NotificationInfo notification) {
+    final EventType eventType = requireResourceUriEventType(notification);
+
+    return switch (eventType) {
+      case SET -> this.handleSetUriChange(notification);
+      default -> throw unexpectedResourceUriEventType(notification);
+    };
+  }
+
+  private EventType requireEventType(final NotificationInfo notification) {
+    final EventType eventType = notification.getEventTypeEnum();
+
+    if (eventType == null) {
+      throw unexpectedEventType(notification);
     }
-    if (_matched) {
-      _switchResult = List.of();
+
+    return eventType;
+  }
+
+  private EventType requireResourceUriEventType(final NotificationInfo notification) {
+    final EventType eventType = notification.getEventTypeEnum();
+
+    if (eventType == null) {
+      throw unexpectedResourceUriEventType(notification);
     }
-    if (!_matched) {
-      boolean _isAttributeNotification = notification.isAttributeNotification();
-      if (_isAttributeNotification) {
-        _matched = true;
-        Iterable<? extends EChange<EObject>> _switchResult_1 = null;
-        EventType _eventTypeEnum = notification.getEventTypeEnum();
-        if (_eventTypeEnum != null) {
-          switch (_eventTypeEnum) {
-            case SET:
-              _switchResult_1 = this.handleSetAttribute(notification);
-              break;
-            case UNSET:
-              _switchResult_1 = this.handleUnsetAttribute(notification);
-              break;
-            case ADD:
-              _switchResult_1 = this.handleInsertAttribute(notification);
-              break;
-            case ADD_MANY:
-              _switchResult_1 = this.handleMultiInsertAttribute(notification);
-              break;
-            case REMOVE:
-              _switchResult_1 = this.handleRemoveAttribute(notification);
-              break;
-            case REMOVE_MANY:
-              _switchResult_1 = this.handleMultiRemoveAttribute(notification);
-              break;
-            case MOVE:
-              _switchResult_1 = this.handleMoveAttribute(notification);
-              break;
-            case RESOLVE:
-              String _convertExceptionMessage = this.convertExceptionMessage(EventType.RESOLVE, this.ATTRIBUTE_TYPE);
-              throw new IllegalArgumentException(_convertExceptionMessage);
-            case REMOVING_ADAPTER:
-              String _convertExceptionMessage_1 = this.convertExceptionMessage(EventType.REMOVING_ADAPTER,
-                  this.ATTRIBUTE_TYPE);
-              throw new IllegalArgumentException(_convertExceptionMessage_1);
-            default:
-              int _eventType = notification.getEventType();
-              String _plus = ("Unexpected event type " + Integer.valueOf(_eventType));
-              throw new IllegalArgumentException(_plus);
-          }
-        } else {
-          int _eventType = notification.getEventType();
-          String _plus = ("Unexpected event type " + Integer.valueOf(_eventType));
-          throw new IllegalArgumentException(_plus);
-        }
-        _switchResult = _switchResult_1;
-      }
-    }
-    if (!_matched) {
-      boolean _isReferenceNotification = notification.isReferenceNotification();
-      if (_isReferenceNotification) {
-        _matched = true;
-        Iterable<? extends EChange<EObject>> _switchResult_2 = null;
-        EventType _eventTypeEnum_1 = notification.getEventTypeEnum();
-        if (_eventTypeEnum_1 != null) {
-          switch (_eventTypeEnum_1) {
-            case SET:
-              _switchResult_2 = this.handleSetReference(notification);
-              break;
-            case UNSET:
-              _switchResult_2 = this.handleUnsetReference(notification);
-              break;
-            case ADD:
-              _switchResult_2 = this.handleInsertReference(notification);
-              break;
-            case ADD_MANY:
-              _switchResult_2 = this.handleMultiInsertReference(notification);
-              break;
-            case REMOVE:
-              _switchResult_2 = this.handleRemoveReference(notification);
-              break;
-            case REMOVE_MANY:
-              _switchResult_2 = this.handleMultiRemoveReference(notification);
-              break;
-            case MOVE:
-              _switchResult_2 = this.handleMoveReference(notification);
-              break;
-            case RESOLVE:
-              String _convertExceptionMessage_2 = this.convertExceptionMessage(EventType.RESOLVE, this.REFERENCE_TYPE);
-              throw new IllegalArgumentException(_convertExceptionMessage_2);
-            case REMOVING_ADAPTER:
-              String _convertExceptionMessage_3 = this.convertExceptionMessage(EventType.REMOVING_ADAPTER,
-                  this.REFERENCE_TYPE);
-              throw new IllegalArgumentException(_convertExceptionMessage_3);
-            default:
-              int _eventType_1 = notification.getEventType();
-              String _plus_1 = ("Unexpected event type " + Integer.valueOf(_eventType_1));
-              throw new IllegalArgumentException(_plus_1);
-          }
-        } else {
-          int _eventType_1 = notification.getEventType();
-          String _plus_1 = ("Unexpected event type " + Integer.valueOf(_eventType_1));
-          throw new IllegalArgumentException(_plus_1);
-        }
-        _switchResult = _switchResult_2;
-      }
-    }
-    if (!_matched) {
-      Object _notifier = notification.getNotifier();
-      if ((_notifier instanceof Resource)) {
-        _matched = true;
-        Iterable<? extends EChange<EObject>> _switchResult_3 = null;
-        int _featureID = notification.getFeatureID(Resource.class);
-        switch (_featureID) {
-          case Resource.RESOURCE__CONTENTS:
-            Iterable<? extends EChange<EObject>> _switchResult_4 = null;
-            EventType _eventTypeEnum_2 = notification.getEventTypeEnum();
-            if (_eventTypeEnum_2 != null) {
-              switch (_eventTypeEnum_2) {
-                case ADD:
-                  _switchResult_4 = this.handleInsertRootChange(notification);
-                  break;
-                case ADD_MANY:
-                  _switchResult_4 = this.handleMultiInsertRootChange(notification);
-                  break;
-                case REMOVE:
-                  _switchResult_4 = this.handleRemoveRootChange(notification);
-                  break;
-                case REMOVE_MANY:
-                  _switchResult_4 = this.handleMultiRemoveRootChange(notification);
-                  break;
-                case SET:
-                  String _convertExceptionMessage_4 = this.convertExceptionMessage(EventType.SET,
-                      this.RESOURCE_CONTENTS_TYPE);
-                  throw new IllegalArgumentException(_convertExceptionMessage_4);
-                case UNSET:
-                  String _convertExceptionMessage_5 = this.convertExceptionMessage(EventType.UNSET,
-                      this.RESOURCE_CONTENTS_TYPE);
-                  throw new IllegalArgumentException(_convertExceptionMessage_5);
-                case MOVE:
-                  String _convertExceptionMessage_6 = this.convertExceptionMessage(EventType.MOVE,
-                      this.RESOURCE_CONTENTS_TYPE);
-                  throw new IllegalArgumentException(_convertExceptionMessage_6);
-                case RESOLVE:
-                  String _convertExceptionMessage_7 = this.convertExceptionMessage(EventType.RESOLVE,
-                      this.RESOURCE_CONTENTS_TYPE);
-                  throw new IllegalArgumentException(_convertExceptionMessage_7);
-                case REMOVING_ADAPTER:
-                  String _convertExceptionMessage_8 = this.convertExceptionMessage(EventType.REMOVING_ADAPTER,
-                      this.RESOURCE_CONTENTS_TYPE);
-                  throw new IllegalArgumentException(_convertExceptionMessage_8);
-                default:
-                  int _eventType_2 = notification.getEventType();
-                  String _plus_2 = ("Unexpected event type " + Integer.valueOf(_eventType_2));
-                  throw new IllegalArgumentException(_plus_2);
-              }
-            } else {
-              int _eventType_2 = notification.getEventType();
-              String _plus_2 = ("Unexpected event type " + Integer.valueOf(_eventType_2));
-              throw new IllegalArgumentException(_plus_2);
-            }
-            _switchResult_3 = _switchResult_4;
-            break;
-          case Resource.RESOURCE__URI:
-            Iterable<? extends EChange<EObject>> _switchResult_5 = null;
-            EventType _eventTypeEnum_3 = notification.getEventTypeEnum();
-            if (_eventTypeEnum_3 != null) {
-              switch (_eventTypeEnum_3) {
-                case SET:
-                  _switchResult_5 = this.handleSetUriChange(notification);
-                  break;
-                default:
-                  int _eventType_3 = notification.getEventType();
-                  String _plus_3 = ("Unexpected event type " + Integer.valueOf(_eventType_3));
-                  String _plus_4 = (_plus_3 + " for Resource URI Notification.");
-                  throw new IllegalArgumentException(_plus_4);
-              }
-            } else {
-              int _eventType_3 = notification.getEventType();
-              String _plus_3 = ("Unexpected event type " + Integer.valueOf(_eventType_3));
-              String _plus_4 = (_plus_3 + " for Resource URI Notification.");
-              throw new IllegalArgumentException(_plus_4);
-            }
-            _switchResult_3 = _switchResult_5;
-            break;
-          default:
-            _switchResult_3 = List.of();
-            break;
-        }
-        _switchResult = _switchResult_3;
-      }
-    }
-    if (!_matched) {
-      _switchResult = List.of();
-    }
-    return _switchResult;
+
+    return eventType;
+  }
+
+  private IllegalArgumentException unexpectedEventType(final NotificationInfo notification) {
+    return new IllegalArgumentException("Unexpected event type " + notification.getEventType());
+  }
+
+  private IllegalArgumentException unexpectedResourceUriEventType(
+          final NotificationInfo notification) {
+    final String message = "Unexpected event type "
+            + notification.getEventType()
+            + " for Resource URI Notification.";
+
+    return new IllegalArgumentException(message);
+  }
+
+  private IllegalArgumentException unexpectedNotificationEvent(
+          final EventType eventType, final String notificationType) {
+    return new IllegalArgumentException(this.convertExceptionMessage(eventType, notificationType));
   }
 
   private Iterable<? extends EChange<EObject>> handleMoveAttribute(final NotificationInfo notification) {
