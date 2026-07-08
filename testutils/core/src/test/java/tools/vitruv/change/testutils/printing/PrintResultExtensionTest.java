@@ -24,7 +24,7 @@ public class PrintResultExtensionTest {
         final PrintResult previous,
         final PrintResult latest,
         final PrintResult expected) {
-      assertEquals(expected, PrintResultExtension.operatorPlus(previous, latest));
+    assertEquals(expected, PrintResultExtension.operatorPlus(previous, latest));
   }
 
   @ParameterizedTest
