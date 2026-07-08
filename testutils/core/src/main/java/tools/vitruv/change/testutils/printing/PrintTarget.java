@@ -50,17 +50,17 @@ public interface PrintTarget {
         _matched=true;
         PrintResult _print = this.print("\"");
         PrintResult _apply = valuePrinter.apply(this, value);
-        PrintResult _plus = PrintResultExtension.operator_plus(_print, _apply);
+        PrintResult _plus = PrintResultExtension.operatorPlus(_print, _apply);
         PrintResult _print_1 = this.print("\"");
-        _switchResult = PrintResultExtension.operator_plus(_plus, _print_1);
+        _switchResult = PrintResultExtension.operatorPlus(_plus, _print_1);
       }
     }
     if (!_matched) {
       PrintResult _print = this.print("<");
       PrintResult _apply = valuePrinter.apply(this, value);
-      PrintResult _plus = PrintResultExtension.operator_plus(_print, _apply);
+      PrintResult _plus = PrintResultExtension.operatorPlus(_print, _apply);
       PrintResult _print_1 = this.print(">");
-      _switchResult = PrintResultExtension.operator_plus(_plus, _print_1);
+      _switchResult = PrintResultExtension.operatorPlus(_plus, _print_1);
     }
     return _switchResult;
   }

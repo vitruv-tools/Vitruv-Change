@@ -139,7 +139,7 @@ public class DefaultPrintTarget implements PrintTarget {
     if (isEmpty) {
       PrintResult startResult = this.print(start);
       PrintResult endResult = this.print(end);
-      return PrintResultExtension.operator_plus(startResult, endResult);
+      return PrintResultExtension.operatorPlus(startResult, endResult);
     }
     int size = preprinted.size();
     int multiLineIfAtLeastItemCount = mode.getMultiLineIfAtLeastItemCount();
@@ -157,43 +157,43 @@ public class DefaultPrintTarget implements PrintTarget {
       {
         PrintResult _result = result;
         PrintResult _print = this.print(outputs.next());
-        result = PrintResultExtension.operator_plus(_result, _print);
+        result = PrintResultExtension.operatorPlus(_result, _print);
         boolean _hasNext = outputs.hasNext();
         if (_hasNext) {
           PrintResult _result_1 = result;
           PrintResult _print_1 = this.print(separator);
-          result = PrintResultExtension.operator_plus(_result_1, _print_1);
+          result = PrintResultExtension.operatorPlus(_result_1, _print_1);
         }
       }
     }
     PrintResult _print = this.print(end);
-    return PrintResultExtension.operator_plus(result, _print);
+    return PrintResultExtension.operatorPlus(result, _print);
   }
 
   private <T extends Object> PrintResult printMultiLine(final String start, final String end, final String separator,
       final Collection<DefaultPrintTarget> preprinted) {
     PrintResult _print = this.print(start);
     PrintResult _newLineIncreaseIndent = this.newLineIncreaseIndent();
-    PrintResult result = PrintResultExtension.operator_plus(_print, _newLineIncreaseIndent);
+    PrintResult result = PrintResultExtension.operatorPlus(_print, _newLineIncreaseIndent);
     for (final Iterator<DefaultPrintTarget> outputs = preprinted.iterator(); outputs.hasNext();) {
       {
         PrintResult _result = result;
         PrintResult _print_1 = this.print(outputs.next());
-        result = PrintResultExtension.operator_plus(_result, _print_1);
+        result = PrintResultExtension.operatorPlus(_result, _print_1);
         boolean _hasNext = outputs.hasNext();
         if (_hasNext) {
           PrintResult _result_1 = result;
           PrintResult _print_2 = this.print(separator);
           PrintResult _newLine = this.newLine();
-          PrintResult _plus = PrintResultExtension.operator_plus(_print_2, _newLine);
-          result = PrintResultExtension.operator_plus(_result_1, _plus);
+          PrintResult _plus = PrintResultExtension.operatorPlus(_print_2, _newLine);
+          result = PrintResultExtension.operatorPlus(_result_1, _plus);
         }
       }
     }
     PrintResult _newLineDecreaseIndent = this.newLineDecreaseIndent();
-    PrintResult _plus = PrintResultExtension.operator_plus(result, _newLineDecreaseIndent);
+    PrintResult _plus = PrintResultExtension.operatorPlus(result, _newLineDecreaseIndent);
     PrintResult _print_1 = this.print(end);
-    return PrintResultExtension.operator_plus(_plus, _print_1);
+    return PrintResultExtension.operatorPlus(_plus, _print_1);
   }
 
   @Override

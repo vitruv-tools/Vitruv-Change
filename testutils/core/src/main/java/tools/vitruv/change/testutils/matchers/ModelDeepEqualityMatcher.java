@@ -401,7 +401,7 @@ class ModelDeepEqualityMatcher<O extends EObject> extends TypeSafeMatcher<O> {
       if (!_matched) {
         _switchResult = this.modelPrinter.printObject(target, this.idProvider, difference);
       }
-      return PrintResultExtension.operator_plus(_print, _switchResult);
+      return PrintResultExtension.operatorPlus(_print, _switchResult);
     }
 
     private PrintResult printFeatureDifference(final PrintTarget target, final EStructuralFeature feature,
@@ -414,23 +414,23 @@ class ModelDeepEqualityMatcher<O extends EObject> extends TypeSafeMatcher<O> {
         PrintResult _print_1 = target.print(" (");
         PrintResult _printObjectShortened = this.modelPrinter.printObjectShortened(target, this.idProvider,
             difference.getMatch().getLeft());
-        PrintResult _plus = PrintResultExtension.operator_plus(_print_1, _printObjectShortened);
+        PrintResult _plus = PrintResultExtension.operatorPlus(_print_1, _printObjectShortened);
         PrintResult _print_2 = target.print(")");
-        _xifexpression = PrintResultExtension.operator_plus(_plus, _print_2);
+        _xifexpression = PrintResultExtension.operatorPlus(_plus, _print_2);
       } else {
         _xifexpression = PrintResult.PRINTED_NO_OUTPUT;
       }
-      PrintResult _plus_1 = PrintResultExtension.operator_plus(_print, _xifexpression);
+      PrintResult _plus_1 = PrintResultExtension.operatorPlus(_print, _xifexpression);
       PrintResult _print_3 = target.print(".");
-      PrintResult _plus_2 = PrintResultExtension.operator_plus(_plus_1, _print_3);
+      PrintResult _plus_2 = PrintResultExtension.operatorPlus(_plus_1, _print_3);
       PrintResult _print_4 = target.print(feature.getName());
-      PrintResult _plus_3 = PrintResultExtension.operator_plus(_plus_2, _print_4);
+      PrintResult _plus_3 = PrintResultExtension.operatorPlus(_plus_2, _print_4);
       PrintResult _print_5 = target.print(" ");
-      PrintResult _plus_4 = PrintResultExtension.operator_plus(_plus_3, _print_5);
+      PrintResult _plus_4 = PrintResultExtension.operatorPlus(_plus_3, _print_5);
       PrintResult _print_6 = target.print(this.getVerb(difference.getKind()));
-      PrintResult _plus_5 = PrintResultExtension.operator_plus(_plus_4, _print_6);
+      PrintResult _plus_5 = PrintResultExtension.operatorPlus(_plus_4, _print_6);
       PrintResult _print_7 = target.print(": ");
-      PrintResult _plus_6 = PrintResultExtension.operator_plus(_plus_5, _print_7);
+      PrintResult _plus_6 = PrintResultExtension.operatorPlus(_plus_5, _print_7);
       EObject _elvis = null;
       EObject _left_1 = difference.getMatch().getLeft();
       if (_left_1 != null) {
@@ -441,7 +441,7 @@ class ModelDeepEqualityMatcher<O extends EObject> extends TypeSafeMatcher<O> {
       }
       PrintResult _printFeatureValue = this.modelPrinter.printFeatureValue(target, this.idProvider, _elvis, feature,
           value);
-      return PrintResultExtension.operator_plus(_plus_6, _printFeatureValue);
+      return PrintResultExtension.operatorPlus(_plus_6, _printFeatureValue);
     }
 
     private String getVerb(final DifferenceKind kind) {
