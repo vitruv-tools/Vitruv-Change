@@ -185,15 +185,15 @@ public class DefaultPrintTarget implements PrintTarget {
           PrintResult _result_1 = result;
           PrintResult _print_2 = this.print(separator);
           PrintResult _newLine = this.newLine();
-          PrintResult _plus = PrintResultExtension.operatorPlus(_print_2, _newLine);
-          result = PrintResultExtension.operatorPlus(_result_1, _plus);
+          PrintResult plus = PrintResultExtension.operatorPlus(_print_2, _newLine);
+          result = PrintResultExtension.operatorPlus(_result_1, plus);
         }
       }
     }
     PrintResult _newLineDecreaseIndent = this.newLineDecreaseIndent();
-    PrintResult _plus = PrintResultExtension.operatorPlus(result, _newLineDecreaseIndent);
+    PrintResult plus = PrintResultExtension.operatorPlus(result, _newLineDecreaseIndent);
     PrintResult _print_1 = this.print(end);
-    return PrintResultExtension.operatorPlus(_plus, _print_1);
+    return PrintResultExtension.operatorPlus(plus, _print_1);
   }
 
   @Override

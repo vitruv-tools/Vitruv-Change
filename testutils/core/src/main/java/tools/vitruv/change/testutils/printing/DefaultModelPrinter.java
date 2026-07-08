@@ -45,12 +45,12 @@ public final class DefaultModelPrinter implements ModelPrinter {
       return this.subPrinter.printObject(subTarget, idProvider, uri);
     };
     PrintResult _printValue = target.<URI>printValue(resource.getURI(), _function);
-    PrintResult _plus = PrintResultExtension.operatorPlus(_print, _printValue);
+    PrintResult plus = PrintResultExtension.operatorPlus(_print, _printValue);
     final BiFunction<PrintTarget, EObject, PrintResult> _function_1 = (PrintTarget subTarget, EObject element) -> {
       return this.subPrinter.printObject(subTarget, idProvider, element);
     };
     PrintResult _printList = target.<EObject>printList(resource.getContents(), PrintMode.MULTI_LINE_LIST, _function_1);
-    return PrintResultExtension.operatorPlus(_plus, _printList);
+    return PrintResultExtension.operatorPlus(plus, _printList);
   }
 
   private PrintResult _dispatchPrintObject(final PrintTarget target, final PrintIdProvider idProvider,
@@ -79,14 +79,14 @@ public final class DefaultModelPrinter implements ModelPrinter {
       } else {
         _xifexpression_1 = PrintResult.PRINTED_NO_OUTPUT;
       }
-      PrintResult _plus_1 = PrintResultExtension.operatorPlus(_print, _xifexpression_1);
+      PrintResult plus1 = PrintResultExtension.operatorPlus(_print, _xifexpression_1);
       final BiFunction<PrintTarget, EStructuralFeature, PrintResult> _function_1 = (PrintTarget subTarget,
           EStructuralFeature feature) -> {
         return this.subPrinter.printFeature(subTarget, idProvider, object, feature);
       };
       PrintResult _printIterable = target.<EStructuralFeature>printIterable("(", ")", featuresToPrint,
           DefaultModelPrinter.FEATURE_PRINT_MODE, _function_1);
-      _xblockexpression = PrintResultExtension.operatorPlus(_plus_1, _printIterable);
+      _xblockexpression = PrintResultExtension.operatorPlus(plus1, _printIterable);
     }
     return _xblockexpression;
   }
@@ -192,12 +192,12 @@ public final class DefaultModelPrinter implements ModelPrinter {
       return this.subPrinter.printObjectShortened(subTarget, idProvider, uri);
     };
     PrintResult _printValue = target.<URI>printValue(resource.getURI(), _function);
-    PrintResult _plus = PrintResultExtension.operatorPlus(_print, _printValue);
+    PrintResult plus = PrintResultExtension.operatorPlus(_print, _printValue);
     final BiFunction<PrintTarget, EObject, PrintResult> _function_1 = (PrintTarget subTarget, EObject element) -> {
       return this.subPrinter.printObjectShortened(subTarget, idProvider, element);
     };
     PrintResult _printList = target.<EObject>printList(resource.getContents(), PrintMode.SINGLE_LINE_LIST, _function_1);
-    return PrintResultExtension.operatorPlus(_plus, _printList);
+    return PrintResultExtension.operatorPlus(plus, _printList);
   }
 
   private PrintResult _dispatchPrintObjectShortened(final PrintTarget target,
@@ -210,9 +210,9 @@ public final class DefaultModelPrinter implements ModelPrinter {
       if ((idAttribute != null)) {
         PrintResult _print_1 = target.print("(");
         PrintResult _printFeature = this.printFeature(target, idProvider, object, idAttribute);
-        PrintResult _plus = PrintResultExtension.operatorPlus(_print_1, _printFeature);
+        PrintResult plus = PrintResultExtension.operatorPlus(_print_1, _printFeature);
         PrintResult _print_2 = target.print(")");
-        _xifexpression = PrintResultExtension.operatorPlus(_plus, _print_2);
+        _xifexpression = PrintResultExtension.operatorPlus(plus, _print_2);
       } else {
         PrintResult _print_3 = target.print("#");
         PrintResult _print_4 = target.print(idProvider.getFallbackId(object));
@@ -261,9 +261,9 @@ public final class DefaultModelPrinter implements ModelPrinter {
     if (!_matched) {
       PrintResult _print = target.print(object.getClass().getSimpleName());
       PrintResult _print_1 = target.print("#");
-      PrintResult _plus = PrintResultExtension.operatorPlus(_print, _print_1);
+      PrintResult plus = PrintResultExtension.operatorPlus(_print, _print_1);
       PrintResult _print_2 = target.print(idProvider.getFallbackId(object));
-      _switchResult = PrintResultExtension.operatorPlus(_plus, _print_2);
+      _switchResult = PrintResultExtension.operatorPlus(plus, _print_2);
     }
     return _switchResult;
   }
