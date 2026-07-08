@@ -1,17 +1,20 @@
 package tools.vitruv.change.composite.recording;
 
+import static tools.vitruv.change.composite.message.Error.RESOURCE_URI_NOTIFICATION;
+import static tools.vitruv.change.composite.message.Error.UNEXPECTED_EVENT_TYPE;
+
 import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
-import java.util.function.Function;
-import java.util.function.BiFunction;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory;
 import tools.vitruv.change.atomic.eobject.CreateEObject;
@@ -99,9 +102,8 @@ final class NotificationToEChangeConverter {
       case REMOVE -> this.handleRemoveAttribute(notification);
       case REMOVE_MANY -> this.handleMultiRemoveAttribute(notification);
       case MOVE -> this.handleMoveAttribute(notification);
-      case RESOLVE, REMOVING_ADAPTER -> {
-        throw unexpectedNotificationEvent(eventType, ATTRIBUTE_TYPE);
-      }
+      case RESOLVE, REMOVING_ADAPTER ->
+          throw unexpectedNotificationEvent(eventType, ATTRIBUTE_TYPE);
       default -> throw unexpectedEventType(notification);
     };
   }
@@ -118,9 +120,8 @@ final class NotificationToEChangeConverter {
       case REMOVE -> this.handleRemoveReference(notification);
       case REMOVE_MANY -> this.handleMultiRemoveReference(notification);
       case MOVE -> this.handleMoveReference(notification);
-      case RESOLVE, REMOVING_ADAPTER -> {
-        throw unexpectedNotificationEvent(eventType, REFERENCE_TYPE);
-      }
+      case RESOLVE, REMOVING_ADAPTER ->
+          throw unexpectedNotificationEvent(eventType, REFERENCE_TYPE);
       default -> throw unexpectedEventType(notification);
     };
   }
@@ -180,14 +181,14 @@ final class NotificationToEChangeConverter {
   }
 
   private IllegalArgumentException unexpectedEventType(final NotificationInfo notification) {
-    return new IllegalArgumentException("Unexpected event type " + notification.getEventType());
+    return new IllegalArgumentException(UNEXPECTED_EVENT_TYPE + notification.getEventType());
   }
 
   private IllegalArgumentException unexpectedResourceUriEventType(
           final NotificationInfo notification) {
-    final String message = "Unexpected event type "
+    final String message = UNEXPECTED_EVENT_TYPE
             + notification.getEventType()
-            + " for Resource URI Notification.";
+            + RESOURCE_URI_NOTIFICATION;
 
     return new IllegalArgumentException(message);
   }
