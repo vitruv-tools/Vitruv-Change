@@ -27,16 +27,16 @@ public class PrintResultExtensionTest {
                 assertEquals(expected, PrintResultExtension.operatorPlus(previous, latest));
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "PRINTED, NOT_RESPONSIBLE",
-        "NOT_RESPONSIBLE, PRINTED"
-    })
-    void rejectsInvalidPrintResultTransitions(
-            final PrintResult previous,
-            final PrintResult latest) {
-        assertThrows(
-                IllegalStateException.class,
-                () -> PrintResultExtension.operatorPlus(previous, latest));
-    }
+  @ParameterizedTest
+  @CsvSource({
+    "PRINTED, NOT_RESPONSIBLE",
+    "NOT_RESPONSIBLE, PRINTED"
+  })
+  void rejectsInvalidPrintResultTransitions(
+        final PrintResult previous,
+        final PrintResult latest) {
+    assertThrows(
+            IllegalStateException.class,
+            () -> PrintResultExtension.operatorPlus(previous, latest));
+  }
 }
