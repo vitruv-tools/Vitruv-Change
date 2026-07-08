@@ -1,7 +1,6 @@
 package tools.vitruv.change.testutils.printing;
 
 import com.google.common.base.Preconditions;
-import java.util.function.Supplier;
 
 public final class PrintResultExtension {
   public static PrintResult operator_plus(final PrintResult previous, final PrintResult latest) {
