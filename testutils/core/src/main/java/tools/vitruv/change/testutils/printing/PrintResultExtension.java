@@ -3,7 +3,15 @@ package tools.vitruv.change.testutils.printing;
 import com.google.common.base.Preconditions;
 
 public final class PrintResultExtension {
-  public static PrintResult operator_plus(final PrintResult previous, final PrintResult latest) {
+  /**
+   * Combines a previous and latest print result.
+   *
+   * @param previous the previous print result
+   * @param latest the latest print result
+   * @return the combined print result
+   * @throws IllegalStateException if the transition between both results is invalid
+   */
+  public static PrintResult operatorPlus(final PrintResult previous, final PrintResult latest) {
     Preconditions.checkNotNull(previous, "previous result");
     Preconditions.checkNotNull(latest, "latest result");
 
