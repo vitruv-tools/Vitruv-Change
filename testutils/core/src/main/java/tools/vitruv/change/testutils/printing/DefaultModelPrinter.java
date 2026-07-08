@@ -115,7 +115,7 @@ public final class DefaultModelPrinter implements ModelPrinter {
     }
     PrintResult _print = target.print(feature.getName());
     PrintResult _print_1 = target.print("=");
-    PrintResult _plus = PrintResultExtension.operatorPlus(_print, _print_1);
+    PrintResult plus = PrintResultExtension.operatorPlus(_print, _print_1);
     PrintResult _xifexpression = null;
     boolean _isMany = feature.isMany();
     if (_isMany) {
@@ -134,7 +134,7 @@ public final class DefaultModelPrinter implements ModelPrinter {
     } else {
       _xifexpression = this.subPrinter.printFeatureValue(target, idProvider, object, feature, object.eGet(feature));
     }
-    return PrintResultExtension.operatorPlus(_plus, _xifexpression);
+    return PrintResultExtension.operatorPlus(plus, _xifexpression);
   }
 
   @Override
