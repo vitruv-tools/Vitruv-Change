@@ -422,9 +422,9 @@ class ModelDeepEqualityMatcher<O extends EObject> extends TypeSafeMatcher<O> {
       }
       PrintResult plus1 = PrintResultExtension.operatorPlus(_print, _xifexpression);
       PrintResult _print_3 = target.print(".");
-      PrintResult _plus_2 = PrintResultExtension.operatorPlus(plus1, _print_3);
+      PrintResult plus2 = PrintResultExtension.operatorPlus(plus1, _print_3);
       PrintResult _print_4 = target.print(feature.getName());
-      PrintResult plus3 = PrintResultExtension.operatorPlus(_plus_2, _print_4);
+      PrintResult plus3 = PrintResultExtension.operatorPlus(plus2, _print_4);
       PrintResult _print_5 = target.print(" ");
       PrintResult plus4 = PrintResultExtension.operatorPlus(plus3, _print_5);
       PrintResult print6 = target.print(this.getVerb(difference.getKind()));
