@@ -31,6 +31,7 @@ public class ModelCreatorsProcessor extends AbstractClassProcessor {
 
   private static final String NEW_EOBJECT_CONVERTER = "NewEObject";
   private static final String CLASSIFIER_CONVERTER = "Classifier";
+  private static final String METHOD_NAME_CREATE = "create";
 
   @Override
   public void doRegisterGlobals(ClassDeclaration annotatedClass, RegisterGlobalsContext context) {
@@ -68,11 +69,18 @@ public class ModelCreatorsProcessor extends AbstractClassProcessor {
     StreamSupport.stream(factory.getDeclaredResolvedMethods().spliterator(), false)
         .map(rm -> rm.getDeclaration())
         .filter(
-            m -> m.getSimpleName().startsWith("create") && !m.getParameters().iterator().hasNext())
+            m ->
+                    m.getSimpleName().startsWith(METHOD_NAME_CREATE)
+                            && !m.getParameters().iterator().hasNext())
         .forEach(
             createMethod -> {
               String baseName =
-                  removePrefix(removePrefix(createMethod.getSimpleName(), "create"), stripPrefix);
+                  removePrefix(
+                          removePrefix(
+                                  createMethod.getSimpleName(),
+                                  METHOD_NAME_CREATE
+                          ),
+                          stripPrefix);
               String targetName =
                   prefix + toFirstUpper(replacements.getOrDefault(baseName, baseName));
               TypeReference returnType = createMethod.getReturnType();
@@ -157,7 +165,7 @@ public class ModelCreatorsProcessor extends AbstractClassProcessor {
         });
 
     annotatedClass.addMethod(
-        "create",
+            METHOD_NAME_CREATE,
         m -> {
           m.setReturnType(context.newTypeReference(EObject.class));
           m.addParameter("className", context.newTypeReference(String.class));
@@ -165,7 +173,7 @@ public class ModelCreatorsProcessor extends AbstractClassProcessor {
         });
 
     annotatedClass.addMethod(
-        "create",
+            METHOD_NAME_CREATE,
         m -> {
           MutableTypeParameterDeclaration typeParam =
               m.addTypeParameter("M", context.newTypeReference(EObject.class));

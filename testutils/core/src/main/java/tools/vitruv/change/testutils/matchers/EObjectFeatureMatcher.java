@@ -48,37 +48,29 @@ class EObjectFeatureMatcher extends TypeSafeMatcher<EObject> {
     if (_not) {
       mismatchDescription.appendText(" was ").appendText(TestMessages.a(item.eClass().getName()));
     } else {
-      Description _appendText = mismatchDescription.appendText("->").appendText(this.feature.getName());
-      String _switchResult = null;
-      final Matcher<?> featureMatcher = this.featureMatcher;
-      boolean _matched = false;
-      if (featureMatcher instanceof IsCollectionContaining) {
-        boolean _isOrdered = this.feature.isOrdered();
-        if (_isOrdered) {
-          _matched=true;
-          _switchResult = "[*]";
-        }
-      }
-      if (!_matched) {
-        if (featureMatcher instanceof IsCollectionContaining) {
-          _matched=true;
-          _switchResult = "{*}";
-        }
-      }
-      if (!_matched) {
-        if (featureMatcher instanceof EObjectFeatureMatcher) {
-          _matched=true;
-          _switchResult = "";
-        }
-      }
-      if (!_matched) {
-        _switchResult = " ";
-      }
-      _appendText.appendText(_switchResult);
-      this.featureMatcher.describeMismatch(item.eGet(this.feature), mismatchDescription);
-      mismatchDescription.appendText(" for");
+      this.describeFeatureMismatch(item, mismatchDescription);
     }
     ModelPrinting.appendModelValue(mismatchDescription.appendText(":").appendText(System.lineSeparator()), item);
+  }
+
+  private void describeFeatureMismatch(final EObject item, final Description mismatchDescription) {
+    mismatchDescription.appendText("->").appendText(this.feature.getName())
+        .appendText(this.featureMismatchSuffix());
+    this.featureMatcher.describeMismatch(item.eGet(this.feature), mismatchDescription);
+    mismatchDescription.appendText(" for");
+  }
+
+  private String featureMismatchSuffix() {
+    if (this.featureMatcher instanceof IsCollectionContaining) {
+      if (this.feature.isOrdered()) {
+        return "[*]";
+      }
+      return "{*}";
+    }
+    if (this.featureMatcher instanceof EObjectFeatureMatcher) {
+      return "";
+    }
+    return " ";
   }
 
   public EObjectFeatureMatcher(final EStructuralFeature feature, final Matcher<?> featureMatcher) {
