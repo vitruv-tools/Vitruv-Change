@@ -231,7 +231,7 @@ public class TreeChangeDataSetDecoder {
         break;
       default:
         // this should never happens
-        throw new RuntimeException("Unknown change type : " + changeType);
+        throw new IllegalArgumentException("Unknown change type : " + changeType);
     }
 
     return node;
