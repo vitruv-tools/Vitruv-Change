@@ -267,6 +267,9 @@ public class ChangeRecorder implements AutoCloseable {
 
     @Override
     public void setTarget(final Notifier newTarget) {
+      // Intentionally empty: this recorder does not track a single adapter target
+      // (getTarget() always returns null). It is attached to and detached from notifiers
+      // explicitly by the enclosing ChangeRecorder, so EMF's target callback needs no action.
     }
 
     public NotificationRecorder(final ChangeRecorder outer) {
