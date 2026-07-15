@@ -43,7 +43,7 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
 
     ON_FAILURE,
 
-    NEVER_2;
+    NEVER;
   }
 
   private static class WorkspaceGuard implements AutoCloseable {
@@ -107,7 +107,7 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
       TestProjectManager.RetainMode _retainMode = TestProjectManager.getRetainMode();
       final TestProjectManager.RetainMode retain = _retainMode;
       boolean _matched = false;
-      if (Objects.equals(retain, TestProjectManager.RetainMode.NEVER_2)) {
+      if (Objects.equals(retain, TestProjectManager.RetainMode.NEVER)) {
         _matched = true;
       }
       if (!_matched) {
