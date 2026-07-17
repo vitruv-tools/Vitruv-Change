@@ -165,7 +165,7 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
   private static final ExtensionContext.Namespace projectNamespace = ExtensionContext.Namespace
       .create(TestProjectManager.class, "projects");
 
-  private static final Pattern invalidFileCharacters = Pattern.compile("[/\\\\<>:\"|?*]");
+  private static final Pattern invalidFileCharacters = Pattern.compile("[/\\\\<>:\"|?*\u0000]");
 
   private static Path workspaceCache;
 
