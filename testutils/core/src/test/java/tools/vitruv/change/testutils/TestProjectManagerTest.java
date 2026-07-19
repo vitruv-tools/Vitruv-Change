@@ -10,7 +10,6 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.nio.file.Files;
@@ -91,15 +90,15 @@ class TestProjectManagerTest {
 
   @Test
   @DisplayName("Should support @TestProject annotation with Path parameter")
-  void testSupportsParameter_Valid() throws Exception {
+  void testSupportsParameterValid() throws Exception {
     final ParameterContext paramContext = this.createParameterContext("dummyValidMethod",
         Path.class);
     assertTrue(this.manager.supportsParameter(paramContext, this.mockContext));
   }
 
   @Test
-  @DisplayName("Should throw exception when @TestProject is used on a non-Path parameter")
-  void testSupportsParameter_InvalidType() throws Exception {
+  @DisplayName("Should throw exception when @TestProject is used on a non Path parameter")
+  void testSupportsParameterInvalidType() throws Exception {
     final ParameterContext paramContext = this.createParameterContext("dummyInvalidTypeMethod",
         String.class);
     assertThrows(ParameterResolutionException.class, () -> {
@@ -109,7 +108,7 @@ class TestProjectManagerTest {
 
   @Test
   @DisplayName("Should reject parameter without @TestProject annotation")
-  void testSupportsParameter_NoAnnotation() throws Exception {
+  void testSupportsParameterNoAnnotation() throws Exception {
     final ParameterContext paramContext = this.createParameterContext("dummyUnannotatedMethod",
         Path.class);
     assertFalse(this.manager.supportsParameter(paramContext, this.mockContext));
@@ -117,7 +116,7 @@ class TestProjectManagerTest {
 
   @Test
   @DisplayName("Should resolve parameter and create project directory for default variant")
-  void testResolveParameter_DefaultVariant() throws Exception {
+  void testResolveParameterDefaultVariant() throws Exception {
     final ParameterContext paramContext = this.createParameterContext("dummyValidMethod",
         Path.class);
     final Object resolved = this.manager.resolveParameter(paramContext, this.mockContext);
@@ -129,7 +128,7 @@ class TestProjectManagerTest {
 
   @Test
   @DisplayName("Should sanitize invalid characters in variant name and create directory")
-  void testGetProject_WithVariantAndInvalidCharacters() {
+  void testGetProjectWithVariantAndInvalidCharacters() {
     final String variantWithInvalidChars = "test/variant:*?\"<>|";
     final Path projectPath = this.manager.getProject(variantWithInvalidChars, this.mockContext);
 
@@ -141,13 +140,16 @@ class TestProjectManagerTest {
 
   @Test
   @DisplayName("Should handle directory collision by appending a counter")
-  void testCreateUniqueDirectory_CollisionHandling() throws IOException {
-    final Path firstProject = this.manager.getProject("", this.mockContext);
+  void testCreateUniqueDirectoryCollisionHandling() throws Exception {
+    final Method method = TestProjectManager.class
+        .getDeclaredMethod("createUniqueDirectory", Path.class);
+    method.setAccessible(true);
+
+    final Path targetPath = this.tempDir.resolve("collisionTest");
+    final Path firstProject = (Path) method.invoke(null, targetPath);
+    final Path secondProject = (Path) method.invoke(null, targetPath);
+
     assertTrue(Files.exists(firstProject));
-
-    this.storeMap.clear();
-    final Path secondProject = this.manager.getProject("", this.mockContext);
-
     assertTrue(Files.exists(secondProject));
     assertNotEquals(firstProject, secondProject);
     assertTrue(secondProject.getFileName().toString().contains(" 2"));
@@ -155,7 +157,7 @@ class TestProjectManagerTest {
 
   @Test
   @DisplayName("Should set observedFailure flag when test execution fails")
-  void testAfterEach_WithExecutionException_SetsObservedFailure() throws Exception {
+  void testAfterEachWithExecutionExceptionSetsObservedFailure() throws Exception {
     when(this.mockContext.getExecutionException())
         .thenReturn(Optional.of(new RuntimeException("Test Failed")));
 
@@ -168,7 +170,7 @@ class TestProjectManagerTest {
 
   @Test
   @DisplayName("Should delete project directory on close when RetainMode is NEVER")
-  void testProjectGuard_RetainModeNever_DeletesDirectory() throws Exception {
+  void testProjectGuardRetainModeNeverDeletesDirectory() throws Exception {
     System.setProperty(TestProjectManager.RETAIN_TEST_PROJECTS_SYSTEM_PROPERTY, "never");
 
     final Path projectPath = this.manager.getProject("", this.mockContext);
@@ -186,25 +188,31 @@ class TestProjectManagerTest {
 
   @Test
   @DisplayName("Should throw IllegalArgumentException when an invalid RetainMode is set")
-  void testInvalidRetainMode_ThrowsException() {
+  void testInvalidRetainModeThrowsException() {
     System.setProperty(TestProjectManager.RETAIN_TEST_PROJECTS_SYSTEM_PROPERTY,
         "invalid_mode_value");
 
     this.manager.getProject("", this.mockContext);
 
-    assertThrows(IllegalArgumentException.class, () -> {
-      for (final Object value : this.storeMap.values()) {
-        if (value instanceof AutoCloseable
-            && value.getClass().getSimpleName().contains("ProjectGuard")) {
-          ((AutoCloseable) value).close();
-        }
+    AutoCloseable targetGuard = null;
+    for (final Object value : this.storeMap.values()) {
+      if (value instanceof AutoCloseable
+          && value.getClass().getSimpleName().contains("ProjectGuard")) {
+        targetGuard = (AutoCloseable) value;
+        break;
       }
-    });
+    }
+
+    assertNotNull(targetGuard);
+
+    final AutoCloseable finalGuard = targetGuard;
+
+    assertThrows(IllegalArgumentException.class, finalGuard::close);
   }
 
   @Test
   @DisplayName("Should delete workspace directory when WorkspaceGuard closes")
-  void testWorkspaceGuard_ClosesAndDeletesWorkspace() throws Exception {
+  void testWorkspaceGuardClosesAndDeletesWorkspace() throws Exception {
     this.manager.getProject("", this.mockContext);
 
     for (final Object value : this.storeMap.values()) {
@@ -218,8 +226,8 @@ class TestProjectManagerTest {
     assertFalse(Files.exists(vitruvDir));
   }
 
-  private ParameterContext createParameterContext(final String methodName,
-                                                  final Class<?> paramType) throws NoSuchMethodException {
+  private ParameterContext createParameterContext(
+      final String methodName, final Class<?> paramType) throws NoSuchMethodException {
     final Method method = this.getClass().getDeclaredMethod(methodName, paramType);
     final Parameter parameter = method.getParameters()[0];
 
