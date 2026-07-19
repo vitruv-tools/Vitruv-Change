@@ -207,7 +207,8 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
     deleteRecursively(targetDir);
 
     TestProjectManager.workspaceCache = TestProjectManager.createUniqueDirectory(targetDir);
-    TestProjectManager.log.info("Running in the test workspace at " + TestProjectManager.workspaceCache);
+    TestProjectManager.log.info("Running in the test workspace at {}",
+        TestProjectManager.workspaceCache);
     return TestProjectManager.workspaceCache;
   }
 
