@@ -5,9 +5,11 @@ import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.Resour
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -235,6 +237,32 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
       allCorrespondences.addAll(correspondence.getRightEObjects());
     }
     return Set.copyOf(allCorrespondences);
+  }
+
+  @Override
+  public Map<String, Set<EObject>> getCorrespondingEObjectsWithTag(
+      EObject sourceEObject, Class<? extends Correspondence> correspondenceType) {
+    // Extract correspondences
+    List<EObject> source = List.of(sourceEObject);
+    Set<Correspondence> correspondencesForSource = getCorrespondences(source);
+    Set<? extends Correspondence> typedCorrespondences = filterCorrespondenceTypeAndTag(
+        correspondencesForSource,
+        correspondenceType,
+        null
+    );
+
+    Map<String, Set<EObject>> correspondingTaggedElements = new HashMap<>();
+    for (var correspondence : typedCorrespondences) {
+      var correspondingElements =
+          correspondence.getLeftEObjects().equals(source)
+              ? correspondence.getRightEObjects()
+              : correspondence.getLeftEObjects();
+      correspondingTaggedElements.computeIfAbsent(
+          correspondence.getTag(),
+          tag -> new HashSet<>()
+      ).addAll(correspondingElements);
+    }
+    return correspondingTaggedElements;
   }
 
   @Override

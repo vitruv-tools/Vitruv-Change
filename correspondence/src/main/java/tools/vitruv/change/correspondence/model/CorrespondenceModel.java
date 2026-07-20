@@ -1,6 +1,7 @@
 package tools.vitruv.change.correspondence.model;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.eclipse.emf.ecore.EObject;
@@ -56,6 +57,20 @@ public interface CorrespondenceModel extends AutoCloseable {
    * @return {@link Set} a set of {@link EObject}s.
    */
   Set<EObject> getAllEObjectsInACorrespondence();
+
+  /**
+   * Returns all elements corresponding to {@code sourceEObject}, if the correspondence is of
+   * the given {@code correspondenceType}.
+   *
+   * @param sourceEObject {@link EObject}, must not be null
+   * @param correspondenceType {@link Correspondence}, must not be null
+   * @return {@link Map} of {@link Set}
+   *     Each entry of the returned map contains as key the correspondence tag {@code t}, and
+   *     as value all entries corresponding to {@code sourceEObject} with tag {@code t}.
+   *     Null keys are also supported; these stand for a missing tag.
+   */
+  Map<String, Set<EObject>> getCorrespondingEObjectsWithTag(
+      EObject sourceEObject, Class<? extends Correspondence> correspondenceType);
 
   /**
    * Returns the elements corresponding to the given ones, if the correspondence is of the given

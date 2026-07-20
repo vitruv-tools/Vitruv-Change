@@ -1,6 +1,8 @@
 package tools.vitruv.change.correspondence;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil;
@@ -155,6 +157,47 @@ class CorrespondenceTest {
     final Set<EObject> correspForPkgInterface =
         correspondenceModel.getCorrespondingEObjects(pkgInterface);
     Assertions.assertTrue(correspForPkgInterface.isEmpty());
+  }
+
+  @Test
+  void testTaggingCorrespondences() {
+    // Correspondence Model:
+    // a <-("1")-> b, c
+    // b, c <-("2")-> d
+    // b <-> d
+    // a, c <-> b, d
+
+    EObject a = Pcm_mockupFactory.eINSTANCE.createComponent();
+    EObject b = Pcm_mockupFactory.eINSTANCE.createPInterface();
+    EObject c = Pcm_mockupFactory.eINSTANCE.createPMethod();
+    EObject d = Pcm_mockupFactory.eINSTANCE.createRepository();
+    EditableCorrespondenceModelView<Correspondence> correspondenceView =
+        this.createCorrespondenceModelAndReturnView();
+
+    // Empty set
+    assertFalse(correspondenceView.hasCorrespondences(List.of(a, b, c, d)));
+    assertTrue(correspondenceView.getTaggedCorrespondingEObjects(a).isEmpty());
+
+    // Add first three correspondences
+    correspondenceView.addCorrespondenceBetween(a, b, "1");
+    correspondenceView.addCorrespondenceBetween(b, d, "2");
+    correspondenceView.addCorrespondenceBetween(b, d, null);
+    // Query for b
+    var correspondencesForB = correspondenceView.getTaggedCorrespondingEObjects(b);
+    assertEquals(correspondencesForB.get("1"), Set.of(a));
+    assertEquals(correspondencesForB.get("2"), Set.of(d));
+    assertEquals(correspondencesForB.get(null), Set.of(d));
+
+    // Add further correspondences
+    correspondenceView.addCorrespondenceBetween(List.of(a, c), List.of(b, d), null);
+    correspondenceView.addCorrespondenceBetween(a, c, "1");
+    correspondenceView.addCorrespondenceBetween(c, d, "2");
+    // Repeat query
+    var correspondencesForA = correspondenceView.getTaggedCorrespondingEObjects(a);
+    assertNull(correspondencesForA.get("3"));
+    assertEquals(correspondencesForA.get(null), Set.of(b, d));
+    assertEquals(correspondencesForA.get("1"), Set.of(b, c));
+    assertNull(correspondencesForA.get("2"));
   }
 
   private void validateSingleCorrespondence(

@@ -1,6 +1,7 @@
 package tools.vitruv.change.correspondence.view;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.correspondence.Correspondence;
@@ -37,6 +38,11 @@ class CorrespondenceModelViewImpl<C extends Correspondence> implements Correspon
   @Override
   public Set<List<EObject>> getCorrespondingEObjects(List<EObject> sourceEObjects) {
     return correspondenceModel.getCorrespondingEObjects(correspondenceType, sourceEObjects, null);
+  }
+
+  @Override
+  public Map<String, Set<EObject>> getTaggedCorrespondingEObjects(EObject sourceObject) {
+    return correspondenceModel.getCorrespondingEObjectsWithTag(sourceObject, correspondenceType);
   }
 
   @Override

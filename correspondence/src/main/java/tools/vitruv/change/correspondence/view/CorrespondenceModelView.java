@@ -3,6 +3,7 @@ package tools.vitruv.change.correspondence.view;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.correspondence.Correspondence;
@@ -68,6 +69,14 @@ public interface CorrespondenceModelView<C extends Correspondence> {
     }
     return flatten(getCorrespondingEObjects(List.of(sourceObject)));
   }
+
+  /**
+   * Returns the elements corresponding to the given one with their tags.
+   *
+   * @param sourceObject The object to get correspondences for.
+   * @return {@link Map} Each entry in the map is for one distinct tag (including null).
+   */
+  Map<String, Set<EObject>> getTaggedCorrespondingEObjects(EObject sourceObject);
 
   /**
    * Returns the elements corresponding to the given ones for all correspondences between these
