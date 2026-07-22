@@ -176,14 +176,14 @@ class CorrespondenceTest {
 
     // Empty set
     assertFalse(correspondenceView.hasCorrespondences(List.of(a, b, c, d)));
-    assertTrue(correspondenceView.getTaggedCorrespondingEObjects(a).isEmpty());
+    assertTrue(correspondenceView.getCorrespondingEObjectsWithTag(a).isEmpty());
 
     // Add first three correspondences
     correspondenceView.addCorrespondenceBetween(a, b, "1");
     correspondenceView.addCorrespondenceBetween(b, d, "2");
     correspondenceView.addCorrespondenceBetween(b, d, null);
     // Query for b
-    var correspondencesForB = correspondenceView.getTaggedCorrespondingEObjects(b);
+    var correspondencesForB = correspondenceView.getCorrespondingEObjectsWithTag(b);
     assertEquals(correspondencesForB.get("1"), Set.of(a));
     assertEquals(correspondencesForB.get("2"), Set.of(d));
     assertEquals(correspondencesForB.get(null), Set.of(d));
@@ -193,10 +193,12 @@ class CorrespondenceTest {
     correspondenceView.addCorrespondenceBetween(a, c, "1");
     correspondenceView.addCorrespondenceBetween(c, d, "2");
     // Repeat query
-    var correspondencesForA = correspondenceView.getTaggedCorrespondingEObjects(a);
+    var correspondencesForA = correspondenceView.getCorrespondingEObjectsWithTag(a);
     assertNull(correspondencesForA.get("3"));
-    assertEquals(correspondencesForA.get(null), Set.of(b, d));
-    assertEquals(correspondencesForA.get("1"), Set.of(b, c));
+    assertNull(correspondencesForA.get(null));
+    assertEquals(Set.of(a, c),
+        correspondenceView.getCorrespondingEObjectsWithTag(List.of(b, d)).get(null));
+    assertEquals(Set.of(b, c), correspondencesForA.get("1"));
     assertNull(correspondencesForA.get("2"));
   }
 

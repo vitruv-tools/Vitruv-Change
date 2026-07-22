@@ -71,14 +71,6 @@ public interface CorrespondenceModelView<C extends Correspondence> {
   }
 
   /**
-   * Returns the elements corresponding to the given one with their tags.
-   *
-   * @param sourceObject The object to get correspondences for.
-   * @return {@link Map} Each entry in the map is for one distinct tag (including null).
-   */
-  Map<String, Set<EObject>> getTaggedCorrespondingEObjects(EObject sourceObject);
-
-  /**
    * Returns the elements corresponding to the given ones for all correspondences between these
    * elements containing the given tag.
    *
@@ -105,6 +97,27 @@ public interface CorrespondenceModelView<C extends Correspondence> {
       return Collections.emptySet();
     }
     return flatten(getCorrespondingEObjects(List.of(sourceObject), tag));
+  }
+
+  /**
+   * Returns the elements corresponding to the given {@code sourceObjects} with their tags.
+   *
+   * @param sourceObjects The objects to get correspondences for.
+   * @return {@link Map} Each entry in the map is for one distinct tag (including null).
+   */
+  Map<String, Set<EObject>> getCorrespondingEObjectsWithTag(List<EObject> sourceObjects);
+
+  /**
+   * Returns the elements corresponding to the given {@code sourceObject} with their tags.
+   *
+   * @param sourceObject The object to get correspondences for.
+   * @return {@link Map} Each entry in the map is for one distinct tag (including null).
+   */
+  default Map<String, Set<EObject>> getCorrespondingEObjectsWithTag(EObject sourceObject) {
+    if (sourceObject == null) {
+      return Collections.emptyMap();
+    }
+    return getCorrespondingEObjectsWithTag(List.of(sourceObject));
   }
 
   private static <O extends EObject> Set<O> flatten(Set<List<O>> toFlatten) {

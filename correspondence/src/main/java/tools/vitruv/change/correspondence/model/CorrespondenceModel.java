@@ -62,7 +62,11 @@ public interface CorrespondenceModel extends AutoCloseable {
    * Returns all elements corresponding to {@code sourceEObject}, if the correspondence is of
    * the given {@code correspondenceType}.
    *
-   * @param sourceEObject {@link EObject}, must not be null
+   * <p>Correspondences are <strong>between sets of model elements</strong>.
+   * For example, if {@code {a, c}} and {@code {b, d}} are in correspondence,
+   * then this does not imply a correspondence between {@code a} and {@code b}, for example.
+   *
+   * @param sourceEObjects {@link EObject}, must not be null
    * @param correspondenceType {@link Correspondence}, must not be null
    * @return {@link Map} of {@link Set}
    *     Each entry of the returned map contains as key the correspondence tag {@code t}, and
@@ -70,11 +74,15 @@ public interface CorrespondenceModel extends AutoCloseable {
    *     Null keys are also supported; these stand for a missing tag.
    */
   Map<String, Set<EObject>> getCorrespondingEObjectsWithTag(
-      EObject sourceEObject, Class<? extends Correspondence> correspondenceType);
+      List<EObject> sourceEObjects, Class<? extends Correspondence> correspondenceType);
 
   /**
    * Returns the elements corresponding to the given ones, if the correspondence is of the given
    * type and contains the given tag.
+   *
+   * <p>Correspondences are <strong>between sets of model elements</strong>.
+   * For example, if {@code {a, c}} and {@code {b, d}} are in correspondence,
+   * then this does not imply a correspondence between {@code a} and {@code b}, for example.
    *
    * @param correspondenceType the type of correspondence to filter for, must not be {@code null}
    * @param sourceEObjects the objects to get the corresponding ones for, must not be {@code null}

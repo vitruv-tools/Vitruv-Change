@@ -241,10 +241,9 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
 
   @Override
   public Map<String, Set<EObject>> getCorrespondingEObjectsWithTag(
-      EObject sourceEObject, Class<? extends Correspondence> correspondenceType) {
+      List<EObject> sourceEObjects, Class<? extends Correspondence> correspondenceType) {
     // Extract correspondences
-    List<EObject> source = List.of(sourceEObject);
-    Set<Correspondence> correspondencesForSource = getCorrespondences(source);
+    Set<Correspondence> correspondencesForSource = getCorrespondences(sourceEObjects);
     Set<? extends Correspondence> typedCorrespondences = filterCorrespondenceTypeAndTag(
         correspondencesForSource,
         correspondenceType,
@@ -254,7 +253,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
     Map<String, Set<EObject>> correspondingTaggedElements = new HashMap<>();
     for (var correspondence : typedCorrespondences) {
       var correspondingElements =
-          correspondence.getLeftEObjects().equals(source)
+          correspondence.getLeftEObjects().equals(sourceEObjects)
               ? correspondence.getRightEObjects()
               : correspondence.getLeftEObjects();
       correspondingTaggedElements.computeIfAbsent(

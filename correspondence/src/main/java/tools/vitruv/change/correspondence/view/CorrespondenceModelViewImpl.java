@@ -41,13 +41,14 @@ class CorrespondenceModelViewImpl<C extends Correspondence> implements Correspon
   }
 
   @Override
-  public Map<String, Set<EObject>> getTaggedCorrespondingEObjects(EObject sourceObject) {
-    return correspondenceModel.getCorrespondingEObjectsWithTag(sourceObject, correspondenceType);
-  }
-
-  @Override
   public Set<List<EObject>> getCorrespondingEObjects(List<EObject> sourceEObjects, String tag) {
     return correspondenceModel.getCorrespondingEObjects(correspondenceType, sourceEObjects, tag);
+  }
+
+
+  @Override
+  public Map<String, Set<EObject>> getCorrespondingEObjectsWithTag(List<EObject> sourceObjects) {
+    return correspondenceModel.getCorrespondingEObjectsWithTag(sourceObjects, correspondenceType);
   }
 
   @Override
