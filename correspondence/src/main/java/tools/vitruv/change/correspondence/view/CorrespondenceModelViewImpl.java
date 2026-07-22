@@ -26,6 +26,11 @@ class CorrespondenceModelViewImpl<C extends Correspondence> implements Correspon
   }
 
   @Override
+  public Set<String> getAllTags() {
+    return this.correspondenceModel.getAllTags();
+  }
+
+  @Override
   public Set<EObject> getAllEObjectsInACorrespondence() {
     return this.correspondenceModel.getAllEObjectsInACorrespondence();
   }

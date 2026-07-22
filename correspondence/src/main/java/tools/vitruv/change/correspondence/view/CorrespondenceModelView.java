@@ -25,6 +25,14 @@ public interface CorrespondenceModelView<C extends Correspondence> {
   Set<EObject> getAllEObjectsInACorrespondence();
 
   /**
+   * Returns all {@link String}s that are used as tag in some correspondence,
+   * excluding the {@code null} string.
+   *
+   * @return {@link Set}
+   */
+  Set<String> getAllTags();
+
+  /**
    * Returns whether at least one object corresponds to the given objects.
    *
    * @param eObjects the objects for which correspondences should be looked up, must not be {@code

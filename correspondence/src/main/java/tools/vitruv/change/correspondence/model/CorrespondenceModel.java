@@ -59,6 +59,14 @@ public interface CorrespondenceModel extends AutoCloseable {
   Set<EObject> getAllEObjectsInACorrespondence();
 
   /**
+   * Returns a set of {@link String}s which are used as tags in some correspondence.
+   * The {@code null} element is not part of this set.
+   *
+   * @return {@code Set}
+   */
+  Set<String> getAllTags();
+
+  /**
    * Returns all elements corresponding to {@code sourceEObject}, if the correspondence is of
    * the given {@code correspondenceType}.
    *

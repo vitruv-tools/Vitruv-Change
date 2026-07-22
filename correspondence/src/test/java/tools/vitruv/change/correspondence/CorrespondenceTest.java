@@ -162,9 +162,11 @@ class CorrespondenceTest {
   @Test
   void testTaggingCorrespondences() {
     // Correspondence Model:
-    // a <-("1")-> b, c
-    // b, c <-("2")-> d
+    // a <-("1")-> b
     // b <-> d
+    // b <-("2")-> d
+    // a <-("1")-> c
+    // c <-("3")-> d
     // a, c <-> b, d
 
     EObject a = Pcm_mockupFactory.eINSTANCE.createComponent();
@@ -175,6 +177,7 @@ class CorrespondenceTest {
         this.createCorrespondenceModelAndReturnView();
 
     // Empty set
+    assertTrue(correspondenceView.getAllTags().isEmpty());
     assertFalse(correspondenceView.hasCorrespondences(List.of(a, b, c, d)));
     assertTrue(correspondenceView.getCorrespondingEObjectsWithTag(a).isEmpty());
 
@@ -182,6 +185,7 @@ class CorrespondenceTest {
     correspondenceView.addCorrespondenceBetween(a, b, "1");
     correspondenceView.addCorrespondenceBetween(b, d, "2");
     correspondenceView.addCorrespondenceBetween(b, d, null);
+    assertEquals(Set.of("1", "2"), correspondenceView.getAllTags());
     // Query for b
     var correspondencesForB = correspondenceView.getCorrespondingEObjectsWithTag(b);
     assertEquals(correspondencesForB.get("1"), Set.of(a));
@@ -191,8 +195,9 @@ class CorrespondenceTest {
     // Add further correspondences
     correspondenceView.addCorrespondenceBetween(List.of(a, c), List.of(b, d), null);
     correspondenceView.addCorrespondenceBetween(a, c, "1");
-    correspondenceView.addCorrespondenceBetween(c, d, "2");
+    correspondenceView.addCorrespondenceBetween(c, d, "3");
     // Repeat query
+    assertEquals(Set.of("1", "2", "3"), correspondenceView.getAllTags());
     var correspondencesForA = correspondenceView.getCorrespondingEObjectsWithTag(a);
     assertNull(correspondencesForA.get("3"));
     assertNull(correspondencesForA.get(null));

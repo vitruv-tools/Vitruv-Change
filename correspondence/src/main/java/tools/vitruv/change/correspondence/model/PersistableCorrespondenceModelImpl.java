@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -237,6 +238,15 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
       allCorrespondences.addAll(correspondence.getRightEObjects());
     }
     return Set.copyOf(allCorrespondences);
+  }
+
+  @Override
+  public Set<String> getAllTags() {
+    return this.correspondences.getCorrespondences()
+        .stream()
+        .map(Correspondence::getTag)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
   }
 
   @Override
