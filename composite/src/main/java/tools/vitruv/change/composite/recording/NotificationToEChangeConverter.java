@@ -4,7 +4,7 @@ import static tools.vitruv.change.composite.message.Error.RESOURCE_URI_NOTIFICAT
 import static tools.vitruv.change.composite.message.Error.UNEXPECTED_EVENT_TYPE;
 
 import com.google.common.collect.Iterables;
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -70,15 +70,15 @@ final class NotificationToEChangeConverter {
     }
 
     if (notification.isAttributeNotification()) {
-      return new ArrayList<>(convertAttributeNotification(notification));
+      return Lists.newArrayList(convertAttributeNotification(notification));
     }
 
     if (notification.isReferenceNotification()) {
-      return new ArrayList<>(convertReferenceNotification(notification));
+      return Lists.newArrayList(convertReferenceNotification(notification));
     }
 
     if (notification.getNotifier() instanceof Resource) {
-      return new ArrayList<>(convertResourceNotification(notification));
+      return Lists.newArrayList(convertResourceNotification(notification));
     }
 
     return List.of();
@@ -362,7 +362,7 @@ final class NotificationToEChangeConverter {
       {
         Object _oldValue = notification.getOldValue();
         final List<?> oldValues = ((List<?>) _oldValue);
-        List<RemoveEAttributeValue<EObject, Object>> _mapped = new ArrayList<>();
+        List<RemoveEAttributeValue<EObject, Object>> _mapped = Lists.newArrayList();
         for (int _i = 0; _i < oldValues.size(); _i++) {
           Object value = oldValues.get(oldValues.size() - 1 - _i);
           final int valueIndex = (notification.getInitialIndex() + oldValues.size() - 1) - _i;
@@ -396,7 +396,7 @@ final class NotificationToEChangeConverter {
       {
         Object _oldValue = notification.getOldValue();
         final List<EObject> oldValues = ((List<EObject>) _oldValue);
-        List<RemoveEReference<EObject>> _mapped = new ArrayList<>();
+        List<RemoveEReference<EObject>> _mapped = Lists.newArrayList();
         for (int _i = 0; _i < oldValues.size(); _i++) {
           EObject value = oldValues.get(oldValues.size() - 1 - _i);
           final int valueIndex = (notification.getInitialIndex() + oldValues.size() - 1) - _i;
@@ -422,7 +422,7 @@ final class NotificationToEChangeConverter {
   private List<InsertEAttributeValue<EObject, Object>> handleMultiInsertAttribute(
       final NotificationInfo notification) {
     List<?> _newValue = ((List<?>) notification.getNewValue());
-    List<InsertEAttributeValue<EObject, Object>> _result = new ArrayList<>();
+    List<InsertEAttributeValue<EObject, Object>> _result = Lists.newArrayList();
     for (int _i = 0; _i < _newValue.size(); _i++) {
       Object value = _newValue.get(_i);
       _result.add(this.changeFactory.<EObject, Object>createInsertAttributeChange(
@@ -441,7 +441,7 @@ final class NotificationToEChangeConverter {
   private Iterable<? extends EChange<EObject>> handleMultiInsertReference(
       final NotificationInfo notification) {
     List<EObject> _newValue = ((List<EObject>) notification.getNewValue());
-    List<EChange<EObject>> _result = new ArrayList<>();
+    List<EChange<EObject>> _result = Lists.newArrayList();
     for (int _i = 0; _i < _newValue.size(); _i++) {
       EObject value = _newValue.get(_i);
       Iterables.addAll(_result, this.surroundWithCreateAndFeatureChangesIfNecessary(
@@ -459,7 +459,7 @@ final class NotificationToEChangeConverter {
 
   private List<EChange<EObject>> handleMultiInsertRootChange(final NotificationInfo notification) {
     List<EObject> _newValue = ((List<EObject>) notification.getNewValue());
-    List<EChange<EObject>> _result = new ArrayList<>();
+    List<EChange<EObject>> _result = Lists.newArrayList();
     for (int _i = 0; _i < _newValue.size(); _i++) {
       EObject value = _newValue.get(_i);
       Iterables.addAll(_result, this.surroundWithCreateAndFeatureChangesIfNecessary(
@@ -479,7 +479,7 @@ final class NotificationToEChangeConverter {
     {
       Object _oldValue = notification.getOldValue();
       final List<EObject> oldValues = ((List<EObject>) _oldValue);
-      List<RemoveRootEObject<EObject>> _mapped = new ArrayList<>();
+      List<RemoveRootEObject<EObject>> _mapped = Lists.newArrayList();
       for (int _i = 0; _i < oldValues.size(); _i++) {
         EObject value = oldValues.get(oldValues.size() - 1 - _i);
         final int valueIndex = (notification.getInitialIndex() + oldValues.size() - 1) - _i;
@@ -496,15 +496,15 @@ final class NotificationToEChangeConverter {
     {
       Object _oldValue = notification.getOldValue();
       final URI oldUri = ((URI) _oldValue);
-      List<EObject> _contents = new ArrayList<>(notification.getNotifierResource().getContents());
-      List<RemoveRootEObject<EObject>> _removeChanges = new ArrayList<>();
+      List<EObject> _contents = Lists.newArrayList(notification.getNotifierResource().getContents());
+      List<RemoveRootEObject<EObject>> _removeChanges = Lists.newArrayList();
       for (int _i = 0; _i < _contents.size(); _i++) {
         EObject value = _contents.get(_contents.size() - 1 - _i);
         final int valueIndex = (notification.getInitialIndex() + _contents.size() - 1) - _i;
         final Resource oldResource = notification.getNotifierResource().getResourceSet().createResource(oldUri);
         _removeChanges.add(this.changeFactory.<EObject>createRemoveRootChange(value, oldResource, oldUri, valueIndex));
       }
-      List<EChange<EObject>> _insertChanges = new ArrayList<>();
+      List<EChange<EObject>> _insertChanges = Lists.newArrayList();
       for (int _i = 0; _i < _contents.size(); _i++) {
         EObject value = _contents.get(_i);
         Iterables.addAll(_insertChanges, this.surroundWithCreateAndFeatureChangesIfNecessary(
@@ -579,7 +579,7 @@ final class NotificationToEChangeConverter {
         }
         return _elvis;
       };
-      List<EChange<EObject>> thisLayerAttributeResults = new ArrayList<>();
+      List<EChange<EObject>> thisLayerAttributeResults = Lists.newArrayList();
       for (EAttribute it : Iterables.<EAttribute>filter(changeRelevantFeatures, EAttribute.class)) {
         Iterables.addAll(thisLayerAttributeResults, _function_1.apply(it));
       }
@@ -597,7 +597,7 @@ final class NotificationToEChangeConverter {
         }
         return _elvis;
       };
-      List<EChange<EObject>> thisLayerReferenceResults = new ArrayList<>();
+      List<EChange<EObject>> thisLayerReferenceResults = Lists.newArrayList();
       for (EReference it : Iterables.<EReference>filter(changeRelevantFeatures, EReference.class)) {
         Iterables.addAll(thisLayerReferenceResults, _function_2.apply(it));
       }
@@ -610,7 +610,7 @@ final class NotificationToEChangeConverter {
       final Function<EObject, Iterable<? extends EChange<EObject>>> _function_5 = (EObject it) -> {
         return NotificationToEChangeConverter.walkChangeRelevantFeatures(it, attributeVisitor, referenceVisitor);
       };
-      List<EChange<EObject>> nextLayer = new ArrayList<>();
+      List<EChange<EObject>> nextLayer = Lists.newArrayList();
       Iterable<EObject> _nextLayerElements = Iterables.concat(
           Iterables.transform(
               Iterables.filter(
