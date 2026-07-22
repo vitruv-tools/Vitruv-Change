@@ -43,7 +43,7 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
 
     ON_FAILURE,
 
-    NEVER_2;
+    NEVER;
   }
 
   private static class WorkspaceGuard implements AutoCloseable {
@@ -107,7 +107,7 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
       TestProjectManager.RetainMode _retainMode = TestProjectManager.getRetainMode();
       final TestProjectManager.RetainMode retain = _retainMode;
       boolean _matched = false;
-      if (Objects.equals(retain, TestProjectManager.RetainMode.NEVER_2)) {
+      if (Objects.equals(retain, TestProjectManager.RetainMode.NEVER)) {
         _matched = true;
       }
       if (!_matched) {
@@ -365,42 +365,24 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
 
   private static Path createUniqueDirectory(final Path projectPath) {
     try {
-      Path uniqueProject = projectPath;
       Files.createDirectories(projectPath.getParent());
-      {
-        int counter = 2;
-        boolean created = false;
-        boolean _while = (!created);
-        while (_while) {
-          {
-            try {
-              Files.createDirectory(uniqueProject);
-              created = true;
-            } catch (final Throwable _t) {
-              if (_t instanceof FileAlreadyExistsException) {
-                uniqueProject = projectPath.resolveSibling(projectPath.getFileName() + " " + counter);
-              } else {
-                if (_t instanceof RuntimeException)
-                  throw (RuntimeException) _t;
-                if (_t instanceof Error)
-                  throw (Error) _t;
-                throw new RuntimeException(_t);
-              }
-            }
-            Preconditions.checkState((counter < 1000),
-                "Failed to create a unique version of " + projectPath + " with 1000 tries!");
-          }
+      Path uniqueProject = projectPath;
+      int counter = 2;
+
+      while (true) {
+        try {
+          Files.createDirectory(uniqueProject);
+          return uniqueProject;
+        } catch (final FileAlreadyExistsException ignored) {
+          uniqueProject = projectPath
+              .resolveSibling(projectPath.getFileName() + " " + counter);
+          Preconditions.checkState(counter < 1000,
+              "Failed to create a unique version of " + projectPath + " with 1000 tries!");
           counter++;
-          _while = (!created);
         }
       }
-      return uniqueProject;
-    } catch (Throwable _e) {
-      if (_e instanceof RuntimeException)
-        throw (RuntimeException) _e;
-      if (_e instanceof Error)
-        throw (Error) _e;
-      throw new RuntimeException(_e);
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
