@@ -7,10 +7,15 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseWheelEvent;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import javax.swing.JLabel;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.vitruv.change.testutils.changevisualization.ui.LabelValuePanel;
 
 class ChangeTreeUnitTest {
 
@@ -65,6 +70,62 @@ class ChangeTreeUnitTest {
           assertThat(changeTree.getDetailsUI()).isNotNull();
           assertThat(changeTree.getTreeScroller()).isNotNull();
           assertThat(changeTree.getDetailsSplitpane()).isNotNull();
+        });
+  }
+
+  @Test
+  void selectingFeatureNodeWithTextDetails_updatesDetailsText() throws Exception {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          selectNode(new FeatureNode("feature", "value", "detail text", null, null));
+
+          assertThat(changeTree.getDetailsUI().getText()).isEqualTo("detail text");
+        });
+  }
+
+  @Test
+  void selectingFeatureNodeWithArrayDetails_updatesDetailsComponent() throws Exception {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          String[][] detailsArray = new String[][] {{"label", "value"}};
+
+          selectNode(new FeatureNode("feature", "value", null, detailsArray, null));
+
+          assertThat(changeTree.getDetailsSplitpane().getRightComponent())
+              .isInstanceOf(LabelValuePanel.class);
+        });
+  }
+
+  @Test
+  void selectingFeatureNodeWithCustomDetailsComponent_updatesDetailsComponent() throws Exception {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          JLabel detailsComponent = new JLabel("details");
+
+          selectNode(new FeatureNode("feature", "value", null, null, detailsComponent));
+
+          assertThat(changeTree.getDetailsSplitpane().getRightComponent())
+              .isSameAs(detailsComponent);
+        });
+  }
+
+  @Test
+  void selectingChangeNode_updatesDetailsComponent() throws Exception {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          ChangeNode changeNode =
+              new ChangeNode(
+                  "individual change",
+                  new String[][] {{"feature", "value"}},
+                  ChangeNode.EChangeClass.ATTRIBUTE_ECHANGE,
+                  "ChangeClass",
+                  "AffectedClass",
+                  "id");
+
+          selectNode(changeNode);
+
+          assertThat(changeTree.getDetailsSplitpane().getRightComponent())
+              .isInstanceOf(LabelValuePanel.class);
         });
   }
 
@@ -136,6 +197,15 @@ class ChangeTreeUnitTest {
         .as("tsl holds a non-serializable TreeSelectionListener and must be transient "
             + "to avoid NotSerializableException (SonarCloud java:S1948)")
         .isTrue();
+  }
+
+  private void selectNode(Object userObject) {
+    DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
+    DefaultMutableTreeNode child = new DefaultMutableTreeNode(userObject);
+    root.add(child);
+
+    changeTree.getTreeUI().setModel(new DefaultTreeModel(root));
+    changeTree.getTreeUI().setSelectionPath(new TreePath(new Object[] {root, child}));
   }
 
   private void simulateCtrlMouseWheel(int rotation) {

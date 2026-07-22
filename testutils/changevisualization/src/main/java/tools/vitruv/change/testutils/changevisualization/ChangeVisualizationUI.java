@@ -139,7 +139,10 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
     tabbedPane.addContainerListener(
         new ContainerListener() {
           @Override
-          public void componentAdded(ContainerEvent e) {}
+          public void componentAdded(ContainerEvent e) {
+            // Intentionally empty: only tab removal needs to be tracked here,
+            // so component additions require no action.
+          }
 
           @Override
           public void componentRemoved(ContainerEvent e) {
