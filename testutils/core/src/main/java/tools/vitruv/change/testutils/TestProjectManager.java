@@ -151,15 +151,14 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
     return result;
   }
 
-  private Path setupWorkspace() {
+  private static Path setupWorkspace() {
     if (TestProjectManager.workspaceCache != null) {
       return TestProjectManager.workspaceCache;
     }
     final Path targetDir = resolveWorkspaceRoot().resolve("Vitruv");
     TestProjectManager.deleteRecursively(targetDir);
     TestProjectManager.workspaceCache = TestProjectManager.createUniqueDirectory(targetDir);
-    TestProjectManager.log.info(
-        "Running in the test workspace at " + TestProjectManager.workspaceCache);
+    TestProjectManager.log.info("Running in the test workspace at {}", TestProjectManager.workspaceCache);
     return TestProjectManager.workspaceCache;
   }
 
@@ -195,8 +194,8 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
   @SuppressWarnings("deprecation")
   private Path getWorkspace(final ExtensionContext context) {
     final Function<String, TestProjectManager.WorkspaceGuard> _function = (String it) -> {
-      Path _setupWorkspace = this.setupWorkspace();
-      return new TestProjectManager.WorkspaceGuard(_setupWorkspace);
+      Path workspace = TestProjectManager.setupWorkspace();
+      return new TestProjectManager.WorkspaceGuard(workspace);
     };
     ExtensionContext.Store store = context.getRoot().getStore(TestProjectManager.namespace);
     TestProjectManager.WorkspaceGuard guard = (TestProjectManager.WorkspaceGuard) store.getOrComputeIfAbsent(
