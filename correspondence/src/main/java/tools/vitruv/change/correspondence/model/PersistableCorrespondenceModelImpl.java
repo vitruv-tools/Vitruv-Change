@@ -5,8 +5,12 @@ import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.Resour
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -56,7 +60,8 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
         loadOrCreateResource(
             withGlobalFactories(new ResourceSetImpl()), correspondencesResource.getURI());
     if (!loadedResource.getContents().isEmpty()) {
-      Correspondences loadedCorrespondences = (Correspondences) loadedResource.getContents().get(0);
+      Correspondences loadedCorrespondences = (Correspondences)
+          loadedResource.getContents().getFirst();
       for (Correspondence correspondence : loadedCorrespondences.getCorrespondences()) {
         List<EObject> resolvedLeftObjects = resolve(correspondence.getLeftEObjects(), resolveIn);
         replace(correspondence.getLeftEObjects(), resolvedLeftObjects);
@@ -153,7 +158,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
     Set<Correspondence> correspondencesBetween = getCorrespondencesBetween(aEObjects, bEObjects);
     Set<C> correspondencesToRemove =
         filterCorrespondenceTypeAndTag(correspondencesBetween, correspondenceType, tag);
-    correspondencesToRemove.stream().forEach(this::removeCorrespondence);
+    correspondencesToRemove.forEach(this::removeCorrespondence);
     return correspondencesToRemove;
   }
 
@@ -222,6 +227,51 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   public boolean hasCorrespondences(List<EObject> eObjects) {
     Set<Correspondence> tempCorrespondences = this.getCorrespondences(eObjects);
     return tempCorrespondences != null && tempCorrespondences.isEmpty();
+  }
+
+  @Override
+  public Set<EObject> getAllEObjectsInACorrespondence() {
+    Set<EObject> allCorrespondences = HashSet.newHashSet(
+        correspondences.getCorrespondences().size());
+    for (var correspondence : correspondences.getCorrespondences()) {
+      allCorrespondences.addAll(correspondence.getLeftEObjects());
+      allCorrespondences.addAll(correspondence.getRightEObjects());
+    }
+    return Set.copyOf(allCorrespondences);
+  }
+
+  @Override
+  public Set<String> getAllTags() {
+    return this.correspondences.getCorrespondences()
+        .stream()
+        .map(Correspondence::getTag)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
+  }
+
+  @Override
+  public Map<String, Set<EObject>> getCorrespondingEObjectsWithTag(
+      List<EObject> sourceEObjects, Class<? extends Correspondence> correspondenceType) {
+    // Extract correspondences
+    Set<Correspondence> correspondencesForSource = getCorrespondences(sourceEObjects);
+    Set<? extends Correspondence> typedCorrespondences = filterCorrespondenceTypeAndTag(
+        correspondencesForSource,
+        correspondenceType,
+        null
+    );
+
+    Map<String, Set<EObject>> correspondingTaggedElements = new HashMap<>();
+    for (var correspondence : typedCorrespondences) {
+      var correspondingElements =
+          correspondence.getLeftEObjects().equals(sourceEObjects)
+              ? correspondence.getRightEObjects()
+              : correspondence.getLeftEObjects();
+      correspondingTaggedElements.computeIfAbsent(
+          correspondence.getTag(),
+          tag -> new HashSet<>()
+      ).addAll(correspondingElements);
+    }
+    return correspondingTaggedElements;
   }
 
   @Override
