@@ -2,6 +2,7 @@ package tools.vitruv.change.testutils;
 
 import com.google.common.base.Preconditions;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileVisitResult;
@@ -50,43 +51,18 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
     private final Path workspace;
 
     @Override
-    public void close() throws Exception {
+    public void close() throws IOException {
       Files.walkFileTree(this.workspace, new SimpleFileVisitor<Path>() {
         @Override
-        public FileVisitResult postVisitDirectory(final Path dir, final IOException error) {
+        public FileVisitResult postVisitDirectory(final Path dir, final IOException error)
+            throws IOException {
+          FileVisitResult result = super.postVisitDirectory(dir, error);
           try {
-            FileVisitResult _postVisitDirectory = super.postVisitDirectory(dir, error);
-            final Consumer<FileVisitResult> _function = (FileVisitResult it) -> {
-              try {
-                try {
-                  Files.delete(dir);
-                } catch (final Throwable _t) {
-                  if (_t instanceof DirectoryNotEmptyException) {
-                  } else {
-                    if (_t instanceof RuntimeException)
-                      throw (RuntimeException) _t;
-                    if (_t instanceof Error)
-                      throw (Error) _t;
-                    throw new RuntimeException(_t);
-                  }
-                }
-              } catch (Throwable _e) {
-                if (_e instanceof RuntimeException)
-                  throw (RuntimeException) _e;
-                if (_e instanceof Error)
-                  throw (Error) _e;
-                throw new RuntimeException(_e);
-              }
-            };
-            _function.accept(_postVisitDirectory);
-            return _postVisitDirectory;
-          } catch (Throwable _e) {
-            if (_e instanceof RuntimeException)
-              throw (RuntimeException) _e;
-            if (_e instanceof Error)
-              throw (Error) _e;
-            throw new RuntimeException(_e);
+            Files.delete(dir);
+          } catch (DirectoryNotEmptyException retained) {
+            // Keep directories that still contain retained test artifacts.
           }
+          return result;
         }
       });
     }
@@ -103,34 +79,13 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
     private final ExtensionContext context;
 
     @Override
-    public void close() throws Exception {
-      TestProjectManager.RetainMode _retainMode = TestProjectManager.getRetainMode();
-      final TestProjectManager.RetainMode retain = _retainMode;
-      boolean _matched = false;
-      if (Objects.equals(retain, TestProjectManager.RetainMode.NEVER)) {
-        _matched = true;
-      }
-      if (!_matched) {
-        if ((Objects.equals(retain, TestProjectManager.RetainMode.ON_FAILURE)
-            && (!(TestProjectManager.getObservedFailure(this.context)).booleanValue()))) {
-          _matched = true;
-        }
-      }
-      if (_matched) {
-        final Consumer<Path> _function = (Path it) -> {
-          try {
-            Files.delete(it);
-          } catch (Throwable _e) {
-            if (_e instanceof RuntimeException)
-              throw (RuntimeException) _e;
-            if (_e instanceof Error)
-              throw (Error) _e;
-            throw new RuntimeException(_e);
-          }
-        };
-        TestProjectManager.walkIfExists(this.projectDir).sorted(Comparator.<Path>reverseOrder()).forEach(_function);
-      }
-      if (!_matched) {
+    public void close() {
+      TestProjectManager.RetainMode retain = TestProjectManager.getRetainMode();
+      boolean shouldDelete = Objects.equals(retain, TestProjectManager.RetainMode.NEVER)
+          || (Objects.equals(retain, TestProjectManager.RetainMode.ON_FAILURE)
+              && !TestProjectManager.getObservedFailure(this.context).booleanValue());
+      if (shouldDelete) {
+        TestProjectManager.deleteRecursively(this.projectDir);
       }
     }
 
@@ -197,59 +152,39 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
   }
 
   private static Path setupWorkspace() {
-    Path _xblockexpression = null;
-    {
-      if ((TestProjectManager.workspaceCache != null)) {
-        return TestProjectManager.workspaceCache;
-      }
-      Path _elvis = null;
-      String _property = System.getProperty(TestProjectManager.WORKSPACE_PATH_SYSTEM_PROPERTY);
-      Path _path = null;
-      if (_property != null) {
-        _path = TestProjectManager.toPath(_property);
-      }
-      if (_path != null) {
-        _elvis = _path;
-      } else {
-        Path _xifexpression = null;
-        boolean _isRunning = Platform.isRunning();
-        if (_isRunning) {
-          _xifexpression = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().toPath();
-        } else {
-          _xifexpression = TestProjectManager.toPath(System.getProperty("java.io.tmpdir"));
-        }
-        _elvis = _xifexpression;
-      }
-      final Path testWorkspace = _elvis;
-      final Path targetDir = testWorkspace.resolve("Vitruv");
-      try {
-        final Consumer<Path> _function = (Path it) -> {
-          try {
-            Files.delete(it);
-          } catch (Throwable _e) {
-            if (_e instanceof RuntimeException)
-              throw (RuntimeException) _e;
-            if (_e instanceof Error)
-              throw (Error) _e;
-            throw new RuntimeException(_e);
-          }
-        };
-        TestProjectManager.walkIfExists(targetDir).sorted(Comparator.<Path>reverseOrder()).forEach(_function);
-      } catch (final Throwable _t) {
-        if (_t instanceof IOException) {
-        } else {
-          if (_t instanceof RuntimeException)
-            throw (RuntimeException) _t;
-          if (_t instanceof Error)
-            throw (Error) _t;
-          throw new RuntimeException(_t);
-        }
-      }
-      TestProjectManager.workspaceCache = TestProjectManager.createUniqueDirectory(targetDir);
-      TestProjectManager.log.info("Running in the test workspace at " + TestProjectManager.workspaceCache);
-      _xblockexpression = TestProjectManager.workspaceCache;
+    if (TestProjectManager.workspaceCache != null) {
+      return TestProjectManager.workspaceCache;
     }
-    return _xblockexpression;
+    final Path targetDir = resolveWorkspaceRoot().resolve("Vitruv");
+    TestProjectManager.deleteRecursively(targetDir);
+    TestProjectManager.workspaceCache = TestProjectManager.createUniqueDirectory(targetDir);
+    TestProjectManager.log.info("Running in the test workspace at {}", TestProjectManager.workspaceCache);
+    return TestProjectManager.workspaceCache;
+  }
+
+  private static Path resolveWorkspaceRoot() {
+    String configuredPath = System.getProperty(TestProjectManager.WORKSPACE_PATH_SYSTEM_PROPERTY);
+    if (configuredPath != null) {
+      return TestProjectManager.toPath(configuredPath);
+    }
+    if (Platform.isRunning()) {
+      return ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().toPath();
+    }
+    return TestProjectManager.toPath(System.getProperty("java.io.tmpdir"));
+  }
+
+  /** Deletes the file tree rooted at {@code path} bottom-up, doing nothing if it is absent. */
+  private static void deleteRecursively(final Path path) {
+    TestProjectManager.walkIfExists(path).sorted(Comparator.<Path>reverseOrder())
+        .forEach(TestProjectManager::delete);
+  }
+
+  private static void delete(final Path path) {
+    try {
+      Files.delete(path);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   private static Path toPath(final String string) {
