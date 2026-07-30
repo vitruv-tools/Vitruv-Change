@@ -196,7 +196,7 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
     return result;
   }
 
-  private Path setupWorkspace() {
+  private static Path setupWorkspace() {
     Path _xblockexpression = null;
     {
       if ((TestProjectManager.workspaceCache != null)) {
@@ -259,8 +259,8 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
   @SuppressWarnings("deprecation")
   private Path getWorkspace(final ExtensionContext context) {
     final Function<String, TestProjectManager.WorkspaceGuard> _function = (String it) -> {
-      Path _setupWorkspace = this.setupWorkspace();
-      return new TestProjectManager.WorkspaceGuard(_setupWorkspace);
+      Path workspace = TestProjectManager.setupWorkspace();
+      return new TestProjectManager.WorkspaceGuard(workspace);
     };
     ExtensionContext.Store store = context.getRoot().getStore(TestProjectManager.namespace);
     TestProjectManager.WorkspaceGuard guard = (TestProjectManager.WorkspaceGuard) store.getOrComputeIfAbsent(
