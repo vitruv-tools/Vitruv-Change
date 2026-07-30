@@ -33,6 +33,6 @@ public final class CorrespondenceModelViewFactory {
     return new EditableCorrespondenceModelViewImpl<>(
         correspondenceModel,
         Correspondence.class,
-        () -> CorrespondenceFactory.eINSTANCE.createManualCorrespondence());
+        CorrespondenceFactory.eINSTANCE::createManualCorrespondence);
   }
 }
