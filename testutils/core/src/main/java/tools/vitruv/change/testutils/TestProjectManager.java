@@ -2,6 +2,7 @@ package tools.vitruv.change.testutils;
 
 import com.google.common.base.Preconditions;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileVisitResult;
@@ -11,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -51,43 +51,18 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
     private final Path workspace;
 
     @Override
-    public void close() throws Exception {
+    public void close() throws IOException {
       Files.walkFileTree(this.workspace, new SimpleFileVisitor<Path>() {
         @Override
-        public FileVisitResult postVisitDirectory(final Path dir, final IOException error) {
+        public FileVisitResult postVisitDirectory(final Path dir, final IOException error)
+            throws IOException {
+          FileVisitResult result = super.postVisitDirectory(dir, error);
           try {
-            FileVisitResult _postVisitDirectory = super.postVisitDirectory(dir, error);
-            final Consumer<FileVisitResult> _function = (FileVisitResult it) -> {
-              try {
-                try {
-                  Files.delete(dir);
-                } catch (final Throwable _t) {
-                  if (_t instanceof DirectoryNotEmptyException) {
-                  } else {
-                    if (_t instanceof RuntimeException)
-                      throw (RuntimeException) _t;
-                    if (_t instanceof Error)
-                      throw (Error) _t;
-                    throw new RuntimeException(_t);
-                  }
-                }
-              } catch (Throwable _e) {
-                if (_e instanceof RuntimeException)
-                  throw (RuntimeException) _e;
-                if (_e instanceof Error)
-                  throw (Error) _e;
-                throw new RuntimeException(_e);
-              }
-            };
-            _function.accept(_postVisitDirectory);
-            return _postVisitDirectory;
-          } catch (Throwable _e) {
-            if (_e instanceof RuntimeException)
-              throw (RuntimeException) _e;
-            if (_e instanceof Error)
-              throw (Error) _e;
-            throw new RuntimeException(_e);
+            Files.delete(dir);
+          } catch (DirectoryNotEmptyException retained) {
+            // Keep directories that still contain retained test artifacts.
           }
+          return result;
         }
       });
     }
@@ -104,34 +79,13 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
     private final ExtensionContext context;
 
     @Override
-    public void close() throws Exception {
-      TestProjectManager.RetainMode _retainMode = TestProjectManager.getRetainMode();
-      final TestProjectManager.RetainMode retain = _retainMode;
-      boolean _matched = false;
-      if (Objects.equals(retain, TestProjectManager.RetainMode.NEVER)) {
-        _matched = true;
-      }
-      if (!_matched) {
-        if ((Objects.equals(retain, TestProjectManager.RetainMode.ON_FAILURE)
-            && (!(TestProjectManager.getObservedFailure(this.context)).booleanValue()))) {
-          _matched = true;
-        }
-      }
-      if (_matched) {
-        final Consumer<Path> _function = (Path it) -> {
-          try {
-            Files.delete(it);
-          } catch (Throwable _e) {
-            if (_e instanceof RuntimeException)
-              throw (RuntimeException) _e;
-            if (_e instanceof Error)
-              throw (Error) _e;
-            throw new RuntimeException(_e);
-          }
-        };
-        TestProjectManager.walkIfExists(this.projectDir).sorted(Comparator.<Path>reverseOrder()).forEach(_function);
-      }
-      if (!_matched) {
+    public void close() {
+      TestProjectManager.RetainMode retain = TestProjectManager.getRetainMode();
+      boolean shouldDelete = Objects.equals(retain, TestProjectManager.RetainMode.NEVER)
+          || (Objects.equals(retain, TestProjectManager.RetainMode.ON_FAILURE)
+              && !TestProjectManager.getObservedFailure(this.context).booleanValue());
+      if (shouldDelete) {
+        TestProjectManager.deleteRecursively(this.projectDir);
       }
     }
 
@@ -197,25 +151,21 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
     return result;
   }
 
-  private Path setupWorkspace() {
+  private static Path setupWorkspace() {
     if (TestProjectManager.workspaceCache != null) {
       return TestProjectManager.workspaceCache;
     }
-
-    Path testWorkspace = determineTestWorkspace();
-    Path targetDir = testWorkspace.resolve("Vitruv");
-    deleteRecursively(targetDir);
-
+    final Path targetDir = resolveWorkspaceRoot().resolve("Vitruv");
+    TestProjectManager.deleteRecursively(targetDir);
     TestProjectManager.workspaceCache = TestProjectManager.createUniqueDirectory(targetDir);
-    TestProjectManager.log.info("Running in the test workspace at {}",
-        TestProjectManager.workspaceCache);
+    TestProjectManager.log.info("Running in the test workspace at {}", TestProjectManager.workspaceCache);
     return TestProjectManager.workspaceCache;
   }
 
-  private static Path determineTestWorkspace() {
-    String property = System.getProperty(TestProjectManager.WORKSPACE_PATH_SYSTEM_PROPERTY);
-    if (property != null) {
-      return TestProjectManager.toPath(property);
+  private static Path resolveWorkspaceRoot() {
+    String configuredPath = System.getProperty(TestProjectManager.WORKSPACE_PATH_SYSTEM_PROPERTY);
+    if (configuredPath != null) {
+      return TestProjectManager.toPath(configuredPath);
     }
     if (Platform.isRunning()) {
       return ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().toPath();
@@ -223,16 +173,17 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
     return TestProjectManager.toPath(System.getProperty("java.io.tmpdir"));
   }
 
-  private static void deleteRecursively(Path targetDir) {
-    List<Path> paths = TestProjectManager.walkIfExists(targetDir)
-        .sorted(Comparator.reverseOrder())
-        .toList();
-    for (Path path : paths) {
-      try {
-        Files.delete(path);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+  /** Deletes the file tree rooted at {@code path} bottom-up, doing nothing if it is absent. */
+  private static void deleteRecursively(final Path path) {
+    TestProjectManager.walkIfExists(path).sorted(Comparator.<Path>reverseOrder())
+        .forEach(TestProjectManager::delete);
+  }
+
+  private static void delete(final Path path) {
+    try {
+      Files.delete(path);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
     }
   }
 
@@ -243,8 +194,8 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
   @SuppressWarnings("deprecation")
   private Path getWorkspace(final ExtensionContext context) {
     final Function<String, TestProjectManager.WorkspaceGuard> _function = (String it) -> {
-      Path _setupWorkspace = this.setupWorkspace();
-      return new TestProjectManager.WorkspaceGuard(_setupWorkspace);
+      Path workspace = TestProjectManager.setupWorkspace();
+      return new TestProjectManager.WorkspaceGuard(workspace);
     };
     ExtensionContext.Store store = context.getRoot().getStore(TestProjectManager.namespace);
     TestProjectManager.WorkspaceGuard guard = (TestProjectManager.WorkspaceGuard) store.getOrComputeIfAbsent(
@@ -347,42 +298,24 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
 
   private static Path createUniqueDirectory(final Path projectPath) {
     try {
-      Path uniqueProject = projectPath;
       Files.createDirectories(projectPath.getParent());
-      {
-        int counter = 2;
-        boolean created = false;
-        boolean _while = (!created);
-        while (_while) {
-          {
-            try {
-              Files.createDirectory(uniqueProject);
-              created = true;
-            } catch (final Throwable _t) {
-              if (_t instanceof FileAlreadyExistsException) {
-                uniqueProject = projectPath.resolveSibling(projectPath.getFileName() + " " + counter);
-              } else {
-                if (_t instanceof RuntimeException)
-                  throw (RuntimeException) _t;
-                if (_t instanceof Error)
-                  throw (Error) _t;
-                throw new RuntimeException(_t);
-              }
-            }
-            Preconditions.checkState((counter < 1000),
-                "Failed to create a unique version of " + projectPath + " with 1000 tries!");
-          }
+      Path uniqueProject = projectPath;
+      int counter = 2;
+
+      while (true) {
+        try {
+          Files.createDirectory(uniqueProject);
+          return uniqueProject;
+        } catch (final FileAlreadyExistsException ignored) {
+          uniqueProject = projectPath
+              .resolveSibling(projectPath.getFileName() + " " + counter);
+          Preconditions.checkState(counter < 1000,
+              "Failed to create a unique version of " + projectPath + " with 1000 tries!");
           counter++;
-          _while = (!created);
         }
       }
-      return uniqueProject;
-    } catch (Throwable _e) {
-      if (_e instanceof RuntimeException)
-        throw (RuntimeException) _e;
-      if (_e instanceof Error)
-        throw (Error) _e;
-      throw new RuntimeException(_e);
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
     }
   }
 

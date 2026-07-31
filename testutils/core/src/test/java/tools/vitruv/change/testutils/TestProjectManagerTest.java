@@ -1,10 +1,12 @@
 package tools.vitruv.change.testutils;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -17,6 +19,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,6 +30,10 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.io.TempDir;
 
+/**
+ * Unit tests for the refactored private helpers of {@link TestProjectManager}, exercised through
+ * reflection since they are not part of the public API.
+ */
 class TestProjectManagerTest {
 
   private TestProjectManager manager;
@@ -224,6 +232,48 @@ class TestProjectManagerTest {
 
     final Path vitruvDir = this.tempDir.resolve("Vitruv");
     assertFalse(Files.exists(vitruvDir));
+  }
+
+  @Test
+  @DisplayName("Should delete a whole tree recursively using private helper")
+  void deleteRecursivelyRemovesAWholeTree() throws Exception {
+    Path root = this.tempDir.resolve("tree");
+    Path nested = root.resolve("sub");
+    Files.createDirectories(nested);
+    Files.createFile(nested.resolve("file.txt"));
+
+    deleteRecursively(root);
+
+    assertFalse(Files.exists(root));
+  }
+
+  @Test
+  @DisplayName("Deleting a non-existent path should not throw exceptions")
+  void deleteRecursivelyIgnoresAMissingPath() {
+    Path missing = this.tempDir.resolve("does-not-exist");
+    assertDoesNotThrow(() -> deleteRecursively(missing),
+        "Deleting a non-existent path should be a no-op");
+  }
+
+  @Test
+  @DisplayName("walkIfExists should return empty stream for missing path")
+  void walkIfExistsReturnsEmptyForMissingPath() throws Exception {
+    try (java.util.stream.Stream<Path> walked = walkIfExists(this.tempDir.resolve("missing"))) {
+      assertEquals(0, walked.count());
+    }
+  }
+
+  private static void deleteRecursively(Path path) throws Exception {
+    Method method = TestProjectManager.class.getDeclaredMethod("deleteRecursively", Path.class);
+    method.setAccessible(true);
+    method.invoke(null, path);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Stream<Path> walkIfExists(Path path) throws Exception {
+    Method method = TestProjectManager.class.getDeclaredMethod("walkIfExists", Path.class);
+    method.setAccessible(true);
+    return (java.util.stream.Stream<Path>) method.invoke(null, path);
   }
 
   private ParameterContext createParameterContext(
