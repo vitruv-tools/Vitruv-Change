@@ -4,6 +4,7 @@ import static tools.vitruv.change.composite.message.Error.RESOURCE_URI_NOTIFICAT
 import static tools.vitruv.change.composite.message.Error.UNEXPECTED_EVENT_TYPE;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -64,21 +65,21 @@ final class NotificationToEChangeConverter {
    * @param notification the notification to convert
    * @return the {@link Iterable} of {@link EChange}s
    */
-  public Iterable<? extends EChange<EObject>> convert(final NotificationInfo notification) {
+  public Iterable<EChange<EObject>> convert(final NotificationInfo notification) {
     if (isIrrelevantNotification(notification)) {
       return List.of();
     }
 
     if (notification.isAttributeNotification()) {
-      return convertAttributeNotification(notification);
+      return Lists.newArrayList(convertAttributeNotification(notification));
     }
 
     if (notification.isReferenceNotification()) {
-      return convertReferenceNotification(notification);
+      return Lists.newArrayList(convertReferenceNotification(notification));
     }
 
     if (notification.getNotifier() instanceof Resource) {
-      return convertResourceNotification(notification);
+      return Lists.newArrayList(convertResourceNotification(notification));
     }
 
     return List.of();
