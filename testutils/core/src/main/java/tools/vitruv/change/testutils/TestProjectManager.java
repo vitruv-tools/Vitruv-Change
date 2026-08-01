@@ -114,7 +114,7 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
   private static final ExtensionContext.Namespace namespace = ExtensionContext.Namespace
       .create(TestProjectManager.class);
 
-  private static final String observedFailure = "observedFailure";
+  private static final String OBSERVED_FAILURE = "observedFailure";
 
   private static final ExtensionContext.Namespace projectNamespace = ExtensionContext.Namespace
       .create(TestProjectManager.class, "projects");
@@ -132,13 +132,15 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
   }
 
   private static Boolean getObservedFailure(final ExtensionContext context) {
-    return context.getStore(TestProjectManager.namespace).<Boolean>getOrDefault(TestProjectManager.observedFailure,
-        Boolean.class, Boolean.valueOf(false));
+    return context.getStore(TestProjectManager.namespace)
+        .<Boolean>getOrDefault(TestProjectManager.OBSERVED_FAILURE,
+            Boolean.class, Boolean.FALSE);
   }
 
   private static void setObservedFailure(final ExtensionContext context, final boolean value) {
     final Consumer<ExtensionContext> _function = (ExtensionContext it) -> {
-      it.getStore(TestProjectManager.namespace).put(TestProjectManager.observedFailure, Boolean.valueOf(true));
+      it.getStore(TestProjectManager.namespace)
+          .put(TestProjectManager.OBSERVED_FAILURE, Boolean.TRUE);
     };
     TestProjectManager.getParentChain(context).forEach(_function);
   }
