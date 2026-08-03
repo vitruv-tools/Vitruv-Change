@@ -83,10 +83,11 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
       TestProjectManager.RetainMode retain = TestProjectManager.getRetainMode();
       boolean shouldDelete = Objects.equals(retain, TestProjectManager.RetainMode.NEVER)
           || (Objects.equals(retain, TestProjectManager.RetainMode.ON_FAILURE)
-              && !TestProjectManager.getObservedFailure(this.context).booleanValue());
-      if (shouldDelete) {
-        TestProjectManager.deleteRecursively(this.projectDir);
+              && !TestProjectManager.getObservedFailure(this.context));
+      if (!shouldDelete) {
+        return;
       }
+      TestProjectManager.deleteRecursively(this.projectDir);
     }
 
     public ProjectGuard(final Path projectDir, final ExtensionContext context) {
