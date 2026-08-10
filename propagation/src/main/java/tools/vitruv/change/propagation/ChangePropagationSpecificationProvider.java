@@ -22,4 +22,14 @@ public interface ChangePropagationSpecificationProvider
    */
   List<ChangePropagationSpecification> getChangePropagationSpecifications(
       MetamodelDescriptor sourceMetamodelDescriptor);
+
+  /**
+   * Get the level of the given specification, which is the level within a hierarchy of metamodel composition.
+   * A lower level means that the specification is part of a lower level, more nested within the hierarchy.
+   * Lower levels need to be processed before higher levels.
+   *
+   * @param specification the specification to get the level of, must be provided by this provider
+   * @return the level of the given specification
+   */
+  int getChangePropagationSpecificationLevel(ChangePropagationSpecification specification);
 }

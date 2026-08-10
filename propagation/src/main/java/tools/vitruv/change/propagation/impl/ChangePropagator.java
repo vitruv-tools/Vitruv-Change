@@ -64,6 +64,7 @@ public class ChangePropagator {
                 specs.forEach(s -> s.setUserInteractor(this.outer.userInteractor));
                 return specs.stream();
               })
+              .sorted((s1, s2) -> Integer.compare(this.outer.changePropagationProvider.getChangePropagationSpecificationLevel(s1), this.outer.changePropagationProvider.getChangePropagationSpecificationLevel(s2)))
               .collect(Collectors.toCollection(LinkedHashSet::new));
           _xtrycatchfinallyexpression = allSpecs.stream()
               .flatMap(it -> StreamSupport.stream(this.propagateChangeForChangePropagationSpecification(change, previousState, it).spliterator(), false))
