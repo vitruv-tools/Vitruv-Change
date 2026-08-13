@@ -46,6 +46,11 @@ public class ChangePropagationSpecificationRepository implements ChangePropagati
   }
 
   @Override
+  public int getMaximumPropagationSpecificationLevel() {
+    return this.changePropagationSpecificationToLevel.values().stream().max(Integer::compareTo).orElse(0);
+  }
+
+  @Override
   public Iterator<ChangePropagationSpecification> iterator() {
     return Iterables.concat(this.sourceMetamodelToPropagationSpecifications.values()).iterator();
   }

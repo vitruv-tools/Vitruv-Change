@@ -77,7 +77,9 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
                                 EditableCorrespondenceModelView<Correspondence> correspondenceModel,
                                 ResourceAccess resourceAccess,
                                 ModelSnapshot previousState) {
-      changes.forEach(change -> propagateChange(change, correspondenceModel, resourceAccess));
+      changes.stream()
+             .filter(change -> doesHandleChange(change, correspondenceModel))
+             .forEach(change -> propagateChange(change, correspondenceModel, resourceAccess));
   }
 
   /**

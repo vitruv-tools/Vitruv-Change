@@ -32,4 +32,10 @@ public interface ChangePropagationSpecificationProvider
    * @return the level of the given specification
    */
   int getChangePropagationSpecificationLevel(ChangePropagationSpecification specification);
+
+  /**
+   * Get the maximum level of the specifications provided by this provider.
+   * @return the maximum level
+   */
+  int getMaximumPropagationSpecificationLevel();
 }
