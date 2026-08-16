@@ -35,7 +35,7 @@ public class ChangePropagationSpecificationRepository implements ChangePropagati
   @Override
   public List<ChangePropagationSpecification> getChangePropagationSpecifications(final MetamodelDescriptor sourceMetamodelDescriptor) {
     return this.sourceMetamodelToPropagationSpecifications.keySet().stream()
-        .filter(sourceMetamodelDescriptor::contains)
+        .filter(it -> it.contains(sourceMetamodelDescriptor))
         .flatMap(it -> this.sourceMetamodelToPropagationSpecifications.get(it).stream())
         .collect(Collectors.toList());
   }
