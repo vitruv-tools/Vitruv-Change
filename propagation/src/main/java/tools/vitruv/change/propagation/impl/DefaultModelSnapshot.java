@@ -9,6 +9,10 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import tools.vitruv.change.correspondence.Correspondence;
+import tools.vitruv.change.correspondence.model.PersistableCorrespondenceModel;
+import tools.vitruv.change.correspondence.view.CorrespondenceModelViewFactory;
+import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.propagation.ModelSnapshot;
 
 import java.util.Collection;
@@ -22,17 +26,20 @@ import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.Resour
 public class DefaultModelSnapshot implements ModelSnapshot {
   private final ResourceSet resourceSet;
   private final BiMap<EObject, EObject> repositoryToSnapshot;
+  private final PersistableCorrespondenceModel correspondenceModel;
   private final Function<String[], URI> metadataModelUriProvider;
 
-  public DefaultModelSnapshot(ResourceSet resourceSet, BiMap<EObject, EObject> repositoryToSnapshot, Function<String[], URI> metadataModelUriProvider) {
+  public DefaultModelSnapshot(ResourceSet resourceSet, BiMap<EObject, EObject> repositoryToSnapshot, PersistableCorrespondenceModel correspondenceModel, Function<String[], URI> metadataModelUriProvider) {
     this.resourceSet = resourceSet;
     this.repositoryToSnapshot = repositoryToSnapshot;
+    this.correspondenceModel = correspondenceModel;
     this.metadataModelUriProvider = metadataModelUriProvider;
   }
 
-  public static ModelSnapshot copyOf(ResourceSet resourceSet, Function<String[], URI> metadataModelUriProvider) {
+  public static ModelSnapshot copyOf(ResourceSet resourceSet, PersistableCorrespondenceModel correspondenceModel, Function<String[], URI> metadataModelUriProvider) {
     ResourceSetCopy resourceSetCopy = copyResourceSet(resourceSet);
-    return new DefaultModelSnapshot(resourceSetCopy.resourceSet(), resourceSetCopy.originalToCopy(), metadataModelUriProvider);
+    PersistableCorrespondenceModel correspondenceModelCopy = correspondenceModel.copy(resourceSetCopy.originalToCopy());
+    return new DefaultModelSnapshot(resourceSetCopy.resourceSet(), resourceSetCopy.originalToCopy(), correspondenceModelCopy, metadataModelUriProvider);
   }
 
   private static ResourceSetCopy copyResourceSet(ResourceSet originalResourceSet) {
@@ -74,13 +81,8 @@ public class DefaultModelSnapshot implements ModelSnapshot {
   }
 
   @Override
-  public ModelSnapshot copy() {
-    ResourceSetCopy copy = copyResourceSet(resourceSet);
-    HashBiMap<EObject, EObject> repositoryToCopy = HashBiMap.create(repositoryToSnapshot.size());
-
-    repositoryToSnapshot.forEach((repository, snapshot) -> repositoryToCopy.put(repository, copy.originalToCopy().get(snapshot)));
-
-    return new DefaultModelSnapshot(copy.resourceSet(), repositoryToCopy, metadataModelUriProvider);
+  public EditableCorrespondenceModelView<Correspondence> getCorrespondenceModel() {
+    return CorrespondenceModelViewFactory.createEditableCorrespondenceModelView(correspondenceModel);
   }
 
   @Override

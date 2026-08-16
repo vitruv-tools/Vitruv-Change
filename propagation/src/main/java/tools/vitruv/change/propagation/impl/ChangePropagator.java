@@ -64,14 +64,14 @@ public class ChangePropagator {
     }
 
     private List<PropagatedChange> propagateSingleChange(final TransactionalChange<EObject> change, final ModelSnapshot previousState) {
-      try {
+      try (ModelSnapshot currentState = !outer.changePropagationMode.equals(ChangePropagationMode.SINGLE_STEP) ? this.outer.modelRepository.createSnapshot() : null) {
         Preconditions.checkState(!change.getAffectedEObjects().isEmpty(),
           "There are no objects affected by this change:%s%s", System.lineSeparator(), change);
         final AutoCloseable userInteractorChange = this.installUserInteractorForChange(change);
         this.outer.changePropagationProvider.forEach(it -> it.registerObserver(this));
         this.outer.userInteractor.registerUserInputListener(this);
         List<TransactionalChangeWithPreviousState> _xtrycatchfinallyexpression = null;
-        try (ModelSnapshot currentState = !outer.changePropagationMode.equals(ChangePropagationMode.SINGLE_STEP) ? this.outer.modelRepository.createSnapshot() : null) {
+        try {
           Set<ChangePropagationSpecification> allSpecs = change.getAffectedEObjectsMetamodelDescriptors().stream()
               .flatMap(it -> {
                 List<ChangePropagationSpecification> specs = this.outer.changePropagationProvider.getChangePropagationSpecifications(it);
@@ -149,7 +149,7 @@ public class ChangePropagator {
                    .map(EObject::eResource)
                    .filter(Objects::nonNull)
                    .forEach(this.changedResources::add);
-      return StreamSupport.stream(transitiveChanges.spliterator(), false).map(it -> new TransactionalChangeWithPreviousState(it, currentState != null ? currentState.copy() : null)).toList();
+      return StreamSupport.stream(transitiveChanges.spliterator(), false).map(it -> new TransactionalChangeWithPreviousState(it, currentState)).toList();
     }
 
     private AutoCloseable installUserInteractorForChange(final VitruviusChange<EObject> change) {
