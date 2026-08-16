@@ -8,6 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -63,8 +64,9 @@ public class ChangePropagator {
       return result;
     }
 
-    private List<PropagatedChange> propagateSingleChange(final TransactionalChange<EObject> change, final ModelSnapshot previousState) {
-      try (ModelSnapshot currentState = !outer.changePropagationMode.equals(ChangePropagationMode.SINGLE_STEP) ? this.outer.modelRepository.createSnapshot() : null) {
+    private List<PropagatedChange> propagateSingleChange(final TransactionalChange<EObject> change, final ModelRepositorySnapshot previousState) {
+      try (
+          ModelRepositorySnapshot currentState = !outer.changePropagationMode.equals(ChangePropagationMode.SINGLE_STEP) ? this.outer.modelRepository.createSnapshot() : null) {
         Preconditions.checkState(!change.getAffectedEObjects().isEmpty(),
           "There are no objects affected by this change:%s%s", System.lineSeparator(), change);
         final AutoCloseable userInteractorChange = this.installUserInteractorForChange(change);
@@ -141,7 +143,7 @@ public class ChangePropagator {
                     .toList();
     }
 
-    private Iterable<TransactionalChangeWithPreviousState> propagateChangeForChangePropagationSpecification(final TransactionalChange<EObject> change, final ModelSnapshot previousState, final ModelSnapshot currentState, final ChangePropagationSpecification propagationSpecification) {
+    private Iterable<TransactionalChangeWithPreviousState> propagateChangeForChangePropagationSpecification(final TransactionalChange<EObject> change, final ModelRepositorySnapshot previousState, final ModelRepositorySnapshot currentState, final ChangePropagationSpecification propagationSpecification) {
       final Runnable _function = () -> propagationSpecification.propagateChanges(change.getEChanges(), this.outer.modelRepository.getCorrespondenceModel(), this.outer.modelRepository, previousState);
       final Iterable<TransactionalChange<EObject>> transitiveChanges = this.outer.modelRepository.recordChanges(_function);
       StreamSupport.stream(transitiveChanges.spliterator(), false)
@@ -265,40 +267,70 @@ public class ChangePropagator {
    * @return - {@link List} of {@link PropagatedChange}
    */
   public List<PropagatedChange> propagateChange(final VitruviusChange<Uuid> change, final Iterable<ChangePropagationObserver> observers) {
-    final List<TransactionalChangeWithPreviousState> resolvedChanges = this.modelRepository.applyChangeAndStorePreviousState(change);
-    resolvedChanges.stream().flatMap(it -> it.change().getAffectedEObjects().stream())
-        .map(EObject::eResource)
-        .filter(Objects::nonNull)
-        .forEach(it -> it.setModified(true));
     if (ChangePropagator.logger.isTraceEnabled()) {
-      ChangePropagator.logger.trace("Will now propagate these input changes:\n\t" + resolvedChanges.stream().map(it -> it.change().toString()).collect(Collectors.joining("\n\t")));
+      ChangePropagator.logger.trace("Will begin propagation of change :\n\t" + change);
     }
 
     this.changePropagationProvider.forEach(spec -> observers.forEach(spec::registerObserver));
+
     int maximumLevel = this.changePropagationProvider.getMaximumPropagationSpecificationLevel();
-    List<PropagatedChange> result = resolvedChanges.stream().flatMap(it -> propagateChange(it, maximumLevel).propagatedChanges().stream()).toList();
+
+    List<PropagatedChange> result = new ArrayList<>();
+
+    for (TransactionalChange<Uuid> transactionalChange : change.getTransactionalChangeSequence()) {
+      try (ModelRepositorySnapshot previousState = this.modelRepository.createSnapshot()) {
+        TransactionalChange<EObject> resolvedChange =
+            (TransactionalChange<EObject>) this.modelRepository.applyChange(transactionalChange);
+
+        resolvedChange.getAffectedEObjects().stream()
+                       .map(EObject::eResource)
+                       .filter(Objects::nonNull)
+                       .forEach(it -> it.setModified(true));
+
+        if (ChangePropagator.logger.isTraceEnabled()) {
+          ChangePropagator.logger.trace("Will now propagate this input change:\n\t" + resolvedChange);
+        }
+
+        TransactionalChangeWithPreviousState changeWithPreviousState
+            = new TransactionalChangeWithPreviousState(resolvedChange, previousState);
+        result.addAll(
+            this.propagateChange(changeWithPreviousState, maximumLevel).propagatedChanges());
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
     this.changePropagationProvider.forEach(spec -> observers.forEach(spec::deregisterObserver));
+
     return result;
   }
 
-  private PropagationResult propagateChange(final TransactionalChangeWithPreviousState change, final int level) {
+  private PropagationResult propagateChange(
+      final TransactionalChangeWithPreviousState change, final int level) {
     if (level < 0) {
       return new PropagationResult(change, List.of());
     }
 
     PropagationResult lowerLevelResult = this.propagateChange(change, level - 1);
 
-    LowerLevelPropagation lowerLevelPropagation = (lowerLevelChange) -> propagateChange(lowerLevelChange, level - 1);
-    ChangePropagation propagation = new ChangePropagation(this, lowerLevelResult.change(), level, lowerLevelPropagation, null);
+    LowerLevelPropagation lowerLevelPropagation
+        = (lowerLevelChange) -> propagateChange(lowerLevelChange, level - 1);
+
+    ChangePropagation propagation = new ChangePropagation(
+        this, lowerLevelResult.change(), level, lowerLevelPropagation, null);
     List<PropagatedChange> propagatedChanges = propagation.propagateChange();
 
-    List<PropagatedChange> allPropagatedChanges = new ArrayList<>(lowerLevelResult.propagatedChanges());
+    List<PropagatedChange> allPropagatedChanges
+        = new ArrayList<>(lowerLevelResult.propagatedChanges());
     allPropagatedChanges.addAll(propagatedChanges);
 
-    return new PropagationResult(merge(lowerLevelResult.change(), propagatedChanges), allPropagatedChanges);
+    return new PropagationResult(
+        merge(lowerLevelResult.change(), propagatedChanges),
+        allPropagatedChanges);
   }
 
-  private static TransactionalChangeWithPreviousState merge(TransactionalChangeWithPreviousState change, Iterable<PropagatedChange> propagatedChanges) {
+  private static TransactionalChangeWithPreviousState merge(
+      TransactionalChangeWithPreviousState change, Iterable<PropagatedChange> propagatedChanges) {
     List<EChange<EObject>> eChanges = new ArrayList<>(change.change().getEChanges());
 
     for (PropagatedChange propagatedChange : propagatedChanges) {
@@ -309,5 +341,9 @@ public class ChangePropagator {
         VitruviusChangeFactory.getInstance().createTransactionalChange(eChanges),
         change.previousState()
     );
+  }
+
+  private record TransactionalChangeWithPreviousState(TransactionalChange<EObject> change,
+                                                     ModelRepositorySnapshot previousState) {
   }
 }

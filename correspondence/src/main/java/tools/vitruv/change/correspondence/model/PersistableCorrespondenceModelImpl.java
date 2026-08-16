@@ -106,11 +106,16 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
     Correspondences copiedCorrespondences = EcoreUtil.copy(this.correspondences);
 
     for (Correspondence correspondence : copiedCorrespondences.getCorrespondences()) {
-      replace(correspondence.getLeftEObjects(), map(correspondence.getLeftEObjects(), eObjectMapping));
-      replace(correspondence.getRightEObjects(), map(correspondence.getRightEObjects(), eObjectMapping));
+      var newLeftEObjects = map(correspondence.getLeftEObjects(), eObjectMapping);
+      var newRightEObjects = map(correspondence.getRightEObjects(), eObjectMapping);
+
+      replace(correspondence.getLeftEObjects(), newLeftEObjects);
+      replace(correspondence.getRightEObjects(), newRightEObjects);
     }
 
-    URI resourceUri = this.correspondencesResource != null ? this.correspondencesResource.getURI() : null;
+    URI resourceUri = this.correspondencesResource != null
+                      ? this.correspondencesResource.getURI()
+                      : null;
 
     return new PersistableCorrespondenceModelImpl(copiedCorrespondences, resourceUri);
   }

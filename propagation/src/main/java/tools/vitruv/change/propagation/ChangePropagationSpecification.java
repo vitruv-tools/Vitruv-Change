@@ -1,5 +1,6 @@
 package tools.vitruv.change.propagation;
 
+import java.util.List;
 import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.composite.MetamodelDescriptor;
@@ -7,8 +8,6 @@ import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.interaction.UserInteractor;
 import tools.vitruv.change.utils.ResourceAccess;
-
-import java.util.List;
 
 /**
  * A specification of change propagation, which is able to process changes
@@ -76,10 +75,11 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
   default void propagateChanges(List<EChange<EObject>> changes,
                                 EditableCorrespondenceModelView<Correspondence> correspondenceModel,
                                 ResourceAccess resourceAccess,
-                                ModelSnapshot previousState) {
-      changes.stream()
-             .filter(change -> doesHandleChange(change, correspondenceModel))
-             .forEach(change -> propagateChange(change, correspondenceModel, resourceAccess));
+                                ModelRepositorySnapshot previousState) {
+    changes
+        .stream()
+        .filter(change -> doesHandleChange(change, correspondenceModel))
+        .forEach(change -> propagateChange(change, correspondenceModel, resourceAccess));
   }
 
   /**

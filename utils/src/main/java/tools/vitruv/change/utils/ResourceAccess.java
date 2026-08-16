@@ -1,11 +1,9 @@
 package tools.vitruv.change.utils;
 
+import java.util.Collection;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
-
-import java.util.Collection;
-import java.util.Set;
 
 /** Offers possibilities for resource access and persistence. */
 public interface ResourceAccess {
@@ -27,7 +25,7 @@ public interface ResourceAccess {
   Resource getModelResource(URI uri);
 
   /**
-   * Provides all resources for storing models.
+   * Provides all currently loaded resources that store models or metadata.
    */
   Collection<Resource> getModelResources();
 

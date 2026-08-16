@@ -1,9 +1,8 @@
 package tools.vitruv.change.correspondence.model;
 
+import java.util.Map;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-
-import java.util.Map;
 
 /**
  * An persistable representation of a {@link CorrespondenceModel}.
@@ -22,7 +21,8 @@ public interface PersistableCorrespondenceModel extends CorrespondenceModel {
   public void save();
 
   /**
-   * Copies the correspondence model, using the given mapping to replace the objects referenced in the correspondences.
+   * Copies the correspondence model, using the given mapping to replace the objects referenced in
+   * the correspondences.
    *
    * @param eObjectMapping the mapping to replace the objects referenced in the correspondences
    * @return a copy of this correspondence model

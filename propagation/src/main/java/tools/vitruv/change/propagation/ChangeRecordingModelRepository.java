@@ -10,8 +10,6 @@ import tools.vitruv.change.correspondence.model.CorrespondenceModel;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.utils.ResourceAccess;
 
-import java.util.List;
-
 /**
  * A model repository that records changes performed to the models in the repository. It provides
  * access to the correspondence model and the {@link UuidResolver} associated with all model
@@ -50,7 +48,11 @@ public interface ChangeRecordingModelRepository extends ResourceAccess, AutoClos
    */
   Iterable<TransactionalChange<EObject>> recordChanges(Runnable changeApplicator);
 
-  ModelSnapshot createSnapshot();
-
-  List<TransactionalChangeWithPreviousState> applyChangeAndStorePreviousState(VitruviusChange<Uuid> change);
+  /**
+   * Creates a snapshot of the current state of the models in this repository.
+   * This is effectively a copy of the models and correspondence model of this repository.
+   *
+   * @return the created snapshot
+   */
+  ModelRepositorySnapshot createSnapshot();
 }
