@@ -24,9 +24,9 @@ import tools.vitruv.change.propagation.impl.ChangePropagator;
 import tools.vitruv.change.utils.ResourceAccess;
 
 /**
- * Tests that {@link ChangePropagator} offers a whole {@link VitruviusChange} to
- * {@link ChangePropagationSpecification}s that declare {@code doesHandleNonAtomicChanges()},
- * instead of only ever propagating one {@link EChange} at a time.
+ * Tests that {@link ChangePropagator} offers a whole {@link VitruviusChange} to {@link
+ * ChangePropagationSpecification}s that declare {@code doesHandleNonAtomicChanges()}, instead of
+ * only ever propagating one {@link EChange} at a time.
  */
 class ChangePropagatorNonAtomicPropagationTest {
   private final MetamodelDescriptor sourceDescriptor = MetamodelDescriptor.with("models");
@@ -34,13 +34,14 @@ class ChangePropagatorNonAtomicPropagationTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  void nonAtomicSpecificationReceivesWholeChangeWhileOthersStillReceiveEChanges() throws Exception {
+  void nonAtomicSpecificationReceivesWholeChangeWhileOthersStillReceiveEChanges() {
     var nonAtomicSpecification =
         new NonAtomicChangePropagationSpecification(sourceDescriptor, targetDescriptor);
     var atomicOnlySpecification =
         new AtomicOnlyChangePropagationSpecification(sourceDescriptor, targetDescriptor);
-    var changePropagationProvider = new ChangePropagationSpecificationRepository(
-        List.of(nonAtomicSpecification, atomicOnlySpecification));
+    var changePropagationProvider =
+        new ChangePropagationSpecificationRepository(
+            List.of(nonAtomicSpecification, atomicOnlySpecification));
 
     EObject affectedObject = mock(EObject.class);
     EChange<EObject> eChange = mock(EChange.class);
@@ -52,20 +53,26 @@ class ChangePropagatorNonAtomicPropagationTest {
     when(resolvedChange.containsConcreteChange()).thenReturn(true);
     when(resolvedChange.getUserInteractions()).thenReturn(List.of());
 
+    EditableCorrespondenceModelView<Correspondence> correspondenceModel =
+        mock(EditableCorrespondenceModelView.class);
     ChangeRecordingModelRepository modelRepository = mock(ChangeRecordingModelRepository.class);
     when(modelRepository.applyChange(any())).thenReturn(resolvedChange);
-    when(modelRepository.getCorrespondenceModel())
-        .thenReturn(mock(EditableCorrespondenceModelView.class));
-    when(modelRepository.recordChanges(any())).thenAnswer(invocation -> {
-      Runnable changeApplicator = invocation.getArgument(0);
-      changeApplicator.run();
-      return List.<TransactionalChange<EObject>>of();
-    });
+    when(modelRepository.getCorrespondenceModel()).thenReturn(correspondenceModel);
+    when(modelRepository.recordChanges(any()))
+        .thenAnswer(
+            invocation -> {
+              Runnable changeApplicator = invocation.getArgument(0);
+              changeApplicator.run();
+              return List.<TransactionalChange<EObject>>of();
+            });
 
     InternalUserInteractor userInteractor = mock(InternalUserInteractor.class);
-    ChangePropagator propagator = new ChangePropagator(
-        modelRepository, changePropagationProvider, userInteractor,
-        ChangePropagationMode.SINGLE_STEP);
+    ChangePropagator propagator =
+        new ChangePropagator(
+            modelRepository,
+            changePropagationProvider,
+            userInteractor,
+            ChangePropagationMode.SINGLE_STEP);
 
     VitruviusChange<Uuid> inputChange = mock(VitruviusChange.class);
     List<PropagatedChange> result = propagator.propagateChange(inputChange);
@@ -75,7 +82,8 @@ class ChangePropagatorNonAtomicPropagationTest {
     // ... and, like every other specification, is still called once per atomic EChange, too.
     assertEquals(1, nonAtomicSpecification.atomicInvocations);
 
-    // A specification that does not opt into non-atomic handling never receives the whole change ...
+    // A specification that does not opt into non-atomic handling never receives the whole change
+    // ...
     assertFalse(atomicOnlySpecification.doesHandleNonAtomicChanges());
     assertEquals(0, atomicOnlySpecification.nonAtomicInvocations);
     // ... but is still called once per atomic EChange, as before.
@@ -104,14 +112,16 @@ class ChangePropagatorNonAtomicPropagationTest {
     }
 
     @Override
-    public void propagateNonAtomicChange(VitruviusChange<EObject> change,
+    public void propagateNonAtomicChange(
+        VitruviusChange<EObject> change,
         EditableCorrespondenceModelView<Correspondence> correspondenceModel,
         ResourceAccess resourceAccess) {
       nonAtomicInvocations++;
     }
 
     @Override
-    public void propagateChange(EChange<EObject> change,
+    public void propagateChange(
+        EChange<EObject> change,
         EditableCorrespondenceModelView<Correspondence> correspondenceModel,
         ResourceAccess resourceAccess) {
       atomicInvocations++;
@@ -129,14 +139,16 @@ class ChangePropagatorNonAtomicPropagationTest {
     }
 
     @Override
-    public void propagateNonAtomicChange(VitruviusChange<EObject> change,
+    public void propagateNonAtomicChange(
+        VitruviusChange<EObject> change,
         EditableCorrespondenceModelView<Correspondence> correspondenceModel,
         ResourceAccess resourceAccess) {
       nonAtomicInvocations++;
     }
 
     @Override
-    public void propagateChange(EChange<EObject> change,
+    public void propagateChange(
+        EChange<EObject> change,
         EditableCorrespondenceModelView<Correspondence> correspondenceModel,
         ResourceAccess resourceAccess) {
       atomicInvocations++;

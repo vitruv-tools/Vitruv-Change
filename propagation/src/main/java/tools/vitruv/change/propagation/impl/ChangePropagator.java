@@ -90,7 +90,7 @@ public class ChangePropagator {
       }
     }
     if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Will now propagate this input change:\n\t" + resolvedChange);
+      LOGGER.trace("Will now propagate this input change:\n\t{}", resolvedChange);
     }
     return new ChangePropagation(resolvedChange, null).propagateChanges();
   }
@@ -215,8 +215,7 @@ public class ChangePropagator {
      * afterwards.
      */
     private List<TransactionalChange<EObject>> propagateWithUserInteractionHandling(
-        VitruviusChange<EObject> change,
-        Supplier<List<TransactionalChange<EObject>>> propagation) {
+        VitruviusChange<EObject> change, Supplier<List<TransactionalChange<EObject>>> propagation) {
       try (AutoCloseable userInteractorChange = installUserInteractorForChange(change)) {
         changePropagationProvider.forEach(it -> it.registerObserver(this));
         userInteractor.registerUserInputListener(this);
@@ -245,7 +244,8 @@ public class ChangePropagator {
     private Set<ChangePropagationSpecification> getChangePropagationSpecifications(
         Predicate<ChangePropagationSpecification> filter) {
       Set<ChangePropagationSpecification> specifications = new LinkedHashSet<>();
-      for (MetamodelDescriptor descriptor : sourceChange.getAffectedEObjectsMetamodelDescriptors()) {
+      for (MetamodelDescriptor descriptor :
+          sourceChange.getAffectedEObjectsMetamodelDescriptors()) {
         for (ChangePropagationSpecification specification :
             changePropagationProvider.getChangePropagationSpecifications(descriptor)) {
           if (filter.test(specification)) {
@@ -264,14 +264,14 @@ public class ChangePropagator {
             propagationResultChanges.stream()
                 .map(c -> String.valueOf(c.getAffectedEObjectsMetamodelDescriptors()))
                 .collect(Collectors.joining(", "));
-        LOGGER.debug("Propagated " + path + " -> {" + changes + "}");
+        LOGGER.debug("Propagated {} -> [{}]", path, changes);
       }
       if (LOGGER.isTraceEnabled()) {
         String resultChanges =
             propagationResultChanges.stream()
                 .map(r -> "\t" + r.getAffectedEObjectsMetamodelDescriptors() + ": " + r)
                 .collect(Collectors.joining("\n"));
-        LOGGER.trace("Result changes:\n" + resultChanges);
+        LOGGER.trace("Result changes:\n{}", resultChanges);
       }
     }
 
@@ -303,7 +303,8 @@ public class ChangePropagator {
     }
 
     private Iterable<TransactionalChange<EObject>> propagateChangeForChangePropagationSpecification(
-        TransactionalChange<EObject> change, ChangePropagationSpecification propagationSpecification) {
+        TransactionalChange<EObject> change,
+        ChangePropagationSpecification propagationSpecification) {
       Iterable<TransactionalChange<EObject>> transitiveChanges =
           modelRepository.recordChanges(
               () -> {
@@ -318,7 +319,8 @@ public class ChangePropagator {
 
     private Iterable<TransactionalChange<EObject>>
         propagateNonAtomicChangeForChangePropagationSpecification(
-            VitruviusChange<EObject> change, ChangePropagationSpecification propagationSpecification) {
+            VitruviusChange<EObject> change,
+            ChangePropagationSpecification propagationSpecification) {
       Iterable<TransactionalChange<EObject>> transitiveChanges =
           modelRepository.recordChanges(
               () ->
@@ -328,7 +330,8 @@ public class ChangePropagator {
       return transitiveChanges;
     }
 
-    private void registerChangedResources(Iterable<TransactionalChange<EObject>> transitiveChanges) {
+    private void registerChangedResources(
+        Iterable<TransactionalChange<EObject>> transitiveChanges) {
       for (TransactionalChange<EObject> transitiveChange : transitiveChanges) {
         for (EObject affectedObject : transitiveChange.getAffectedEObjects()) {
           Resource resource = affectedObject.eResource();
@@ -347,7 +350,8 @@ public class ChangePropagator {
       return userInteractor.replaceUserInteractionResultProvider(
           currentProvider ->
               UserInteractionFactory.instance.createPredefinedInteractionResultProvider(
-                  currentProvider, Iterables.toArray(pastUserInteractions, UserInteractionBase.class)));
+                  currentProvider,
+                  Iterables.toArray(pastUserInteractions, UserInteractionBase.class)));
     }
 
     private void handleObjectsWithoutResource() {
@@ -356,13 +360,17 @@ public class ChangePropagator {
           continue;
         }
         Preconditions.checkState(
-            !modelRepository.getCorrespondenceModel().hasCorrespondences(createdObjectWithoutResource),
+            !modelRepository
+                .getCorrespondenceModel()
+                .hasCorrespondences(createdObjectWithoutResource),
             "The object %s is part of a correspondence to %s but not in any resource",
             createdObjectWithoutResource,
-            modelRepository.getCorrespondenceModel().getCorrespondingEObjects(createdObjectWithoutResource));
+            modelRepository
+                .getCorrespondenceModel()
+                .getCorrespondingEObjects(createdObjectWithoutResource));
         LOGGER.warn(
-            "Object was created but has no correspondence and is thus lost: "
-                + createdObjectWithoutResource);
+            "Object was created but has no correspondence and is thus lost: {}",
+            createdObjectWithoutResource);
       }
     }
 
