@@ -63,8 +63,7 @@ public class DefaultChangeableModelRepository implements ChangeableModelReposito
     // Set up logging/reporting
     LOGGER.info("Start change propagation");
     notifyChangePropagationStarted(change);    
-    List<PropagatedChange> resultChanges =
-        changePropagator.propagateChange(change, changePropagationObservers);
+    List<PropagatedChange> resultChanges = changePropagator.propagateChange(change);
     modelRepository.saveOrDeleteModels();
     notifyChangePropagationFinished(change, resultChanges);
     LOGGER.info("Finished change propagation");

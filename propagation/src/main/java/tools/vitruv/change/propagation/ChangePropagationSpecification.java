@@ -3,6 +3,7 @@ package tools.vitruv.change.propagation;
 import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.composite.MetamodelDescriptor;
+import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.interaction.UserInteractor;
@@ -51,11 +52,13 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
    *      whether this specification reacts to it. Must not be <code>null</code>.
    * @param correspondenceModel - the correspondence model to retrieve information
    *      about the target model from. Must not be <code>null</code>.
-   * @return <code>true</code> if {@link #propagateChange} will perform modifications 
+   * @return <code>true</code> if {@link #propagateChange} will perform modifications
    *      in response to the given change, <code>false</code> otherwise.
    */
-  boolean doesHandleChange(EChange<EObject> change,
-      EditableCorrespondenceModelView<Correspondence> correspondenceModel);
+  default boolean doesHandleChange(EChange<EObject> change,
+      EditableCorrespondenceModelView<Correspondence> correspondenceModel) {
+    return false;
+  }
 
   /**
    * Performs modifications in target models identified by accessing the given
@@ -67,10 +70,43 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
    *     (see {@link #getSourceMetamodelDescriptor}). Must not be <code>null</code>.
    * @param correspondenceModel - the correspondence model to retrieve information about the target
    *     model from. Must not be <code>null</code>.
-   * @param resourceAccess - an object for resource access, 
+   * @param resourceAccess - an object for resource access,
    *     in particular to create new model files. Must not be <code>null</code>.
    */
   void propagateChange(EChange<EObject> change,
-      EditableCorrespondenceModelView<Correspondence> correspondenceModel, 
+      EditableCorrespondenceModelView<Correspondence> correspondenceModel,
       ResourceAccess resourceAccess);
+
+  /**
+   * Returns whether this <code>ChangePropagationSpecification</code> handles the given change,
+   * i.e., whether {@link #propagateNonAtomicChange} will perform changes when applied to that
+   * change.
+   *
+   * @return <code>true</code> if {@link #propagateNonAtomicChange} will perform modifications
+   *      in response to the given change, <code>false</code> otherwise.
+   */
+  default boolean doesHandleNonAtomicChanges() {
+    return false;
+  }
+
+  /**
+   * If this <code>ChangePropagationSpecification</code> handles non-atomic changes (change
+   * sequences), see {@link #doesHandleNonAtomicChanges}, this performs modifications in target
+   * models identified by accessing the given <code>CorrespondenceModel</code> for the elements
+   * changed by the given <code>EChange</code> in order to reflect the changes in the target
+   * model. Else, this does nothing.
+   *
+   * @param change - the non-atomic change (i.e. change sequence) which shall be propagated.
+   *     Should affect only elements in an instance of a source metamodel of this specification
+   *     (see {@link #getSourceMetamodelDescriptor}). Must not be <code>null</code>.
+   * @param correspondenceModel - the correspondence model to retrieve information about the target
+   *     model from. Must not be <code>null</code>.
+   * @param resourceAccess - an object for resource access,
+   *     in particular to create new model files. Must not be <code>null</code>.
+   */
+  default void propagateNonAtomicChange(VitruviusChange<EObject> change,
+      EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+      ResourceAccess resourceAccess) {
+    // no-op
+  }
 }

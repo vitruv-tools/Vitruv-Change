@@ -2,7 +2,6 @@ package tools.vitruv.change.utils.activeannotations;
 
 import java.util.List;
 import java.util.stream.StreamSupport;
-
 import org.eclipse.emf.ecore.impl.EFactoryImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtend.lib.macro.AbstractClassProcessor;

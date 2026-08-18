@@ -76,6 +76,18 @@
       <artifactId>org.eclipse.emf.ecore</artifactId>
     </dependency>
 
+    <!-- external test dependencies -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <!-- p2 dependencies -->
     <dependency>
       <groupId>${project.groupId}</groupId>

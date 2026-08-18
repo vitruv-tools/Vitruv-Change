@@ -19,7 +19,7 @@ import tools.vitruv.change.atomic.feature.attribute.AttributeFactory;
 import tools.vitruv.change.atomic.feature.attribute.AttributePackage;
 import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute;
 import tools.vitruv.change.composite.MetamodelDescriptor;
-import tools.vitruv.change.correspondence.Correspondence; 
+import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.interaction.UserInteractionFactory;
 import tools.vitruv.change.interaction.impl.PredefinedInteractionResultProviderImpl;
@@ -34,24 +34,25 @@ class ChangePropagationSpecificationTests {
 
   private MockChangePropagationSpecification specAtoBOnAttributeChange =
       new MockChangePropagationSpecification(
-      AttributePackage.eINSTANCE.getReplaceSingleValuedEAttribute(), descriptorA, descriptorB);
+          AttributePackage.eINSTANCE.getReplaceSingleValuedEAttribute(), descriptorA, descriptorB);
 
   private MockChangePropagationSpecification specAtoBOnElementAddChange =
       new MockChangePropagationSpecification(
-      EobjectPackage.eINSTANCE.getCreateEObject(), descriptorA, descriptorB);
+          EobjectPackage.eINSTANCE.getCreateEObject(), descriptorA, descriptorB);
 
   private MockChangePropagationSpecification specBtoAOnElementDeleteChange =
       new MockChangePropagationSpecification(
-      EobjectPackage.eINSTANCE.getDeleteEObject(), descriptorB, descriptorA);
-  
+          EobjectPackage.eINSTANCE.getDeleteEObject(), descriptorB, descriptorA);
+
   @Test
   void testRegistry() {
-    var registry = new ChangePropagationSpecificationRepository(
-        List.of(specAtoBOnAttributeChange,
-          specAtoBOnElementAddChange, 
-          specBtoAOnElementDeleteChange)
-    );
- 
+    var registry =
+        new ChangePropagationSpecificationRepository(
+            List.of(
+                specAtoBOnAttributeChange,
+                specAtoBOnElementAddChange,
+                specBtoAOnElementDeleteChange));
+
     var resultsForDescriptorA = registry.getChangePropagationSpecifications(descriptorA);
     assertTrue(resultsForDescriptorA.contains(specAtoBOnAttributeChange));
     assertTrue(resultsForDescriptorA.contains(specAtoBOnElementAddChange));
@@ -70,10 +71,10 @@ class ChangePropagationSpecificationTests {
 
   @Test
   void testCompositeChangePropagationSpecification() {
-    var mockUserInteractor = UserInteractionFactory.instance.createUserInteractor(
-      new PredefinedInteractionResultProviderImpl(null)
-    );
-    var compositeSpecificationForDescriptorsAAndB = 
+    var mockUserInteractor =
+        UserInteractionFactory.instance.createUserInteractor(
+            new PredefinedInteractionResultProviderImpl(null));
+    var compositeSpecificationForDescriptorsAAndB =
         new CompositeChangePropagationSpecification(descriptorA, descriptorB);
     compositeSpecificationForDescriptorsAAndB.setUserInteractor(mockUserInteractor);
     compositeSpecificationForDescriptorsAAndB.addChangePreprocessor(specAtoBOnElementAddChange);
@@ -93,7 +94,7 @@ class ChangePropagationSpecificationTests {
     assertTrue(compositeSpecificationForDescriptorsAAndB.doesHandleChange(change1, null));
     assertTrue(compositeSpecificationForDescriptorsAAndB.doesHandleChange(change2, null));
     assertFalse(compositeSpecificationForDescriptorsAAndB.doesHandleChange(change3, null));
-  
+
     // Notifier tests; expect 2 events/one per CPS
     var mockObserver = new MockObserver();
     compositeSpecificationForDescriptorsAAndB.registerObserver(mockObserver);
@@ -112,69 +113,73 @@ class ChangePropagationSpecificationTests {
   void handleIncompatibleSubprocessors() {
     var compositeSpecificationForDescriptorsBAndA =
         new CompositeChangePropagationSpecification(descriptorB, descriptorA);
-    assertThrows(IllegalArgumentException.class,
-        () -> compositeSpecificationForDescriptorsBAndA
-        .addChangePreprocessor(specAtoBOnAttributeChange));
-    assertThrows(IllegalArgumentException.class,
-        () -> compositeSpecificationForDescriptorsBAndA
-        .addChangeMainprocessor(specAtoBOnAttributeChange));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            compositeSpecificationForDescriptorsBAndA.addChangePreprocessor(
+                specAtoBOnAttributeChange));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            compositeSpecificationForDescriptorsBAndA.addChangeMainprocessor(
+                specAtoBOnAttributeChange));
   }
 
   private static class MockObserver implements ChangePropagationObserver {
     private int cpsStarts = 0;
     private int cpsEnds = 0;
     private int objectsCreated = 0;
-   
+
     @Override
-    public void changePropagationStarted(ChangePropagationSpecification specification,
-        EChange<EObject> change) {
+    public void changePropagationStarted(
+        ChangePropagationSpecification specification, EChange<EObject> change) {
       cpsStarts++;
     }
-  
+
     @Override
-    public void changePropagationStopped(ChangePropagationSpecification specification, 
-        EChange<EObject> change) {
+    public void changePropagationStopped(
+        ChangePropagationSpecification specification, EChange<EObject> change) {
       cpsEnds++;
     }
 
     @Override
     public void objectCreated(EObject createdObject) {
-      objectsCreated++;      
+      objectsCreated++;
     }
   }
 
   /**
-   * A mock change propagation specification.
-   * It "handles" changes for a given change type (a concrete subclass of {@link EChange})
-   * by doing nothing, expect calling notifiers. 
+   * A mock change propagation specification. It "handles" changes for a given change type (a
+   * concrete subclass of {@link EChange}) by doing nothing, expect calling notifiers.
    */
-  private static class MockChangePropagationSpecification extends
-      AbstractChangePropagationSpecification {
-    /**
-     * Change type to handle.
-     */
+  private static class MockChangePropagationSpecification
+      extends AbstractChangePropagationSpecification {
+    /** Change type to handle. */
     private final EClass eChangeType;
-  
-    private MockChangePropagationSpecification(EClass eChangeType,
-        MetamodelDescriptor sourceDescriptor, MetamodelDescriptor targetDescriptor) {
+
+    private MockChangePropagationSpecification(
+        EClass eChangeType,
+        MetamodelDescriptor sourceDescriptor,
+        MetamodelDescriptor targetDescriptor) {
       super(sourceDescriptor, targetDescriptor);
       this.eChangeType = eChangeType;
     }
 
     @Override
-    public boolean doesHandleChange(EChange<EObject> change,
+    public boolean doesHandleChange(
+        EChange<EObject> change,
         EditableCorrespondenceModelView<Correspondence> correspondenceModel) {
       return change.eClass().equals(eChangeType);
     }
 
     @Override
-    public void propagateChange(EChange<EObject> change,
+    public void propagateChange(
+        EChange<EObject> change,
         EditableCorrespondenceModelView<Correspondence> correspondenceModel,
         ResourceAccess resourceAccess) {
       notifyChangePropagationStarted(this, change);
       notifyObjectCreated(change);
       notifyChangePropagationStopped(this, change);
-      return;
     }
   }
 }
