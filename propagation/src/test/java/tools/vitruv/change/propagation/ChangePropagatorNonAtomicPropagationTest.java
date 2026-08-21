@@ -24,8 +24,10 @@ import tools.vitruv.change.propagation.impl.ChangePropagator;
 import tools.vitruv.change.utils.ResourceAccess;
 
 /**
- * Tests that {@link ChangePropagator} offers a whole {@link VitruviusChange} to {@link
- * ChangePropagationSpecification}s that declare {@code doesHandleNonAtomicChanges()}, instead of
+ * Tests that {@link ChangePropagator} offers a whole {@link VitruviusChange} to
+ * {@link
+ * ChangePropagationSpecification}s that declare
+ * {@code doesHandleNonAtomicChanges()}, instead of
  * only ever propagating one {@link EChange} at a time.
  */
 class ChangePropagatorNonAtomicPropagationTest {
@@ -35,13 +37,10 @@ class ChangePropagatorNonAtomicPropagationTest {
   @Test
   @SuppressWarnings("unchecked")
   void nonAtomicSpecificationReceivesWholeChangeWhileOthersStillReceiveEChanges() {
-    var nonAtomicSpecification =
-        new NonAtomicChangePropagationSpecification(sourceDescriptor, targetDescriptor);
-    var atomicOnlySpecification =
-        new AtomicOnlyChangePropagationSpecification(sourceDescriptor, targetDescriptor);
-    var changePropagationProvider =
-        new ChangePropagationSpecificationRepository(
-            List.of(nonAtomicSpecification, atomicOnlySpecification));
+    var nonAtomicSpecification = new NonAtomicChangePropagationSpecification(sourceDescriptor, targetDescriptor);
+    var atomicOnlySpecification = new AtomicOnlyChangePropagationSpecification(sourceDescriptor, targetDescriptor);
+    var changePropagationProvider = new ChangePropagationSpecificationRepository(
+        List.of(nonAtomicSpecification, atomicOnlySpecification));
 
     EObject affectedObject = mock(EObject.class);
     EChange<EObject> eChange = mock(EChange.class);
@@ -53,8 +52,7 @@ class ChangePropagatorNonAtomicPropagationTest {
     when(resolvedChange.containsConcreteChange()).thenReturn(true);
     when(resolvedChange.getUserInteractions()).thenReturn(List.of());
 
-    EditableCorrespondenceModelView<Correspondence> correspondenceModel =
-        mock(EditableCorrespondenceModelView.class);
+    EditableCorrespondenceModelView<Correspondence> correspondenceModel = mock(EditableCorrespondenceModelView.class);
     ChangeRecordingModelRepository modelRepository = mock(ChangeRecordingModelRepository.class);
     when(modelRepository.applyChange(any())).thenReturn(resolvedChange);
     when(modelRepository.getCorrespondenceModel()).thenReturn(correspondenceModel);
@@ -67,31 +65,35 @@ class ChangePropagatorNonAtomicPropagationTest {
             });
 
     InternalUserInteractor userInteractor = mock(InternalUserInteractor.class);
-    ChangePropagator propagator =
-        new ChangePropagator(
-            modelRepository,
-            changePropagationProvider,
-            userInteractor,
-            ChangePropagationMode.SINGLE_STEP);
+    ChangePropagator propagator = new ChangePropagator(
+        modelRepository,
+        changePropagationProvider,
+        userInteractor,
+        ChangePropagationMode.SINGLE_STEP);
 
     VitruviusChange<Uuid> inputChange = mock(VitruviusChange.class);
-    List<PropagatedChange> result = propagator.propagateChange(inputChange);
 
-    // The non-atomic-enabled specification is offered the whole change exactly once ...
+    // The non-atomic-enabled specification is offered the whole change exactly once
+    // ...
     assertEquals(1, nonAtomicSpecification.nonAtomicInvocations);
-    // ... and, like every other specification, is still called once per atomic EChange, too.
+    // ... and, like every other specification, is still called once per atomic
+    // EChange, too.
     assertEquals(1, nonAtomicSpecification.atomicInvocations);
 
-    // A specification that does not opt into non-atomic handling never receives the whole change
+    // A specification that does not opt into non-atomic handling never receives the
+    // whole change
     // ...
     assertFalse(atomicOnlySpecification.doesHandleNonAtomicChanges());
     assertEquals(0, atomicOnlySpecification.nonAtomicInvocations);
     // ... but is still called once per atomic EChange, as before.
     assertEquals(1, atomicOnlySpecification.atomicInvocations);
 
-    // Since neither specification recorded any actual model changes, only the atomic propagation
-    // step (which always reports a result) produces a PropagatedChange; the non-atomic step,
+    // Since neither specification recorded any actual model changes, only the
+    // atomic propagation
+    // step (which always reports a result) produces a PropagatedChange; the
+    // non-atomic step,
     // having recorded nothing, contributes none.
+    List<PropagatedChange> result = propagator.propagateChange(inputChange);
     assertEquals(1, result.size());
     assertEquals(resolvedChange, result.get(0).getOriginalChange());
   }
