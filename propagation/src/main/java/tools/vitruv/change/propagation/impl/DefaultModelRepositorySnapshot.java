@@ -8,7 +8,6 @@ import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceCopie
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -27,7 +26,6 @@ import tools.vitruv.change.propagation.ModelRepositorySnapshot;
  */
 public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
   private final ResourceSet resourceSet;
-  private final BiMap<EObject, EObject> repositoryToSnapshot;
   private final PersistableCorrespondenceModel correspondenceModel;
   private final Function<String[], URI> metadataModelUriProvider;
 
@@ -35,11 +33,9 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
 
   private DefaultModelRepositorySnapshot(
       ResourceSet resourceSet,
-      BiMap<EObject, EObject> repositoryToSnapshot,
       PersistableCorrespondenceModel correspondenceModel,
       Function<String[], URI> metadataModelUriProvider) {
     this.resourceSet = resourceSet;
-    this.repositoryToSnapshot = repositoryToSnapshot;
     this.correspondenceModel = correspondenceModel;
     this.metadataModelUriProvider = metadataModelUriProvider;
   }
@@ -64,7 +60,6 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
 
     return new DefaultModelRepositorySnapshot(
         resourceSetCopy.resourceSet(),
-        resourceSetCopy.originalToCopy(),
         correspondenceModelCopy,
         metadataModelUriProvider);
   }
@@ -115,18 +110,6 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
   }
 
   @Override
-  public Optional<EObject> getRepositoryEObject(EObject snapshotEObject) {
-    return Optional.ofNullable(repositoryToSnapshot
-                                   .inverse()
-                                   .get(snapshotEObject));
-  }
-
-  @Override
-  public Optional<EObject> getSnapshotEObject(EObject repositoryEObject) {
-    return Optional.ofNullable(repositoryToSnapshot.get(repositoryEObject));
-  }
-
-  @Override
   public URI getMetadataModelURI(String... metadataKey) {
     return metadataModelUriProvider.apply(metadataKey);
   }
@@ -164,10 +147,10 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
     for (Resource resource : resourceSet.getResources()) {
       resource.unload();
     }
+
     resourceSet
         .getResources()
         .clear();
-    repositoryToSnapshot.clear();
   }
 
   private record ResourceSetCopy(ResourceSet resourceSet, BiMap<EObject, EObject> originalToCopy) {
