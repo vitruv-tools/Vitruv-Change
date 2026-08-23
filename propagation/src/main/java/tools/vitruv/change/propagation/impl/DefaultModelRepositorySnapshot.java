@@ -64,7 +64,14 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
         metadataModelUriProvider);
   }
 
-  private static ResourceSetCopy copyResourceSet(ResourceSet originalResourceSet) {
+  /**
+   * Copy a resource set and create a mapping between all objects of the original and the copy.
+   * This means all resources of the resource set are copied, including all contents.
+   *
+   * @param originalResourceSet the resource set to copy
+   * @return a copy of the resource set and the mapping
+   */
+  public static ResourceSetCopy copyResourceSet(ResourceSet originalResourceSet) {
     ResourceSet copiedResourceSet = withGlobalFactories(new ResourceSetImpl());
 
     Map<Resource, Resource> resourceCopies
@@ -153,6 +160,12 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
         .clear();
   }
 
-  private record ResourceSetCopy(ResourceSet resourceSet, BiMap<EObject, EObject> originalToCopy) {
+  /**
+   * Result provided by {@link #copyResourceSet(ResourceSet)}.
+   *
+   * @param resourceSet the copied resource set
+   * @param originalToCopy the mapping between the original and the copy
+   */
+  public record ResourceSetCopy(ResourceSet resourceSet, BiMap<EObject, EObject> originalToCopy) {
   }
 }
