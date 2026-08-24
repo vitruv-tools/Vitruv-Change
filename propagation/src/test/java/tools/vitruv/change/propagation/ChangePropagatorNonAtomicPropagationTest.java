@@ -72,6 +72,7 @@ class ChangePropagatorNonAtomicPropagationTest {
         ChangePropagationMode.SINGLE_STEP);
 
     VitruviusChange<Uuid> inputChange = mock(VitruviusChange.class);
+    List<PropagatedChange> result = propagator.propagateChange(inputChange);
 
     // The non-atomic-enabled specification is offered the whole change exactly once
     // ...
@@ -93,7 +94,6 @@ class ChangePropagatorNonAtomicPropagationTest {
     // step (which always reports a result) produces a PropagatedChange; the
     // non-atomic step,
     // having recorded nothing, contributes none.
-    List<PropagatedChange> result = propagator.propagateChange(inputChange);
     assertEquals(1, result.size());
     assertEquals(resolvedChange, result.get(0).getOriginalChange());
   }
