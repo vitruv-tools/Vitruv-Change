@@ -19,6 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
+import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -372,7 +373,7 @@ public class ChangeTree extends ChangeComponent {
     String[] names = new String[] {"Attribute", "Reference", "Existence", "Root"};
 
     for (int n = 0; n < icons.length; n++) {
-      JLabel label = new JLabel(names[n], icons[n], JLabel.RIGHT);
+      JLabel label = new JLabel(names[n], icons[n], SwingConstants.RIGHT);
       label.setFont(ChangeVisualizationUI.DEFAULT_LABEL_FONT);
       toolbar.add(label);
     }
