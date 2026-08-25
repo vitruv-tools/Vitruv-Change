@@ -106,15 +106,20 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   @Override
-  public PersistableCorrespondenceModel copy(Map<EObject, EObject> eObjectMapping) {
+  public PersistableCorrespondenceModel copy(Map<EObject, EObject> originalToCopyMapping) {
     Correspondences copiedCorrespondences = EcoreUtil.copy(this.correspondences);
 
-    for (Correspondence correspondence : copiedCorrespondences.getCorrespondences()) {
-      var newLeftEObjects = map(correspondence.getLeftEObjects(), eObjectMapping);
-      var newRightEObjects = map(correspondence.getRightEObjects(), eObjectMapping);
+    for (int index = 0; index < copiedCorrespondences.getCorrespondences().size(); index++) {
+      Correspondence originalCorrespondence = this.correspondences.getCorrespondences().get(index);
+      Correspondence copiedCorrespondence = copiedCorrespondences.getCorrespondences().get(index);
 
-      replace(correspondence.getLeftEObjects(), newLeftEObjects);
-      replace(correspondence.getRightEObjects(), newRightEObjects);
+      var newLeftEObjects = map(copiedCorrespondence.getLeftEObjects(), originalToCopyMapping);
+      var newRightEObjects = map(copiedCorrespondence.getRightEObjects(), originalToCopyMapping);
+
+      replace(copiedCorrespondence.getLeftEObjects(), newLeftEObjects);
+      replace(copiedCorrespondence.getRightEObjects(), newRightEObjects);
+
+      originalToCopyMapping.put(originalCorrespondence, copiedCorrespondence);
     }
 
     URI resourceUri = this.correspondencesResource != null
@@ -124,8 +129,10 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
     return new PersistableCorrespondenceModelImpl(copiedCorrespondences, resourceUri);
   }
 
-  private static List<EObject> map(List<EObject> eObjects, Map<EObject, EObject> eObjectMapping) {
-    return eObjects.stream().map(eObject -> eObjectMapping.getOrDefault(eObject, eObject)).toList();
+  private static List<EObject> map(
+      List<EObject> eObjects, Map<EObject, EObject> originalToCopyMapping) {
+    return eObjects.stream()
+               .map(eObject -> originalToCopyMapping.getOrDefault(eObject, eObject)).toList();
   }
 
   @Override

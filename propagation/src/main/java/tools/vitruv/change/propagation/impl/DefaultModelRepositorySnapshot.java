@@ -6,6 +6,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceCopier;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -27,6 +28,7 @@ import tools.vitruv.change.propagation.ModelRepositorySnapshot;
 public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
   private final ResourceSet resourceSet;
   private final PersistableCorrespondenceModel correspondenceModel;
+  private final BiMap<EObject, EObject> repositoryToSnapshotMap;
   private final Function<String[], URI> metadataModelUriProvider;
 
   private boolean closed = false;
@@ -34,9 +36,11 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
   private DefaultModelRepositorySnapshot(
       ResourceSet resourceSet,
       PersistableCorrespondenceModel correspondenceModel,
+      BiMap<EObject, EObject> repositoryToSnapshotMap,
       Function<String[], URI> metadataModelUriProvider) {
     this.resourceSet = resourceSet;
     this.correspondenceModel = correspondenceModel;
+    this.repositoryToSnapshotMap = repositoryToSnapshotMap;
     this.metadataModelUriProvider = metadataModelUriProvider;
   }
 
@@ -61,6 +65,7 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
     return new DefaultModelRepositorySnapshot(
         resourceSetCopy.resourceSet(),
         correspondenceModelCopy,
+        resourceSetCopy.originalToCopy(),
         metadataModelUriProvider);
   }
 
@@ -78,12 +83,12 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
         = ResourceCopier.copyViewResources(originalResourceSet.getResources(), copiedResourceSet);
     resourceCopies.forEach((original, copy) -> copy.setModified(original.isModified()));
 
-    BiMap<EObject, EObject> mapping = createMapping(originalResourceSet, copiedResourceSet);
+    BiMap<EObject, EObject> mapping = createOriginalToCopyMapping(originalResourceSet, copiedResourceSet);
 
     return new ResourceSetCopy(copiedResourceSet, mapping);
   }
 
-  private static BiMap<EObject, EObject> createMapping(
+  private static BiMap<EObject, EObject> createOriginalToCopyMapping(
       ResourceSet originalResourceSet,
       ResourceSet copiedResourceSet) {
     BiMap<EObject, EObject> result = HashBiMap.create();
@@ -114,6 +119,16 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
   public EditableCorrespondenceModelView<Correspondence> getCorrespondenceModel() {
     return CorrespondenceModelViewFactory.createEditableCorrespondenceModelView(
         correspondenceModel);
+  }
+
+  @Override
+  public Map<EObject, EObject> getRepositoryToSnapshotMap() {
+    return Collections.unmodifiableMap(repositoryToSnapshotMap);
+  }
+
+  @Override
+  public Map<EObject, EObject> getSnapshotToRepositoryMap() {
+    return Collections.unmodifiableMap(repositoryToSnapshotMap.inverse());
   }
 
   @Override
