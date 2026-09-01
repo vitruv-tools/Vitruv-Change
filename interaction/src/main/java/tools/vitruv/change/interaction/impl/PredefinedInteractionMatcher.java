@@ -65,6 +65,10 @@ public class PredefinedInteractionMatcher {
     return inputToReuse;
   }
 
+  private static <T> T getFirstOrNull(final Iterable<T> candidates) {
+    return candidates == null ? null : Iterables.getFirst(candidates, null);
+  }
+
   /**
    * Returns the predefined notification result for the given message, if one is available.
    *
@@ -74,11 +78,10 @@ public class PredefinedInteractionMatcher {
   public Optional<Boolean> getNotificationResult(final String message) {
     final Iterable<ConfirmationUserInteraction> inputToReuseCandidates = this
         .<ConfirmationUserInteraction>getMatchingInput(message, ConfirmationUserInteraction.class);
-    boolean _isEmpty = Iterables.isEmpty(inputToReuseCandidates);
-    if (_isEmpty) {
+    final ConfirmationUserInteraction inputToReuse = getFirstOrNull(inputToReuseCandidates);
+    if (inputToReuse == null) {
       return Optional.empty();
     }
-    final ConfirmationUserInteraction inputToReuse = inputToReuseCandidates.iterator().next();
     this.userInteractions.remove(inputToReuse);
     return Optional.of(Boolean.TRUE);
   }
@@ -92,11 +95,10 @@ public class PredefinedInteractionMatcher {
   public Optional<Boolean> getConfirmationResult(final String message) {
     final Iterable<ConfirmationUserInteraction> inputToReuseCandidates = this
         .<ConfirmationUserInteraction>getMatchingInput(message, ConfirmationUserInteraction.class);
-    boolean _isEmpty = Iterables.isEmpty(inputToReuseCandidates);
-    if (_isEmpty) {
+    final ConfirmationUserInteraction inputToReuse = getFirstOrNull(inputToReuseCandidates);
+    if (inputToReuse == null) {
       return Optional.empty();
     }
-    final ConfirmationUserInteraction inputToReuse = inputToReuseCandidates.iterator().next();
     this.userInteractions.remove(inputToReuse);
     return Optional.of(Boolean.valueOf(inputToReuse.isConfirmed()));
   }
@@ -104,11 +106,10 @@ public class PredefinedInteractionMatcher {
   public String getTextInputResult(final String message) {
     final Iterable<FreeTextUserInteraction> inputToReuseCandidates = this
         .<FreeTextUserInteraction>getMatchingInput(message, FreeTextUserInteraction.class);
-    boolean _isEmpty = Iterables.isEmpty(inputToReuseCandidates);
-    if (_isEmpty) {
+    final FreeTextUserInteraction inputToReuse = getFirstOrNull(inputToReuseCandidates);
+    if (inputToReuse == null) {
       return null;
     }
-    final FreeTextUserInteraction inputToReuse = inputToReuseCandidates.iterator().next();
     this.userInteractions.remove(inputToReuse);
     return inputToReuse.getText();
   }
@@ -117,11 +118,11 @@ public class PredefinedInteractionMatcher {
     final Iterable<MultipleChoiceSingleSelectionUserInteraction> inputToReuseCandidates = this
         .<MultipleChoiceSingleSelectionUserInteraction>getMatchingMutltipleChoiceInput(message, choices,
             MultipleChoiceSingleSelectionUserInteraction.class);
-    boolean _isEmpty = Iterables.isEmpty(inputToReuseCandidates);
-    if (_isEmpty) {
+    final MultipleChoiceSingleSelectionUserInteraction inputToReuse =
+        getFirstOrNull(inputToReuseCandidates);
+    if (inputToReuse == null) {
       return null;
     }
-    final MultipleChoiceSingleSelectionUserInteraction inputToReuse = inputToReuseCandidates.iterator().next();
     this.userInteractions.remove(inputToReuse);
     return Integer.valueOf(inputToReuse.getSelectedIndex());
   }
@@ -130,11 +131,11 @@ public class PredefinedInteractionMatcher {
     final Iterable<MultipleChoiceMultiSelectionUserInteraction> inputToReuseCandidates = this
         .<MultipleChoiceMultiSelectionUserInteraction>getMatchingMutltipleChoiceInput(message, choices,
             MultipleChoiceMultiSelectionUserInteraction.class);
-    boolean _isEmpty = Iterables.isEmpty(inputToReuseCandidates);
-    if (_isEmpty) {
+    final MultipleChoiceMultiSelectionUserInteraction inputToReuse =
+        getFirstOrNull(inputToReuseCandidates);
+    if (inputToReuse == null) {
       return null;
     }
-    final MultipleChoiceMultiSelectionUserInteraction inputToReuse = inputToReuseCandidates.iterator().next();
     this.userInteractions.remove(inputToReuse);
     return inputToReuse.getSelectedIndices();
   }
