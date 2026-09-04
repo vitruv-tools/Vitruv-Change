@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.InputEvent;
@@ -40,23 +40,25 @@ class ChangeVisualizationUITest {
 
   @Test
   void testInitializeWindowProperties() {
-    // Check close operation
     assumeTrue(ui != null, "Skipping UI test in headless environment.");
-    assertEquals(WindowConstants.DISPOSE_ON_CLOSE, ui.getDefaultCloseOperation(), 
+    assertEquals(WindowConstants.DISPOSE_ON_CLOSE, ui.getDefaultCloseOperation(),
                   "Window should dispose on close");
 
-    // Check size is within screen bounds
-    Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-    assertTrue(ui.getWidth() <= screenSize.width - 30, "Width should fit within screen");
-    assertTrue(ui.getHeight() <= screenSize.height - 60, "Height should fit within screen");
+    // Compare against the primary display, which is what the window is positioned on. Deriving the
+    // expectation from Toolkit.getScreenSize() instead used to make this test fail on multi-display
+    // setups, because that reports only the primary size while the window was being centered on the
+    // whole virtual desktop (issue #320).
+    Rectangle primaryScreen =
+        GraphicsEnvironment.getLocalGraphicsEnvironment()
+            .getDefaultScreenDevice()
+            .getDefaultConfiguration()
+            .getBounds();
+    Rectangle expected = ChangeVisualizationUI.computeCenteredWindowBounds(primaryScreen);
 
-    // Check window is centered
-    Dimension frameSize = ui.getSize();
-    int expectedX = (screenSize.width - frameSize.width) / 2;
-    int expectedY = (screenSize.height - frameSize.height) / 2;
-
-    assertEquals(expectedX, ui.getX(), 30, "Window X position should be centered (±30)");
-    assertEquals(expectedY, ui.getY(), 30, "Window Y position should be centered (±30)");
+    assertEquals(expected, ui.getBounds(), "Window should be centered on the primary display");
+    assertTrue(
+        primaryScreen.contains(ui.getBounds()),
+        "Window should lie entirely within the primary display");
   }
 
   @Test
