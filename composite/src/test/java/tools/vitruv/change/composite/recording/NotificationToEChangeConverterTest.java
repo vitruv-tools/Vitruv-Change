@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.junit.jupiter.api.Test;
@@ -48,11 +49,60 @@ class NotificationToEChangeConverterTest {
         exception.getMessage());
   }
 
+  @Test
+  void setAttributeNotificationWithoutAttributeIsIgnored() {
+    final NotificationToEChangeConverter converter =
+        new NotificationToEChangeConverter((left, right) -> false);
+
+    assertEquals(List.of(), converter.convert(new AttributeNotificationWithoutAttribute()));
+  }
+
   private enum UnexpectedNotificationKind {
     ATTRIBUTE,
     REFERENCE,
     RESOURCE_CONTENTS,
     RESOURCE_URI
+  }
+
+  private static class AttributeNotificationWithoutAttribute extends NotificationInfo {
+    AttributeNotificationWithoutAttribute() {
+      super(null);
+    }
+
+    @Override
+    public EventType getEventTypeEnum() {
+      return EventType.SET;
+    }
+
+    @Override
+    public Object getOldValue() {
+      return "old";
+    }
+
+    @Override
+    public Object getNewValue() {
+      return "new";
+    }
+
+    @Override
+    public boolean isTouch() {
+      return false;
+    }
+
+    @Override
+    public boolean isTransient() {
+      return false;
+    }
+
+    @Override
+    public boolean isAttributeNotification() {
+      return true;
+    }
+
+    @Override
+    public EAttribute getAttribute() {
+      return null;
+    }
   }
 
   private static class UnexpectedEventNotification extends NotificationInfo {

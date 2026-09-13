@@ -222,9 +222,14 @@ final class NotificationToEChangeConverter {
   }
 
   private Iterable<? extends EChange<EObject>> handleSetAttribute(final NotificationInfo notification) {
+    final EAttribute attribute = notification.getAttribute();
+    if (attribute == null) {
+      return List.of();
+    }
+
     Iterable<? extends EChange<EObject>> _switchResult = null;
     boolean _matched = false;
-    boolean _isMany = notification.getAttribute().isMany();
+    boolean _isMany = attribute.isMany();
     boolean _not = (!_isMany);
     if (_not) {
       _matched = true;

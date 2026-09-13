@@ -2,6 +2,8 @@ package tools.vitruv.change.testutils.changevisualization;
 
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.awt.event.InputEvent;
@@ -102,6 +104,18 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
   // Define a constant in your class to make it more descriptive
   private static final int CLOSE_OPERATION = WindowConstants.DISPOSE_ON_CLOSE;
 
+  /** Largest window width, so the window stays usable on very wide displays. */
+  private static final int MAX_WINDOW_WIDTH = 1890;
+
+  /** Largest window height. */
+  private static final int MAX_WINDOW_HEIGHT = 1020;
+
+  /** Horizontal space left free on the screen, split evenly between both sides. */
+  private static final int HORIZONTAL_SCREEN_MARGIN = 30;
+
+  /** Vertical space left free on the screen, enough to clear a task bar. */
+  private static final int VERTICAL_SCREEN_MARGIN = 60;
+
   private final transient ChangeVisualizationDataModel changeVisualizationDataModel;
   private JTabbedPane tabbedPane;
 
@@ -127,10 +141,47 @@ public class ChangeVisualizationUI extends JFrame implements MonitoredRepository
 
   private void initializeWindow() {
     setDefaultCloseOperation(CLOSE_OPERATION);
-    int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
-    int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
-    setSize(Math.min(screenWidth - 30, 1890), Math.min(screenHeight - 60, 1020));
-    setLocationRelativeTo(null);
+    setBounds(computeCenteredWindowBounds(getPrimaryScreenBounds()));
+  }
+
+  /**
+   * Returns the bounds of the primary display.
+   *
+   * <p>Deliberately the primary screen rather than {@link
+   * GraphicsEnvironment#getMaximumWindowBounds()}, which spans the whole virtual desktop when more
+   * than one display is attached.
+   *
+   * @return the bounds of the primary display, including its origin
+   */
+  private static Rectangle getPrimaryScreenBounds() {
+    return GraphicsEnvironment.getLocalGraphicsEnvironment()
+        .getDefaultScreenDevice()
+        .getDefaultConfiguration()
+        .getBounds();
+  }
+
+  /**
+   * Computes the window bounds: as large as the size caps and the given screen allow, centered on
+   * that screen.
+   *
+   * <p>Takes the screen rectangle as a parameter rather than reading it from the environment so the
+   * geometry can be tested for multi-display arrangements without attaching displays.
+   *
+   * <p>The origin of {@code screenBounds} is added to the result because a display is not
+   * necessarily positioned at (0,0): with several monitors the primary one may sit to the right of
+   * or below another, in which case centering has to be relative to that origin.
+   *
+   * @param screenBounds the bounds of the display to center on, including its origin
+   * @return the bounds the window should occupy
+   */
+  static Rectangle computeCenteredWindowBounds(Rectangle screenBounds) {
+    int width = Math.min(screenBounds.width - HORIZONTAL_SCREEN_MARGIN, MAX_WINDOW_WIDTH);
+    int height = Math.min(screenBounds.height - VERTICAL_SCREEN_MARGIN, MAX_WINDOW_HEIGHT);
+    return new Rectangle(
+        screenBounds.x + (screenBounds.width - width) / 2,
+        screenBounds.y + (screenBounds.height - height) / 2,
+        width,
+        height);
   }
 
   private void setupMonitoringForMonitoredRepositoryChanges(
