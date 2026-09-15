@@ -72,7 +72,7 @@ public class ChangePropagator {
         final AutoCloseable userInteractorChange = this.installUserInteractorForChange(change);
         this.outer.changePropagationProvider.forEach(it -> it.registerObserver(this));
         this.outer.userInteractor.registerUserInputListener(this);
-        List<TransactionalChangeWithPreviousState> _xtrycatchfinallyexpression = null;
+        List<TransactionalChangeWithPreviousState> propagatedChanges;
         try {
           Set<ChangePropagationSpecification> allSpecs = change.getAffectedEObjectsMetamodelDescriptors().stream()
               .flatMap(it -> {
@@ -82,7 +82,7 @@ public class ChangePropagator {
               })
               .filter(it -> this.outer.changePropagationProvider.getChangePropagationSpecificationLevel(it) == this.level)
               .collect(Collectors.toCollection(LinkedHashSet::new));
-          _xtrycatchfinallyexpression = allSpecs.stream()
+          propagatedChanges = allSpecs.stream()
               .flatMap(it -> StreamSupport.stream(this.propagateChangeForChangePropagationSpecification(change, previousState, currentState, it).spliterator(), false))
               .toList();
         } catch (Exception e) {
@@ -92,7 +92,7 @@ public class ChangePropagator {
           this.outer.changePropagationProvider.forEach(it -> it.deregisterObserver(this));
           userInteractorChange.close();
         }
-        final List<TransactionalChangeWithPreviousState> propagationResultChanges = _xtrycatchfinallyexpression;
+        final List<TransactionalChangeWithPreviousState> propagationResultChanges = propagatedChanges;
         if (ChangePropagator.logger.isDebugEnabled()) {
           String path = String.join(" -> ", this.getPropagationPath());
           String changes = propagationResultChanges.stream()
