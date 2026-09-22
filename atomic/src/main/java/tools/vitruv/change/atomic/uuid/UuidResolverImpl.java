@@ -47,10 +47,20 @@ class UuidResolverImpl implements UuidResolver {
   }
 
   @Override
+  public boolean hasUuid(EObject eObject) {
+    return eObjectToUuid.containsKey(eObject);
+  }
+
+  @Override
   public Uuid getUuid(EObject eObject) throws IllegalStateException {
     Uuid uuid = getUuidOrNull(eObject);
     checkState(uuid != null, "no UUID could be found for EObject: %s", eObject);
     return uuid;
+  }
+
+  @Override
+  public boolean hasEObject(Uuid uuid) {
+    return eObjectToUuid.containsValue(uuid);
   }
 
   @Override
