@@ -6,10 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.ecore.EObject;
-import org.jspecify.annotations.NonNull;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.command.ApplyEChangeObserver;
-import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute;
 
 /**
  * Utility class for applying an EChange.
