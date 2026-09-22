@@ -11,17 +11,10 @@ import tools.vitruv.change.atomic.resolve.AtomicEChangeResolverHelper;
 
 /**
  * A resolver for resolving a change with {@link Uuid} to {@link EObject} or vice versa.
+ *
+ * @param uuidResolver the {@link UuidResolver} to use for resolving and applying atomic changes
  */
 public record AtomicEChangeUuidResolver(UuidResolver uuidResolver) {
-
-  /**
-   * Creates a new {@link AtomicEChangeUuidResolver} with the given {@link UuidResolver}.
-   *
-   * @param uuidResolver the {@link UuidResolver} to use for resolving and applying atomic changes
-   */
-  public AtomicEChangeUuidResolver {
-  }
-
   /**
    * Resolves the given change using its {@link UuidResolver} and applies it forward. The associated
    * resource set must be in the state before the change has been applied.
@@ -52,8 +45,8 @@ public record AtomicEChangeUuidResolver(UuidResolver uuidResolver) {
   /**
    * Gets or registers {@link Uuid Uuids} for all elements of the given change and returns the
    * Uuid-assigned change.
-   * <p>
-   * Unlike {@link AtomicEChangeUuidResolver#assignIds(EChange)}, does not update the resource set,
+   *
+   * <p>Unlike {@link AtomicEChangeUuidResolver#assignIds(EChange)}, does not update the resource set,
    * or the UuidResolver status.
    *
    * @param resolvedEChange the change to assign Uuids for.

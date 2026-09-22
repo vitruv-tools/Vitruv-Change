@@ -35,19 +35,23 @@ public final class ProjectMarker {
    * requires any of the folders in the containment hierarchy above the folder of the contained
    * element to be initialized as a project root folder by calling {@link
    * #markAsProjectRootFolder(Path)}.
-   * <p>
-   * If the path does not exists, returns an absent {@link Optional#absent()}}.
+   *
+   * <p>If the path does not exists, returns an absent {@link Optional#empty()}.
    *
    * @param containedElementPath the absolute path to the element to search the project root folder
    *     for, must not be <code>null</code>
-   * @return the path to the project root folder of the element at the given path, or {@link Optional#absent()}.
+   * @return the path to the project root folder of the element at the given path,
+   *     or {@link Optional#empty()}.
    */
   public static Optional<Path> getProjectRootFolder(Path containedElementPath) {
     Path potentialProjectPath = containedElementPath;
     // Remove last segment as long as the folder does not contain the marker file
     while (!Files.exists(potentialProjectPath.resolve(TEST_PROJECT_MARKER_FILE_NAME))) {
       potentialProjectPath = potentialProjectPath.getParent();
-      checkState(potentialProjectPath != null, "No project folder for %s found", containedElementPath);
+      checkState(
+          potentialProjectPath != null,
+          "No project folder for %s found",
+          containedElementPath);
     }
     return Optional.ofNullable(potentialProjectPath);
   }
