@@ -8,16 +8,17 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import com.google.common.collect.Streams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.uuid.Uuid;
-import tools.vitruv.change.composite.MetamodelDescriptor;
-import tools.vitruv.change.composite.description.CompositeChange;
 import tools.vitruv.change.composite.description.CompositeContainerChange;
 import tools.vitruv.change.composite.description.PropagatedChange;
 import tools.vitruv.change.composite.description.TransactionalChange;
@@ -28,17 +29,25 @@ import tools.vitruv.change.interaction.InternalUserInteractor;
 import tools.vitruv.change.interaction.UserInteractionBase;
 import tools.vitruv.change.interaction.UserInteractionFactory;
 import tools.vitruv.change.interaction.UserInteractionListener;
-import tools.vitruv.change.propagation.ChangePropagationMode;
-import tools.vitruv.change.propagation.ChangePropagationObserver;
-import tools.vitruv.change.propagation.ChangePropagationSpecification;
-import tools.vitruv.change.propagation.ChangePropagationSpecificationProvider;
-import tools.vitruv.change.propagation.ChangeRecordingModelRepository;
+import tools.vitruv.change.propagation.*;
 
 public class ChangePropagator {
+  private record PropagationResult(TransactionalChangeWithPreviousState change, List<PropagatedChange> propagatedChanges) {
+  }
+
+  @FunctionalInterface
+  private interface LowerLevelPropagation {
+    PropagationResult propagateChange(TransactionalChangeWithPreviousState change);
+  }
+
   private static class ChangePropagation implements ChangePropagationObserver, UserInteractionListener {
     private final ChangePropagator outer;
 
-    private final VitruviusChange<EObject> sourceChange;
+    private final TransactionalChangeWithPreviousState sourceChange;
+
+    private final int level;
+
+    private final LowerLevelPropagation lowerLevelPropagation;
 
     private final ChangePropagator.ChangePropagation previous;
 
@@ -48,61 +57,63 @@ public class ChangePropagator {
 
     private final List<UserInteractionBase> userInteractions = new ArrayList<UserInteractionBase>();
 
-    private List<PropagatedChange> propagateChanges() {
-      List<PropagatedChange> result = StreamSupport.stream(this.outer.getTransactionalChangeSequence(this.sourceChange).spliterator(), false)
-          .flatMap(it -> this.propagateSingleChange(it).stream())
-          .collect(Collectors.toList());
+    private List<PropagatedChange> propagateChange() {
+      List<PropagatedChange> result = this.propagateSingleChange(this.sourceChange.change(), this.sourceChange.previousState());
       this.handleObjectsWithoutResource();
       this.changedResources.forEach(it -> it.setModified(true));
       return result;
     }
 
-    private List<PropagatedChange> propagateSingleChange(final TransactionalChange<EObject> change) {
-      try {
+    private List<PropagatedChange> propagateSingleChange(final TransactionalChange<EObject> change, final ModelRepositorySnapshot previousState) {
+      try (
+          ModelRepositorySnapshot currentState = !outer.changePropagationMode.equals(ChangePropagationMode.SINGLE_STEP) ? this.outer.modelRepository.createSnapshot() : null) {
         Preconditions.checkState(!change.getAffectedEObjects().isEmpty(),
           "There are no objects affected by this change:%s%s", System.lineSeparator(), change);
         final AutoCloseable userInteractorChange = this.installUserInteractorForChange(change);
         this.outer.changePropagationProvider.forEach(it -> it.registerObserver(this));
         this.outer.userInteractor.registerUserInputListener(this);
-        List<TransactionalChange<EObject>> _xtrycatchfinallyexpression = null;
+        List<TransactionalChangeWithPreviousState> propagatedChanges;
         try {
-          Set<ChangePropagationSpecification> allSpecs = this.sourceChange.getAffectedEObjectsMetamodelDescriptors().stream()
+          Set<ChangePropagationSpecification> allSpecs = change.getAffectedEObjectsMetamodelDescriptors().stream()
               .flatMap(it -> {
                 List<ChangePropagationSpecification> specs = this.outer.changePropagationProvider.getChangePropagationSpecifications(it);
                 specs.forEach(s -> s.setUserInteractor(this.outer.userInteractor));
                 return specs.stream();
               })
+              .filter(it -> this.outer.changePropagationProvider.getChangePropagationSpecificationLevel(it) == this.level)
               .collect(Collectors.toCollection(LinkedHashSet::new));
-          _xtrycatchfinallyexpression = allSpecs.stream()
-              .flatMap(it -> StreamSupport.stream(this.propagateChangeForChangePropagationSpecification(change, it).spliterator(), false))
-              .collect(Collectors.toList());
+          propagatedChanges = allSpecs.stream()
+              .flatMap(it -> StreamSupport.stream(this.propagateChangeForChangePropagationSpecification(change, previousState, currentState, it).spliterator(), false))
+              .toList();
+        } catch (Exception e) {
+          throw new RuntimeException(e);
         } finally {
           this.outer.userInteractor.deregisterUserInputListener(this);
           this.outer.changePropagationProvider.forEach(it -> it.deregisterObserver(this));
           userInteractorChange.close();
         }
-        final List<TransactionalChange<EObject>> propagationResultChanges = _xtrycatchfinallyexpression;
+        final List<TransactionalChangeWithPreviousState> propagationResultChanges = propagatedChanges;
         if (ChangePropagator.logger.isDebugEnabled()) {
           String path = String.join(" -> ", this.getPropagationPath());
           String changes = propagationResultChanges.stream()
-              .map(c -> String.valueOf(c.getAffectedEObjectsMetamodelDescriptors()))
+              .map(c -> String.valueOf(c.change().getAffectedEObjectsMetamodelDescriptors()))
               .collect(Collectors.joining(", "));
           ChangePropagator.logger.debug("Propagated " + path + " -> {" + changes + "}");
         }
         if (ChangePropagator.logger.isTraceEnabled()) {
           String resultChanges = propagationResultChanges.stream()
-              .map(r -> "\t" + r.getAffectedEObjectsMetamodelDescriptors() + ": " + r)
+              .map(r -> "\t" + r.change().getAffectedEObjectsMetamodelDescriptors() + ": " + r)
               .collect(Collectors.joining("\n"));
           ChangePropagator.logger.trace("Result changes:\n" + resultChanges);
         }
         change.setUserInteractions(this.userInteractions);
-        CompositeContainerChange<EObject> _createCompositeChange = VitruviusChangeFactory.getInstance().<EObject>createCompositeChange(propagationResultChanges);
+        CompositeContainerChange<EObject> _createCompositeChange = VitruviusChangeFactory.getInstance().<EObject>createCompositeChange(propagationResultChanges.stream().map(TransactionalChangeWithPreviousState::change).toList());
         final PropagatedChange propagatedChange = new PropagatedChange(change, _createCompositeChange);
         final ArrayList<PropagatedChange> resultingChanges = new ArrayList<PropagatedChange>();
         resultingChanges.add(propagatedChange);
         if (!Objects.equals(this.outer.changePropagationMode, ChangePropagationMode.SINGLE_STEP)) {
           Iterable<PropagatedChange> _propagateTransitiveChanges = this.propagateTransitiveChanges(
-              propagationResultChanges.stream().filter(TransactionalChange::containsConcreteChange).collect(Collectors.toList()));
+              propagationResultChanges.stream().filter(it -> it.change().containsConcreteChange()).collect(Collectors.toList()));
           Iterables.<PropagatedChange>addAll(resultingChanges, _propagateTransitiveChanges);
         }
         return resultingChanges;
@@ -111,41 +122,36 @@ public class ChangePropagator {
       }
     }
 
-    private Iterable<PropagatedChange> propagateTransitiveChanges(final Iterable<TransactionalChange<EObject>> transitiveChanges) {
-      List<TransactionalChange<EObject>> nonEmptyChanges = StreamSupport.stream(transitiveChanges.spliterator(), false)
-          .filter(TransactionalChange::containsConcreteChange)
+    private Iterable<PropagatedChange> propagateTransitiveChanges(final Iterable<TransactionalChangeWithPreviousState> transitiveChanges) {
+      List<TransactionalChangeWithPreviousState> nonEmptyChanges = StreamSupport.stream(transitiveChanges.spliterator(), false)
+          .filter(it -> it.change().containsConcreteChange())
           .collect(Collectors.toList());
-      List<TransactionalChange<EObject>> nonLeafChanges;
+      List<TransactionalChangeWithPreviousState> nonLeafChanges;
       if (Objects.equals(this.outer.changePropagationMode, ChangePropagationMode.TRANSITIVE_EXCEPT_LEAVES)) {
         nonLeafChanges = nonEmptyChanges.stream()
             .filter(it -> this.outer.changePropagationProvider.getChangePropagationSpecifications(
-                it.getAffectedEObjectsMetamodelDescriptor()).size() > 1)
+                it.change().getAffectedEObjectsMetamodelDescriptor()).size() > 1)
             .collect(Collectors.toList());
       } else {
         nonLeafChanges = nonEmptyChanges;
       }
-      List<ChangePropagator.ChangePropagation> nextPropagations = nonLeafChanges.stream()
-          .map(it -> new ChangePropagator.ChangePropagation(this.outer, it, this))
-          .collect(Collectors.toList());
-      return Iterables.concat(nextPropagations.stream()
-          .map(it -> it.propagateChanges())
-          .collect(Collectors.toList()));
+      return nonLeafChanges.stream()
+                    .map(lowerLevelPropagation::propagateChange)
+                    .flatMap(it -> Streams.concat(
+                            it.propagatedChanges().stream(),
+                            new ChangePropagator.ChangePropagation(this.outer, it.change(), this.level, this.lowerLevelPropagation, this).propagateChange().stream()))
+                    .toList();
     }
 
-    private Iterable<TransactionalChange<EObject>> propagateChangeForChangePropagationSpecification(final TransactionalChange<EObject> change, final ChangePropagationSpecification propagationSpecification) {
-      final Runnable _function = () -> {
-        for (final EChange<EObject> eChange : change.getEChanges()) {
-          propagationSpecification.propagateChange(eChange, this.outer.modelRepository.getCorrespondenceModel(),
-            this.outer.modelRepository);
-        }
-      };
+    private Iterable<TransactionalChangeWithPreviousState> propagateChangeForChangePropagationSpecification(final TransactionalChange<EObject> change, final ModelRepositorySnapshot previousState, final ModelRepositorySnapshot currentState, final ChangePropagationSpecification propagationSpecification) {
+      final Runnable _function = () -> propagationSpecification.propagateChanges(change.getEChanges(), this.outer.modelRepository.getCorrespondenceModel(), this.outer.modelRepository, previousState);
       final Iterable<TransactionalChange<EObject>> transitiveChanges = this.outer.modelRepository.recordChanges(_function);
       StreamSupport.stream(transitiveChanges.spliterator(), false)
-          .flatMap(it -> it.getAffectedEObjects().stream())
-          .map(EObject::eResource)
-          .filter(Objects::nonNull)
-          .forEach(this.changedResources::add);
-      return transitiveChanges;
+                   .flatMap(it -> it.getAffectedEObjects().stream())
+                   .map(EObject::eResource)
+                   .filter(Objects::nonNull)
+                   .forEach(this.changedResources::add);
+      return StreamSupport.stream(transitiveChanges.spliterator(), false).map(it -> new TransactionalChangeWithPreviousState(it, currentState)).toList();
     }
 
     private AutoCloseable installUserInteractorForChange(final VitruviusChange<EObject> change) {
@@ -162,7 +168,7 @@ public class ChangePropagator {
     private void handleObjectsWithoutResource() {
       List<EObject> objectsWithoutResource = this.createdObjects.stream()
           .filter(it -> it.eResource() == null)
-          .collect(Collectors.toList());
+          .toList();
       for (final EObject createdObjectWithoutResource : objectsWithoutResource) {
         Preconditions.checkState(
             !this.outer.modelRepository.getCorrespondenceModel().hasCorrespondences(createdObjectWithoutResource),
@@ -199,17 +205,19 @@ public class ChangePropagator {
 
     private Iterable<String> getPropagationPath() {
       if (this.previous == null) {
-        return List.of("<input change> in " + this.sourceChange.getAffectedEObjectsMetamodelDescriptors());
+        return List.of("<input change (level " + this.level + ")> in " + this.sourceChange.change().getAffectedEObjectsMetamodelDescriptors());
       } else {
         return Iterables.concat(this.previous.getPropagationPath(),
-            List.of(this.sourceChange.getAffectedEObjectsMetamodelDescriptors().toString()));
+            List.of(this.sourceChange.change().getAffectedEObjectsMetamodelDescriptors().toString()));
       }
     }
 
-    public ChangePropagation(final ChangePropagator outer, final VitruviusChange<EObject> sourceChange, final ChangePropagator.ChangePropagation previous) {
+    public ChangePropagation(final ChangePropagator outer, final TransactionalChangeWithPreviousState sourceChange, final int level, final LowerLevelPropagation lowerLevelPropagation, final ChangePropagator.ChangePropagation previous) {
       super();
       this.outer = outer;
       this.sourceChange = sourceChange;
+      this.level = level;
+      this.lowerLevelPropagation = lowerLevelPropagation;
       this.previous = previous;
     }
   }
@@ -259,32 +267,83 @@ public class ChangePropagator {
    * @return - {@link List} of {@link PropagatedChange}
    */
   public List<PropagatedChange> propagateChange(final VitruviusChange<Uuid> change, final Iterable<ChangePropagationObserver> observers) {
-    final VitruviusChange<EObject> resolvedChange = this.modelRepository.applyChange(change);
-    resolvedChange.getAffectedEObjects().stream()
-        .map(EObject::eResource)
-        .filter(Objects::nonNull)
-        .forEach(it -> it.setModified(true));
     if (ChangePropagator.logger.isTraceEnabled()) {
-      ChangePropagator.logger.trace("Will now propagate this input change:\n\t" + resolvedChange);
+      ChangePropagator.logger.trace("Will begin propagation of change :\n\t" + change);
     }
+
     this.changePropagationProvider.forEach(spec -> observers.forEach(spec::registerObserver));
-    List<PropagatedChange> result = new ChangePropagator.ChangePropagation(this, resolvedChange, null).propagateChanges();
+
+    int maximumLevel = this.changePropagationProvider.getMaximumPropagationSpecificationLevel();
+
+    List<PropagatedChange> result = new ArrayList<>();
+
+    for (TransactionalChange<Uuid> transactionalChange : change.getTransactionalChangeSequence()) {
+      try (ModelRepositorySnapshot previousState = this.modelRepository.createSnapshot()) {
+        TransactionalChange<EObject> resolvedChange =
+            (TransactionalChange<EObject>) this.modelRepository.applyChange(transactionalChange);
+
+        resolvedChange.getAffectedEObjects().stream()
+                       .map(EObject::eResource)
+                       .filter(Objects::nonNull)
+                       .forEach(it -> it.setModified(true));
+
+        if (ChangePropagator.logger.isTraceEnabled()) {
+          ChangePropagator.logger.trace("Will now propagate this input change:\n\t" + resolvedChange);
+        }
+
+        TransactionalChangeWithPreviousState changeWithPreviousState
+            = new TransactionalChangeWithPreviousState(resolvedChange, previousState);
+        result.addAll(
+            this.propagateChange(changeWithPreviousState, maximumLevel).propagatedChanges());
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
     this.changePropagationProvider.forEach(spec -> observers.forEach(spec::deregisterObserver));
+
     return result;
   }
 
-  private Iterable<TransactionalChange<EObject>> getTransactionalChangeSequence(final VitruviusChange<EObject> change) {
-    if (!change.containsConcreteChange()) {
-      return List.of();
+  private PropagationResult propagateChange(
+      final TransactionalChangeWithPreviousState change, final int level) {
+    if (level < 0) {
+      return new PropagationResult(change, List.of());
     }
-    if (change instanceof TransactionalChange) {
-      return List.of((TransactionalChange<EObject>) change);
+
+    PropagationResult lowerLevelResult = this.propagateChange(change, level - 1);
+
+    LowerLevelPropagation lowerLevelPropagation
+        = (lowerLevelChange) -> propagateChange(lowerLevelChange, level - 1);
+
+    ChangePropagation propagation = new ChangePropagation(
+        this, lowerLevelResult.change(), level, lowerLevelPropagation, null);
+    List<PropagatedChange> propagatedChanges = propagation.propagateChange();
+
+    List<PropagatedChange> allPropagatedChanges
+        = new ArrayList<>(lowerLevelResult.propagatedChanges());
+    allPropagatedChanges.addAll(propagatedChanges);
+
+    return new PropagationResult(
+        merge(lowerLevelResult.change(), propagatedChanges),
+        allPropagatedChanges);
+  }
+
+  private static TransactionalChangeWithPreviousState merge(
+      TransactionalChangeWithPreviousState change, Iterable<PropagatedChange> propagatedChanges) {
+    List<EChange<EObject>> eChanges = new ArrayList<>(change.change().getEChanges());
+
+    for (PropagatedChange propagatedChange : propagatedChanges) {
+      eChanges.addAll(propagatedChange.getConsequentialChanges().getEChanges());
     }
-    if (change instanceof CompositeChange) {
-      return ((CompositeChange<EObject, ?>) change).getChanges().stream()
-          .flatMap(it -> StreamSupport.stream(this.getTransactionalChangeSequence(it).spliterator(), false))
-          .collect(Collectors.toList());
-    }
-    throw new IllegalStateException("Unexpected change type: " + change.getClass().getSimpleName());
+
+    return new TransactionalChangeWithPreviousState(
+        VitruviusChangeFactory.getInstance().createTransactionalChange(eChanges),
+        change.previousState()
+    );
+  }
+
+  private record TransactionalChangeWithPreviousState(TransactionalChange<EObject> change,
+                                                     ModelRepositorySnapshot previousState) {
   }
 }

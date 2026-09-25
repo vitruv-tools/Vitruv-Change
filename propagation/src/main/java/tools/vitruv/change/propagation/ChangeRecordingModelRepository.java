@@ -47,4 +47,12 @@ public interface ChangeRecordingModelRepository extends ResourceAccess, AutoClos
    *     metamodel
    */
   Iterable<TransactionalChange<EObject>> recordChanges(Runnable changeApplicator);
+
+  /**
+   * Creates a snapshot of the current state of the models in this repository.
+   * This is effectively a copy of the models and correspondence model of this repository.
+   *
+   * @return the created snapshot
+   */
+  ModelRepositorySnapshot createSnapshot();
 }

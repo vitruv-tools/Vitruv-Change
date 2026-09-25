@@ -2,6 +2,8 @@ package tools.vitruv.change.composite.description;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -57,4 +59,24 @@ public interface VitruviusChange<Element> {
    * modified without affecting the original change.
    */
   public VitruviusChange<Element> copy();
+
+  /**
+   * Get the sequence of transactional changes contained within this change.
+   *
+   * @return the change sequence
+   */
+  default Iterable<TransactionalChange<Element>> getTransactionalChangeSequence() {
+    if (!this.containsConcreteChange()) {
+      return List.of();
+    }
+    if (this instanceof TransactionalChange<Element> change) {
+      return List.of(change);
+    }
+    if (this instanceof CompositeChange<Element, ?> change) {
+      return change.getChanges().stream()
+              .flatMap(it -> StreamSupport.stream(it.getTransactionalChangeSequence().spliterator(), false))
+              .collect(Collectors.toList());
+    }
+    throw new IllegalStateException("Unexpected change type: " + this.getClass().getSimpleName());
+  }
 }

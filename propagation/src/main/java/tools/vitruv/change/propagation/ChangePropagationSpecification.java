@@ -1,5 +1,6 @@
 package tools.vitruv.change.propagation;
 
+import java.util.List;
 import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.composite.MetamodelDescriptor;
@@ -56,6 +57,30 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
    */
   boolean doesHandleChange(EChange<EObject> change,
       EditableCorrespondenceModelView<Correspondence> correspondenceModel);
+
+  /**
+   * Performs modifications in target models identified by accessing the given
+   * <code>CorrespondenceModel</code> for the elements changed by the given <code>EChange</code>
+   * in order to reflect the changes in the target model.
+   *
+   * @param changes - the atomic changes which shall be propagated.
+   *     Should affect only elements in an instance of a source metamodel of this specification
+   *     (see {@link #getSourceMetamodelDescriptor}). Must not be <code>null</code>.
+   * @param correspondenceModel - the correspondence model to retrieve information about the target
+   *     model from. Must not be <code>null</code>.
+   * @param resourceAccess - an object for resource access,
+   *     in particular to create new model files. Must not be <code>null</code>.
+   * @param previousState the state of the models before the changes were applied
+   */
+  default void propagateChanges(List<EChange<EObject>> changes,
+                                EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+                                ResourceAccess resourceAccess,
+                                ModelRepositorySnapshot previousState) {
+    changes
+        .stream()
+        .filter(change -> doesHandleChange(change, correspondenceModel))
+        .forEach(change -> propagateChange(change, correspondenceModel, resourceAccess));
+  }
 
   /**
    * Performs modifications in target models identified by accessing the given
