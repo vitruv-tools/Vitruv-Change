@@ -19,6 +19,7 @@ class DeferringInteractionResultProviderTest {
 
   @Test
   void interactionsThatNeedAnAnswer_throwWithTheirDetails() {
+    List<String> pickOne = List.of("a", "b");
     assertPending(
         PendingUserInteraction.Kind.CONFIRMATION,
         "Confirm?",
@@ -45,7 +46,8 @@ class DeferringInteractionResultProviderTest {
             PendingUserInteractionException.class,
             () ->
                 provider.getMultipleChoiceSingleSelectionInteractionResult(
-                    WindowModality.MODAL, "T", "Pick one", "ok", "cancel", List.of("a", "b"))));
+                    WindowModality.MODAL, "T", "Pick one", "ok", "cancel", pickOne)));
+    List<String> pickSome = List.of("x");
     assertPending(
         PendingUserInteraction.Kind.MULTIPLE_SELECTION,
         "Pick some",
@@ -54,7 +56,7 @@ class DeferringInteractionResultProviderTest {
             PendingUserInteractionException.class,
             () ->
                 provider.getMultipleChoiceMultipleSelectionInteractionResult(
-                    WindowModality.MODAL, "T", "Pick some", "ok", "cancel", List.of("x"))));
+                    WindowModality.MODAL, "T", "Pick some", "ok", "cancel", pickSome)));
   }
 
   @Test

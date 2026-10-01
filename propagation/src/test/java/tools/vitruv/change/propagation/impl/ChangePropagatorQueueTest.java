@@ -71,8 +71,9 @@ class ChangePropagatorQueueTest {
   @SuppressWarnings("unchecked")
   void setUp() {
     repository = mock(ChangeRecordingModelRepository.class);
-    when(repository.getCorrespondenceModel())
-        .thenReturn(mock(EditableCorrespondenceModelView.class));
+    EditableCorrespondenceModelView<Correspondence> correspondenceModel =
+        mock(EditableCorrespondenceModelView.class);
+    when(repository.getCorrespondenceModel()).thenReturn(correspondenceModel);
     when(repository.recordChanges(any()))
         .thenAnswer(
             invocation -> {
@@ -95,8 +96,8 @@ class ChangePropagatorQueueTest {
 
     assertEquals(42, propagator.enqueueChange(input(change(models)), 42));
 
-    assertThrows(
-        IllegalArgumentException.class, () -> propagator.enqueueChange(input(change(models)), 42));
+    VitruviusChange<Uuid> duplicate = input(change(models));
+    assertThrows(IllegalArgumentException.class, () -> propagator.enqueueChange(duplicate, 42));
     QueuedChange queued = propagator.getQueuedChange(42).orElseThrow();
     assertEquals(42, queued.rootTaskId());
     assertNull(queued.parentTaskId());
@@ -235,7 +236,7 @@ class ChangePropagatorQueueTest {
   }
 
   @Test
-  void answersRegisteredWhileTheChangeRuns_makeItRetryInsteadOfWaiting() throws Exception {
+  void answersRegisteredWhileTheChangeRuns_makeItRetryInsteadOfWaiting() {
     TransactionalChange<EObject> askingChange = change(models);
     modelsSpec.askFor = askingChange;
     ChangePropagator propagator = propagator();

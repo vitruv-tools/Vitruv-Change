@@ -84,10 +84,11 @@ public class ChangePropagator {
               this.propagateTransitiveChanges(
                   step.resultChanges().stream()
                       .filter(TransactionalChange::containsConcreteChange)
-                      .collect(Collectors.toList()));
+                      .toList());
           Iterables.<PropagatedChange>addAll(resultingChanges, transitivelyPropagated);
-        } catch (Throwable e) {
+        } catch (RuntimeException e) {
           // Same wrapping as when transitive propagation ran inside propagateOneStep's try block.
+          // Only runtime exceptions get here: each nested step already wraps everything it throws.
           throw new RuntimeException(e);
         }
       }
@@ -125,26 +126,7 @@ public class ChangePropagator {
                 return specs.stream();
               })
               .collect(Collectors.toCollection(LinkedHashSet::new));
-          final List<TransactionalChange<EObject>> results = new ArrayList<>();
-          for (final ChangePropagationSpecification specification : allSpecs) {
-            try {
-              Iterables.addAll(
-                  results,
-                  this.propagateChangeForChangePropagationSpecification(change, specification));
-            } catch (final RuntimeException e) {
-              if (PendingUserInteractionException.findIn(e) != null
-                  && results.stream().anyMatch(TransactionalChange::containsConcreteChange)) {
-                throw new NonDeferrablePropagationException(
-                    "A user interaction is pending, but propagating this change already modified"
-                        + " models, so it cannot be deferred and retried without repeating those"
-                        + " modifications: "
-                        + change,
-                    e);
-              }
-              throw e;
-            }
-          }
-          _xtrycatchfinallyexpression = results;
+          _xtrycatchfinallyexpression = this.propagateThroughSpecifications(change, allSpecs);
         } finally {
           this.outer.userInteractor.deregisterUserInputListener(this);
           this.outer.changePropagationProvider.forEach(it -> it.deregisterObserver(this));
@@ -173,7 +155,37 @@ public class ChangePropagator {
       }
     }
 
-    private Iterable<PropagatedChange> propagateTransitiveChanges(final Iterable<TransactionalChange<EObject>> transitiveChanges) {
+    /**
+     * Propagates the change through the given specifications in order. A pending user interaction
+     * after an earlier specification already modified models is reported as non-deferrable.
+     */
+    private List<TransactionalChange<EObject>> propagateThroughSpecifications(
+        final TransactionalChange<EObject> change,
+        final Set<ChangePropagationSpecification> specifications) {
+      final List<TransactionalChange<EObject>> results = new ArrayList<>();
+      for (final ChangePropagationSpecification specification : specifications) {
+        try {
+          Iterables.addAll(
+              results,
+              this.propagateChangeForChangePropagationSpecification(change, specification));
+        } catch (final RuntimeException e) {
+          if (PendingUserInteractionException.findIn(e) != null
+              && results.stream().anyMatch(TransactionalChange::containsConcreteChange)) {
+            throw new NonDeferrablePropagationException(
+                "A user interaction is pending, but propagating this change already modified"
+                    + " models, so it cannot be deferred and retried without repeating those"
+                    + " modifications: "
+                    + change,
+                e);
+          }
+          throw e;
+        }
+      }
+      return results;
+    }
+
+    private Iterable<PropagatedChange> propagateTransitiveChanges(
+        final Iterable<TransactionalChange<EObject>> transitiveChanges) {
       List<TransactionalChange<EObject>> nonLeafChanges =
           this.outer.selectTransitiveChanges(transitiveChanges);
       List<ChangePropagator.ChangePropagation> nextPropagations = nonLeafChanges.stream()
@@ -590,57 +602,73 @@ public class ChangePropagator {
         knownAnswers = userInteractionsOf(item.rootTaskId).size();
       }
       try {
-        if (item.inputChange != null) {
-          // Queue the other parts of the client change right away, so they are not lost if
-          // propagating the first part is deferred.
-          final List<QueueItem> siblings = applyInputChange(item);
-          synchronized (queueLock) {
-            for (int i = siblings.size() - 1; i >= 0; i--) {
-              queue.addFirst(siblings.get(i));
-            }
-          }
-        }
-        final List<QueueItem> followUps = new ArrayList<>();
-        final List<PropagatedChange> propagated = new ArrayList<>();
-        if (item.change != null) {
-          final ChangePropagation.StepResult step = propagateQueuedItem(item, observers);
-          propagated.add(step.propagatedChange());
-          if (!Objects.equals(this.changePropagationMode, ChangePropagationMode.SINGLE_STEP)) {
-            followUps.addAll(
-                newChildItems(item, item.taskId, selectTransitiveChanges(step.resultChanges())));
-          }
-        }
-        synchronized (queueLock) {
-          executingItem = null;
-          for (int i = followUps.size() - 1; i >= 0; i--) {
-            queue.addFirst(followUps.get(i));
-          }
-          forgetRootIfDone(item.rootTaskId);
-        }
-        return Optional.of(
-            new QueuedPropagationStep(
-                item.taskId, QueuedPropagationStep.Outcome.PROPAGATED, propagated));
+        return Optional.of(propagateItem(item, observers));
       } catch (final RuntimeException e) {
-        final PendingUserInteractionException pending = PendingUserInteractionException.findIn(e);
-        final NonDeferrablePropagationException nonDeferrable =
-            findCause(e, NonDeferrablePropagationException.class);
-        synchronized (queueLock) {
-          executingItem = null;
-          if (pending != null && nonDeferrable == null) {
-            // If answers were registered while the item was running, retry instead of waiting.
-            final boolean answeredMeanwhile =
-                userInteractionsOf(item.rootTaskId).size() != knownAnswers;
-            item.blockReason = answeredMeanwhile ? null : PropagationBlockReason.USER_INTERACTION;
-            item.pendingInteraction = answeredMeanwhile ? null : pending.getInteraction();
-            queue.addLast(item);
-            return Optional.of(
-                new QueuedPropagationStep(
-                    item.taskId, QueuedPropagationStep.Outcome.DEFERRED, List.of()));
-          }
-          forgetRootIfDone(item.rootTaskId);
-        }
-        throw nonDeferrable != null ? nonDeferrable : e;
+        return Optional.of(handleFailedItem(item, e, knownAnswers));
       }
+    }
+  }
+
+  /** Propagates an item that has been taken from the queue and requeues what follows from it. */
+  private QueuedPropagationStep propagateItem(
+      final QueueItem item, final Iterable<ChangePropagationObserver> observers) {
+    if (item.inputChange != null) {
+      // Queue the other parts of the client change right away, so they are not lost if
+      // propagating the first part is deferred.
+      final List<QueueItem> siblings = applyInputChange(item);
+      synchronized (queueLock) {
+        addAllFirst(siblings);
+      }
+    }
+    final List<QueueItem> followUps = new ArrayList<>();
+    final List<PropagatedChange> propagated = new ArrayList<>();
+    if (item.change != null) {
+      final ChangePropagation.StepResult step = propagateQueuedItem(item, observers);
+      propagated.add(step.propagatedChange());
+      if (!Objects.equals(this.changePropagationMode, ChangePropagationMode.SINGLE_STEP)) {
+        followUps.addAll(
+            newChildItems(item, item.taskId, selectTransitiveChanges(step.resultChanges())));
+      }
+    }
+    synchronized (queueLock) {
+      executingItem = null;
+      addAllFirst(followUps);
+      forgetRootIfDone(item.rootTaskId);
+    }
+    return new QueuedPropagationStep(
+        item.taskId, QueuedPropagationStep.Outcome.PROPAGATED, propagated);
+  }
+
+  /**
+   * Defers an item whose propagation needs an unanswered user interaction; removes the item and
+   * rethrows for any other failure.
+   */
+  private QueuedPropagationStep handleFailedItem(
+      final QueueItem item, final RuntimeException failure, final int knownAnswers) {
+    final PendingUserInteractionException pending = PendingUserInteractionException.findIn(failure);
+    final NonDeferrablePropagationException nonDeferrable =
+        findCause(failure, NonDeferrablePropagationException.class);
+    synchronized (queueLock) {
+      executingItem = null;
+      if (pending != null && nonDeferrable == null) {
+        // If answers were registered while the item was running, retry instead of waiting.
+        final boolean answeredMeanwhile =
+            userInteractionsOf(item.rootTaskId).size() != knownAnswers;
+        item.blockReason = answeredMeanwhile ? null : PropagationBlockReason.USER_INTERACTION;
+        item.pendingInteraction = answeredMeanwhile ? null : pending.getInteraction();
+        queue.addLast(item);
+        return new QueuedPropagationStep(
+            item.taskId, QueuedPropagationStep.Outcome.DEFERRED, List.of());
+      }
+      forgetRootIfDone(item.rootTaskId);
+    }
+    throw nonDeferrable != null ? nonDeferrable : failure;
+  }
+
+  /** Puts the items at the front of the queue, keeping their order. */
+  private void addAllFirst(final List<QueueItem> items) {
+    for (int i = items.size() - 1; i >= 0; i--) {
+      queue.addFirst(items.get(i));
     }
   }
 
