@@ -171,9 +171,15 @@ public class DefaultChangeRecordingModelRepository
   public Iterable<TransactionalChange<EObject>> recordChanges(Runnable changeApplicator) {
     changeRecorder.beginRecording();
     LOGGER.debug("Start recording changes");
-    changeApplicator.run();
-    LOGGER.debug("End recording changes");
-    changeRecorder.endRecording();
+    try {
+      changeApplicator.run();
+    } finally {
+      // End recording even if the applicator throws (e.g. a failing reaction or a deferred user
+      // interaction); otherwise the recorder stays in recording mode and every later
+      // propagation fails with "This recorder is already recording!".
+      LOGGER.debug("End recording changes");
+      changeRecorder.endRecording();
+    }
     TransactionalChange<EObject> recordedChange = changeRecorder.getChange();
     changeResolver.assignIds(recordedChange);
     return List.of(recordedChange);
