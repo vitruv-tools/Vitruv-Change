@@ -1,5 +1,6 @@
 package tools.vitruv.change.utils;
 
+import java.util.Collection;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -22,6 +23,11 @@ public interface ResourceAccess {
    * @param uri the model's uri, must not be {@code null}
    */
   Resource getModelResource(URI uri);
+
+  /**
+   * Provides all currently loaded resources that store models or metadata.
+   */
+  Collection<Resource> getModelResources();
 
   /**
    * Persists the given {@code rootObject} at the given {@code uri}.
