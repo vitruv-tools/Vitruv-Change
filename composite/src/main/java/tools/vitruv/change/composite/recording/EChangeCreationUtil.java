@@ -81,6 +81,11 @@ final class EChangeCreationUtil {
   }
 
   private static boolean valueIsNonDefault(final EObject eObject, final EStructuralFeature feature) {
+    // A feature reported as not set carries no value of its own, even if eGet returns one (e.g., a
+    // union or redefinition computed from other features), as for EcoreUtil.copy and serialization.
+    if (!eObject.eIsSet(feature)) {
+      return false;
+    }
     final Object value = eObject.eGet(feature);
     boolean _isMany = feature.isMany();
     if (_isMany) {
