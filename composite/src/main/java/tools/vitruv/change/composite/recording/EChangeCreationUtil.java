@@ -76,8 +76,12 @@ final class EChangeCreationUtil {
 
   private static boolean isChangeableUnderivedPersistedNotContainingFeature(final EObject eObject,
       final EStructuralFeature feature) {
-    return (((feature.isChangeable() && (!feature.isDerived())) && (!feature.isTransient())) &&
-        (!Objects.equals(eObject.eContainer(), eObject.eGet(feature))));
+    // Skip the container reference (the opposite of a containment), which the containment implies.
+    // Comparing the feature with eContainingFeature would not do, as an object can be contained in
+    // a reference it declares itself, and comparing the value with eContainer would also skip
+    // ordinary references to the container.
+    return feature.isChangeable() && !feature.isDerived() && !feature.isTransient()
+        && !(feature instanceof EReference reference && reference.isContainer());
   }
 
   private static boolean valueIsNonDefault(final EObject eObject, final EStructuralFeature feature) {
