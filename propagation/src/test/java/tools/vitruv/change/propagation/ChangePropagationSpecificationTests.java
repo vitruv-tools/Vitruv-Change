@@ -124,9 +124,11 @@ class ChangePropagationSpecificationTests {
     composite.addChangeMainprocessor(recordingMainprocessor);
 
     record Tag(String value) {}
+
     var tag = new Tag("hello");
     // AnnotationSource.of() is needed because the generic SAM prevents a direct lambda assignment.
-    AnnotationSource annotations = AnnotationSource.of(type -> type == Tag.class ? Optional.of(tag) : Optional.empty());
+    AnnotationSource annotations =
+        AnnotationSource.of(type -> type == Tag.class ? Optional.of(tag) : Optional.empty());
 
     CreateEObject<EObject> change = EobjectFactory.eINSTANCE.createCreateEObject();
     composite.propagateChange(change, annotations, null, null);

@@ -9,19 +9,12 @@ import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.eobject.DeleteEObject;
 import tools.vitruv.change.atomic.resolve.AtomicEChangeResolverHelper;
 
-/** A resolver for resolving a change with {@link Uuid} to {@link EObject} or vice versa. */
-public class AtomicEChangeUuidResolver {
-  private UuidResolver uuidResolver;
-
-  /**
-   * Creates a new {@link AtomicEChangeUuidResolver} with the given {@link UuidResolver}.
-   *
-   * @param uuidResolver the {@link UuidResolver} to use for resolving and applying atomic changes
-   */
-  public AtomicEChangeUuidResolver(UuidResolver uuidResolver) {
-    this.uuidResolver = uuidResolver;
-  }
-
+/**
+ * A resolver for resolving a change with {@link Uuid} to {@link EObject} or vice versa.
+ *
+ * @param uuidResolver the {@link UuidResolver} to use for resolving and applying atomic changes
+ */
+public record AtomicEChangeUuidResolver(UuidResolver uuidResolver) {
   /**
    * Resolves the given change using its {@link UuidResolver} and applies it forward. The associated
    * resource set must be in the state before the change has been applied.
@@ -51,6 +44,36 @@ public class AtomicEChangeUuidResolver {
 
   /**
    * Gets or registers {@link Uuid Uuids} for all elements of the given change and returns the
+   * Uuid-assigned change.
+   *
+   * <p>Unlike {@link AtomicEChangeUuidResolver#assignIds(EChange)},
+   * does not update the resource set, or the UuidResolver status.
+   *
+   * @param resolvedEChange the change to assign Uuids for.
+   * @return Returns the Uuid-assigned change.
+   */
+  public EChange<Uuid> assignIdsWithoutUpdatingResolver(EChange<EObject> resolvedEChange) {
+    return AtomicEChangeResolverHelper.resolveChange(
+        resolvedEChange,
+        eObject -> {
+          if (uuidResolver.hasUuid(eObject)) {
+            return uuidResolver.getUuid(eObject);
+          } else {
+            if (resolvedEChange instanceof CreateEObject<EObject> createChange
+                && createChange.getAffectedElement() == eObject) {
+              return uuidResolver.generateUuid(eObject);
+            } else {
+              throw new IllegalStateException(
+                  "trying to assign UUID for unknown element %s of change %s"
+                      .formatted(eObject, resolvedEChange));
+            }
+          }
+        },
+        this::resourceResolver);
+  }
+
+  /**
+   * Gets or registers {@link Uuid Uuids} for all elements of the given change and returns the
    * Uuid-assigned change. The associated resource set must be in the state after the change has
    * been applied.
    *
@@ -58,24 +81,7 @@ public class AtomicEChangeUuidResolver {
    * @return Returns the Uuid-assigned change.
    */
   public EChange<Uuid> assignIds(EChange<EObject> resolvedEChange) {
-    EChange<Uuid> unresolvedEChange =
-        AtomicEChangeResolverHelper.resolveChange(
-            resolvedEChange,
-            eObject -> {
-              if (uuidResolver.hasUuid(eObject)) {
-                return uuidResolver.getUuid(eObject);
-              } else {
-                if (resolvedEChange instanceof CreateEObject<EObject> createChange
-                    && createChange.getAffectedElement() == eObject) {
-                  return uuidResolver.registerEObject(eObject);
-                } else {
-                  throw new IllegalStateException(
-                      "trying to assign UUID for unknown element %s of change %s"
-                          .formatted(eObject, resolvedEChange));
-                }
-              }
-            },
-            this::resourceResolver);
+    EChange<Uuid> unresolvedEChange = assignIdsWithoutUpdatingResolver(resolvedEChange);
     updateUuidResolver(resolvedEChange, unresolvedEChange);
     return unresolvedEChange;
   }
@@ -85,7 +91,7 @@ public class AtomicEChangeUuidResolver {
    * throws an error.
    *
    * @throws IllegalStateException if an uncontained element is registered in the {@link
-   *     UuidResolver}.
+   *                               UuidResolver}.
    */
   public void endTransaction() {
     uuidResolver.endTransaction();

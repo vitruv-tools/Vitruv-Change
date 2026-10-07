@@ -26,7 +26,6 @@ public interface UuidResolver {
       return false;
     }
   }
-
   /**
    * Returns whether an {@link org.eclipse.emf.ecore.EObject} is registered for the given UUID or
    * not.

@@ -22,7 +22,7 @@ import tools.vitruv.change.testutils.changevisualization.tree.TabHighlighting;
  * to displaying general information.
  */
 public class ChangesTab extends JPanel
-    implements ListSelectionListener, ChangeDataSetGenerationListener, TabHighlighting, TabColours {
+    implements ListSelectionListener, ChangeDataSetGenerationListener, TabHighlighting {
   private static final long serialVersionUID = -5293272783862251463L;
 
   /** The ChangeComponent implementing the actual visualization. */
@@ -32,7 +32,7 @@ public class ChangesTab extends JPanel
    * The table responsible for the display of the general changeDataSet
    * information.
    */
-  private ChangeDataSetTableView changeDataSetTable;
+  private transient ChangeDataSetTableView changeDataSetTable;
 
   /** The affectedEOject id to highlight. */
   private String highlightID;

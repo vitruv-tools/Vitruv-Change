@@ -1,6 +1,7 @@
 package tools.vitruv.change.correspondence.model;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.eclipse.emf.ecore.EObject;
@@ -16,6 +17,7 @@ import tools.vitruv.change.correspondence.view.CorrespondenceModelView;
  *
  * @author kramerm
  * @author Heiko Klare
+ * @author Benedikt Jutz
  */
 public interface CorrespondenceModel extends AutoCloseable {
   /**
@@ -30,7 +32,7 @@ public interface CorrespondenceModel extends AutoCloseable {
    * @param <C> the type of correspondence to create
    * @return the created correspondence
    */
-  public <C extends Correspondence> C addCorrespondenceBetween(
+  <C extends Correspondence> C addCorrespondenceBetween(
       List<EObject> firstEObjects,
       List<EObject> secondEObjects,
       String tag,
@@ -43,11 +45,52 @@ public interface CorrespondenceModel extends AutoCloseable {
    *     {@code null} or empty
    * @return {@code true} if number of corresponding objects > 0
    */
-  public boolean hasCorrespondences(List<EObject> sourceEObjects);
+  boolean hasCorrespondences(List<EObject> sourceEObjects);
+
+  /**
+   * Returns a set of {@link EObject}s that occur in a correspondence.
+   *
+   * <p>The set does not distinguish between the direction of the correspondence,
+   * so if e.g. {@code (e1, e2, tag1)} is a correspondence, then the result will contain both
+   * e1 and e2.
+   *
+   * @return {@link Set} a set of {@link EObject}s.
+   */
+  Set<EObject> getAllEObjectsInACorrespondence();
+
+  /**
+   * Returns a set of {@link String}s which are used as tags in some correspondence.
+   * The {@code null} element is not part of this set.
+   *
+   * @return {@code Set}
+   */
+  Set<String> getAllTags();
+
+  /**
+   * Returns all elements corresponding to {@code sourceEObject}, if the correspondence is of
+   * the given {@code correspondenceType}.
+   *
+   * <p>Correspondences are <strong>between sets of model elements</strong>.
+   * For example, if {@code {a, c}} and {@code {b, d}} are in correspondence,
+   * then this does not imply a correspondence between {@code a} and {@code b}, for example.
+   *
+   * @param sourceEObjects {@link EObject}, must not be null
+   * @param correspondenceType {@link Correspondence}, must not be null
+   * @return {@link Map} of {@link Set}
+   *     Each entry of the returned map contains as key the correspondence tag {@code t}, and
+   *     as value all entries corresponding to {@code sourceEObject} with tag {@code t}.
+   *     Null keys are also supported; these stand for a missing tag.
+   */
+  Map<String, Set<EObject>> getCorrespondingEObjectsWithTag(
+      List<EObject> sourceEObjects, Class<? extends Correspondence> correspondenceType);
 
   /**
    * Returns the elements corresponding to the given ones, if the correspondence is of the given
    * type and contains the given tag.
+   *
+   * <p>Correspondences are <strong>between sets of model elements</strong>.
+   * For example, if {@code {a, c}} and {@code {b, d}} are in correspondence,
+   * then this does not imply a correspondence between {@code a} and {@code b}, for example.
    *
    * @param correspondenceType the type of correspondence to filter for, must not be {@code null}
    * @param sourceEObjects the objects to get the corresponding ones for, must not be {@code null}
@@ -55,7 +98,7 @@ public interface CorrespondenceModel extends AutoCloseable {
    *     correspondences will be returned
    * @return the elements corresponding to the given ones
    */
-  public Set<List<EObject>> getCorrespondingEObjects(
+  Set<List<EObject>> getCorrespondingEObjects(
       Class<? extends Correspondence> correspondenceType, List<EObject> sourceEObjects, String tag);
 
   /**
@@ -72,7 +115,7 @@ public interface CorrespondenceModel extends AutoCloseable {
    * @param <C> the type of correspondence to remove
    * @return the removed correspondences
    */
-  public <C extends Correspondence> Set<C> removeCorrespondencesBetween(
+  <C extends Correspondence> Set<C> removeCorrespondencesBetween(
       Class<C> correspondenceType,
       List<EObject> firstEObjects,
       List<EObject> secondEObjects,

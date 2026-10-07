@@ -8,7 +8,7 @@
   <parent>
     <groupId>tools.vitruv</groupId>
     <artifactId>tools.vitruv.change.testutils</artifactId>
-    <version>3.2.4-SNAPSHOT</version>
+    <version>4.0.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>tools.vitruv.change.testutils.metamodels</artifactId>
@@ -25,10 +25,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.eclipse.xtend</groupId>
-        <artifactId>xtend-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
@@ -72,10 +68,5 @@
     </dependency>
 
     <!-- p2 dependencies -->
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>tools.vitruv.change.p2wrappers.activextendannotations</artifactId>
-      <version>${project.version}</version>
-    </dependency>
   </dependencies>
 </project>

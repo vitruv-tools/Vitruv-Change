@@ -1,6 +1,5 @@
 package tools.vitruv.change.testutils;
 
-import edu.kit.ipd.sdq.activextendannotations.Utility;
 import java.io.IOException;
 import java.nio.file.Files;
 import tools.vitruv.change.composite.propagation.ChangeableModelRepository;
@@ -12,7 +11,6 @@ import tools.vitruv.change.propagation.impl.DefaultChangeRecordingModelRepositor
 import tools.vitruv.change.propagation.impl.DefaultChangeableModelRepository;
 
 /** Factory for creating test model repositories. */
-@Utility
 public class TestModelRepositoryFactory {
   private TestModelRepositoryFactory() {
     throw new UnsupportedOperationException("Utility class");

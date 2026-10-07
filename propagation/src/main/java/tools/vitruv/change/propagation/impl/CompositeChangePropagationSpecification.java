@@ -108,8 +108,10 @@ public class CompositeChangePropagationSpecification
       AnnotationSource changeAnnotations,
       EditableCorrespondenceModelView<Correspondence> correspondenceModel,
       ResourceAccess resourceAccess) {
-    this.propagateChangeViaPreprocessors(change, changeAnnotations, correspondenceModel, resourceAccess);
-    this.propagateChangeViaMainprocessors(change, changeAnnotations, correspondenceModel, resourceAccess);
+    this.propagateChangeViaPreprocessors(
+        change, changeAnnotations, correspondenceModel, resourceAccess);
+    this.propagateChangeViaMainprocessors(
+        change, changeAnnotations, correspondenceModel, resourceAccess);
   }
 
   /**
@@ -127,7 +129,8 @@ public class CompositeChangePropagationSpecification
       ResourceAccess resourceAccess) {
     for (var changeProcessor : changePreprocessors) {
       logger.trace("Calling change preprocessor %s for change event %s", changeProcessor, change);
-      changeProcessor.propagateChange(change, changeAnnotations, correspondenceModel, resourceAccess);
+      changeProcessor.propagateChange(
+          change, changeAnnotations, correspondenceModel, resourceAccess);
     }
   }
 
@@ -146,7 +149,8 @@ public class CompositeChangePropagationSpecification
       ResourceAccess resourceAccess) {
     for (var changeProcessor : this.changeMainprocessors) {
       logger.trace("Calling change main processor %s for change event %s", changeProcessor, change);
-      changeProcessor.propagateChange(change, changeAnnotations, correspondenceModel, resourceAccess);
+      changeProcessor.propagateChange(
+          change, changeAnnotations, correspondenceModel, resourceAccess);
     }
   }
 

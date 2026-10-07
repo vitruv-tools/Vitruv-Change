@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.aet;
 
+import allElementTypes.AllElementTypesPackage;
+import allElementTypes.NonRoot;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,6 +26,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory;
+import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference;
 import tools.vitruv.change.testutils.RegisterMetamodelsInStandalone;
 import tools.vitruv.change.testutils.TestProject;
 import tools.vitruv.change.testutils.TestProjectManager;
@@ -152,6 +157,44 @@ class UuidResolvingTest {
     assertEquals(uuid, uuidResolver.getUuid(root));
     assertTrue(uuidResolver.hasUuid(root));
     assertTrue(uuidResolver.hasEObject(uuid));
+  }
+
+  @ParameterizedTest(name = "{0}")
+  @ValueSource(strings = {
+      "pathmap://TEST_LIBRARY/library.aet", "archive:file:/library.jar!/library.aet"})
+  @DisplayName("resolve element in read-only resource without registration")
+  void resolveReadOnlyElementWithoutRegistration(String libraryUri) {
+    NonRoot libraryElement = createLibraryElement(libraryUri);
+
+    Uuid uuid = uuidResolver.getUuid(libraryElement);
+    assertTrue(uuidResolver.hasUuid(libraryElement));
+    assertTrue(uuidResolver.hasEObject(uuid));
+    assertEquals(libraryElement, uuidResolver.getEObject(uuid));
+  }
+
+  @Test
+  @DisplayName("assign UUIDs to a change referencing an element in a read-only resource")
+  void assignIdsForReferenceToReadOnlyElement() {
+    var root = aet.Root();
+    URI resourceUri = URI.createFileURI(testProjectPath.resolve("root.aet").toString());
+    resourceSet.createResource(resourceUri).getContents().add(root);
+    uuidResolver.registerEObject(root);
+    NonRoot libraryElement = createLibraryElement("pathmap://TEST_LIBRARY/library.aet");
+    root.setSingleValuedNonContainmentEReference(libraryElement);
+    EChange<EObject> change = TypeInferringAtomicEChangeFactory.getInstance()
+        .<EObject>createReplaceSingleReferenceChange(root,
+            AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_NON_CONTAINMENT_EREFERENCE,
+            null, libraryElement);
+
+    var unresolvedChange = (ReplaceSingleValuedEReference<Uuid>)
+        new AtomicEChangeUuidResolver(uuidResolver).assignIds(change);
+    assertEquals(uuidResolver.getUuid(libraryElement), unresolvedChange.getNewValue());
+  }
+
+  private NonRoot createLibraryElement(String libraryUri) {
+    NonRoot libraryElement = aet.NonRoot();
+    resourceSet.createResource(URI.createURI(libraryUri)).getContents().add(libraryElement);
+    return libraryElement;
   }
 
   @Test
