@@ -41,10 +41,14 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
    * @param resourceUri the URI of the resource to store the correspondences in
    */
   public PersistableCorrespondenceModelImpl(URI resourceUri) {
-    this.correspondences = CorrespondenceFactory.eINSTANCE.createCorrespondences();
+    this(CorrespondenceFactory.eINSTANCE.createCorrespondences(), resourceUri);
+  }
+
+  private PersistableCorrespondenceModelImpl(Correspondences correspondences, URI resourceUri) {
+    this.correspondences = correspondences;
     if (resourceUri != null) {
       this.correspondencesResource =
-          withGlobalFactories(new ResourceSetImpl()).createResource(resourceUri);
+              withGlobalFactories(new ResourceSetImpl()).createResource(resourceUri);
       this.correspondencesResource.getContents().add(correspondences);
     } else {
       this.correspondencesResource = null;
@@ -99,6 +103,36 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
         logger.error("Could not save correspondences resource", e);
       }
     }
+  }
+
+  @Override
+  public PersistableCorrespondenceModel copy(Map<EObject, EObject> originalToCopyMapping) {
+    Correspondences copiedCorrespondences = EcoreUtil.copy(this.correspondences);
+
+    for (int index = 0; index < copiedCorrespondences.getCorrespondences().size(); index++) {
+      Correspondence originalCorrespondence = this.correspondences.getCorrespondences().get(index);
+      Correspondence copiedCorrespondence = copiedCorrespondences.getCorrespondences().get(index);
+
+      var newLeftEObjects = map(copiedCorrespondence.getLeftEObjects(), originalToCopyMapping);
+      var newRightEObjects = map(copiedCorrespondence.getRightEObjects(), originalToCopyMapping);
+
+      replace(copiedCorrespondence.getLeftEObjects(), newLeftEObjects);
+      replace(copiedCorrespondence.getRightEObjects(), newRightEObjects);
+
+      originalToCopyMapping.put(originalCorrespondence, copiedCorrespondence);
+    }
+
+    URI resourceUri = this.correspondencesResource != null
+                      ? this.correspondencesResource.getURI()
+                      : null;
+
+    return new PersistableCorrespondenceModelImpl(copiedCorrespondences, resourceUri);
+  }
+
+  private static List<EObject> map(
+      List<EObject> eObjects, Map<EObject, EObject> originalToCopyMapping) {
+    return eObjects.stream()
+               .map(eObject -> originalToCopyMapping.getOrDefault(eObject, eObject)).toList();
   }
 
   @Override
