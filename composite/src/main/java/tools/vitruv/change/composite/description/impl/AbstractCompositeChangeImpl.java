@@ -1,10 +1,14 @@
 package tools.vitruv.change.composite.description.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -16,6 +20,7 @@ import tools.vitruv.change.interaction.UserInteractionBase;
 
 public abstract class AbstractCompositeChangeImpl<Element extends Object, ContanedChange extends VitruviusChange<Element>> implements CompositeChange<Element, ContanedChange> {
   private List<ContanedChange> changes;
+  protected final Map<Class<?>, Object> annotations = new HashMap<>();
 
   public AbstractCompositeChangeImpl(final List<? extends ContanedChange> changes) {
     this.changes = List.<ContanedChange>copyOf(changes);
@@ -83,6 +88,21 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contan
       it.getUserInteractions().forEach(result::add);
     }
     return result;
+  }
+
+  @Override
+  public <T> void setAnnotation(final Class<T> type, final T value) {
+    this.annotations.put(type, value);
+  }
+
+  @Override
+  public <T> Optional<T> getAnnotation(final Class<T> type) {
+    return Optional.ofNullable(type.cast(this.annotations.get(type)));
+  }
+
+  @Override
+  public Map<Class<?>, Object> getAnnotations() {
+    return Collections.unmodifiableMap(this.annotations);
   }
 
   @Override
