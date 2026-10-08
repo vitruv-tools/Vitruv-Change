@@ -135,8 +135,8 @@ public class ChangePropagator {
     private Iterable<TransactionalChange<EObject>> propagateChangeForChangePropagationSpecification(final TransactionalChange<EObject> change, final ChangePropagationSpecification propagationSpecification) {
       final Runnable _function = () -> {
         for (final EChange<EObject> eChange : change.getEChanges()) {
-          propagationSpecification.propagateChange(eChange, this.outer.modelRepository.getCorrespondenceModel(),
-            this.outer.modelRepository);
+          propagationSpecification.propagateChange(eChange, change,
+              this.outer.modelRepository.getCorrespondenceModel(), this.outer.modelRepository);
         }
       };
       final Iterable<TransactionalChange<EObject>> transitiveChanges = this.outer.modelRepository.recordChanges(_function);

@@ -10,7 +10,7 @@ import tools.vitruv.change.composite.MetamodelDescriptor;
 import tools.vitruv.change.interaction.UserInteractionBase;
 
 /** Base interface for all kinds of changes in Vitruvius. */
-public interface VitruviusChange<Element> {
+public interface VitruviusChange<Element> extends Annotatable {
   /** Returns whether the change contains any concrete change or consists only of composite ones. */
   public boolean containsConcreteChange();
 
