@@ -12,6 +12,8 @@ public class CompositeContainerChangeImpl<Element extends Object> extends Abstra
   @Override
   public CompositeContainerChangeImpl<Element> copy() {
     List<VitruviusChange<Element>> _mapFixed = this.getChanges().stream().map(it -> it.copy()).toList();
-    return new CompositeContainerChangeImpl<Element>(_mapFixed);
+    CompositeContainerChangeImpl<Element> copy = new CompositeContainerChangeImpl<>(_mapFixed);
+    copy.annotations.putAll(this.annotations);
+    return copy;
   }
 }

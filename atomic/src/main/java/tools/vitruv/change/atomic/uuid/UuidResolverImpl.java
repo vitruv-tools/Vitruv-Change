@@ -48,7 +48,8 @@ class UuidResolverImpl implements UuidResolver {
 
   @Override
   public boolean hasUuid(EObject eObject) {
-    return eObjectToUuid.containsKey(eObject);
+    // like getUuid, elements of read-only resources have a UUID without being registered
+    return getUuidOrNull(eObject) != null;
   }
 
   @Override
@@ -60,7 +61,7 @@ class UuidResolverImpl implements UuidResolver {
 
   @Override
   public boolean hasEObject(Uuid uuid) {
-    return eObjectToUuid.containsValue(uuid);
+    return getEObjectOrNull(uuid) != null;
   }
 
   @Override
