@@ -5,8 +5,9 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -428,7 +429,8 @@ public class ChangeRecorder implements AutoCloseable {
   }
 
   private static Set<EObject> findRemovedElements(final List<EChange<EObject>> changes) {
-    final Set<EObject> removedElements = new HashSet<>();
+    // insertion-ordered, so that delete changes come in the same order in every run
+    final Set<EObject> removedElements = new LinkedHashSet<>();
     for (final EChange<EObject> eChange : changes) {
       if (eChange instanceof EObjectSubtractedEChange
           && EChangeUtil.isContainmentRemoval(eChange)) {
@@ -444,11 +446,10 @@ public class ChangeRecorder implements AutoCloseable {
 
   private void appendDeleteChanges(final List<EChange<EObject>> changes,
       final Set<EObject> removedElements) {
-    final Map<EObject, Iterable<EObject>> allElementsToDelete = new HashMap<>();
+    final Map<EObject, Iterable<EObject>> allElementsToDelete = new LinkedHashMap<>();
+    final Set<EObject> collectedElements = new HashSet<>();
     for (final EObject element : removedElements) {
-      boolean alreadyContained =
-          allElementsToDelete.values().stream().anyMatch(it -> Iterables.contains(it, element));
-      if (alreadyContained) {
+      if (collectedElements.contains(element)) {
         continue;
       }
       final List<EObject> elementsToDelete =
@@ -458,6 +459,7 @@ public class ChangeRecorder implements AutoCloseable {
         allElementsToDelete.remove(child);
       }
       elementsToDelete.add(element);
+      collectedElements.addAll(elementsToDelete);
       allElementsToDelete.put(element, elementsToDelete);
     }
     final List<EChange<EObject>> deleteChanges = new ArrayList<>();
