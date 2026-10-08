@@ -10,8 +10,8 @@ import tools.vitruv.change.atomic.command.internal.ApplyEChangeSwitch;
 import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange;
 import tools.vitruv.change.atomic.feature.FeatureEChange;
+import tools.vitruv.change.atomic.feature.reference.AdditiveReferenceEChange;
 import tools.vitruv.change.atomic.feature.reference.SubtractiveReferenceEChange;
-import tools.vitruv.change.atomic.feature.reference.UpdateReferenceEChange;
 import tools.vitruv.change.atomic.hid.internal.HierarchicalIdResolver;
 import tools.vitruv.change.atomic.resolve.AtomicEChangeResolverHelper;
 import tools.vitruv.change.atomic.root.InsertRootEObject;
@@ -110,11 +110,18 @@ public class AtomicEChangeHierarchicalIdResolver {
 
   private void applyForward(EChange<EObject> resolvedChange) {
     EObject affectedEObject = getAffectedEObject(resolvedChange);
-    HierarchicalId affectedId = idResolver.getAndUpdateId(affectedEObject);
+    idResolver.getAndUpdateId(affectedEObject);
     EObject oldObject = getOldContainedEObject(resolvedChange);
     ApplyEChangeSwitch.applyEChange(resolvedChange, true);
-    if (isContainmentChange(resolvedChange)
-        || affectedId != idResolver.getAndUpdateId(affectedEObject)) {
+    idResolver.getAndUpdateId(affectedEObject);
+    // Only elements changing between attached and detached need new IDs: their subtree switches
+    // between positional and cache IDs. IDs of attached elements are derived on demand.
+    EObject newObject = getNewContainedEObject(resolvedChange);
+    if (newObject != null) {
+      refreshIds(newObject);
+    }
+    if (resolvedChange instanceof InsertRootEObject<EObject>
+        || resolvedChange instanceof RemoveRootEObject<EObject>) {
       refreshIds(affectedEObject);
     }
     if (oldObject != null) {
@@ -144,11 +151,12 @@ public class AtomicEChangeHierarchicalIdResolver {
     return null;
   }
 
-  private static boolean isContainmentChange(EChange<EObject> eChange) {
-    if (eChange instanceof UpdateReferenceEChange<EObject> referenceChange) {
-      return referenceChange.isContainment();
+  private static EObject getNewContainedEObject(EChange<EObject> eChange) {
+    if ((eChange instanceof AdditiveReferenceEChange<EObject> additiveChange)
+        && (additiveChange.isContainment())) {
+      return additiveChange.getNewValue();
     }
-    return false;
+    return null;
   }
 
   private void refreshIds(EObject eObject) {

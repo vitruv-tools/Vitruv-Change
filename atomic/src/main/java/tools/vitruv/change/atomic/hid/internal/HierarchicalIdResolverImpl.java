@@ -74,10 +74,14 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
   }
   
   private HierarchicalId registerObjectInResource(EObject eObject) {
-    var id = new HierarchicalId(eObject.eResource().getURI().appendFragment(
-        ObjectResolutionUtil.getHierarchicUriFragment(eObject)).toString());
+    var id = getPositionalId(eObject);
     register(id, eObject);
     return id;
+  }
+
+  private static HierarchicalId getPositionalId(EObject eObject) {
+    return new HierarchicalId(eObject.eResource().getURI().appendFragment(
+        ObjectResolutionUtil.getHierarchicUriFragment(eObject)).toString());
   }
   
   private HierarchicalId getOrRegisterCachedObject(EObject eObject) {
@@ -104,10 +108,23 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
     if (result == null) {
       result = getStoredEObject(uri);
     }
+    if (result != null && isOutdated(id, result)) {
+      // the element was shifted since the ID was stored, e.g., by an insertion before it, so
+      // the element currently at that position takes precedence if there is one
+      final EObject current = getAndRegisterNonStoredEObject(uri);
+      if (current != null) {
+        result = current;
+      }
+    }
     if (result == null) {
       result = getAndRegisterNonStoredEObject(uri);
     }
     return result;
+  }
+
+  private static boolean isOutdated(HierarchicalId id, EObject storedEObject) {
+    return !id.isCache() && storedEObject.eResource() != null
+        && !id.equals(getPositionalId(storedEObject));
   }
  
   private EObject getEObjectIfReadonlyUri(URI uri) {
