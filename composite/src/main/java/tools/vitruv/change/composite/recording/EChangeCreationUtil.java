@@ -76,11 +76,20 @@ final class EChangeCreationUtil {
 
   private static boolean isChangeableUnderivedPersistedNotContainingFeature(final EObject eObject,
       final EStructuralFeature feature) {
-    return (((feature.isChangeable() && (!feature.isDerived())) && (!feature.isTransient())) &&
-        (!Objects.equals(eObject.eContainer(), eObject.eGet(feature))));
+    // Skip the container reference (the opposite of a containment), which the containment implies.
+    // Comparing the feature with eContainingFeature would not do, as an object can be contained in
+    // a reference it declares itself, and comparing the value with eContainer would also skip
+    // ordinary references to the container.
+    return feature.isChangeable() && !feature.isDerived() && !feature.isTransient()
+        && !(feature instanceof EReference reference && reference.isContainer());
   }
 
   private static boolean valueIsNonDefault(final EObject eObject, final EStructuralFeature feature) {
+    // A feature reported as not set carries no value of its own, even if eGet returns one (e.g., a
+    // union or redefinition computed from other features), as for EcoreUtil.copy and serialization.
+    if (!eObject.eIsSet(feature)) {
+      return false;
+    }
     final Object value = eObject.eGet(feature);
     boolean _isMany = feature.isMany();
     if (_isMany) {

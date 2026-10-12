@@ -3,6 +3,7 @@ package tools.vitruv.change.propagation;
 import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.composite.MetamodelDescriptor;
+import tools.vitruv.change.composite.description.AnnotationSource;
 import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.interaction.UserInteractor;
@@ -71,6 +72,23 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
    *     in particular to create new model files. Must not be <code>null</code>.
    */
   void propagateChange(EChange<EObject> change,
-      EditableCorrespondenceModelView<Correspondence> correspondenceModel, 
+      EditableCorrespondenceModelView<Correspondence> correspondenceModel,
       ResourceAccess resourceAccess);
+
+  /**
+   * Propagates <code>change</code> with access to the annotations of the enclosing
+   * transactional change. Defaults to {@link #propagateChange} for backward compatibility.
+   *
+   * @param change - the atomic change to propagate. Must not be <code>null</code>.
+   * @param changeAnnotations - read-only annotations of the enclosing transactional change.
+   *     Must not be <code>null</code>.
+   * @param correspondenceModel - the correspondence model. Must not be <code>null</code>.
+   * @param resourceAccess - resource access object. Must not be <code>null</code>.
+   */
+  default void propagateChange(EChange<EObject> change,
+      AnnotationSource changeAnnotations,
+      EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+      ResourceAccess resourceAccess) {
+    propagateChange(change, correspondenceModel, resourceAccess);
+  }
 }
