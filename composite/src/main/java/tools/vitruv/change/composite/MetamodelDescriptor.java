@@ -1,6 +1,7 @@
 package tools.vitruv.change.composite;
 
 import com.google.common.base.Preconditions;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -41,6 +42,18 @@ public final class MetamodelDescriptor {
       _xblockexpression = this.nsUris.containsAll(descriptorForPotentiallyContainedMetamodel.nsUris);
     }
     return _xblockexpression;
+  }
+
+  /**
+   * Returns whether the metamodel of this descriptor overlaps with the metamodel of the
+   * given descriptor, i.e., whether they share at least one namespace URI.
+   *
+   * @param other the descriptor to check for overlap with, must not be <code>null</code>
+   * @return whether the metamodel of this descriptor overlaps with the metamodel of the given
+   *     descriptor
+   */
+  public boolean overlaps(final MetamodelDescriptor other) {
+    return !Collections.disjoint(this.nsUris, other.nsUris);
   }
 
   @Override
