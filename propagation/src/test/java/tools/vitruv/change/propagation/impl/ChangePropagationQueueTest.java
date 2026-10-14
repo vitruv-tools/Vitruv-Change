@@ -49,10 +49,10 @@ import tools.vitruv.change.propagation.QueuedPropagationStep.Outcome;
 import tools.vitruv.change.utils.ResourceAccess;
 
 /**
- * Tests the change propagation queue of {@link ChangePropagator} with a mocked model repository and
- * the real user interaction machinery.
+ * Tests {@link ChangePropagationQueue} with a mocked model repository and the real user interaction
+ * machinery.
  */
-class ChangePropagatorQueueTest {
+class ChangePropagationQueueTest {
   private static final String QUESTION = "Delete the corresponding class?";
 
   private final MetamodelDescriptor models = MetamodelDescriptor.with("models");
@@ -92,13 +92,13 @@ class ChangePropagatorQueueTest {
 
   @Test
   void enqueue_usesTheGivenTaskId_andRejectsIdsInUse() {
-    ChangePropagator propagator = propagator();
+    ChangePropagationQueue queue = queue();
 
-    assertEquals(42, propagator.enqueueChange(input(change(models)), 42));
+    assertEquals(42, queue.enqueueChange(input(change(models)), 42));
 
     VitruviusChange<Uuid> duplicate = input(change(models));
-    assertThrows(IllegalArgumentException.class, () -> propagator.enqueueChange(duplicate, 42));
-    QueuedChange queued = propagator.getQueuedChange(42).orElseThrow();
+    assertThrows(IllegalArgumentException.class, () -> queue.enqueueChange(duplicate, 42));
+    QueuedChange queued = queue.getQueuedChange(42).orElseThrow();
     assertEquals(42, queued.rootTaskId());
     assertNull(queued.parentTaskId());
     assertFalse(queued.blocked());
@@ -106,16 +106,16 @@ class ChangePropagatorQueueTest {
 
   @Test
   void enqueue_generatesDistinctPositiveTaskIds() {
-    ChangePropagator propagator = propagator();
+    ChangePropagationQueue queue = queue();
     Set<Integer> ids = new HashSet<>();
 
     for (int i = 0; i < 200; i++) {
-      ids.add(propagator.enqueueChange(input(change(models))));
+      ids.add(queue.enqueueChange(input(change(models))));
     }
 
     assertEquals(200, ids.size());
     assertTrue(ids.stream().allMatch(id -> id > 0));
-    assertEquals(200, propagator.getQueuedChanges().size());
+    assertEquals(200, queue.getQueuedChanges().size());
   }
 
   // ---- propagation order
@@ -125,43 +125,43 @@ class ChangePropagatorQueueTest {
   void propagateNext_queuesTransitiveChangesAtTheFront_soOrderMatchesSynchronousPropagation() {
     TransactionalChange<EObject> produced = change(otherModels);
     modelsSpec.onFirstRun = spec -> recordedByCurrentRun.add(produced);
-    ChangePropagator propagator = propagator();
+    ChangePropagationQueue queue = queue();
     VitruviusChange<Uuid> first = input(change(models));
-    propagator.enqueueChange(first, 1);
-    propagator.enqueueChange(input(change(models)), 2);
+    queue.enqueueChange(first, 1);
+    queue.enqueueChange(input(change(models)), 2);
 
-    QueuedPropagationStep step1 = propagator.propagateNext().orElseThrow();
+    QueuedPropagationStep step1 = queue.propagateNext().orElseThrow();
     assertEquals(
         new QueuedPropagationStep(1, Outcome.PROPAGATED, step1.propagatedChanges()), step1);
     assertEquals(1, step1.propagatedChanges().size());
 
     // The change produced by task 1 comes before task 2 ...
-    QueuedChange child = propagator.getQueuedChanges().get(0);
+    QueuedChange child = queue.getQueuedChanges().get(0);
     assertEquals(Integer.valueOf(1), child.parentTaskId());
     assertEquals(1, child.rootTaskId());
-    assertTrue(propagator.isPending(1));
+    assertTrue(queue.isPending(1));
 
-    QueuedPropagationStep step2 = propagator.propagateNext().orElseThrow();
+    QueuedPropagationStep step2 = queue.propagateNext().orElseThrow();
     assertEquals(child.taskId(), step2.taskId());
     assertSame(produced, step2.propagatedChanges().get(0).getOriginalChange());
     assertEquals(1, otherModelsSpec.runs);
     // ... and task 1 is complete once its child has been propagated.
-    assertFalse(propagator.isPending(1));
+    assertFalse(queue.isPending(1));
 
-    assertEquals(2, propagator.propagateNext().orElseThrow().taskId());
-    assertTrue(propagator.propagateNext().isEmpty());
+    assertEquals(2, queue.propagateNext().orElseThrow().taskId());
+    assertTrue(queue.propagateNext().isEmpty());
     verify(repository, times(1)).applyChange(first);
   }
 
   @Test
   void singleStepMode_doesNotQueueTransitiveChanges() {
     modelsSpec.onFirstRun = spec -> recordedByCurrentRun.add(change(otherModels));
-    ChangePropagator propagator = propagator(ChangePropagationMode.SINGLE_STEP);
-    propagator.enqueueChange(input(change(models)), 1);
+    ChangePropagationQueue queue = queue(ChangePropagationMode.SINGLE_STEP);
+    queue.enqueueChange(input(change(models)), 1);
 
-    propagator.propagateNext();
+    queue.propagateNext();
 
-    assertFalse(propagator.isPending(1));
+    assertFalse(queue.isPending(1));
     assertEquals(0, otherModelsSpec.runs);
   }
 
@@ -175,19 +175,19 @@ class ChangePropagatorQueueTest {
     when(composite.getChanges()).thenReturn(List.of(part1, part2));
     VitruviusChange<Uuid> inputChange = mock(VitruviusChange.class);
     when(repository.applyChange(inputChange)).thenReturn((VitruviusChange) composite);
-    ChangePropagator propagator = propagator();
-    propagator.enqueueChange(inputChange, 7);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(inputChange, 7);
 
-    QueuedPropagationStep first = propagator.propagateNext().orElseThrow();
+    QueuedPropagationStep first = queue.propagateNext().orElseThrow();
 
     assertEquals(7, first.taskId());
     assertSame(part1, first.propagatedChanges().get(0).getOriginalChange());
-    QueuedChange second = propagator.getQueuedChanges().get(0);
+    QueuedChange second = queue.getQueuedChanges().get(0);
     assertEquals(7, second.rootTaskId());
     assertSame(
         part2,
-        propagator.propagateNext().orElseThrow().propagatedChanges().get(0).getOriginalChange());
-    assertFalse(propagator.isPending(7));
+        queue.propagateNext().orElseThrow().propagatedChanges().get(0).getOriginalChange());
+    assertFalse(queue.isPending(7));
   }
 
   // ---- user interactions -----------------------------------------------------------------------
@@ -196,29 +196,29 @@ class ChangePropagatorQueueTest {
   void unansweredInteraction_defersTheChange_whileOtherChangesProceed() {
     TransactionalChange<EObject> askingChange = change(models);
     modelsSpec.askFor = askingChange;
-    ChangePropagator propagator = propagator();
+    ChangePropagationQueue queue = queue();
     VitruviusChange<Uuid> askingInput = input(askingChange);
-    propagator.enqueueChange(askingInput, 1);
-    propagator.enqueueChange(input(change(models)), 2);
+    queue.enqueueChange(askingInput, 1);
+    queue.enqueueChange(input(change(models)), 2);
 
-    assertEquals(Outcome.DEFERRED, propagator.propagateNext().orElseThrow().outcome());
+    assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
 
-    QueuedChange deferred = propagator.getQueuedChange(1).orElseThrow();
+    QueuedChange deferred = queue.getQueuedChange(1).orElseThrow();
     assertEquals(PropagationBlockReason.USER_INTERACTION, deferred.blockReason());
     PendingUserInteraction pending = deferred.pendingInteraction();
     assertEquals(PendingUserInteraction.Kind.CONFIRMATION, pending.kind());
     assertEquals(QUESTION, pending.message());
     // The other change is not held up ...
-    QueuedPropagationStep other = propagator.propagateNext().orElseThrow();
+    QueuedPropagationStep other = queue.propagateNext().orElseThrow();
     assertEquals(
         new QueuedPropagationStep(2, Outcome.PROPAGATED, other.propagatedChanges()), other);
     // ... and the deferred one stays skipped until answered.
-    assertEquals(Outcome.SKIPPED_BLOCKED, propagator.propagateNext().orElseThrow().outcome());
+    assertEquals(Outcome.SKIPPED_BLOCKED, queue.propagateNext().orElseThrow().outcome());
 
-    propagator.registerUserInteractions(1, confirmation(QUESTION, true));
+    queue.registerUserInteractions(1, confirmation(QUESTION, true));
 
-    assertFalse(propagator.getQueuedChange(1).orElseThrow().blocked());
-    QueuedPropagationStep retried = propagator.propagateNext().orElseThrow();
+    assertFalse(queue.getQueuedChange(1).orElseThrow().blocked());
+    QueuedPropagationStep retried = queue.propagateNext().orElseThrow();
     assertEquals(Outcome.PROPAGATED, retried.outcome());
     assertEquals(List.of(Boolean.TRUE), modelsSpec.answers);
     // The input change was applied once, not again on the retry ...
@@ -232,34 +232,23 @@ class ChangePropagatorQueueTest {
     // ... and the VSUM's own provider was never asked.
     verify(blockingProvider, never())
         .getConfirmationInteractionResult(any(), any(), any(), any(), any(), any());
-    assertFalse(propagator.isPending(1));
+    assertFalse(queue.isPending(1));
   }
 
   @Test
   void answersRegisteredWhileTheChangeRuns_makeItRetryInsteadOfWaiting() {
     TransactionalChange<EObject> askingChange = change(models);
     modelsSpec.askFor = askingChange;
-    ChangePropagator propagator = propagator();
-    propagator.enqueueChange(input(askingChange), 1);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(askingChange), 1);
     // Another thread answers while the change is being propagated, before it asks.
-    modelsSpec.beforeAsking =
-        spec -> {
-          Thread answering =
-              new Thread(
-                  () -> propagator.registerUserInteractions(1, confirmation(QUESTION, false)));
-          answering.start();
-          try {
-            answering.join();
-          } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-          }
-        };
+    modelsSpec.beforeAsking = spec -> answerFromAnotherThread(queue, 1, false);
 
-    assertEquals(Outcome.DEFERRED, propagator.propagateNext().orElseThrow().outcome());
+    assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
 
-    assertFalse(propagator.getQueuedChange(1).orElseThrow().blocked());
+    assertFalse(queue.getQueuedChange(1).orElseThrow().blocked());
     modelsSpec.beforeAsking = spec -> {};
-    assertEquals(Outcome.PROPAGATED, propagator.propagateNext().orElseThrow().outcome());
+    assertEquals(Outcome.PROPAGATED, queue.propagateNext().orElseThrow().outcome());
     assertEquals(List.of(Boolean.FALSE), modelsSpec.answers);
   }
 
@@ -270,15 +259,16 @@ class ChangePropagatorQueueTest {
     TransactionalChange<EObject> askingChange = change(models);
     ScriptedSpecification asking = new ScriptedSpecification(models, otherModels);
     asking.askFor = askingChange;
-    ChangePropagator propagator =
-        new ChangePropagator(
-            repository,
-            new ChangePropagationSpecificationRepository(List.of(modifying, asking)),
-            userInteractor);
-    propagator.enqueueChange(input(askingChange), 1);
+    ChangePropagationQueue queue =
+        new ChangePropagationQueue(
+            new ChangePropagator(
+                repository,
+                new ChangePropagationSpecificationRepository(List.of(modifying, asking)),
+                userInteractor));
+    queue.enqueueChange(input(askingChange), 1);
 
-    assertThrows(NonDeferrablePropagationException.class, propagator::propagateNext);
-    assertFalse(propagator.isPending(1));
+    assertThrows(NonDeferrablePropagationException.class, queue::propagateNext);
+    assertFalse(queue.isPending(1));
   }
 
   // ---- transactions and other blocks
@@ -287,56 +277,78 @@ class ChangePropagatorQueueTest {
   @Test
   void blockingAChange_skipsIt_andTheChangesItProducesLater_untilUnblocked() {
     modelsSpec.onFirstRun = spec -> recordedByCurrentRun.add(change(otherModels));
-    ChangePropagator propagator = propagator();
+    ChangePropagationQueue queue = queue();
     VitruviusChange<Uuid> inputChange = input(change(models));
-    propagator.enqueueChange(inputChange, 1);
+    queue.enqueueChange(inputChange, 1);
 
-    propagator.block(1, PropagationBlockReason.TRANSACTION);
-    assertEquals(Outcome.SKIPPED_BLOCKED, propagator.propagateNext().orElseThrow().outcome());
+    queue.block(1, PropagationBlockReason.TRANSACTION);
+    assertEquals(Outcome.SKIPPED_BLOCKED, queue.propagateNext().orElseThrow().outcome());
     verify(repository, never()).applyChange(inputChange);
 
-    propagator.unblock(1);
-    assertEquals(Outcome.PROPAGATED, propagator.propagateNext().orElseThrow().outcome());
+    queue.unblock(1);
+    assertEquals(Outcome.PROPAGATED, queue.propagateNext().orElseThrow().outcome());
 
     // The child produced just now is part of the change, so blocking the change blocks it too.
-    propagator.block(1, PropagationBlockReason.TRANSACTION);
-    QueuedChange child = propagator.getQueuedChanges().get(0);
+    queue.block(1, PropagationBlockReason.TRANSACTION);
+    QueuedChange child = queue.getQueuedChanges().get(0);
     assertEquals(PropagationBlockReason.TRANSACTION, child.blockReason());
-    assertEquals(Outcome.SKIPPED_BLOCKED, propagator.propagateNext().orElseThrow().outcome());
+    assertEquals(Outcome.SKIPPED_BLOCKED, queue.propagateNext().orElseThrow().outcome());
     assertEquals(0, otherModelsSpec.runs);
 
-    propagator.unblock(1);
-    assertEquals(Outcome.PROPAGATED, propagator.propagateNext().orElseThrow().outcome());
+    queue.unblock(1);
+    assertEquals(Outcome.PROPAGATED, queue.propagateNext().orElseThrow().outcome());
     assertEquals(1, otherModelsSpec.runs);
   }
 
   @Test
   void blockAndAnswer_rejectUnknownTaskIds() {
-    ChangePropagator propagator = propagator();
+    ChangePropagationQueue queue = queue();
 
     assertThrows(
         IllegalArgumentException.class,
-        () -> propagator.block(5, PropagationBlockReason.TRANSACTION));
-    assertThrows(IllegalArgumentException.class, () -> propagator.unblock(5));
-    assertThrows(IllegalArgumentException.class, () -> propagator.registerUserInteractions(5));
+        () -> queue.block(5, PropagationBlockReason.TRANSACTION));
+    assertThrows(IllegalArgumentException.class, () -> queue.unblock(5));
+    assertThrows(IllegalArgumentException.class, () -> queue.registerUserInteractions(5));
   }
 
   @Test
   void propagateUntilBlocked_stopsOnceOnlyBlockedChangesRemain() {
     TransactionalChange<EObject> askingChange = change(models);
     modelsSpec.askFor = askingChange;
-    ChangePropagator propagator = propagator();
-    propagator.enqueueChange(input(askingChange), 1);
-    propagator.enqueueChange(input(change(models)), 2);
-    propagator.enqueueChange(input(change(models)), 3);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(askingChange), 1);
+    queue.enqueueChange(input(change(models)), 2);
+    queue.enqueueChange(input(change(models)), 3);
 
-    List<QueuedPropagationStep> steps = propagator.propagateUntilBlocked(List.of());
+    List<QueuedPropagationStep> steps = queue.propagateUntilBlocked(List.of());
 
     assertEquals(
-        List.of(Outcome.DEFERRED, Outcome.PROPAGATED, Outcome.PROPAGATED, Outcome.SKIPPED_BLOCKED),
+        List.of(Outcome.DEFERRED, Outcome.PROPAGATED, Outcome.PROPAGATED),
         steps.stream().map(QueuedPropagationStep::outcome).toList());
-    assertTrue(propagator.isPending(1));
-    assertFalse(propagator.isPending(2));
+    assertTrue(queue.isPending(1));
+    assertFalse(queue.isPending(2));
+    assertTrue(queue.propagateUntilBlocked(List.of()).isEmpty());
+  }
+
+  @Test
+  void propagateUntilBlocked_retriesAChangeThatWasAnsweredWhileItRan() {
+    TransactionalChange<EObject> askingChange = change(models);
+    modelsSpec.askFor = askingChange;
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(askingChange), 1);
+    modelsSpec.beforeAsking =
+        spec -> {
+          spec.beforeAsking = again -> {};
+          answerFromAnotherThread(queue, 1, true);
+        };
+
+    List<QueuedPropagationStep> steps = queue.propagateUntilBlocked(List.of());
+
+    assertEquals(
+        List.of(Outcome.DEFERRED, Outcome.PROPAGATED),
+        steps.stream().map(QueuedPropagationStep::outcome).toList());
+    assertEquals(List.of(Boolean.TRUE), modelsSpec.answers);
+    assertFalse(queue.isPending(1));
   }
 
   @Test
@@ -346,13 +358,13 @@ class ChangePropagatorQueueTest {
         spec -> {
           throw failure;
         };
-    ChangePropagator propagator = propagator();
-    propagator.enqueueChange(input(change(models)), 1);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(change(models)), 1);
 
-    RuntimeException thrown = assertThrows(RuntimeException.class, propagator::propagateNext);
+    RuntimeException thrown = assertThrows(RuntimeException.class, queue::propagateNext);
 
     assertTrue(causedBy(thrown, failure));
-    assertFalse(propagator.isPending(1));
+    assertFalse(queue.isPending(1));
   }
 
   @Test
@@ -384,6 +396,14 @@ class ChangePropagatorQueueTest {
         mode);
   }
 
+  private ChangePropagationQueue queue() {
+    return queue(ChangePropagationMode.TRANSITIVE_CYCLIC);
+  }
+
+  private ChangePropagationQueue queue(ChangePropagationMode mode) {
+    return new ChangePropagationQueue(propagator(mode));
+  }
+
   @SuppressWarnings("unchecked")
   private VitruviusChange<Uuid> input(TransactionalChange<EObject> resolved) {
     VitruviusChange<Uuid> inputChange = mock(VitruviusChange.class);
@@ -409,6 +429,19 @@ class ChangePropagatorQueueTest {
     interaction.setMessage(message);
     interaction.setConfirmed(confirmed);
     return interaction;
+  }
+
+  /** Registers an answer from another thread, as a client would while the change runs. */
+  private static void answerFromAnotherThread(
+      ChangePropagationQueue queue, int taskId, boolean confirmed) {
+    Thread answering =
+        new Thread(() -> queue.registerUserInteractions(taskId, confirmation(QUESTION, confirmed)));
+    answering.start();
+    try {
+      answering.join();
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
   }
 
   private static boolean causedBy(Throwable throwable, Throwable expected) {

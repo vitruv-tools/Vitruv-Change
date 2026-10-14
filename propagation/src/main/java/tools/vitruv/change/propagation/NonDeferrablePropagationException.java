@@ -6,7 +6,9 @@ package tools.vitruv.change.propagation;
  *
  * <p>Deferring would mean propagating the change again later, which would repeat those
  * modifications. The queue therefore relies on change propagation asking for user input before
- * modifying models, and fails with this exception when that does not hold.
+ * modifying models, and fails with this exception when that does not hold. Only modifications by
+ * specifications that finished before the interaction are detected; modifications by the
+ * specification asking for input are not, and would be repeated.
  */
 public class NonDeferrablePropagationException extends IllegalStateException {
   private static final long serialVersionUID = 1L;

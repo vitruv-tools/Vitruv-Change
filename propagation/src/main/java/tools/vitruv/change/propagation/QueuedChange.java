@@ -3,8 +3,7 @@ package tools.vitruv.change.propagation;
 import tools.vitruv.change.interaction.PendingUserInteraction;
 
 /**
- * Snapshot of one item in the change propagation queue of a {@link
- * tools.vitruv.change.propagation.impl.ChangePropagator}.
+ * Snapshot of one item in a {@link tools.vitruv.change.propagation.impl.ChangePropagationQueue}.
  *
  * <p>Items form a tree: the change a client enqueues is the root, and every change produced by
  * propagating an item is queued as a child of that item.

@@ -23,6 +23,7 @@ class DeferringInteractionResultProviderTest {
     assertPending(
         PendingUserInteraction.Kind.CONFIRMATION,
         "Confirm?",
+        "no",
         List.of(),
         assertThrows(
             PendingUserInteractionException.class,
@@ -32,31 +33,34 @@ class DeferringInteractionResultProviderTest {
     assertPending(
         PendingUserInteraction.Kind.TEXT_INPUT,
         "Name?",
+        null,
         List.of(),
         assertThrows(
             PendingUserInteractionException.class,
             () ->
                 provider.getTextInputInteractionResult(
-                    WindowModality.MODAL, "T", "Name?", "ok", "cancel", null)));
+                    WindowModality.MODAL, "T", "Name?", "yes", "cancel", null)));
     assertPending(
         PendingUserInteraction.Kind.SINGLE_SELECTION,
         "Pick one",
+        null,
         List.of("a", "b"),
         assertThrows(
             PendingUserInteractionException.class,
             () ->
                 provider.getMultipleChoiceSingleSelectionInteractionResult(
-                    WindowModality.MODAL, "T", "Pick one", "ok", "cancel", pickOne)));
+                    WindowModality.MODAL, "T", "Pick one", "yes", "cancel", pickOne)));
     List<String> pickSome = List.of("x");
     assertPending(
         PendingUserInteraction.Kind.MULTIPLE_SELECTION,
         "Pick some",
+        null,
         List.of("x"),
         assertThrows(
             PendingUserInteractionException.class,
             () ->
                 provider.getMultipleChoiceMultipleSelectionInteractionResult(
-                    WindowModality.MODAL, "T", "Pick some", "ok", "cancel", pickSome)));
+                    WindowModality.MODAL, "T", "Pick some", "yes", "cancel", pickSome)));
   }
 
   @Test
@@ -71,7 +75,8 @@ class DeferringInteractionResultProviderTest {
   void findIn_locatesThePendingInteractionThroughWrappers() {
     PendingUserInteractionException pending =
         new PendingUserInteractionException(
-            new PendingUserInteraction(PendingUserInteraction.Kind.CONFIRMATION, null, "m", null));
+            new PendingUserInteraction(
+                PendingUserInteraction.Kind.CONFIRMATION, null, "m", null, null, null, null));
 
     assertSame(
         pending,
@@ -83,12 +88,16 @@ class DeferringInteractionResultProviderTest {
   private static void assertPending(
       PendingUserInteraction.Kind kind,
       String message,
+      String negativeDecisionText,
       List<String> choices,
       PendingUserInteractionException exception) {
     PendingUserInteraction interaction = exception.getInteraction();
     assertEquals(kind, interaction.kind());
     assertEquals("T", interaction.title());
     assertEquals(message, interaction.message());
+    assertEquals("yes", interaction.positiveDecisionText());
+    assertEquals(negativeDecisionText, interaction.negativeDecisionText());
+    assertEquals("cancel", interaction.cancelDecisionText());
     assertEquals(choices, interaction.choices());
   }
 }

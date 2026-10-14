@@ -27,7 +27,15 @@ public class DeferringInteractionResultProvider implements InteractionResultProv
       String positiveDecisionText,
       String negativeDecisionText,
       String cancelDecisionText) {
-    throw pending(PendingUserInteraction.Kind.CONFIRMATION, title, message, null);
+    throw pending(
+        new PendingUserInteraction(
+            PendingUserInteraction.Kind.CONFIRMATION,
+            title,
+            message,
+            positiveDecisionText,
+            negativeDecisionText,
+            cancelDecisionText,
+            null));
   }
 
   @Override
@@ -48,7 +56,15 @@ public class DeferringInteractionResultProvider implements InteractionResultProv
       String positiveDecisionText,
       String cancelDecisionText,
       InputValidator inputValidator) {
-    throw pending(PendingUserInteraction.Kind.TEXT_INPUT, title, message, null);
+    throw pending(
+        new PendingUserInteraction(
+            PendingUserInteraction.Kind.TEXT_INPUT,
+            title,
+            message,
+            positiveDecisionText,
+            null,
+            cancelDecisionText,
+            null));
   }
 
   @Override
@@ -59,7 +75,15 @@ public class DeferringInteractionResultProvider implements InteractionResultProv
       String positiveDecisionText,
       String cancelDecisionText,
       Iterable<String> choices) {
-    throw pending(PendingUserInteraction.Kind.SINGLE_SELECTION, title, message, choices);
+    throw pending(
+        new PendingUserInteraction(
+            PendingUserInteraction.Kind.SINGLE_SELECTION,
+            title,
+            message,
+            positiveDecisionText,
+            null,
+            cancelDecisionText,
+            toList(choices)));
   }
 
   @Override
@@ -70,16 +94,26 @@ public class DeferringInteractionResultProvider implements InteractionResultProv
       String positiveDecisionText,
       String cancelDecisionText,
       Iterable<String> choices) {
-    throw pending(PendingUserInteraction.Kind.MULTIPLE_SELECTION, title, message, choices);
+    throw pending(
+        new PendingUserInteraction(
+            PendingUserInteraction.Kind.MULTIPLE_SELECTION,
+            title,
+            message,
+            positiveDecisionText,
+            null,
+            cancelDecisionText,
+            toList(choices)));
   }
 
-  private static PendingUserInteractionException pending(
-      PendingUserInteraction.Kind kind, String title, String message, Iterable<String> choices) {
+  private static PendingUserInteractionException pending(PendingUserInteraction interaction) {
+    return new PendingUserInteractionException(interaction);
+  }
+
+  private static List<String> toList(Iterable<String> choices) {
     List<String> choiceList = new ArrayList<>();
     if (choices != null) {
       choices.forEach(choiceList::add);
     }
-    return new PendingUserInteractionException(
-        new PendingUserInteraction(kind, title, message, choiceList));
+    return choiceList;
   }
 }

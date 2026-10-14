@@ -4,7 +4,8 @@ import java.util.List;
 import tools.vitruv.change.composite.description.PropagatedChange;
 
 /**
- * Result of one attempt to propagate the first item of the change propagation queue.
+ * Result of one attempt to propagate the first item of a {@link
+ * tools.vitruv.change.propagation.impl.ChangePropagationQueue}.
  *
  * @param taskId the id of the item that was attempted
  * @param outcome what happened to it
