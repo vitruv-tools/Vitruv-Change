@@ -4,9 +4,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.emf.common.util.URI;
@@ -39,6 +42,8 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
   private List<? extends EChange<Element>> eChanges;
 
   private final List<UserInteractionBase> userInteractions = new ArrayList<UserInteractionBase>();
+
+  private final Map<Class<?>, Object> annotations = new HashMap<>();
 
   public TransactionalChangeImpl(final Iterable<? extends EChange<Element>> eChanges) {
     Preconditions.checkNotNull(eChanges, "eChanges");
@@ -210,6 +215,21 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
     Iterables.<UserInteractionBase>addAll(this.userInteractions, userInteractions);
   }
 
+  @Override
+  public <T> void setAnnotation(final Class<T> type, final T value) {
+    this.annotations.put(type, value);
+  }
+
+  @Override
+  public <T> Optional<T> getAnnotation(final Class<T> type) {
+    return Optional.ofNullable(type.cast(this.annotations.get(type)));
+  }
+
+  @Override
+  public Map<Class<?>, Object> getAnnotations() {
+    return Collections.unmodifiableMap(this.annotations);
+  }
+
   protected List<EChange<Element>> getClonedEChanges() {
     return this.eChanges.stream().map(it -> EcoreUtil.<EChange<Element>>copy(it)).toList();
   }
@@ -217,7 +237,9 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
   @Override
   public TransactionalChangeImpl<Element> copy() {
     List<EChange<Element>> _clonedEChanges = this.getClonedEChanges();
-    return new TransactionalChangeImpl<Element>(_clonedEChanges);
+    TransactionalChangeImpl<Element> copy = new TransactionalChangeImpl<Element>(_clonedEChanges);
+    copy.annotations.putAll(this.annotations);
+    return copy;
   }
 
   @Override
