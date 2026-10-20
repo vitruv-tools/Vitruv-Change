@@ -65,18 +65,5 @@ public interface VitruviusChange<Element> extends Annotatable {
    *
    * @return the change sequence
    */
-  default Iterable<TransactionalChange<Element>> getTransactionalChangeSequence() {
-    if (!this.containsConcreteChange()) {
-      return List.of();
-    }
-    if (this instanceof TransactionalChange<Element> change) {
-      return List.of(change);
-    }
-    if (this instanceof CompositeChange<Element, ?> change) {
-      return change.getChanges().stream()
-              .flatMap(it -> StreamSupport.stream(it.getTransactionalChangeSequence().spliterator(), false))
-              .collect(Collectors.toList());
-    }
-    throw new IllegalStateException("Unexpected change type: " + this.getClass().getSimpleName());
-  }
+  public Iterable<TransactionalChange<Element>> getTransactionalChangeSequence();
 }

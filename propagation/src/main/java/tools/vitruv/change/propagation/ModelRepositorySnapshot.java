@@ -31,4 +31,10 @@ public interface ModelRepositorySnapshot extends ResourceAccess, AutoCloseable {
    * @return the immutable map
    */
   Map<EObject, EObject> getSnapshotToRepositoryMap();
+
+  /**
+   * Unload all resources in the snapshot.
+   * Specified explicitly so that the throws-declaration is removed.
+   */
+  void close();
 }

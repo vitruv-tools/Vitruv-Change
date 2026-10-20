@@ -1,5 +1,6 @@
 package tools.vitruv.change.propagation.impl;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import java.util.ArrayList;
@@ -32,14 +33,6 @@ import tools.vitruv.change.interaction.UserInteractionListener;
 import tools.vitruv.change.propagation.*;
 
 public class ChangePropagator {
-  private record PropagationResult(TransactionalChangeWithPreviousState change, List<PropagatedChange> propagatedChanges) {
-  }
-
-  @FunctionalInterface
-  private interface LowerLevelPropagation {
-    PropagationResult propagateChange(TransactionalChangeWithPreviousState change);
-  }
-
   private static class ChangePropagation implements ChangePropagationObserver, UserInteractionListener {
     private final ChangePropagator outer;
 
@@ -47,7 +40,7 @@ public class ChangePropagator {
 
     private final int level;
 
-    private final LowerLevelPropagation lowerLevelPropagation;
+    private final Function<TransactionalChangeWithPreviousState, PropagationResult> lowerLevelPropagation;
 
     private final ChangePropagator.ChangePropagation previous;
 
@@ -136,7 +129,7 @@ public class ChangePropagator {
         nonLeafChanges = nonEmptyChanges;
       }
       return nonLeafChanges.stream()
-                    .map(lowerLevelPropagation::propagateChange)
+                    .map(lowerLevelPropagation)
                     .flatMap(it -> Streams.concat(
                             it.propagatedChanges().stream(),
                             new ChangePropagator.ChangePropagation(this.outer, it.change(), this.level, this.lowerLevelPropagation, this).propagateChange().stream()))
@@ -212,7 +205,7 @@ public class ChangePropagator {
       }
     }
 
-    public ChangePropagation(final ChangePropagator outer, final TransactionalChangeWithPreviousState sourceChange, final int level, final LowerLevelPropagation lowerLevelPropagation, final ChangePropagator.ChangePropagation previous) {
+    public ChangePropagation(final ChangePropagator outer, final TransactionalChangeWithPreviousState sourceChange, final int level, final Function<TransactionalChangeWithPreviousState, PropagationResult> lowerLevelPropagation, final ChangePropagator.ChangePropagation previous) {
       super();
       this.outer = outer;
       this.sourceChange = sourceChange;
@@ -295,8 +288,6 @@ public class ChangePropagator {
             = new TransactionalChangeWithPreviousState(resolvedChange, previousState);
         result.addAll(
             this.propagateChange(changeWithPreviousState, maximumLevel).propagatedChanges());
-      } catch (Exception e) {
-        throw new RuntimeException(e);
       }
     }
 
@@ -313,7 +304,7 @@ public class ChangePropagator {
 
     PropagationResult lowerLevelResult = this.propagateChange(change, level - 1);
 
-    LowerLevelPropagation lowerLevelPropagation
+    Function<TransactionalChangeWithPreviousState, PropagationResult> lowerLevelPropagation
         = (lowerLevelChange) -> propagateChange(lowerLevelChange, level - 1);
 
     ChangePropagation propagation = new ChangePropagation(
@@ -341,9 +332,5 @@ public class ChangePropagator {
         VitruviusChangeFactory.getInstance().createTransactionalChange(eChanges),
         change.previousState()
     );
-  }
-
-  private record TransactionalChangeWithPreviousState(TransactionalChange<EObject> change,
-                                                     ModelRepositorySnapshot previousState) {
   }
 }

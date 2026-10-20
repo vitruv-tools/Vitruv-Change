@@ -27,6 +27,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.CorrespondenceFactory;
 import tools.vitruv.change.correspondence.Correspondences;
+import tools.vitruv.change.utils.StreamUtils;
 
 /** A persistable representation of a {@link CorrespondenceModel}. */
 class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceModel {
@@ -113,8 +114,10 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
       Correspondence originalCorrespondence = this.correspondences.getCorrespondences().get(index);
       Correspondence copiedCorrespondence = copiedCorrespondences.getCorrespondences().get(index);
 
-      var newLeftEObjects = map(copiedCorrespondence.getLeftEObjects(), originalToCopyMapping);
-      var newRightEObjects = map(copiedCorrespondence.getRightEObjects(), originalToCopyMapping);
+      var newLeftEObjects = StreamUtils.mapIfMappable(
+          copiedCorrespondence.getLeftEObjects().stream(), originalToCopyMapping).toList();
+      var newRightEObjects = StreamUtils.mapIfMappable(
+          copiedCorrespondence.getRightEObjects().stream(), originalToCopyMapping).toList();
 
       replace(copiedCorrespondence.getLeftEObjects(), newLeftEObjects);
       replace(copiedCorrespondence.getRightEObjects(), newRightEObjects);
@@ -127,12 +130,6 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
                       : null;
 
     return new PersistableCorrespondenceModelImpl(copiedCorrespondences, resourceUri);
-  }
-
-  private static List<EObject> map(
-      List<EObject> eObjects, Map<EObject, EObject> originalToCopyMapping) {
-    return eObjects.stream()
-               .map(eObject -> originalToCopyMapping.getOrDefault(eObject, eObject)).toList();
   }
 
   @Override
