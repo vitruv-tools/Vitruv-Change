@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 import org.eclipse.emf.ecore.EObject;
@@ -54,6 +56,8 @@ import tools.vitruv.change.utils.ResourceAccess;
  */
 class ChangePropagationQueueTest {
   private static final String QUESTION = "Delete the corresponding class?";
+  private static final String OTHER_QUESTION = "Rename the corresponding class?";
+  private static final String NOTICE = "Created the corresponding class.";
 
   private final MetamodelDescriptor models = MetamodelDescriptor.with("models");
   private final MetamodelDescriptor otherModels = MetamodelDescriptor.with("otherModels");
@@ -166,17 +170,11 @@ class ChangePropagationQueueTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   void compositeInput_isSplitIntoOneItemPerTransactionalChange_keepingTheTaskIdForTheFirst() {
     TransactionalChange<EObject> part1 = change(models);
     TransactionalChange<EObject> part2 = change(models);
-    CompositeChange<EObject, VitruviusChange<EObject>> composite = mock(CompositeChange.class);
-    when(composite.containsConcreteChange()).thenReturn(true);
-    when(composite.getChanges()).thenReturn(List.of(part1, part2));
-    VitruviusChange<Uuid> inputChange = mock(VitruviusChange.class);
-    when(repository.applyChange(inputChange)).thenReturn((VitruviusChange) composite);
     ChangePropagationQueue queue = queue();
-    queue.enqueueChange(inputChange, 7);
+    queue.enqueueChange(compositeInput(part1, part2), 7);
 
     QueuedPropagationStep first = queue.propagateNext().orElseThrow();
 
@@ -187,6 +185,26 @@ class ChangePropagationQueueTest {
     assertSame(
         part2,
         queue.propagateNext().orElseThrow().propagatedChanges().get(0).getOriginalChange());
+    assertFalse(queue.isPending(7));
+  }
+
+  @Test
+  void compositeInput_whoseFirstPartIsDeferred_hasItsLaterPartsPropagatedFirst() {
+    // Documents the current behaviour.
+    TransactionalChange<EObject> part1 = change(models);
+    TransactionalChange<EObject> part2 = change(models);
+    modelsSpec.askFor = part1;
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(compositeInput(part1, part2), 7);
+
+    assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
+    QueuedPropagationStep second = queue.propagateNext().orElseThrow();
+    assertSame(part2, second.propagatedChanges().get(0).getOriginalChange());
+
+    queue.registerUserInteractions(7, confirmation(QUESTION, true));
+    QueuedPropagationStep first = queue.propagateNext().orElseThrow();
+    assertEquals(7, first.taskId());
+    assertSame(part1, first.propagatedChanges().get(0).getOriginalChange());
     assertFalse(queue.isPending(7));
   }
 
@@ -271,6 +289,74 @@ class ChangePropagationQueueTest {
     assertFalse(queue.isPending(1));
   }
 
+  // ---- notifications ---------------------------------------------------------------------------
+
+  @Test
+  void notificationsOfAPropagatedChange_reachThePreviouslyInstalledProvider() {
+    modelsSpec.notification = NOTICE;
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(change(models)), 1);
+
+    assertEquals(Outcome.PROPAGATED, queue.propagateNext().orElseThrow().outcome());
+
+    verify(blockingProvider, times(1))
+        .getNotificationInteractionResult(any(), any(), eq(NOTICE), any(), any());
+  }
+
+  @Test
+  void notificationsOfADeferredChange_areShownOnce_whenTheRetrySucceeds() {
+    TransactionalChange<EObject> askingChange = change(models);
+    modelsSpec.askFor = askingChange;
+    modelsSpec.notification = NOTICE;
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(askingChange), 1);
+
+    assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
+    // The retry starts over and notifies again, so the deferred attempt shows nothing.
+    verify(blockingProvider, never())
+        .getNotificationInteractionResult(any(), any(), eq(NOTICE), any(), any());
+
+    queue.registerUserInteractions(1, confirmation(QUESTION, true));
+    assertEquals(Outcome.PROPAGATED, queue.propagateNext().orElseThrow().outcome());
+
+    verify(blockingProvider, times(1))
+        .getNotificationInteractionResult(any(), any(), eq(NOTICE), any(), any());
+  }
+
+  @Test
+  void notifications_doNotUseUpAnAnswerWithoutAMessage() {
+    TransactionalChange<EObject> askingChange = change(models);
+    modelsSpec.askFor = askingChange;
+    modelsSpec.notification = NOTICE;
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(askingChange), 1);
+    assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
+
+    // Such an answer matches every confirmation, but must be left for the question.
+    queue.registerUserInteractions(1, confirmationWithoutMessage(true));
+
+    assertEquals(Outcome.PROPAGATED, queue.propagateNext().orElseThrow().outcome());
+    assertEquals(List.of(Boolean.TRUE), modelsSpec.answers);
+    verify(blockingProvider, times(1))
+        .getNotificationInteractionResult(any(), any(), eq(NOTICE), any(), any());
+  }
+
+  @Test
+  void notificationsOfAFailingChange_stillReachThePreviouslyInstalledProvider() {
+    modelsSpec.notification = NOTICE;
+    modelsSpec.onFirstRun =
+        spec -> {
+          throw new IllegalStateException("reaction failed");
+        };
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(change(models)), 1);
+
+    assertThrows(RuntimeException.class, queue::propagateNext);
+
+    verify(blockingProvider, times(1))
+        .getNotificationInteractionResult(any(), any(), eq(NOTICE), any(), any());
+  }
+
   // ---- transactions and other blocks
   // --------------------------------------------------------------
 
@@ -309,6 +395,108 @@ class ChangePropagationQueueTest {
         () -> queue.block(5, PropagationBlockReason.TRANSACTION));
     assertThrows(IllegalArgumentException.class, () -> queue.unblock(5));
     assertThrows(IllegalArgumentException.class, () -> queue.registerUserInteractions(5));
+  }
+
+  @Test
+  void blockAndUnblock_acceptTheItemBeingPropagated() {
+    modelsSpec.onFirstRun = spec -> recordedByCurrentRun.add(change(otherModels));
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(change(models)), 1);
+    queue.propagateNext();
+    int child = queue.getQueuedChanges().get(0).taskId();
+    List<QueuedChange> whileRunning = new ArrayList<>();
+    otherModelsSpec.onFirstRun =
+        spec ->
+            inAnotherThread(
+                () -> {
+                  queue.block(child, PropagationBlockReason.TRANSACTION);
+                  whileRunning.add(queue.getQueuedChange(child).orElseThrow());
+                  queue.unblock(child);
+                  whileRunning.add(queue.getQueuedChange(child).orElseThrow());
+                  queue.block(child, PropagationBlockReason.TRANSACTION);
+                });
+
+    // A block left on the item has no effect once the item has been propagated.
+    assertEquals(Outcome.PROPAGATED, queue.propagateNext().orElseThrow().outcome());
+    assertEquals(PropagationBlockReason.TRANSACTION, whileRunning.get(0).blockReason());
+    assertFalse(whileRunning.get(1).blocked());
+    assertFalse(queue.isPending(1));
+  }
+
+  @Test
+  void itemBlockedWhileRunning_staysBlockedAfterBeingDeferredAndAnswered_untilUnblocked() {
+    ChangePropagationQueue queue = queue();
+    int child = deferChildBlockedWhileRunning(queue);
+    QueuedChange deferred = queue.getQueuedChange(child).orElseThrow();
+    assertEquals(PropagationBlockReason.TRANSACTION, deferred.blockReason());
+    assertEquals(QUESTION, deferred.pendingInteraction().message());
+
+    queue.registerUserInteractions(1, confirmation(QUESTION, true));
+
+    QueuedChange answered = queue.getQueuedChange(child).orElseThrow();
+    assertEquals(PropagationBlockReason.TRANSACTION, answered.blockReason());
+    assertNull(answered.pendingInteraction());
+    assertEquals(Outcome.SKIPPED_BLOCKED, queue.propagateNext().orElseThrow().outcome());
+
+    queue.unblock(child);
+    assertEquals(Outcome.PROPAGATED, queue.propagateNext().orElseThrow().outcome());
+    assertEquals(List.of(Boolean.TRUE), otherModelsSpec.answers);
+    assertFalse(queue.isPending(1));
+  }
+
+  @Test
+  void itemBlockedWhileRunning_keepsItsQuestion_untilAnAnswerMatchesIt() {
+    ChangePropagationQueue queue = queue();
+    int child = deferChildBlockedWhileRunning(queue);
+
+    queue.registerUserInteractions(1, confirmation(OTHER_QUESTION, true));
+
+    QueuedChange stillBlocked = queue.getQueuedChange(child).orElseThrow();
+    assertEquals(PropagationBlockReason.TRANSACTION, stillBlocked.blockReason());
+    assertEquals(QUESTION, stillBlocked.pendingInteraction().message());
+    queue.unblock(child);
+    QueuedChange unblocked = queue.getQueuedChange(child).orElseThrow();
+    assertEquals(PropagationBlockReason.USER_INTERACTION, unblocked.blockReason());
+    assertEquals(QUESTION, unblocked.pendingInteraction().message());
+
+    queue.registerUserInteractions(1, confirmationWithoutMessage(true));
+    assertEquals(Outcome.PROPAGATED, queue.propagateNext().orElseThrow().outcome());
+    assertEquals(List.of(Boolean.TRUE), otherModelsSpec.answers);
+  }
+
+  @Test
+  void deferredItemOfABlockedChange_keepsItsQuestion_untilAnAnswerMatchesIt() {
+    TransactionalChange<EObject> askingChange = change(models);
+    modelsSpec.askFor = askingChange;
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(askingChange), 1);
+    assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
+    queue.block(1, PropagationBlockReason.TRANSACTION);
+
+    queue.registerUserInteractions(1, confirmation(OTHER_QUESTION, true));
+    assertEquals(QUESTION, queue.getQueuedChange(1).orElseThrow().pendingInteraction().message());
+
+    queue.registerUserInteractions(1, confirmation(QUESTION, true));
+    assertNull(queue.getQueuedChange(1).orElseThrow().pendingInteraction());
+    assertEquals(Outcome.SKIPPED_BLOCKED, queue.propagateNext().orElseThrow().outcome());
+    queue.unblock(1);
+    assertEquals(Outcome.PROPAGATED, queue.propagateNext().orElseThrow().outcome());
+    assertEquals(List.of(Boolean.TRUE), modelsSpec.answers);
+  }
+
+  @Test
+  void unblockingADeferredItemBeforeItIsAnswered_leavesItWaitingForTheAnswer() {
+    ChangePropagationQueue queue = queue();
+    int child = deferChildBlockedWhileRunning(queue);
+
+    queue.unblock(child);
+
+    QueuedChange unblocked = queue.getQueuedChange(child).orElseThrow();
+    assertEquals(PropagationBlockReason.USER_INTERACTION, unblocked.blockReason());
+    assertEquals(QUESTION, unblocked.pendingInteraction().message());
+    assertEquals(Outcome.SKIPPED_BLOCKED, queue.propagateNext().orElseThrow().outcome());
+    queue.registerUserInteractions(1, confirmation(QUESTION, true));
+    assertEquals(Outcome.PROPAGATED, queue.propagateNext().orElseThrow().outcome());
   }
 
   @Test
@@ -368,6 +556,34 @@ class ChangePropagationQueueTest {
   }
 
   @Test
+  void failingItem_isRemovedAlone_whileTheRestOfItsTreeIsStillPropagated() {
+    // Documents the current behaviour.
+    TransactionalChange<EObject> failing = change(otherModels);
+    TransactionalChange<EObject> sibling = change(otherModels);
+    modelsSpec.onFirstRun =
+        spec -> {
+          recordedByCurrentRun.add(failing);
+          recordedByCurrentRun.add(sibling);
+        };
+    otherModelsSpec.onFirstRun =
+        spec -> {
+          throw new IllegalStateException("reaction failed");
+        };
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(change(models)), 1);
+    queue.propagateNext();
+
+    assertThrows(RuntimeException.class, queue::propagateNext);
+
+    assertTrue(queue.isPending(1));
+    assertEquals(1, queue.getQueuedChanges().size());
+    QueuedPropagationStep next = queue.propagateNext().orElseThrow();
+    assertEquals(Outcome.PROPAGATED, next.outcome());
+    assertSame(sibling, next.propagatedChanges().get(0).getOriginalChange());
+    assertFalse(queue.isPending(1));
+  }
+
+  @Test
   void synchronousPropagation_stillAsksTheProviderDirectly() {
     TransactionalChange<EObject> askingChange = change(models);
     modelsSpec.askFor = askingChange;
@@ -411,6 +627,40 @@ class ChangePropagationQueueTest {
     return inputChange;
   }
 
+  /** Creates an input change that the repository resolves to a composite of the given parts. */
+  @SafeVarargs
+  @SuppressWarnings("unchecked")
+  private VitruviusChange<Uuid> compositeInput(TransactionalChange<EObject>... parts) {
+    CompositeChange<EObject, VitruviusChange<EObject>> composite = mock(CompositeChange.class);
+    when(composite.containsConcreteChange()).thenReturn(true);
+    when(composite.getChanges()).thenReturn(List.of(parts));
+    VitruviusChange<Uuid> inputChange = mock(VitruviusChange.class);
+    when(repository.applyChange(inputChange)).thenReturn((VitruviusChange) composite);
+    return inputChange;
+  }
+
+  /**
+   * Enqueues a change as task 1 and propagates it, then propagates the child it produced, which is
+   * blocked for a transaction while it runs and asks the user, so that it is deferred.
+   *
+   * @return the task id of the child
+   */
+  private int deferChildBlockedWhileRunning(ChangePropagationQueue queue) {
+    TransactionalChange<EObject> askingChange = change(otherModels);
+    modelsSpec.onFirstRun = spec -> recordedByCurrentRun.add(askingChange);
+    otherModelsSpec.askFor = askingChange;
+    queue.enqueueChange(input(change(models)), 1);
+    queue.propagateNext();
+    int child = queue.getQueuedChanges().get(0).taskId();
+    otherModelsSpec.beforeAsking =
+        spec -> {
+          spec.beforeAsking = again -> {};
+          inAnotherThread(() -> queue.block(child, PropagationBlockReason.TRANSACTION));
+        };
+    assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
+    return child;
+  }
+
   @SuppressWarnings("unchecked")
   private TransactionalChange<EObject> change(MetamodelDescriptor descriptor) {
     TransactionalChange<EObject> change = mock(TransactionalChange.class);
@@ -431,16 +681,44 @@ class ChangePropagationQueueTest {
     return interaction;
   }
 
+  /** Creates an answer that matches every confirmation, as its message is not set. */
+  private static UserInteractionBase confirmationWithoutMessage(boolean confirmed) {
+    ConfirmationUserInteraction interaction =
+        InteractionFactory.eINSTANCE.createConfirmationUserInteraction();
+    interaction.setConfirmed(confirmed);
+    return interaction;
+  }
+
   /** Registers an answer from another thread, as a client would while the change runs. */
   private static void answerFromAnotherThread(
       ChangePropagationQueue queue, int taskId, boolean confirmed) {
-    Thread answering =
-        new Thread(() -> queue.registerUserInteractions(taskId, confirmation(QUESTION, confirmed)));
-    answering.start();
+    inAnotherThread(
+        () -> queue.registerUserInteractions(taskId, confirmation(QUESTION, confirmed)));
+  }
+
+  /**
+   * Runs the action in another thread, as a client would while a change runs, waits for it and
+   * rethrows what it threw.
+   */
+  private static void inAnotherThread(Runnable action) {
+    AtomicReference<RuntimeException> failure = new AtomicReference<>();
+    Thread client =
+        new Thread(
+            () -> {
+              try {
+                action.run();
+              } catch (RuntimeException e) {
+                failure.set(e);
+              }
+            });
+    client.start();
     try {
-      answering.join();
+      client.join();
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
+    }
+    if (failure.get() != null) {
+      throw failure.get();
     }
   }
 
@@ -462,6 +740,9 @@ class ChangePropagationQueueTest {
     /** The change for which this specification asks the user before doing anything. */
     private TransactionalChange<EObject> askFor;
 
+    /** What this specification notifies the user of whenever it runs, before asking. */
+    private String notification;
+
     private final List<Boolean> answers = new ArrayList<>();
 
     ScriptedSpecification(MetamodelDescriptor source, MetamodelDescriptor target) {
@@ -480,6 +761,9 @@ class ChangePropagationQueueTest {
         EChange<EObject> change,
         EditableCorrespondenceModelView<Correspondence> correspondenceModel,
         ResourceAccess resourceAccess) {
+      if (notification != null) {
+        getUserInteractor().getNotificationDialogBuilder().message(notification).startInteraction();
+      }
       if (askFor != null && askFor.getEChanges().contains(change)) {
         beforeAsking.accept(this);
         answers.add(

@@ -11,16 +11,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.composite.description.PropagatedChange;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
+import tools.vitruv.change.interaction.InteractionResultProvider;
 import tools.vitruv.change.interaction.PendingUserInteraction;
 import tools.vitruv.change.interaction.PendingUserInteractionException;
 import tools.vitruv.change.interaction.UserInteractionBase;
-import tools.vitruv.change.interaction.UserInteractionFactory;
+import tools.vitruv.change.interaction.UserInteractionOptions.NotificationType;
+import tools.vitruv.change.interaction.UserInteractionOptions.WindowModality;
 import tools.vitruv.change.interaction.impl.DeferringInteractionResultProvider;
+import tools.vitruv.change.interaction.impl.PredefinedInteractionMatcher;
+import tools.vitruv.change.interaction.impl.PredefinedInteractionResultProviderImpl;
 import tools.vitruv.change.propagation.ChangePropagationObserver;
 import tools.vitruv.change.propagation.NonDeferrablePropagationException;
 import tools.vitruv.change.propagation.PropagationBlockReason;
@@ -35,6 +40,10 @@ import tools.vitruv.change.propagation.QueuedPropagationStep;
  * an item are queued as its children at the front of the queue. An item that needs an unanswered
  * user interaction is blocked and moved to the end of the queue, and propagated again from the
  * start once an answer is registered.
+ *
+ * <p>Notifications do not defer an item. They are passed on to the user interaction result
+ * provider that was installed before, once the propagation step has completed or failed. Those of a
+ * deferred step are dropped, since the item notifies again when it is propagated from the start.
  *
  * <p>The queue may be inspected and modified from other threads at any time. Items are propagated
  * by one thread at a time, and not while the change propagator propagates a change directly.
@@ -152,7 +161,9 @@ public class ChangePropagationQueue {
   /**
    * Blocks propagation. For the task id of an enqueued change this blocks the change and every
    * change its propagation produces, including those produced later; for the id of any other queue
-   * item only that item.
+   * item only that item. If that item is being propagated, the block only takes effect if the item
+   * is deferred and goes back into the queue: once it has been propagated it is gone, and the
+   * changes it produced are new items that the block does not cover.
    *
    * @param taskId the id of the change or item to block
    * @param reason why it is blocked
@@ -164,7 +175,7 @@ public class ChangePropagationQueue {
       if (isPendingRoot(taskId)) {
         blockedRoots.put(taskId, reason);
       } else {
-        findQueuedItem(taskId).blockReason = reason;
+        findPendingItem(taskId).blockReason = reason;
       }
     }
   }
@@ -172,7 +183,8 @@ public class ChangePropagationQueue {
   /**
    * Lifts a block set by {@link #block(int, PropagationBlockReason)}. Blocks caused by unanswered
    * user interactions are lifted by {@link #registerUserInteractions(int, UserInteractionBase...)}
-   * instead.
+   * instead, so an item that still waits for an answer stays blocked until the answer is
+   * registered.
    *
    * @param taskId the id passed to {@link #block(int, PropagationBlockReason)}
    * @throws IllegalArgumentException if nothing with this id is pending
@@ -182,9 +194,10 @@ public class ChangePropagationQueue {
       if (isPendingRoot(taskId)) {
         blockedRoots.remove(taskId);
       } else {
-        final QueueItem item = findQueuedItem(taskId);
+        final QueueItem item = findPendingItem(taskId);
         if (item.blockReason != PropagationBlockReason.USER_INTERACTION) {
-          item.blockReason = null;
+          item.blockReason =
+              item.pendingInteraction != null ? PropagationBlockReason.USER_INTERACTION : null;
         }
       }
     }
@@ -192,10 +205,12 @@ public class ChangePropagationQueue {
 
   /**
    * Registers answers to user interactions for a change and unblocks every item of it that waits
-   * for a user interaction. Answers are matched to interactions as described at {@link
+   * for a user interaction; a {@link PropagationBlockReason#TRANSACTION} block stays until {@link
+   * #unblock(int)}. Answers are matched to interactions as described at {@link
    * PendingUserInteraction}: by type, message and, for selections, choices. They stay available
-   * for all further items of the change, and each propagation step gets all of them again. May be
-   * called while an item is being propagated.
+   * for all further items of the change, and each propagation step gets all of them again. An item
+   * that stays blocked for another reason keeps the interaction it waits for until one of the
+   * answers matches it. May be called while an item is being propagated.
    *
    * @param taskId the task id of the change, or of any of its queue items
    * @param interactions the answers
@@ -204,26 +219,13 @@ public class ChangePropagationQueue {
   public void registerUserInteractions(
       final int taskId, final UserInteractionBase... interactions) {
     synchronized (queueLock) {
-      final int rootTaskId;
-      if (isPendingRoot(taskId)) {
-        rootTaskId = taskId;
-      } else {
-        rootTaskId =
-            allItems().stream()
-                .filter(it -> it.taskId == taskId)
-                .findFirst()
-                .orElseThrow(
-                    () -> new IllegalArgumentException("No pending change with task id " + taskId))
-                .rootTaskId;
-      }
+      final int rootTaskId = isPendingRoot(taskId) ? taskId : findPendingItem(taskId).rootTaskId;
       userInteractionsByRoot
           .computeIfAbsent(rootTaskId, id -> new ArrayList<>())
           .addAll(List.of(interactions));
       for (final QueueItem item : queue) {
-        if (item.rootTaskId == rootTaskId
-            && item.blockReason == PropagationBlockReason.USER_INTERACTION) {
-          item.blockReason = null;
-          item.pendingInteraction = null;
+        if (item.rootTaskId == rootTaskId) {
+          applyNewAnswers(item, List.of(interactions));
         }
       }
     }
@@ -331,23 +333,27 @@ public class ChangePropagationQueue {
    */
   private QueuedPropagationStep handleFailedItem(
       final QueueItem item, final RuntimeException failure, final int knownAnswers) {
-    final PendingUserInteractionException pending = PendingUserInteractionException.findIn(failure);
-    final NonDeferrablePropagationException nonDeferrable =
-        findCause(failure, NonDeferrablePropagationException.class);
     synchronized (queueLock) {
       executingItem = null;
-      if (pending != null && nonDeferrable == null) {
-        // If answers were registered while the item was running, retry instead of waiting.
-        final boolean answeredMeanwhile =
-            userInteractionsOf(item.rootTaskId).size() != knownAnswers;
-        item.blockReason = answeredMeanwhile ? null : PropagationBlockReason.USER_INTERACTION;
-        item.pendingInteraction = answeredMeanwhile ? null : pending.getInteraction();
+      if (isDeferral(failure)) {
+        // A block set while the item was running stays until unblock lifts it.
+        if (item.blockReason == null) {
+          item.blockReason = PropagationBlockReason.USER_INTERACTION;
+        }
+        item.pendingInteraction = PendingUserInteractionException.findIn(failure).getInteraction();
+        // Answers registered while the item was running are applied as if registered just now.
+        final List<UserInteractionBase> answers = userInteractionsOf(item.rootTaskId);
+        if (answers.size() != knownAnswers) {
+          applyNewAnswers(item, answers.subList(knownAnswers, answers.size()));
+        }
         queue.addLast(item);
         return new QueuedPropagationStep(
             item.taskId, QueuedPropagationStep.Outcome.DEFERRED, List.of());
       }
       forgetRootIfDone(item.rootTaskId);
     }
+    final NonDeferrablePropagationException nonDeferrable =
+        findCause(failure, NonDeferrablePropagationException.class);
     throw nonDeferrable != null ? nonDeferrable : failure;
   }
 
@@ -368,7 +374,9 @@ public class ChangePropagationQueue {
 
   /**
    * Propagates the change of a queue item one step, answering user interactions from the answers
-   * registered for its tree and deferring all others.
+   * registered for its tree and deferring all others. Once the previous user interaction result
+   * provider is restored, the notifications of the step are passed on to it, unless the step is
+   * deferred.
    */
   private ChangePropagator.SingleStepResult propagateQueuedItem(
       final QueueItem item, final Iterable<ChangePropagationObserver> observers) {
@@ -376,18 +384,78 @@ public class ChangePropagationQueue {
     synchronized (queueLock) {
       answers = userInteractionsOf(item.rootTaskId).toArray(UserInteractionBase[]::new);
     }
-    try (AutoCloseable deferringProvider =
+    final DeferringInteractionResultProvider deferringProvider =
+        new DeferringInteractionResultProvider();
+    final AtomicReference<InteractionResultProvider> previousProvider = new AtomicReference<>();
+    ChangePropagator.SingleStepResult step = null;
+    RuntimeException failure = null;
+    try (AutoCloseable restorePreviousProvider =
         changePropagator
             .getUserInteractor()
             .replaceUserInteractionResultProvider(
-                current ->
-                    UserInteractionFactory.instance.createPredefinedInteractionResultProvider(
-                        new DeferringInteractionResultProvider(), answers))) {
-      return changePropagator.propagateSingleStep(item.change, observers);
+                current -> {
+                  previousProvider.set(current);
+                  return createStepProvider(deferringProvider, answers);
+                })) {
+      step = changePropagator.propagateSingleStep(item.change, observers);
     } catch (final RuntimeException e) {
-      throw e;
+      failure = e;
     } catch (final Exception e) {
-      throw new IllegalStateException("Could not restore the user interaction result provider", e);
+      failure =
+          new IllegalStateException("Could not restore the user interaction result provider", e);
+    }
+    // A deferred step is propagated again from the start, which repeats its notifications.
+    if (failure == null || !isDeferral(failure)) {
+      deferringProvider.forwardNotificationsTo(previousProvider.get());
+    }
+    if (failure != null) {
+      throw failure;
+    }
+    return step;
+  }
+
+  /**
+   * Creates the user interaction result provider for one propagation step: it answers user
+   * interactions from the given answers and leaves all others to {@code deferringProvider}.
+   * Notifications go to {@code deferringProvider} directly. No answer is ever registered for a
+   * notification, but an answer to a confirmation would otherwise match one and be used up by it.
+   */
+  private static InteractionResultProvider createStepProvider(
+      final DeferringInteractionResultProvider deferringProvider,
+      final UserInteractionBase[] answers) {
+    final PredefinedInteractionResultProviderImpl provider =
+        new PredefinedInteractionResultProviderImpl(deferringProvider) {
+          @Override
+          public void getNotificationInteractionResult(
+              final WindowModality windowModality,
+              final String title,
+              final String message,
+              final String positiveDecisionText,
+              final NotificationType notificationType) {
+            deferringProvider.getNotificationInteractionResult(
+                windowModality, title, message, positiveDecisionText, notificationType);
+          }
+        };
+    provider.addUserInteractions(answers);
+    return provider;
+  }
+
+  /**
+   * Updates an item of a change for answers newly registered for that change. An item that can be
+   * propagated again right away no longer waits for its user interaction, as propagating it asks
+   * again if the answers do not suffice. An item that stays blocked for another reason keeps
+   * waiting for its interaction until one of the answers matches it, so the interaction can still
+   * be looked up while the item is blocked.
+   */
+  private void applyNewAnswers(final QueueItem item, final List<UserInteractionBase> newAnswers) {
+    final boolean blockedOtherwise =
+        (item.blockReason != null && item.blockReason != PropagationBlockReason.USER_INTERACTION)
+            || blockedRoots.containsKey(item.rootTaskId);
+    if (!blockedOtherwise || isAnsweredBy(item.pendingInteraction, newAnswers)) {
+      if (item.blockReason == PropagationBlockReason.USER_INTERACTION) {
+        item.blockReason = null;
+      }
+      item.pendingInteraction = null;
     }
   }
 
@@ -451,11 +519,12 @@ public class ChangePropagationQueue {
     return allItems().stream().anyMatch(it -> it.rootTaskId == taskId);
   }
 
-  private QueueItem findQueuedItem(final int taskId) {
-    return queue.stream()
+  private QueueItem findPendingItem(final int taskId) {
+    return allItems().stream()
         .filter(it -> it.taskId == taskId)
         .findFirst()
-        .orElseThrow(() -> new IllegalArgumentException("No queued change with task id " + taskId));
+        .orElseThrow(
+            () -> new IllegalArgumentException("No pending change with task id " + taskId));
   }
 
   private List<UserInteractionBase> userInteractionsOf(final int rootTaskId) {
@@ -468,6 +537,37 @@ public class ChangePropagationQueue {
       userInteractionsByRoot.remove(rootTaskId);
       blockedRoots.remove(rootTaskId);
     }
+  }
+
+  /**
+   * Whether a failed propagation step is deferred: it needs an unanswered user interaction and has
+   * not modified models yet.
+   */
+  private static boolean isDeferral(final RuntimeException failure) {
+    return PendingUserInteractionException.findIn(failure) != null
+        && findCause(failure, NonDeferrablePropagationException.class) == null;
+  }
+
+  /**
+   * Whether one of the answers is matched to the interaction when its item is propagated again, by
+   * the same rules a propagation step uses.
+   */
+  private static boolean isAnsweredBy(
+      final PendingUserInteraction interaction, final List<UserInteractionBase> answers) {
+    if (interaction == null) {
+      return false;
+    }
+    final PredefinedInteractionMatcher matcher = new PredefinedInteractionMatcher();
+    answers.forEach(matcher::addInteraction);
+    final String message = interaction.message();
+    return switch (interaction.kind()) {
+      case CONFIRMATION -> matcher.getConfirmationResult(message).isPresent();
+      case TEXT_INPUT -> matcher.getTextInputResult(message) != null;
+      case SINGLE_SELECTION ->
+          matcher.getSingleSelectionResult(message, interaction.choices()) != null;
+      case MULTIPLE_SELECTION ->
+          matcher.getMultiSelectionResult(message, interaction.choices()) != null;
+    };
   }
 
   private static <T extends Throwable> T findCause(final Throwable throwable, final Class<T> type) {

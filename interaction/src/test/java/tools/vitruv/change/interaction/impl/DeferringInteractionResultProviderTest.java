@@ -2,9 +2,11 @@ package tools.vitruv.change.interaction.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import tools.vitruv.change.interaction.PendingUserInteraction;
@@ -72,6 +74,48 @@ class DeferringInteractionResultProviderTest {
   }
 
   @Test
+  void notifications_areRecordedAndForwardedInOrder() {
+    provider.getNotificationInteractionResult(
+        WindowModality.MODAL, "T", "First", "ok", NotificationType.WARNING);
+    provider.getNotificationInteractionResult(
+        WindowModality.MODELESS, "U", "Second", "fine", NotificationType.INFORMATION);
+    List<String> received = new ArrayList<>();
+    // Any provider will do as the target; this one writes down what it is notified of.
+    DeferringInteractionResultProvider target =
+        new DeferringInteractionResultProvider() {
+          @Override
+          public void getNotificationInteractionResult(
+              WindowModality windowModality,
+              String title,
+              String message,
+              String positiveDecisionText,
+              NotificationType notificationType) {
+            received.add(
+                String.join(
+                    " ",
+                    windowModality.name(),
+                    title,
+                    message,
+                    positiveDecisionText,
+                    notificationType.name()));
+          }
+        };
+
+    provider.forwardNotificationsTo(target);
+
+    assertEquals(
+        List.of("MODAL T First ok WARNING", "MODELESS U Second fine INFORMATION"), received);
+  }
+
+  @Test
+  void forwardingNotifications_toNoTarget_doesNothing() {
+    provider.getNotificationInteractionResult(
+        WindowModality.MODAL, "T", "Done", "ok", NotificationType.INFORMATION);
+
+    assertDoesNotThrow(() -> provider.forwardNotificationsTo(null));
+  }
+
+  @Test
   void findIn_locatesThePendingInteractionThroughWrappers() {
     PendingUserInteractionException pending =
         new PendingUserInteractionException(
@@ -82,7 +126,7 @@ class DeferringInteractionResultProviderTest {
         pending,
         PendingUserInteractionException.findIn(
             new RuntimeException(new IllegalStateException(pending))));
-    assertEquals(null, PendingUserInteractionException.findIn(new RuntimeException("other")));
+    assertNull(PendingUserInteractionException.findIn(new RuntimeException("other")));
   }
 
   private static void assertPending(

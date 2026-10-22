@@ -15,9 +15,20 @@ import tools.vitruv.change.interaction.UserInteractionOptions.WindowModality;
  *
  * <p>Meant as the fallback behind a {@link PredefinedInteractionResultProviderImpl} holding the
  * answers known so far: known interactions are answered, unknown ones defer the propagation.
- * Notifications need no answer and are therefore ignored instead of deferring.
+ * Notifications need no answer, so they do not defer; they are recorded instead and can be passed
+ * on with {@link #forwardNotificationsTo(InteractionResultProvider)}.
  */
 public class DeferringInteractionResultProvider implements InteractionResultProvider {
+
+  /** The arguments of one call of {@link #getNotificationInteractionResult}. */
+  private record Notification(
+      WindowModality windowModality,
+      String title,
+      String message,
+      String positiveDecisionText,
+      NotificationType notificationType) {}
+
+  private final List<Notification> notifications = new ArrayList<>();
 
   @Override
   public boolean getConfirmationInteractionResult(
@@ -46,6 +57,28 @@ public class DeferringInteractionResultProvider implements InteractionResultProv
       String positiveDecisionText,
       NotificationType notificationType) {
     // Nothing to wait for: a notification has no result.
+    notifications.add(
+        new Notification(windowModality, title, message, positiveDecisionText, notificationType));
+  }
+
+  /**
+   * Passes the notifications recorded so far on to another provider, in the order they were
+   * received.
+   *
+   * @param target the provider to notify; nothing happens if it is {@code null}
+   */
+  public void forwardNotificationsTo(InteractionResultProvider target) {
+    if (target == null) {
+      return;
+    }
+    for (Notification notification : notifications) {
+      target.getNotificationInteractionResult(
+          notification.windowModality(),
+          notification.title(),
+          notification.message(),
+          notification.positiveDecisionText(),
+          notification.notificationType());
+    }
   }
 
   @Override

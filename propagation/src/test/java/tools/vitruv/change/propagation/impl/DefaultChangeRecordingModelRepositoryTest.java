@@ -1,6 +1,7 @@
 package tools.vitruv.change.propagation.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.file.Path;
@@ -43,7 +44,7 @@ class DefaultChangeRecordingModelRepositoryTest {
                     }));
 
     // The applicator's own exception must surface unchanged ...
-    org.junit.jupiter.api.Assertions.assertSame(failure, thrown);
+    assertSame(failure, thrown);
     // ... and must not leave the recorder stuck in "recording".
     assertDoesNotThrow(() -> repository.recordChanges(() -> {}));
   }
