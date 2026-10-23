@@ -7,6 +7,7 @@ import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.Resour
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil;
+import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import org.apache.logging.log4j.LogManager;
@@ -168,7 +169,9 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
    * the same sequence of taking and pushing entries always gives the same values.
    */
   static class CacheIdsRepository {
-    private final Queue<HierarchicalId> entries = new PriorityQueue<>();
+    // ordered by index, since the IDs' string order puts cache:/10 before cache:/2
+    private final Queue<HierarchicalId> entries =
+        new PriorityQueue<>(Comparator.comparingInt(CacheIdsRepository::getIndex));
     private int maxValue;
     
     HierarchicalId pop() {
@@ -192,6 +195,10 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
     
     boolean isNoneMissing() {
       return entries.size() == maxValue;
+    }
+
+    private static int getIndex(HierarchicalId id) {
+      return Integer.parseInt(id.getId().substring(HierarchicalId.CACHE_PREFIX.length()));
     }
   }
 }
