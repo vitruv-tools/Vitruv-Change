@@ -1,6 +1,7 @@
 package tools.vitruv.change.interaction.impl;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -43,6 +44,18 @@ public class PredefinedInteractionResultProviderImpl implements PredefinedIntera
       this.predefinedInteractionMatcher.addInteraction(it);
     };
     Arrays.<UserInteractionBase>asList(interactions).forEach(_function);
+  }
+
+  /**
+   * Returns the predefined inputs that have not been used for a request yet. Each input is used
+   * for one request at most, so the inputs that were used are those missing here, compared by
+   * identity. An input that was added more than once is listed once for each time it was added and
+   * has not been used yet.
+   *
+   * @return the remaining predefined inputs, in the order they were added
+   */
+  public List<UserInteractionBase> getRemainingUserInteractions() {
+    return this.predefinedInteractionMatcher.getRemainingInteractions();
   }
 
   @Override

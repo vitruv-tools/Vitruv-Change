@@ -1,14 +1,18 @@
 package tools.vitruv.change.interaction.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import tools.vitruv.change.interaction.ConfirmationUserInteraction;
 import tools.vitruv.change.interaction.InteractionFactory;
 import tools.vitruv.change.interaction.InteractionResultProvider;
+import tools.vitruv.change.interaction.UserInteractionBase;
 import tools.vitruv.change.interaction.UserInteractionOptions.InputValidator;
 import tools.vitruv.change.interaction.UserInteractionOptions.NotificationType;
 import tools.vitruv.change.interaction.UserInteractionOptions.WindowModality;
@@ -89,6 +93,23 @@ class PredefinedInteractionResultProviderImplTest {
         WindowModality.MODAL, TITLE, MESSAGE, "Ok", NotificationType.INFORMATION);
 
     assertFalse(fallback.notificationRequested, "Fallback must not be used when a match exists");
+  }
+
+  @Test
+  void remainingUserInteractionsLeaveOutTheOneUsedForARequest() {
+    final PredefinedInteractionResultProviderImpl provider =
+        new PredefinedInteractionResultProviderImpl(null);
+    final ConfirmationUserInteraction first = confirmation(MESSAGE, true);
+    final ConfirmationUserInteraction second = confirmation(MESSAGE, true);
+    provider.addUserInteractions(first, second);
+
+    provider.getConfirmationInteractionResult(
+        WindowModality.MODAL, TITLE, MESSAGE, "Yes", "No", "Cancel");
+
+    // Both inputs match the request, and only the first one is used up by it.
+    final List<UserInteractionBase> remaining = provider.getRemainingUserInteractions();
+    assertEquals(1, remaining.size());
+    assertSame(second, remaining.get(0));
   }
 
   @Test

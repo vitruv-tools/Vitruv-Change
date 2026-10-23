@@ -37,9 +37,17 @@ import tools.vitruv.change.propagation.QueuedPropagationStep;
  * for a user interaction or a transaction does not hold up the others.
  *
  * <p>An enqueued change is the root of a tree of queue items: the changes produced by propagating
- * an item are queued as its children at the front of the queue. An item that needs an unanswered
- * user interaction is blocked and moved to the end of the queue, and propagated again from the
- * start once an answer is registered.
+ * an item are queued as its children at the front of the queue. The items of one change are
+ * propagated in the order {@link ChangePropagator#propagateChange} propagates them, since later
+ * items may rely on what the reactions to earlier ones created, such as correspondences. So while
+ * one item of a change is blocked, the other items of that change wait as well, and the change is
+ * moved to the end of the queue, where it is overtaken by the other changes. An item that needs an
+ * unanswered user interaction is blocked, and propagated again from the start once an answer is
+ * registered.
+ *
+ * <p>If propagating an item fails for any other reason, the whole change is removed from the queue,
+ * just as {@link ChangePropagator#propagateChange} stops at the first exception. The models keep
+ * what was applied and propagated before the failure.
  *
  * <p>Notifications do not defer an item. They are passed on to the user interaction result
  * provider that was installed before, once the propagation step has completed or failed. Those of a
@@ -77,7 +85,17 @@ public class ChangePropagationQueue {
   private final Object queueLock = new Object();
   private final Object executionLock = new Object();
   private final Deque<QueueItem> queue = new ArrayDeque<>();
+
+  /** All answers registered for a change, in the order they were registered. */
   private final Map<Integer, List<UserInteractionBase>> userInteractionsByRoot = new HashMap<>();
+
+  /**
+   * The answers registered for a change that no propagated step has used yet. An answer object
+   * registered twice counts as two answers, so it is listed twice.
+   */
+  private final Map<Integer, List<UserInteractionBase>> unusedUserInteractionsByRoot =
+      new HashMap<>();
+
   private final Map<Integer, PropagationBlockReason> blockedRoots = new HashMap<>();
   private QueueItem executingItem;
 
@@ -150,7 +168,8 @@ public class ChangePropagationQueue {
    * produced, still waits to be propagated.
    *
    * @param taskId the task id returned by {@link #enqueueChange(VitruviusChange)}
-   * @return {@code false} once the change has been propagated completely
+   * @return {@code false} once the change has been propagated completely or its propagation has
+   *     failed
    */
   public boolean isPending(final int taskId) {
     synchronized (queueLock) {
@@ -160,10 +179,11 @@ public class ChangePropagationQueue {
 
   /**
    * Blocks propagation. For the task id of an enqueued change this blocks the change and every
-   * change its propagation produces, including those produced later; for the id of any other queue
-   * item only that item. If that item is being propagated, the block only takes effect if the item
-   * is deferred and goes back into the queue: once it has been propagated it is gone, and the
-   * changes it produced are new items that the block does not cover.
+   * change its propagation produces, including those produced later. For the id of any other queue
+   * item it blocks that item, which holds back the other items of its change as well, since a
+   * change is propagated in order. If that item is being propagated, the block only takes effect if
+   * the item is deferred and goes back into the queue: once it has been propagated it is gone, and
+   * the changes it produced are new items that the block does not cover.
    *
    * @param taskId the id of the change or item to block
    * @param reason why it is blocked
@@ -181,10 +201,10 @@ public class ChangePropagationQueue {
   }
 
   /**
-   * Lifts a block set by {@link #block(int, PropagationBlockReason)}. Blocks caused by unanswered
-   * user interactions are lifted by {@link #registerUserInteractions(int, UserInteractionBase...)}
-   * instead, so an item that still waits for an answer stays blocked until the answer is
-   * registered.
+   * Lifts a block set by {@link #block(int, PropagationBlockReason)}. The change goes on once none
+   * of its items is blocked anymore. Blocks caused by unanswered user interactions are lifted by
+   * {@link #registerUserInteractions(int, UserInteractionBase...)} instead, so an item that still
+   * waits for an answer stays blocked until the answer is registered.
    *
    * @param taskId the id passed to {@link #block(int, PropagationBlockReason)}
    * @throws IllegalArgumentException if nothing with this id is pending
@@ -204,13 +224,18 @@ public class ChangePropagationQueue {
   }
 
   /**
-   * Registers answers to user interactions for a change and unblocks every item of it that waits
-   * for a user interaction; a {@link PropagationBlockReason#TRANSACTION} block stays until {@link
-   * #unblock(int)}. Answers are matched to interactions as described at {@link
-   * PendingUserInteraction}: by type, message and, for selections, choices. They stay available
-   * for all further items of the change, and each propagation step gets all of them again. An item
-   * that stays blocked for another reason keeps the interaction it waits for until one of the
-   * answers matches it. May be called while an item is being propagated.
+   * Registers answers to user interactions for a change and unblocks the item of it that waits for
+   * a user interaction, if any; a {@link PropagationBlockReason#TRANSACTION} block stays until
+   * {@link #unblock(int)}. As the change is propagated in order, at most one of its items waits for
+   * an answer at a time. Answers are matched to interactions as described at {@link
+   * PendingUserInteraction}: by type, message and, for selections, choices. Each answer answers at
+   * most one interaction, just as each question is answered once when the change is propagated with
+   * {@link ChangePropagator#propagateChange}. This holds per registration: an answer object that is
+   * passed twice, or registered again later, counts as one answer each time. Until it is used, an
+   * answer is available to all further items of the change. An answer that a deferred step used is
+   * available again when the step is repeated. An item that stays blocked for another reason keeps
+   * the interaction it waits for until one of the answers matches it. May be called while an item
+   * is being propagated.
    *
    * @param taskId the task id of the change, or of any of its queue items
    * @param interactions the answers
@@ -220,12 +245,14 @@ public class ChangePropagationQueue {
       final int taskId, final UserInteractionBase... interactions) {
     synchronized (queueLock) {
       final int rootTaskId = isPendingRoot(taskId) ? taskId : findPendingItem(taskId).rootTaskId;
-      userInteractionsByRoot
+      final List<UserInteractionBase> answers = List.of(interactions);
+      userInteractionsByRoot.computeIfAbsent(rootTaskId, id -> new ArrayList<>()).addAll(answers);
+      unusedUserInteractionsByRoot
           .computeIfAbsent(rootTaskId, id -> new ArrayList<>())
-          .addAll(List.of(interactions));
+          .addAll(answers);
       for (final QueueItem item : queue) {
         if (item.rootTaskId == rootTaskId) {
-          applyNewAnswers(item, List.of(interactions));
+          applyNewAnswers(item, answers);
         }
       }
     }
@@ -243,16 +270,20 @@ public class ChangePropagationQueue {
   /**
    * Attempts to propagate the first queue item once.
    *
-   * <p>A blocked item is moved to the end of the queue. Otherwise the item is propagated (an
-   * enqueued change is applied to the models first): either it is propagated completely and the
-   * changes this produced are queued as its children at the front of the queue, or it needs an
-   * unanswered user interaction, in which case it is blocked and moved to the end of the queue. If
-   * propagation fails for any other reason, the item is removed and the exception is rethrown.
+   * <p>If the item, its change or another item of its change is blocked, the item and the rest of
+   * its change are moved to the end of the queue, keeping their order. Otherwise the item is
+   * propagated (an enqueued change is applied to the models first): either it is propagated
+   * completely and the changes this produced are queued as its children at the front of the queue,
+   * or it needs an unanswered user interaction, in which case it is put back at the front of the
+   * queue and, unless answers registered for its change while it ran unblock it, blocked and moved
+   * to the end of the queue together with the rest of its change. An item unblocked like this is
+   * attempted again in the next step. If propagation fails for any other reason, the item and all
+   * other items of its change are removed, and the exception is rethrown.
    *
    * @param observers observers to register at the specifications while propagating
    * @return what happened, empty if the queue is empty
    * @throws NonDeferrablePropagationException if the item needs an unanswered user interaction but
-   *     has already modified models
+   *     has already modified models; its change is removed as well
    */
   public Optional<QueuedPropagationStep> propagateNext(
       final Iterable<ChangePropagationObserver> observers) {
@@ -260,16 +291,17 @@ public class ChangePropagationQueue {
       final QueueItem item;
       final int knownAnswers;
       synchronized (queueLock) {
-        item = queue.pollFirst();
+        item = queue.peekFirst();
         if (item == null) {
           return Optional.empty();
         }
         if (isBlocked(item)) {
-          queue.addLast(item);
+          moveChangeToEnd(item.rootTaskId);
           return Optional.of(
               new QueuedPropagationStep(
                   item.taskId, QueuedPropagationStep.Outcome.SKIPPED_BLOCKED, List.of()));
         }
+        queue.removeFirst();
         executingItem = item;
         knownAnswers = userInteractionsOf(item.rootTaskId).size();
       }
@@ -328,8 +360,8 @@ public class ChangePropagationQueue {
   }
 
   /**
-   * Defers an item whose propagation needs an unanswered user interaction; removes the item and
-   * rethrows for any other failure.
+   * Defers an item whose propagation needs an unanswered user interaction; for any other failure,
+   * removes the item's whole change and rethrows.
    */
   private QueuedPropagationStep handleFailedItem(
       final QueueItem item, final RuntimeException failure, final int knownAnswers) {
@@ -346,10 +378,20 @@ public class ChangePropagationQueue {
         if (answers.size() != knownAnswers) {
           applyNewAnswers(item, answers.subList(knownAnswers, answers.size()));
         }
-        queue.addLast(item);
+        // The item was the first of its change when it was taken, and the other parts of an input
+        // change were queued at the front while it ran, so putting it back at the front keeps the
+        // change in order. While it waits, the whole change moves to the end, where the other
+        // changes overtake it.
+        queue.addFirst(item);
+        if (isBlocked(item)) {
+          moveChangeToEnd(item.rootTaskId);
+        }
         return new QueuedPropagationStep(
             item.taskId, QueuedPropagationStep.Outcome.DEFERRED, List.of());
       }
+      // Like propagateChange, a failure ends the whole change. What was applied and propagated
+      // before stays in the models.
+      queue.removeIf(it -> it.rootTaskId == item.rootTaskId);
       forgetRootIfDone(item.rootTaskId);
     }
     final NonDeferrablePropagationException nonDeferrable =
@@ -374,18 +416,20 @@ public class ChangePropagationQueue {
 
   /**
    * Propagates the change of a queue item one step, answering user interactions from the answers
-   * registered for its tree and deferring all others. Once the previous user interaction result
-   * provider is restored, the notifications of the step are passed on to it, unless the step is
-   * deferred.
+   * registered for its change that no earlier step has used, and deferring all others. Once the
+   * previous user interaction result provider is restored, the notifications of the step are passed
+   * on to it, unless the step is deferred. If the step succeeds, the answers it used are used up.
    */
   private ChangePropagator.SingleStepResult propagateQueuedItem(
       final QueueItem item, final Iterable<ChangePropagationObserver> observers) {
-    final UserInteractionBase[] answers;
+    final List<UserInteractionBase> answers;
     synchronized (queueLock) {
-      answers = userInteractionsOf(item.rootTaskId).toArray(UserInteractionBase[]::new);
+      answers = unusedUserInteractionsOf(item.rootTaskId);
     }
     final DeferringInteractionResultProvider deferringProvider =
         new DeferringInteractionResultProvider();
+    final PredefinedInteractionResultProviderImpl stepProvider =
+        createStepProvider(deferringProvider, answers);
     final AtomicReference<InteractionResultProvider> previousProvider = new AtomicReference<>();
     ChangePropagator.SingleStepResult step = null;
     RuntimeException failure = null;
@@ -395,7 +439,7 @@ public class ChangePropagationQueue {
             .replaceUserInteractionResultProvider(
                 current -> {
                   previousProvider.set(current);
-                  return createStepProvider(deferringProvider, answers);
+                  return stepProvider;
                 })) {
       step = changePropagator.propagateSingleStep(item.change, observers);
     } catch (final RuntimeException e) {
@@ -411,6 +455,11 @@ public class ChangePropagationQueue {
     if (failure != null) {
       throw failure;
     }
+    // Only a step that went through uses up its answers. A deferred step needs the same answers
+    // again when it is repeated, and a failed one ends the change anyway.
+    synchronized (queueLock) {
+      markUsed(item.rootTaskId, answers, stepProvider.getRemainingUserInteractions());
+    }
     return step;
   }
 
@@ -420,9 +469,9 @@ public class ChangePropagationQueue {
    * Notifications go to {@code deferringProvider} directly. No answer is ever registered for a
    * notification, but an answer to a confirmation would otherwise match one and be used up by it.
    */
-  private static InteractionResultProvider createStepProvider(
+  private static PredefinedInteractionResultProviderImpl createStepProvider(
       final DeferringInteractionResultProvider deferringProvider,
-      final UserInteractionBase[] answers) {
+      final List<UserInteractionBase> answers) {
     final PredefinedInteractionResultProviderImpl provider =
         new PredefinedInteractionResultProviderImpl(deferringProvider) {
           @Override
@@ -436,7 +485,7 @@ public class ChangePropagationQueue {
                 windowModality, title, message, positiveDecisionText, notificationType);
           }
         };
-    provider.addUserInteractions(answers);
+    provider.addUserInteractions(answers.toArray(UserInteractionBase[]::new));
     return provider;
   }
 
@@ -450,13 +499,31 @@ public class ChangePropagationQueue {
   private void applyNewAnswers(final QueueItem item, final List<UserInteractionBase> newAnswers) {
     final boolean blockedOtherwise =
         (item.blockReason != null && item.blockReason != PropagationBlockReason.USER_INTERACTION)
-            || blockedRoots.containsKey(item.rootTaskId);
+            || blockedRoots.containsKey(item.rootTaskId)
+            || blockOfOtherItemOfChange(item) != null;
     if (!blockedOtherwise || isAnsweredBy(item.pendingInteraction, newAnswers)) {
       if (item.blockReason == PropagationBlockReason.USER_INTERACTION) {
         item.blockReason = null;
       }
       item.pendingInteraction = null;
     }
+  }
+
+  /**
+   * Uses up the answers a step used for its change: those given to the step that its provider no
+   * longer holds. The lists are compared occurrence by occurrence, so an answer object given twice
+   * and used once stays available once.
+   */
+  private void markUsed(
+      final int rootTaskId,
+      final List<UserInteractionBase> given,
+      final List<UserInteractionBase> remaining) {
+    final List<UserInteractionBase> used = new ArrayList<>(given);
+    remaining.forEach(it -> removeOnce(used, it));
+    // Answers registered while the step ran come after the ones it was given, so the first
+    // occurrence of a used answer is the one the step was given.
+    final List<UserInteractionBase> unused = unusedUserInteractionsByRoot.get(rootTaskId);
+    used.forEach(it -> removeOnce(unused, it));
   }
 
   /** Creates queue items for changes that belong to the tree of {@code parent}, as its children. */
@@ -485,6 +552,17 @@ public class ChangePropagationQueue {
     }
   }
 
+  /**
+   * Moves all queued items of a change to the end of the queue, keeping their order. Moving only
+   * the first one would let the next item of the change overtake it if the change were unblocked
+   * before that item had been moved as well.
+   */
+  private void moveChangeToEnd(final int rootTaskId) {
+    final List<QueueItem> items = queue.stream().filter(it -> it.rootTaskId == rootTaskId).toList();
+    queue.removeIf(it -> it.rootTaskId == rootTaskId);
+    queue.addAll(items);
+  }
+
   private boolean hasUnblockedItem() {
     synchronized (queueLock) {
       return queue.stream().anyMatch(it -> !isBlocked(it));
@@ -492,14 +570,41 @@ public class ChangePropagationQueue {
   }
 
   private boolean isBlocked(final QueueItem item) {
-    return item.blockReason != null || blockedRoots.containsKey(item.rootTaskId);
+    return blockReasonOf(item) != null;
   }
 
+  /**
+   * Returns why an item cannot be propagated right now, {@code null} if it can: its own block, the
+   * block of its change, or the block of another queued item of its change, which it waits for.
+   */
+  private PropagationBlockReason blockReasonOf(final QueueItem item) {
+    if (item.blockReason != null) {
+      return item.blockReason;
+    }
+    final PropagationBlockReason changeBlock = blockedRoots.get(item.rootTaskId);
+    return changeBlock != null ? changeBlock : blockOfOtherItemOfChange(item);
+  }
+
+  /** Returns the block of another queued item of the item's change, {@code null} if none. */
+  private PropagationBlockReason blockOfOtherItemOfChange(final QueueItem item) {
+    return queue.stream()
+        .filter(it -> it != item && it.rootTaskId == item.rootTaskId && it.blockReason != null)
+        .map(it -> it.blockReason)
+        .findFirst()
+        .orElse(null);
+  }
+
+  /**
+   * Takes a snapshot of an item. An item that waits for another item of its change reports the
+   * block reason of that item, but only the item that asked carries the pending interaction.
+   */
   private QueuedChange snapshot(final QueueItem item) {
-    final PropagationBlockReason reason =
-        item.blockReason != null ? item.blockReason : blockedRoots.get(item.rootTaskId);
     return new QueuedChange(
-        item.taskId, item.parentTaskId, item.rootTaskId, reason, item.pendingInteraction);
+        item.taskId,
+        item.parentTaskId,
+        item.rootTaskId,
+        blockReasonOf(item),
+        item.pendingInteraction);
   }
 
   private List<QueueItem> allItems() {
@@ -531,10 +636,16 @@ public class ChangePropagationQueue {
     return userInteractionsByRoot.getOrDefault(rootTaskId, List.of());
   }
 
+  /** Returns the answers registered for a change that no step has used up, in their order. */
+  private List<UserInteractionBase> unusedUserInteractionsOf(final int rootTaskId) {
+    return List.copyOf(unusedUserInteractionsByRoot.getOrDefault(rootTaskId, List.of()));
+  }
+
   /** Drops the answers and blocks of a change once nothing of it is pending anymore. */
   private void forgetRootIfDone(final int rootTaskId) {
     if (!isPendingRoot(rootTaskId)) {
       userInteractionsByRoot.remove(rootTaskId);
+      unusedUserInteractionsByRoot.remove(rootTaskId);
       blockedRoots.remove(rootTaskId);
     }
   }
@@ -568,6 +679,20 @@ public class ChangePropagationQueue {
       case MULTIPLE_SELECTION ->
           matcher.getMultiSelectionResult(message, interaction.choices()) != null;
     };
+  }
+
+  /**
+   * Removes the first occurrence of an answer from the list, compared by identity: two equal
+   * answers are still two answers.
+   */
+  private static void removeOnce(
+      final List<UserInteractionBase> answers, final UserInteractionBase answer) {
+    for (int i = 0; i < answers.size(); i++) {
+      if (answers.get(i) == answer) {
+        answers.remove(i);
+        return;
+      }
+    }
   }
 
   private static <T extends Throwable> T findCause(final Throwable throwable, final Class<T> type) {

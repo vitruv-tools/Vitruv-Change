@@ -12,8 +12,10 @@ import tools.vitruv.change.interaction.PendingUserInteraction;
  * @param parentTaskId the id of the item whose propagation produced this one, {@code null} for a
  *     root
  * @param rootTaskId the id of the change the client enqueued that this item descends from
- * @param blockReason why the item cannot be propagated right now, {@code null} if it can
- * @param pendingInteraction the user interaction the item waits for, {@code null} if none
+ * @param blockReason why the item cannot be propagated right now, {@code null} if it can; for an
+ *     item that waits for another blocked item of its change, the reason of that item
+ * @param pendingInteraction the user interaction the item waits for, {@code null} if none; only the
+ *     item that asked carries it, not the other items of its change that wait for it
  */
 public record QueuedChange(
     int taskId,

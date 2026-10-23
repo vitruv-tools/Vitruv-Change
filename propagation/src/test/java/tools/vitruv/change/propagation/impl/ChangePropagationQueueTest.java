@@ -29,6 +29,7 @@ import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.composite.MetamodelDescriptor;
 import tools.vitruv.change.composite.description.CompositeChange;
+import tools.vitruv.change.composite.description.PropagatedChange;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.correspondence.Correspondence;
@@ -189,22 +190,58 @@ class ChangePropagationQueueTest {
   }
 
   @Test
-  void compositeInput_whoseFirstPartIsDeferred_hasItsLaterPartsPropagatedFirst() {
-    // Documents the current behaviour.
+  void compositeInput_whoseFirstPartIsDeferred_keepsItsOrder_whileOtherChangesOvertakeIt() {
     TransactionalChange<EObject> part1 = change(models);
     TransactionalChange<EObject> part2 = change(models);
-    modelsSpec.askFor = part1;
+    modelsSpec.askFor = List.of(part1);
     ChangePropagationQueue queue = queue();
     queue.enqueueChange(compositeInput(part1, part2), 7);
 
     assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
-    QueuedPropagationStep second = queue.propagateNext().orElseThrow();
-    assertSame(part2, second.propagatedChanges().get(0).getOriginalChange());
 
+    // The later part waits with the first one, which alone carries the question.
+    List<QueuedChange> queued = queue.getQueuedChanges();
+    assertEquals(7, queued.get(0).taskId());
+    assertEquals(QUESTION, queued.get(0).pendingInteraction().message());
+    assertEquals(7, queued.get(1).rootTaskId());
+    assertEquals(PropagationBlockReason.USER_INTERACTION, queued.get(1).blockReason());
+    assertNull(queued.get(1).pendingInteraction());
+
+    TransactionalChange<EObject> other = change(models);
+    queue.enqueueChange(input(other), 8);
+    assertEquals(Outcome.SKIPPED_BLOCKED, queue.propagateNext().orElseThrow().outcome());
     queue.registerUserInteractions(7, confirmation(QUESTION, true));
-    QueuedPropagationStep first = queue.propagateNext().orElseThrow();
-    assertEquals(7, first.taskId());
-    assertSame(part1, first.propagatedChanges().get(0).getOriginalChange());
+    List<QueuedPropagationStep> steps = queue.propagateUntilBlocked(List.of());
+
+    // The other change overtook the waiting one, whose parts kept their order.
+    assertEquals(List.of(other, part1, part2), originalChangesOf(steps));
+    assertEquals(7, steps.get(1).taskId());
+    assertFalse(queue.isPending(7));
+  }
+
+  @Test
+  void blockingOneItem_holdsBackItsWholeChange_whileOtherChangesProceed() {
+    TransactionalChange<EObject> part1 = change(models);
+    TransactionalChange<EObject> part2 = change(models);
+    TransactionalChange<EObject> part3 = change(models);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(compositeInput(part1, part2, part3), 7);
+    queue.propagateNext();
+    int lastPart = queue.getQueuedChanges().get(1).taskId();
+    TransactionalChange<EObject> other = change(models);
+    queue.enqueueChange(input(other), 8);
+
+    queue.block(lastPart, PropagationBlockReason.TRANSACTION);
+
+    // The part before the blocked one waits for it as well ...
+    assertEquals(PropagationBlockReason.TRANSACTION, queue.getQueuedChanges().get(0).blockReason());
+    List<QueuedPropagationStep> steps = queue.propagateUntilBlocked(List.of());
+    assertEquals(List.of(Outcome.SKIPPED_BLOCKED, Outcome.PROPAGATED), outcomesOf(steps));
+    assertEquals(List.of(other), originalChangesOf(steps));
+
+    // ... and the change goes on in order once the block is lifted.
+    queue.unblock(lastPart);
+    assertEquals(List.of(part2, part3), originalChangesOf(queue.propagateUntilBlocked(List.of())));
     assertFalse(queue.isPending(7));
   }
 
@@ -213,7 +250,7 @@ class ChangePropagationQueueTest {
   @Test
   void unansweredInteraction_defersTheChange_whileOtherChangesProceed() {
     TransactionalChange<EObject> askingChange = change(models);
-    modelsSpec.askFor = askingChange;
+    modelsSpec.askFor = List.of(askingChange);
     ChangePropagationQueue queue = queue();
     VitruviusChange<Uuid> askingInput = input(askingChange);
     queue.enqueueChange(askingInput, 1);
@@ -256,7 +293,7 @@ class ChangePropagationQueueTest {
   @Test
   void answersRegisteredWhileTheChangeRuns_makeItRetryInsteadOfWaiting() {
     TransactionalChange<EObject> askingChange = change(models);
-    modelsSpec.askFor = askingChange;
+    modelsSpec.askFor = List.of(askingChange);
     ChangePropagationQueue queue = queue();
     queue.enqueueChange(input(askingChange), 1);
     // Another thread answers while the change is being propagated, before it asks.
@@ -271,21 +308,164 @@ class ChangePropagationQueueTest {
   }
 
   @Test
+  void compositeInputAnsweredWhileItsFirstPartRuns_staysAtTheFront_withItsPartsInOrder() {
+    TransactionalChange<EObject> part1 = change(models);
+    TransactionalChange<EObject> part2 = change(models);
+    modelsSpec.askFor = List.of(part1);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(compositeInput(part1, part2), 7);
+    TransactionalChange<EObject> other = change(models);
+    queue.enqueueChange(input(other), 8);
+    // Another thread answers while the first part is being propagated, before it asks.
+    modelsSpec.beforeAsking =
+        spec -> {
+          spec.beforeAsking = again -> {};
+          answerFromAnotherThread(queue, 7, true);
+        };
+
+    assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
+
+    // The first part is not blocked, so it stays in front of the second part and the other change.
+    List<QueuedChange> queued = queue.getQueuedChanges();
+    assertEquals(List.of(7, 7, 8), queued.stream().map(QueuedChange::rootTaskId).toList());
+    assertEquals(7, queued.get(0).taskId());
+    assertFalse(queued.get(0).blocked());
+    assertEquals(
+        List.of(part1, part2, other), originalChangesOf(queue.propagateUntilBlocked(List.of())));
+  }
+
+  @Test
+  void partsAskingTheSameQuestion_needAnAnswerEach_andOnlyOneOfThemWaitsAtATime() {
+    TransactionalChange<EObject> part1 = change(models);
+    TransactionalChange<EObject> part2 = change(models);
+    modelsSpec.askFor = List.of(part1, part2);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(compositeInput(part1, part2), 7);
+
+    assertEquals(List.of(Outcome.DEFERRED), outcomesOf(queue.propagateUntilBlocked(List.of())));
+    // The second part does not get to ask before the first one is answered.
+    assertEquals(
+        1, queue.getQueuedChanges().stream().filter(it -> it.pendingInteraction() != null).count());
+
+    queue.registerUserInteractions(7, confirmation(QUESTION, true));
+
+    // The first part uses up the answer, so the second one asks again ...
+    assertEquals(
+        List.of(Outcome.PROPAGATED, Outcome.DEFERRED),
+        outcomesOf(queue.propagateUntilBlocked(List.of())));
+    List<QueuedChange> queued = queue.getQueuedChanges();
+    assertEquals(1, queued.size());
+    assertEquals(QUESTION, queued.get(0).pendingInteraction().message());
+
+    // ... and goes on with an answer of its own.
+    queue.registerUserInteractions(7, confirmation(QUESTION, false));
+    assertEquals(List.of(Outcome.PROPAGATED), outcomesOf(queue.propagateUntilBlocked(List.of())));
+    assertEquals(List.of(Boolean.TRUE, Boolean.FALSE), modelsSpec.answers);
+    assertFalse(queue.isPending(7));
+  }
+
+  @Test
+  void answerUsedByAnEarlierStep_isNotReusedByALaterItemAskingTheSameQuestion() {
+    TransactionalChange<EObject> askingChange = change(models);
+    TransactionalChange<EObject> followUp = change(otherModels);
+    modelsSpec.askFor = List.of(askingChange);
+    modelsSpec.onFirstRun = spec -> recordedByCurrentRun.add(followUp);
+    otherModelsSpec.askFor = List.of(followUp);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(askingChange), 1);
+    queue.registerUserInteractions(1, confirmation(QUESTION, true));
+
+    assertEquals(
+        List.of(Outcome.PROPAGATED, Outcome.DEFERRED),
+        outcomesOf(queue.propagateUntilBlocked(List.of())));
+    QueuedChange waiting = queue.getQueuedChanges().get(0);
+    assertEquals(Integer.valueOf(1), waiting.parentTaskId());
+    assertEquals(QUESTION, waiting.pendingInteraction().message());
+
+    queue.registerUserInteractions(1, confirmation(QUESTION, false));
+    assertEquals(List.of(Outcome.PROPAGATED), outcomesOf(queue.propagateUntilBlocked(List.of())));
+    assertEquals(List.of(Boolean.TRUE), modelsSpec.answers);
+    assertEquals(List.of(Boolean.FALSE), otherModelsSpec.answers);
+  }
+
+  @Test
+  void answerObjectRegisteredAgain_answersTheNextInteractionAsWell() {
+    TransactionalChange<EObject> part1 = change(models);
+    TransactionalChange<EObject> part2 = change(models);
+    modelsSpec.askFor = List.of(part1, part2);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(compositeInput(part1, part2), 7);
+    UserInteractionBase yes = confirmation(QUESTION, true);
+    queue.registerUserInteractions(7, yes);
+    assertEquals(
+        List.of(Outcome.PROPAGATED, Outcome.DEFERRED),
+        outcomesOf(queue.propagateUntilBlocked(List.of())));
+
+    // The first part used up the answer, but registering the same object again is a new answer.
+    queue.registerUserInteractions(7, yes);
+
+    assertEquals(List.of(Outcome.PROPAGATED), outcomesOf(queue.propagateUntilBlocked(List.of())));
+    assertEquals(List.of(Boolean.TRUE, Boolean.TRUE), modelsSpec.answers);
+    assertFalse(queue.isPending(7));
+  }
+
+  @Test
+  void answerObjectPassedTwice_answersTwoInteractions_andNoMore() {
+    TransactionalChange<EObject> part1 = change(models);
+    TransactionalChange<EObject> part2 = change(models);
+    TransactionalChange<EObject> part3 = change(models);
+    modelsSpec.askFor = List.of(part1, part2, part3);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(compositeInput(part1, part2, part3), 7);
+    UserInteractionBase yes = confirmation(QUESTION, true);
+
+    queue.registerUserInteractions(7, yes, yes);
+
+    // Like two distinct answers, the object answers the first two parts, and the third one asks.
+    assertEquals(
+        List.of(Outcome.PROPAGATED, Outcome.PROPAGATED, Outcome.DEFERRED),
+        outcomesOf(queue.propagateUntilBlocked(List.of())));
+    assertEquals(List.of(Boolean.TRUE, Boolean.TRUE), modelsSpec.answers);
+    assertEquals(QUESTION, queue.getQueuedChanges().get(0).pendingInteraction().message());
+  }
+
+  @Test
+  void answersUsedInADeferredStep_answerItsRetry() {
+    TransactionalChange<EObject> askingChange = change(models);
+    modelsSpec.askFor = List.of(askingChange);
+    modelsSpec.questions = List.of(QUESTION, OTHER_QUESTION);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(askingChange), 1);
+    queue.registerUserInteractions(1, confirmation(QUESTION, true));
+
+    assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
+    assertEquals(
+        OTHER_QUESTION, queue.getQueuedChange(1).orElseThrow().pendingInteraction().message());
+
+    queue.registerUserInteractions(1, confirmation(OTHER_QUESTION, false));
+
+    assertEquals(Outcome.PROPAGATED, queue.propagateNext().orElseThrow().outcome());
+    // The deferred attempt got the first answer already, and the retry gets it again.
+    assertEquals(List.of(Boolean.TRUE, Boolean.TRUE, Boolean.FALSE), modelsSpec.answers);
+  }
+
+  @Test
   void interactionAfterModifyingModels_failsInsteadOfRepeatingTheModifications() {
     ScriptedSpecification modifying = new ScriptedSpecification(models, otherModels);
     modifying.onFirstRun = spec -> recordedByCurrentRun.add(change(otherModels));
     TransactionalChange<EObject> askingChange = change(models);
     ScriptedSpecification asking = new ScriptedSpecification(models, otherModels);
-    asking.askFor = askingChange;
+    asking.askFor = List.of(askingChange);
     ChangePropagationQueue queue =
         new ChangePropagationQueue(
             new ChangePropagator(
                 repository,
                 new ChangePropagationSpecificationRepository(List.of(modifying, asking)),
                 userInteractor));
-    queue.enqueueChange(input(askingChange), 1);
+    queue.enqueueChange(compositeInput(askingChange, change(models)), 1);
 
     assertThrows(NonDeferrablePropagationException.class, queue::propagateNext);
+    // Like any other failure, this ends the change, including the part not propagated yet.
     assertFalse(queue.isPending(1));
   }
 
@@ -306,7 +486,7 @@ class ChangePropagationQueueTest {
   @Test
   void notificationsOfADeferredChange_areShownOnce_whenTheRetrySucceeds() {
     TransactionalChange<EObject> askingChange = change(models);
-    modelsSpec.askFor = askingChange;
+    modelsSpec.askFor = List.of(askingChange);
     modelsSpec.notification = NOTICE;
     ChangePropagationQueue queue = queue();
     queue.enqueueChange(input(askingChange), 1);
@@ -326,7 +506,7 @@ class ChangePropagationQueueTest {
   @Test
   void notifications_doNotUseUpAnAnswerWithoutAMessage() {
     TransactionalChange<EObject> askingChange = change(models);
-    modelsSpec.askFor = askingChange;
+    modelsSpec.askFor = List.of(askingChange);
     modelsSpec.notification = NOTICE;
     ChangePropagationQueue queue = queue();
     queue.enqueueChange(input(askingChange), 1);
@@ -467,7 +647,7 @@ class ChangePropagationQueueTest {
   @Test
   void deferredItemOfABlockedChange_keepsItsQuestion_untilAnAnswerMatchesIt() {
     TransactionalChange<EObject> askingChange = change(models);
-    modelsSpec.askFor = askingChange;
+    modelsSpec.askFor = List.of(askingChange);
     ChangePropagationQueue queue = queue();
     queue.enqueueChange(input(askingChange), 1);
     assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
@@ -481,6 +661,31 @@ class ChangePropagationQueueTest {
     assertEquals(Outcome.SKIPPED_BLOCKED, queue.propagateNext().orElseThrow().outcome());
     queue.unblock(1);
     assertEquals(Outcome.PROPAGATED, queue.propagateNext().orElseThrow().outcome());
+    assertEquals(List.of(Boolean.TRUE), modelsSpec.answers);
+  }
+
+  @Test
+  void deferredItemWaitingForABlockedItemOfItsChange_keepsItsQuestion_untilAnAnswerMatchesIt() {
+    TransactionalChange<EObject> part1 = change(models);
+    TransactionalChange<EObject> part2 = change(models);
+    modelsSpec.askFor = List.of(part1);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(compositeInput(part1, part2), 7);
+    assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
+    int laterPart = queue.getQueuedChanges().get(1).taskId();
+    queue.block(laterPart, PropagationBlockReason.TRANSACTION);
+
+    queue.registerUserInteractions(7, confirmation(OTHER_QUESTION, true));
+    assertEquals(QUESTION, queue.getQueuedChange(7).orElseThrow().pendingInteraction().message());
+
+    queue.registerUserInteractions(7, confirmation(QUESTION, true));
+    QueuedChange answered = queue.getQueuedChange(7).orElseThrow();
+    assertNull(answered.pendingInteraction());
+    assertEquals(PropagationBlockReason.TRANSACTION, answered.blockReason());
+    assertEquals(Outcome.SKIPPED_BLOCKED, queue.propagateNext().orElseThrow().outcome());
+
+    queue.unblock(laterPart);
+    assertEquals(List.of(part1, part2), originalChangesOf(queue.propagateUntilBlocked(List.of())));
     assertEquals(List.of(Boolean.TRUE), modelsSpec.answers);
   }
 
@@ -502,7 +707,7 @@ class ChangePropagationQueueTest {
   @Test
   void propagateUntilBlocked_stopsOnceOnlyBlockedChangesRemain() {
     TransactionalChange<EObject> askingChange = change(models);
-    modelsSpec.askFor = askingChange;
+    modelsSpec.askFor = List.of(askingChange);
     ChangePropagationQueue queue = queue();
     queue.enqueueChange(input(askingChange), 1);
     queue.enqueueChange(input(change(models)), 2);
@@ -511,8 +716,7 @@ class ChangePropagationQueueTest {
     List<QueuedPropagationStep> steps = queue.propagateUntilBlocked(List.of());
 
     assertEquals(
-        List.of(Outcome.DEFERRED, Outcome.PROPAGATED, Outcome.PROPAGATED),
-        steps.stream().map(QueuedPropagationStep::outcome).toList());
+        List.of(Outcome.DEFERRED, Outcome.PROPAGATED, Outcome.PROPAGATED), outcomesOf(steps));
     assertTrue(queue.isPending(1));
     assertFalse(queue.isPending(2));
     assertTrue(queue.propagateUntilBlocked(List.of()).isEmpty());
@@ -521,7 +725,7 @@ class ChangePropagationQueueTest {
   @Test
   void propagateUntilBlocked_retriesAChangeThatWasAnsweredWhileItRan() {
     TransactionalChange<EObject> askingChange = change(models);
-    modelsSpec.askFor = askingChange;
+    modelsSpec.askFor = List.of(askingChange);
     ChangePropagationQueue queue = queue();
     queue.enqueueChange(input(askingChange), 1);
     modelsSpec.beforeAsking =
@@ -532,9 +736,7 @@ class ChangePropagationQueueTest {
 
     List<QueuedPropagationStep> steps = queue.propagateUntilBlocked(List.of());
 
-    assertEquals(
-        List.of(Outcome.DEFERRED, Outcome.PROPAGATED),
-        steps.stream().map(QueuedPropagationStep::outcome).toList());
+    assertEquals(List.of(Outcome.DEFERRED, Outcome.PROPAGATED), outcomesOf(steps));
     assertEquals(List.of(Boolean.TRUE), modelsSpec.answers);
     assertFalse(queue.isPending(1));
   }
@@ -556,8 +758,7 @@ class ChangePropagationQueueTest {
   }
 
   @Test
-  void failingItem_isRemovedAlone_whileTheRestOfItsTreeIsStillPropagated() {
-    // Documents the current behaviour.
+  void failingItem_endsItsWholeChange_whileOtherChangesAreStillPropagated() {
     TransactionalChange<EObject> failing = change(otherModels);
     TransactionalChange<EObject> sibling = change(otherModels);
     modelsSpec.onFirstRun =
@@ -571,22 +772,45 @@ class ChangePropagationQueueTest {
         };
     ChangePropagationQueue queue = queue();
     queue.enqueueChange(input(change(models)), 1);
+    TransactionalChange<EObject> other = change(models);
+    queue.enqueueChange(input(other), 2);
     queue.propagateNext();
 
     assertThrows(RuntimeException.class, queue::propagateNext);
 
-    assertTrue(queue.isPending(1));
-    assertEquals(1, queue.getQueuedChanges().size());
-    QueuedPropagationStep next = queue.propagateNext().orElseThrow();
-    assertEquals(Outcome.PROPAGATED, next.outcome());
-    assertSame(sibling, next.propagatedChanges().get(0).getOriginalChange());
+    // As with propagateChange, the rest of the change is not propagated anymore ...
     assertFalse(queue.isPending(1));
+    assertEquals(1, otherModelsSpec.runs);
+    // ... but the other change still is.
+    assertEquals(List.of(2), queue.getQueuedChanges().stream().map(QueuedChange::taskId).toList());
+    assertEquals(List.of(other), originalChangesOf(queue.propagateUntilBlocked(List.of())));
+  }
+
+  @Test
+  void failingItem_forgetsTheAnswersAndBlocksOfItsChange() {
+    ChangePropagationQueue queue = queue();
+    modelsSpec.onFirstRun =
+        spec -> {
+          inAnotherThread(() -> queue.block(1, PropagationBlockReason.TRANSACTION));
+          throw new IllegalStateException("reaction failed");
+        };
+    queue.enqueueChange(compositeInput(change(models), change(models)), 1);
+    queue.registerUserInteractions(1, confirmation(QUESTION, true));
+
+    assertThrows(RuntimeException.class, queue::propagateNext);
+
+    // A new change under the same task id starts without the block and the answer.
+    TransactionalChange<EObject> askingChange = change(models);
+    modelsSpec.askFor = List.of(askingChange);
+    queue.enqueueChange(input(askingChange), 1);
+    assertFalse(queue.getQueuedChange(1).orElseThrow().blocked());
+    assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
   }
 
   @Test
   void synchronousPropagation_stillAsksTheProviderDirectly() {
     TransactionalChange<EObject> askingChange = change(models);
-    modelsSpec.askFor = askingChange;
+    modelsSpec.askFor = List.of(askingChange);
     when(blockingProvider.getConfirmationInteractionResult(
             any(), any(), any(), any(), any(), any()))
         .thenReturn(true);
@@ -648,7 +872,7 @@ class ChangePropagationQueueTest {
   private int deferChildBlockedWhileRunning(ChangePropagationQueue queue) {
     TransactionalChange<EObject> askingChange = change(otherModels);
     modelsSpec.onFirstRun = spec -> recordedByCurrentRun.add(askingChange);
-    otherModelsSpec.askFor = askingChange;
+    otherModelsSpec.askFor = List.of(askingChange);
     queue.enqueueChange(input(change(models)), 1);
     queue.propagateNext();
     int child = queue.getQueuedChanges().get(0).taskId();
@@ -659,6 +883,19 @@ class ChangePropagationQueueTest {
         };
     assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
     return child;
+  }
+
+  private static List<Outcome> outcomesOf(List<QueuedPropagationStep> steps) {
+    return steps.stream().map(QueuedPropagationStep::outcome).toList();
+  }
+
+  /** Returns the changes the steps propagated, in order. */
+  private static List<VitruviusChange<EObject>> originalChangesOf(
+      List<QueuedPropagationStep> steps) {
+    return steps.stream()
+        .flatMap(step -> step.propagatedChanges().stream())
+        .map(PropagatedChange::getOriginalChange)
+        .toList();
   }
 
   @SuppressWarnings("unchecked")
@@ -737,8 +974,11 @@ class ChangePropagationQueueTest {
     private Consumer<ScriptedSpecification> onFirstRun = spec -> {};
     private Consumer<ScriptedSpecification> beforeAsking = spec -> {};
 
-    /** The change for which this specification asks the user before doing anything. */
-    private TransactionalChange<EObject> askFor;
+    /** The changes for which this specification asks the user before doing anything. */
+    private List<TransactionalChange<EObject>> askFor = List.of();
+
+    /** The questions it asks for each of these changes, in order. */
+    private List<String> questions = List.of(QUESTION);
 
     /** What this specification notifies the user of whenever it runs, before asking. */
     private String notification;
@@ -764,13 +1004,15 @@ class ChangePropagationQueueTest {
       if (notification != null) {
         getUserInteractor().getNotificationDialogBuilder().message(notification).startInteraction();
       }
-      if (askFor != null && askFor.getEChanges().contains(change)) {
+      if (askFor.stream().anyMatch(asking -> asking.getEChanges().contains(change))) {
         beforeAsking.accept(this);
-        answers.add(
-            getUserInteractor()
-                .getConfirmationDialogBuilder()
-                .message(QUESTION)
-                .startInteraction());
+        for (String question : questions) {
+          answers.add(
+              getUserInteractor()
+                  .getConfirmationDialogBuilder()
+                  .message(question)
+                  .startInteraction());
+        }
       }
       if (runs++ == 0) {
         onFirstRun.accept(this);
