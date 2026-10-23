@@ -65,7 +65,9 @@ public class DefaultChangeRecordingModelRepository
   public DefaultChangeRecordingModelRepository(
       URI correspondencesURI, Path consistencyMetadataFolder) {
     this.consistencyMetadataFolder = consistencyMetadataFolder;
-    this.modelsResourceSet = withGlobalFactories(new ResourceSetImpl());
+    ResourceSetImpl resourceSet = new ResourceSetImpl();
+    new ResourceSetImpl.MappedResourceLocator(resourceSet);
+    this.modelsResourceSet = withGlobalFactories(resourceSet);
     this.uuidResolver = UuidResolver.create(modelsResourceSet);
     this.changeResolver = VitruviusChangeResolverFactory.forUuids(uuidResolver);
     this.correspondenceModel = createPersistableCorrespondenceModel(correspondencesURI);
