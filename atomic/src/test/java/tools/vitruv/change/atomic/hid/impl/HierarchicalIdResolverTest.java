@@ -5,6 +5,7 @@ import allElementTypes.NonRoot;
 import allElementTypes.Root;
 import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
@@ -48,6 +49,26 @@ public class HierarchicalIdResolverTest {
     final Root root = AllElementTypesCreators.aet.Root();
     final HierarchicalId initialRootId = this.idResolver.getAndUpdateId(root);
     Assertions.assertEquals(root, this.idResolver.getEObject(initialRootId));
+  }
+
+  @Test
+  @DisplayName("hand out the free cache ID with the lowest index")
+  public void cacheIdWithLowestIndexIsHandedOutFirst() {
+    final List<Root> roots = new ArrayList<>();
+    for (int i = 0; i < 12; i++) {
+      final Root root = AllElementTypesCreators.aet.Root();
+      Assertions.assertEquals(new HierarchicalId(HierarchicalId.CACHE_PREFIX + i),
+          this.idResolver.getAndUpdateId(root));
+      roots.add(root);
+    }
+    final Resource resource = this.resourceSet.createResource(
+        URI.createFileURI(this.testProjectPath.resolve("root.aet").toString()));
+    for (final int released : List.of(10, 2)) {
+      resource.getContents().add(roots.get(released));
+      this.idResolver.getAndUpdateId(roots.get(released));
+    }
+    Assertions.assertEquals(new HierarchicalId(HierarchicalId.CACHE_PREFIX + 2),
+        this.idResolver.getAndUpdateId(AllElementTypesCreators.aet.Root()));
   }
 
   @Test
