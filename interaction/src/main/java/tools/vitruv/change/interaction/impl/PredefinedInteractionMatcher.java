@@ -38,6 +38,15 @@ public class PredefinedInteractionMatcher {
     this.userInteractions.add(interaction);
   }
 
+  /**
+   * Returns the predefined interactions that have not been matched to a request yet.
+   *
+   * @return the remaining interactions, in the order they were added
+   */
+  List<UserInteractionBase> getRemainingInteractions() {
+    return Collections.unmodifiableList(new ArrayList<>(this.userInteractions));
+  }
+
   protected <T extends UserInteractionBase> Iterable<T> getMatchingInput(final String message, final Class<T> type) {
     if ((this.userInteractions == null)) {
       return Collections.<T>emptyList();

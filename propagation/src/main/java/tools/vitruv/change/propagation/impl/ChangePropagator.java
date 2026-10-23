@@ -25,6 +25,7 @@ import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 import tools.vitruv.change.interaction.InteractionResultProvider;
 import tools.vitruv.change.interaction.InternalUserInteractor;
+import tools.vitruv.change.interaction.PendingUserInteractionException;
 import tools.vitruv.change.interaction.UserInteractionBase;
 import tools.vitruv.change.interaction.UserInteractionFactory;
 import tools.vitruv.change.interaction.UserInteractionListener;
@@ -33,6 +34,7 @@ import tools.vitruv.change.propagation.ChangePropagationObserver;
 import tools.vitruv.change.propagation.ChangePropagationSpecification;
 import tools.vitruv.change.propagation.ChangePropagationSpecificationProvider;
 import tools.vitruv.change.propagation.ChangeRecordingModelRepository;
+import tools.vitruv.change.propagation.NonDeferrablePropagationException;
 
 public class ChangePropagator {
   private static class ChangePropagation implements ChangePropagationObserver, UserInteractionListener {
@@ -57,7 +59,47 @@ public class ChangePropagator {
       return result;
     }
 
+    /** The outcome of propagating one transactional change through all specifications once. */
+    private record StepResult(
+        PropagatedChange propagatedChange, List<TransactionalChange<EObject>> resultChanges) {}
+
     private List<PropagatedChange> propagateSingleChange(final TransactionalChange<EObject> change) {
+      final StepResult step = this.propagateOneStep(change);
+      final ArrayList<PropagatedChange> resultingChanges = new ArrayList<PropagatedChange>();
+      resultingChanges.add(step.propagatedChange());
+      if (!Objects.equals(this.outer.changePropagationMode, ChangePropagationMode.SINGLE_STEP)) {
+        try {
+          Iterable<PropagatedChange> transitivelyPropagated =
+              this.propagateTransitiveChanges(
+                  step.resultChanges().stream()
+                      .filter(TransactionalChange::containsConcreteChange)
+                      .toList());
+          Iterables.<PropagatedChange>addAll(resultingChanges, transitivelyPropagated);
+        } catch (RuntimeException e) {
+          // Same wrapping as when transitive propagation ran inside propagateOneStep's try block.
+          // Only runtime exceptions get here: each nested step already wraps everything it throws.
+          throw new RuntimeException(e);
+        }
+      }
+      return resultingChanges;
+    }
+
+    /**
+     * Propagates a change as a single step for {@link ChangePropagationQueue}: one propagation step
+     * followed by the bookkeeping {@link #propagateChanges()} does at the end of a propagation.
+     */
+    private StepResult propagateQueuedStep(final TransactionalChange<EObject> change) {
+      final StepResult step = this.propagateOneStep(change);
+      this.handleObjectsWithoutResource();
+      this.changedResources.forEach(it -> it.setModified(true));
+      return step;
+    }
+
+    /**
+     * Propagates the given change through every applicable specification once, without propagating
+     * the resulting changes further.
+     */
+    private StepResult propagateOneStep(final TransactionalChange<EObject> change) {
       try {
         Preconditions.checkState(!change.getAffectedEObjects().isEmpty(),
           "There are no objects affected by this change:%s%s", System.lineSeparator(), change);
@@ -73,9 +115,7 @@ public class ChangePropagator {
                 return specs.stream();
               })
               .collect(Collectors.toCollection(LinkedHashSet::new));
-          _xtrycatchfinallyexpression = allSpecs.stream()
-              .flatMap(it -> StreamSupport.stream(this.propagateChangeForChangePropagationSpecification(change, it).spliterator(), false))
-              .collect(Collectors.toList());
+          _xtrycatchfinallyexpression = this.propagateThroughSpecifications(change, allSpecs);
         } finally {
           this.outer.userInteractor.deregisterUserInputListener(this);
           this.outer.changePropagationProvider.forEach(it -> it.deregisterObserver(this));
@@ -98,32 +138,48 @@ public class ChangePropagator {
         change.setUserInteractions(this.userInteractions);
         CompositeContainerChange<EObject> _createCompositeChange = VitruviusChangeFactory.getInstance().<EObject>createCompositeChange(propagationResultChanges);
         final PropagatedChange propagatedChange = new PropagatedChange(change, _createCompositeChange);
-        final ArrayList<PropagatedChange> resultingChanges = new ArrayList<PropagatedChange>();
-        resultingChanges.add(propagatedChange);
-        if (!Objects.equals(this.outer.changePropagationMode, ChangePropagationMode.SINGLE_STEP)) {
-          Iterable<PropagatedChange> _propagateTransitiveChanges = this.propagateTransitiveChanges(
-              propagationResultChanges.stream().filter(TransactionalChange::containsConcreteChange).collect(Collectors.toList()));
-          Iterables.<PropagatedChange>addAll(resultingChanges, _propagateTransitiveChanges);
-        }
-        return resultingChanges;
+        return new StepResult(propagatedChange, propagationResultChanges);
       } catch (Throwable _e) {
         throw new RuntimeException(_e);
       }
     }
 
-    private Iterable<PropagatedChange> propagateTransitiveChanges(final Iterable<TransactionalChange<EObject>> transitiveChanges) {
-      List<TransactionalChange<EObject>> nonEmptyChanges = StreamSupport.stream(transitiveChanges.spliterator(), false)
-          .filter(TransactionalChange::containsConcreteChange)
-          .collect(Collectors.toList());
-      List<TransactionalChange<EObject>> nonLeafChanges;
-      if (Objects.equals(this.outer.changePropagationMode, ChangePropagationMode.TRANSITIVE_EXCEPT_LEAVES)) {
-        nonLeafChanges = nonEmptyChanges.stream()
-            .filter(it -> this.outer.changePropagationProvider.getChangePropagationSpecifications(
-                it.getAffectedEObjectsMetamodelDescriptor()).size() > 1)
-            .collect(Collectors.toList());
-      } else {
-        nonLeafChanges = nonEmptyChanges;
+    /**
+     * Propagates the change through the given specifications in order. A pending user interaction
+     * after an earlier specification already modified models is reported as non-deferrable.
+     */
+    private List<TransactionalChange<EObject>> propagateThroughSpecifications(
+        final TransactionalChange<EObject> change,
+        final Set<ChangePropagationSpecification> specifications) {
+      final List<TransactionalChange<EObject>> results = new ArrayList<>();
+      for (final ChangePropagationSpecification specification : specifications) {
+        try {
+          Iterables.addAll(
+              results,
+              this.propagateChangeForChangePropagationSpecification(change, specification));
+        } catch (final RuntimeException e) {
+          // Only the changes of the specifications that already finished are known here. If this
+          // specification modified models before asking for input, its recording is lost with the
+          // exception, so specifications are assumed to ask for user input before modifying models.
+          if (PendingUserInteractionException.findIn(e) != null
+              && results.stream().anyMatch(TransactionalChange::containsConcreteChange)) {
+            throw new NonDeferrablePropagationException(
+                "A user interaction is pending, but propagating this change already modified"
+                    + " models, so it cannot be deferred and retried without repeating those"
+                    + " modifications: "
+                    + change,
+                e);
+          }
+          throw e;
+        }
       }
+      return results;
+    }
+
+    private Iterable<PropagatedChange> propagateTransitiveChanges(
+        final Iterable<TransactionalChange<EObject>> transitiveChanges) {
+      List<TransactionalChange<EObject>> nonLeafChanges =
+          this.outer.selectTransitiveChanges(transitiveChanges);
       List<ChangePropagator.ChangePropagation> nextPropagations = nonLeafChanges.stream()
           .map(it -> new ChangePropagator.ChangePropagation(this.outer, it, this))
           .collect(Collectors.toList());
@@ -259,11 +315,7 @@ public class ChangePropagator {
    * @return - {@link List} of {@link PropagatedChange}
    */
   public List<PropagatedChange> propagateChange(final VitruviusChange<Uuid> change, final Iterable<ChangePropagationObserver> observers) {
-    final VitruviusChange<EObject> resolvedChange = this.modelRepository.applyChange(change);
-    resolvedChange.getAffectedEObjects().stream()
-        .map(EObject::eResource)
-        .filter(Objects::nonNull)
-        .forEach(it -> it.setModified(true));
+    final VitruviusChange<EObject> resolvedChange = this.applyAndMarkModified(change);
     if (ChangePropagator.logger.isTraceEnabled()) {
       ChangePropagator.logger.trace("Will now propagate this input change:\n\t" + resolvedChange);
     }
@@ -271,6 +323,93 @@ public class ChangePropagator {
     List<PropagatedChange> result = new ChangePropagator.ChangePropagation(this, resolvedChange, null).propagateChanges();
     this.changePropagationProvider.forEach(spec -> observers.forEach(spec::deregisterObserver));
     return result;
+  }
+
+  /**
+   * Selects which of the changes produced by a propagation step are propagated further, according
+   * to the {@link ChangePropagationMode}: only changes with concrete changes, and for {@link
+   * ChangePropagationMode#TRANSITIVE_EXCEPT_LEAVES} only those that more than one specification
+   * handles.
+   */
+  private List<TransactionalChange<EObject>> selectTransitiveChanges(
+      final Iterable<TransactionalChange<EObject>> transitiveChanges) {
+    List<TransactionalChange<EObject>> nonEmptyChanges =
+        StreamSupport.stream(transitiveChanges.spliterator(), false)
+            .filter(TransactionalChange::containsConcreteChange)
+            .collect(Collectors.toList());
+    if (Objects.equals(
+        this.changePropagationMode, ChangePropagationMode.TRANSITIVE_EXCEPT_LEAVES)) {
+      return nonEmptyChanges.stream()
+          .filter(
+              it ->
+                  this.changePropagationProvider
+                          .getChangePropagationSpecifications(
+                              it.getAffectedEObjectsMetamodelDescriptor())
+                          .size()
+                      > 1)
+          .collect(Collectors.toList());
+    }
+    return nonEmptyChanges;
+  }
+
+  /**
+   * Result of {@link #propagateSingleStep}.
+   *
+   * @param propagatedChange the propagated change
+   * @param followUpChanges the resulting changes to propagate next, according to the {@link
+   *     ChangePropagationMode}
+   */
+  record SingleStepResult(
+      PropagatedChange propagatedChange, List<TransactionalChange<EObject>> followUpChanges) {}
+
+  /** Returns the user interactor the specifications ask for user input. */
+  InternalUserInteractor getUserInteractor() {
+    return this.userInteractor;
+  }
+
+  /**
+   * Applies <code>change</code> to the models without propagating it.
+   *
+   * @return the transactional changes to propagate, in order
+   */
+  List<TransactionalChange<EObject>> applyWithoutPropagating(final VitruviusChange<Uuid> change) {
+    final List<TransactionalChange<EObject>> parts = new ArrayList<>();
+    this.getTransactionalChangeSequence(this.applyAndMarkModified(change)).forEach(parts::add);
+    return parts;
+  }
+
+  /**
+   * Propagates <code>change</code> through every applicable specification once, without
+   * propagating the resulting changes further.
+   *
+   * @param change - the applied change to propagate
+   * @param observers - observers to register at the specifications while propagating
+   * @return - the propagated change and the changes to propagate next
+   */
+  SingleStepResult propagateSingleStep(
+      final TransactionalChange<EObject> change,
+      final Iterable<ChangePropagationObserver> observers) {
+    this.changePropagationProvider.forEach(spec -> observers.forEach(spec::registerObserver));
+    try {
+      final ChangePropagation.StepResult step =
+          new ChangePropagation(this, change, null).propagateQueuedStep(change);
+      final List<TransactionalChange<EObject>> followUps =
+          Objects.equals(this.changePropagationMode, ChangePropagationMode.SINGLE_STEP)
+              ? List.of()
+              : this.selectTransitiveChanges(step.resultChanges());
+      return new SingleStepResult(step.propagatedChange(), followUps);
+    } finally {
+      this.changePropagationProvider.forEach(spec -> observers.forEach(spec::deregisterObserver));
+    }
+  }
+
+  private VitruviusChange<EObject> applyAndMarkModified(final VitruviusChange<Uuid> change) {
+    final VitruviusChange<EObject> resolvedChange = this.modelRepository.applyChange(change);
+    resolvedChange.getAffectedEObjects().stream()
+        .map(EObject::eResource)
+        .filter(Objects::nonNull)
+        .forEach(it -> it.setModified(true));
+    return resolvedChange;
   }
 
   private Iterable<TransactionalChange<EObject>> getTransactionalChangeSequence(final VitruviusChange<EObject> change) {
