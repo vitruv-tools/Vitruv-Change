@@ -243,6 +243,11 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
   }
 
   @Override
+  public Iterable<TransactionalChange<Element>> getTransactionalChangeSequence() {
+    return List.of(this);
+  }
+
+  @Override
   public boolean equals(final Object obj) {
     boolean _xifexpression = false;
     if ((obj == this)) {
