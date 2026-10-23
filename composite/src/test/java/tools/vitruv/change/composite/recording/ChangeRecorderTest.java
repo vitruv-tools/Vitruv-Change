@@ -6,10 +6,13 @@ import allElementTypes.Root;
 import com.google.common.collect.Iterables;
 import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
@@ -800,6 +803,26 @@ public class ChangeRecorderTest {
     };
     this.record(_function_2);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(), ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
+  }
+
+  @Test
+  @DisplayName("creates the deletions of removed objects in the order of their removal")
+  public void deletesRemovedObjectsInRemovalOrder() {
+    final Root root = wrapIntoRecordedResource(AllElementTypesCreators.aet.Root());
+    final List<NonRoot> nonRoots = new ArrayList<>();
+    for (int i = 0; i < 10; i++) {
+      nonRoots.add(AllElementTypesCreators.aet.NonRoot());
+    }
+    record(() -> root.getMultiValuedContainmentEReference().addAll(nonRoots));
+    final List<NonRoot> removalOrder = new ArrayList<>(nonRoots);
+    Collections.shuffle(removalOrder, new Random(0));
+    final TransactionalChange<EObject> change = record(() -> removalOrder.forEach(
+        nonRoot -> root.getMultiValuedContainmentEReference().remove(nonRoot)));
+    final List<EObject> deleted = change.getEChanges().stream()
+        .filter(DeleteEObject.class::isInstance)
+        .map(it -> ((DeleteEObject<EObject>) it).getAffectedElement())
+        .collect(Collectors.toList());
+    Assertions.assertEquals(removalOrder, deleted);
   }
 
   @ParameterizedTest(name = "while isRecording={0}")
