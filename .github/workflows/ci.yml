@@ -1,73 +1,166 @@
 name: CI
 
+# workflow triggers
 on:
-  push:
-    branches: [main]
-  release:
-    types: [created]
+  # manually
+  workflow_dispatch:
+  # PRs on `main`
+  pull_request:
+    branches:
+    - main
+  # nightly
   schedule:
-    - cron: '35 2 * * *' # run nightly at 2:35 am
-  workflow_call:
+  - cron: "0 2 * * *"
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-      fail-fast: false
+  verify:
+    name: Verify build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Cache
-        uses: actions/cache@v4
+    - name: Checkout repository
+      uses: actions/checkout@v7
+
+    - name: Setup Java and Maven cache
+      uses: actions/setup-java@v6.1.0
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+        check-latest: true
+        cache: 'maven'
+
+    - name: Verify build
+      run: >
+        ./mvnw clean verify
+        --batch-mode
+        --update-snapshots
+        --no-transfer-progress
+
+    - name: Stage build results (Unix)
+      if: matrix.os == 'ubuntu-latest' || matrix.os == 'macOS-latest'
+      run: mkdir staging-${{ matrix.os }} && find . -path '*/target/*.jar' -exec cp {} staging-${{ matrix.os }}/ \;
+
+    - name: Stage build results (Windows)
+      if: matrix.os == 'windows-latest'
+      run: mkdir staging-${{ matrix.os }} && gci -Path . -Recurse -Include *.jar |? { $_.FullName -like '*\target\*.jar' } |% { cp $_.FullName staging-${{ matrix.os }} }
+
+    - name: Upload build results
+      uses: actions/upload-artifact@v7
+      with:
+        name: build-results-${{ matrix.os }}
+        path: staging-*/
+
+  verify-javadoc:
+    name: Verify JavaDoc
+    runs-on: ubuntu-latest
+    needs: [verify]
+    strategy:
+      fail-fast: true
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v7
+
+    - name: Setup Java and Maven cache
+      uses: actions/setup-java@v6.1.0
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+        check-latest: true
+        cache: 'maven'
+
+    - name: Verify JavaDoc
+      run: >
+        ./mvnw clean compile javadoc:javadoc
+        -DskipTests
+        --batch-mode
+        --update-snapshots
+        --no-transfer-progress
+
+  sonar:
+    name: SonarQube analysis
+    runs-on: ubuntu-latest
+    needs: [verify]
+    if: github.event_name == 'schedule' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]')
+    strategy:
+      fail-fast: true
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v7
+
+    - name: Setup Java and Maven cache
+      uses: actions/setup-java@v6.1.0
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+        check-latest: true
+        cache: 'maven'
+
+    - name: Run SonarQube analysis
+      run: >
+        ./mvnw clean verify sonar:sonar -P coverage
+        --batch-mode
+        --update-snapshots
+        --no-transfer-progress
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  run-checkstyle:
+    name: checkstyle check
+    runs-on: ubuntu-latest
+    needs: [verify]
+    if: (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]')
+    strategy:
+      fail-fast: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - name: Run checkstyle
+        uses: dbelyaev/action-checkstyle@v4.4.0
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/MANIFEST.MF') }}
-          restore-keys: ${{ runner.os }}-m2
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: 17
-      - name: Build and Verify
-        run: >
-          ./mvnw -B -U clean verify 
-          '-Dstyle.color=always'
-          '-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
-          '-Dorg.slf4j.simpleLogger.log.org.eclipse.tycho.core.resolver.DefaultTychoResolver=warn'
-          '-Dorg.slf4j.simpleLogger.log.org.eclipse.tycho.osgi.configuration.MavenContextConfigurator=warn'
-          '-Dorg.slf4j.simpleLogger.log.org.eclipse.sisu.equinox.launching.internal.DefaultEquinoxLauncher=warn'
-          '-Dorg.slf4j.simpleLogger.log.org.eclipse.xtext.maven.XtextGenerateMojo=warn'
-          '-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.NoOpLog'
-        env: 
-          MAVEN_OPTS: -Djansi.force=true
-      - name: Store Change Artifact
-        if: github.event_name == 'pull_request' && matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: change
-          path: releng/tools.vitruv.change.updatesite/target/repository
-          retention-days: 1
-      - name: Publish Nightly Update Site
-        if: github.event_name != 'release' && github.ref == 'refs/heads/main' && github.repository_owner == 'vitruv-tools' && matrix.os == 'ubuntu-latest'
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          deploy_key: ${{ secrets.UPDATE_SITE_DEPLOY_KEY }}
-          external_repository: vitruv-tools/updatesite
-          destination_dir: nightly/change
-          publish_dir: releng/tools.vitruv.change.updatesite/target/repository
-          publish_branch: main
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-      - name: Publish Release Update Site
-        if: github.event_name == 'release' && github.repository_owner == 'vitruv-tools' && matrix.os == 'ubuntu-latest'
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          deploy_key: ${{ secrets.UPDATE_SITE_DEPLOY_KEY }}
-          external_repository: vitruv-tools/updatesite
-          destination_dir: release/change/${{ github.event.release.tag_name }}
-          publish_dir: releng/tools.vitruv.change.updatesite/target/repository
-          publish_branch: main
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          checkstyle_config: checkstyle.xml
+          checkstyle_version: "10.21.4"
+
+  deploy-snapshot:
+    name: Deploy snapshot
+    runs-on: ubuntu-latest
+    needs: [verify]
+    if: github.ref == 'refs/heads/main' && github.repository_owner == 'vitruv-tools'
+    strategy:
+      fail-fast: true
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v7
+
+    - name: Setup Java and Maven cache
+      uses: actions/setup-java@v6.1.0
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+        check-latest: true
+        cache: 'maven'
+        server-id: central
+        server-username: CENTRAL_USERNAME
+        server-password: CENTRAL_PASSWORD
+        gpg-private-key: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
+        gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+    - name: Deploy snapshot
+      run: >
+        ./mvnw clean deploy -P snapshot
+        -DskipTests
+        --batch-mode
+        --update-snapshots
+        --no-transfer-progress
+      env:
+        CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+        CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+        MAVEN_GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}

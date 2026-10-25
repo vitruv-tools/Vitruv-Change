@@ -1,0 +1,230 @@
+package tools.vitruv.change.testutils.changevisualization.tree;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.awt.BorderLayout;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseWheelEvent;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import javax.swing.JLabel;
+import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import tools.vitruv.change.testutils.changevisualization.ui.LabelValuePanel;
+
+class ChangeTreeUnitTest {
+
+  private ChangeTree changeTree;
+  private TabHighlighting dummyHighlighting;
+
+  @BeforeEach
+  void setUp() throws Exception {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          dummyHighlighting =
+              new TabHighlighting() {
+                @Override
+                public void setHighlightID(String highlightID) {
+                  // Intentionally left blank for testing.
+                  // This test does not require real highlighting behavior.
+                }
+
+                @Override
+                public String getHighlightID() {
+                  // Intentionally returns a dummy value for testing.
+                  // This test does not depend on actual highlight ID logic.
+                  return "";
+                }
+              };
+          changeTree = new ChangeTree(dummyHighlighting);
+        });
+  }
+
+  @Test
+  void constructor_initializesUILayout() throws Exception {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          assertThat(changeTree.getLayout()).isInstanceOf(BorderLayout.class);
+
+          boolean hasSplitPane = false;
+          for (int i = 0; i < changeTree.getComponentCount(); i++) {
+            if (changeTree.getComponent(i) instanceof JSplitPane) {
+              hasSplitPane = true;
+              break;
+            }
+          }
+          assertThat(hasSplitPane).isTrue();
+        });
+  }
+
+  @Test
+  void treeUI_andDetailsComponents_areNotNull() throws Exception {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          assertThat(changeTree.getTreeUI()).isNotNull();
+          assertThat(changeTree.getDetailsUI()).isNotNull();
+          assertThat(changeTree.getTreeScroller()).isNotNull();
+          assertThat(changeTree.getDetailsSplitpane()).isNotNull();
+        });
+  }
+
+  @Test
+  void selectingFeatureNodeWithTextDetails_updatesDetailsText() throws Exception {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          selectNode(new FeatureNode("feature", "value", "detail text", null, null));
+
+          assertThat(changeTree.getDetailsUI().getText()).isEqualTo("detail text");
+        });
+  }
+
+  @Test
+  void selectingFeatureNodeWithArrayDetails_updatesDetailsComponent() throws Exception {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          String[][] detailsArray = new String[][] {{"label", "value"}};
+
+          selectNode(new FeatureNode("feature", "value", null, detailsArray, null));
+
+          assertThat(changeTree.getDetailsSplitpane().getRightComponent())
+              .isInstanceOf(LabelValuePanel.class);
+        });
+  }
+
+  @Test
+  void selectingFeatureNodeWithCustomDetailsComponent_updatesDetailsComponent() throws Exception {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          JLabel detailsComponent = new JLabel("details");
+
+          selectNode(new FeatureNode("feature", "value", null, null, detailsComponent));
+
+          assertThat(changeTree.getDetailsSplitpane().getRightComponent())
+              .isSameAs(detailsComponent);
+        });
+  }
+
+  @Test
+  void selectingChangeNode_updatesDetailsComponent() throws Exception {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          ChangeNode changeNode =
+              new ChangeNode(
+                  "individual change",
+                  new String[][] {{"feature", "value"}},
+                  ChangeNode.EChangeClass.ATTRIBUTE_ECHANGE,
+                  "ChangeClass",
+                  "AffectedClass",
+                  "id");
+
+          selectNode(changeNode);
+
+          assertThat(changeTree.getDetailsSplitpane().getRightComponent())
+              .isInstanceOf(LabelValuePanel.class);
+        });
+  }
+
+  @Test
+  void zoomInWithCtrlIncreasesFontSize() throws Exception {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          var tree = changeTree.getTreeUI();
+          float originalSize = tree.getFont().getSize2D();
+
+          simulateCtrlMouseWheel(-1);
+
+          float newSize = tree.getFont().getSize2D();
+          assertThat(newSize).isGreaterThan(originalSize).isLessThanOrEqualTo(30.0f);
+        });
+  }
+
+  @Test
+  void zoomOutWithCtrlDecreasesFontSize() throws Exception {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          var tree = changeTree.getTreeUI();
+          tree.setFont(tree.getFont().deriveFont(20.0f));
+          float originalSize = tree.getFont().getSize2D();
+
+          simulateCtrlMouseWheel(1);
+
+          float newSize = tree.getFont().getSize2D();
+          assertThat(newSize).isLessThan(originalSize).isGreaterThanOrEqualTo(5.0f);
+        });
+  }
+
+  @Test
+  void zoomDoesNotExceedMaxLimit() throws Exception {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          var tree = changeTree.getTreeUI();
+          tree.setFont(tree.getFont().deriveFont(29.0f));
+
+          simulateCtrlMouseWheel(-1);
+          float newSize = tree.getFont().getSize2D();
+          assertThat(newSize).isEqualTo(30.0f);
+        });
+  }
+
+  @Test
+  void zoomDoesNotGoBelowMinLimit() throws Exception {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          var tree = changeTree.getTreeUI();
+          tree.setFont(tree.getFont().deriveFont(6.0f));
+
+          simulateCtrlMouseWheel(1);
+          float newSize = tree.getFont().getSize2D();
+          assertThat(newSize).isEqualTo(5.0f);
+        });
+  }
+
+  @Test
+  void mouseAndSelectionListenerFieldsAreTransient() throws Exception {
+    Field mlField = ChangeTree.class.getDeclaredField("ml");
+    Field tslField = ChangeTree.class.getDeclaredField("tsl");
+
+    assertThat(Modifier.isTransient(mlField.getModifiers()))
+        .as("ml holds a non-serializable TreeMouseListener and must be transient "
+            + "to avoid NotSerializableException (SonarCloud java:S1948)")
+        .isTrue();
+    assertThat(Modifier.isTransient(tslField.getModifiers()))
+        .as("tsl holds a non-serializable TreeSelectionListener and must be transient "
+            + "to avoid NotSerializableException (SonarCloud java:S1948)")
+        .isTrue();
+  }
+
+  private void selectNode(Object userObject) {
+    DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
+    DefaultMutableTreeNode child = new DefaultMutableTreeNode(userObject);
+    root.add(child);
+
+    changeTree.getTreeUI().setModel(new DefaultTreeModel(root));
+    changeTree.getTreeUI().setSelectionPath(new TreePath(new Object[] {root, child}));
+  }
+
+  private void simulateCtrlMouseWheel(int rotation) {
+    var event =
+        new MouseWheelEvent(
+            changeTree.getTreeScroller(),
+            MouseWheelEvent.MOUSE_WHEEL,
+            System.currentTimeMillis(),
+            InputEvent.CTRL_DOWN_MASK,
+            100,
+            100,
+            0,
+            false,
+            MouseWheelEvent.WHEEL_UNIT_SCROLL,
+            1,
+            rotation);
+
+    for (var listener : changeTree.getTreeScroller().getMouseWheelListeners()) {
+      listener.mouseWheelMoved(event);
+    }
+  }
+}

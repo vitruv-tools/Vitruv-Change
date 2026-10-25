@@ -1,29 +1,24 @@
-# Eclipse/Java
-.metadata
-bin/
-tmp/
-*.tmp
-*.bak
-*.swp
-*.class
+# VS Code
+.vscode/
 
-# Xtext
-src-gen/
-**/model/generated/
-.antlr-generator-*-patch.jar
-
-# EMF
-model-gen/
-
-# Xtend
-xtend-gen/
-*._trace
-*.xtendbin
+# IntelliJ
+.idea/
+*.iml
 
 # Maven
 target/
-.polyglot.build.properties
-.mvn/wrapper/maven-wrapper.jar
+*.log
+.mvn/wrapper/*.jar
+.flattened-pom.xml
+dependency-reduced-pom.xml
 
-# Custom
-EvaluationData
+# Eclipse
+META-INF
+build.properties
+plugin.properties
+
+# Generated Files
+**/src-gen/*
+**/xtend-gen/*
+.settings
+**/*.java._trace
