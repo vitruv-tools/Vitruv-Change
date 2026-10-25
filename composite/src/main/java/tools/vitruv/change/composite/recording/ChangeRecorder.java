@@ -415,7 +415,8 @@ public class ChangeRecorder implements AutoCloseable {
   /**
    * Creates {@link DeleteEObject} changes for every element implicitly deleted in the change
    * sequence and all of its contained elements. The delete changes are appended at the end
-   * of the list. Contained elements are deleted before their container.
+   * of the list. Contained elements are deleted before their container, each preceded by the
+   * change removing it from its container.
    */
   private List<EChange<EObject>> postprocessRemovals(final List<EChange<EObject>> changes) {
     if (changes.isEmpty()) {
@@ -463,8 +464,13 @@ public class ChangeRecorder implements AutoCloseable {
       allElementsToDelete.put(element, elementsToDelete);
     }
     final List<EChange<EObject>> deleteChanges = new ArrayList<>();
-    for (final Iterable<EObject> elementsToDelete : allElementsToDelete.values()) {
-      for (final EObject it : elementsToDelete) {
+    for (final Map.Entry<EObject, Iterable<EObject>> entry : allElementsToDelete.entrySet()) {
+      for (final EObject it : entry.getValue()) {
+        // the removed element itself already left its container in a recorded change,
+        // contained elements have to be removed from their containers before being deleted
+        if (it != entry.getKey()) {
+          deleteChanges.add(this.converter.createRemoveFromContainerChange(it));
+        }
         deleteChanges.add(this.converter.createDeleteChange(it));
       }
     }
