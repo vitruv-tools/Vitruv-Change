@@ -12,10 +12,14 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -259,6 +263,48 @@ class TestProjectManagerTest {
   void walkIfExistsReturnsEmptyForMissingPath() throws Exception {
     try (java.util.stream.Stream<Path> walked = walkIfExists(this.tempDir.resolve("missing"))) {
       assertEquals(0, walked.count());
+    }
+  }
+
+  @Test
+  @DisplayName("Should not touch the workspace of a concurrently running test JVM")
+  void setupWorkspaceKeepsConcurrentWorkspace() throws Exception {
+    final Path otherWorkspace = this.tempDir.resolve("Vitruv").resolve("workspace-other");
+    final Path otherProject = Files.createDirectories(otherWorkspace.resolve("SomeTest"));
+    Files.createFile(otherProject.resolve("model.xmi"));
+
+    final Path workspace = setupFreshWorkspace();
+
+    assertTrue(Files.exists(otherProject.resolve("model.xmi")));
+    assertTrue(Files.isDirectory(workspace));
+    assertNotEquals(otherWorkspace, workspace);
+    assertEquals(this.tempDir.resolve("Vitruv"), workspace.getParent());
+  }
+
+  @Test
+  @DisplayName("Should delete workspaces of earlier runs that are older than a day")
+  void setupWorkspaceDeletesStaleWorkspace() throws Exception {
+    final Path staleWorkspace = this.tempDir.resolve("Vitruv").resolve("workspace-stale");
+    final Path staleProject = Files.createDirectories(staleWorkspace.resolve("SomeTest"));
+    Files.createFile(staleProject.resolve("model.xmi"));
+    Files.setLastModifiedTime(staleWorkspace,
+        FileTime.from(Instant.now().minus(Duration.ofDays(2))));
+
+    setupFreshWorkspace();
+
+    assertFalse(Files.exists(staleWorkspace));
+  }
+
+  private static Path setupFreshWorkspace() throws Exception {
+    final Field cache = TestProjectManager.class.getDeclaredField("workspaceCache");
+    cache.setAccessible(true);
+    cache.set(null, null);
+    final Method method = TestProjectManager.class.getDeclaredMethod("setupWorkspace");
+    method.setAccessible(true);
+    try {
+      return (Path) method.invoke(null);
+    } finally {
+      cache.set(null, null);
     }
   }
 
