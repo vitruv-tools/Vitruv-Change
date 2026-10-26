@@ -2,7 +2,6 @@ package tools.vitruv.change.composite.recording;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -20,6 +19,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -450,11 +450,10 @@ public class ChangeRecorder implements AutoCloseable {
     final Map<EObject, Iterable<EObject>> allElementsToDelete = new LinkedHashMap<>();
     final Set<EObject> collectedElements = new HashSet<>();
     for (final EObject element : removedElements) {
-      if (collectedElements.contains(element)) {
+      if (collectedElements.contains(element) || isRootOfOwnResource(element)) {
         continue;
       }
-      final List<EObject> elementsToDelete =
-          new ArrayList<>(Lists.newArrayList(element.eAllContents()));
+      final List<EObject> elementsToDelete = collectContainedElements(element);
       java.util.Collections.reverse(elementsToDelete);
       for (final EObject child : elementsToDelete) {
         allElementsToDelete.remove(child);
@@ -471,10 +470,35 @@ public class ChangeRecorder implements AutoCloseable {
         if (it != entry.getKey()) {
           deleteChanges.add(this.converter.createRemoveFromContainerChange(it));
         }
-        deleteChanges.add(this.converter.createDeleteChange(it));
+        // elements in their own resource (cross-resource containment) survive the deletion
+        if (!isRootOfOwnResource(it)) {
+          deleteChanges.add(this.converter.createDeleteChange(it));
+        }
       }
     }
     Iterables.<EChange<EObject>>addAll(changes, deleteChanges);
+  }
+
+  /**
+   * Collects all elements contained in the given one in pre-order. Elements that are a root of
+   * their own resource are included, but not their contents, as they are not deleted together
+   * with their container.
+   */
+  private static List<EObject> collectContainedElements(final EObject element) {
+    final List<EObject> containedElements = new ArrayList<>();
+    final TreeIterator<EObject> iterator = element.eAllContents();
+    while (iterator.hasNext()) {
+      final EObject containedElement = iterator.next();
+      containedElements.add(containedElement);
+      if (isRootOfOwnResource(containedElement)) {
+        iterator.prune();
+      }
+    }
+    return containedElements;
+  }
+
+  private static boolean isRootOfOwnResource(final EObject element) {
+    return ((InternalEObject) element).eDirectResource() != null;
   }
 
   public TransactionalChange<EObject> getChange() {

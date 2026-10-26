@@ -857,6 +857,30 @@ public class ChangeRecorderTest {
         ((DeleteEObject<EObject>) changes.get(7)).getAffectedElement());
   }
 
+  @Test
+  @DisplayName("does not delete cascade removed objects that are a root of their own resource")
+  public void doesNotDeleteObjectsInOwnResource() {
+    final Resource containerResource = resourceSet.createResource(URI.createURI("test://container.aet"));
+    final Resource containedResource = resourceSet.createResource(URI.createURI("test://contained.aet"));
+    final Root container = AllElementTypesCreators.aet.Root();
+    final Root contained = AllElementTypesCreators.aet.Root();
+    final NonRoot containedChild = AllElementTypesCreators.aet.NonRoot();
+    contained.setSingleValuedContainmentEReference(containedChild);
+    container.setRecursiveRoot(contained);
+    containerResource.getContents().add(container);
+    // cross-resource containment: contained stays contained in container
+    containedResource.getContents().add(contained);
+    changeRecorder.addToRecording(resourceSet);
+    final TransactionalChange<EObject> change = record(() -> containerResource.getContents().clear());
+    MatcherAssert.assertThat(change, hasEChanges(RemoveRootEObject.class,
+        ReplaceSingleValuedEReference.class, DeleteEObject.class));
+    final ReplaceSingleValuedEReference<EObject> removeContained =
+        (ReplaceSingleValuedEReference<EObject>) change.getEChanges().get(1);
+    Assertions.assertEquals(contained, removeContained.getOldValue());
+    Assertions.assertEquals(container,
+        ((DeleteEObject<EObject>) change.getEChanges().get(2)).getAffectedElement());
+  }
+
   @ParameterizedTest(name = "while isRecording={0}")
   @DisplayName("removes a removed resource from the recording")
   @ValueSource(booleans = { false, true })
