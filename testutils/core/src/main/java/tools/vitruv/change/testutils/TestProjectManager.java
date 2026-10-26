@@ -194,7 +194,8 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
             try {
               TestProjectManager.deleteRecursively(workspace);
             } catch (UncheckedIOException e) {
-              TestProjectManager.log.debug("Could not delete stale test workspace {}", workspace, e);
+              TestProjectManager.log.debug("Could not delete stale test workspace {}",
+                  workspace, e);
             }
           });
     }
