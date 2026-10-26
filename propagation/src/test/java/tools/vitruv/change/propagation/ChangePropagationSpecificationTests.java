@@ -9,7 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.junit.jupiter.api.Test;
@@ -155,6 +157,58 @@ class ChangePropagationSpecificationTests {
     assertThrows(IllegalArgumentException.class,
         () -> compositeSpecificationForDescriptorsBAndA
         .addChangeMainprocessor(specAtoBOnAttributeChange));
+  }
+
+  @Test
+  void registryProvidesSpecificationsForOverlappingMetamodels() {
+    var specAandDtoB = new MockChangePropagationSpecification(
+        AttributePackage.eINSTANCE.getReplaceSingleValuedEAttribute(),
+        MetamodelDescriptor.with(Set.of("modelsA", "modelsD")), descriptorB);
+    var registry = new ChangePropagationSpecificationRepository(
+        List.of(specAandDtoB, specBtoAOnElementDeleteChange));
+
+    // a change in an instance of A only overlaps with, but is not contained in, the specification
+    assertEquals(List.of(specAandDtoB), registry.getChangePropagationSpecifications(descriptorA));
+    assertEquals(List.of(specAandDtoB), registry.getChangePropagationSpecifications(descriptorD));
+    assertEquals(List.of(specBtoAOnElementDeleteChange),
+        registry.getChangePropagationSpecifications(descriptorB));
+  }
+
+  @Test
+  void registryProvidesSpecificationLevels() {
+    var registry = new ChangePropagationSpecificationRepository(
+        List.of(specAtoBOnAttributeChange, specAtoBOnElementAddChange,
+            specBtoAOnElementDeleteChange),
+        Map.of(specAtoBOnElementAddChange, 2, specBtoAOnElementDeleteChange, 1));
+
+    assertEquals(0, registry.getChangePropagationSpecificationLevel(specAtoBOnAttributeChange));
+    assertEquals(2, registry.getChangePropagationSpecificationLevel(specAtoBOnElementAddChange));
+    assertEquals(1, registry.getChangePropagationSpecificationLevel(specBtoAOnElementDeleteChange));
+    assertEquals(2, registry.getMaximumPropagationSpecificationLevel());
+  }
+
+  @Test
+  void registryWithoutLevelsHasOnlyLevelZero() {
+    var registry = new ChangePropagationSpecificationRepository(
+        List.of(specAtoBOnAttributeChange));
+
+    assertEquals(0, registry.getChangePropagationSpecificationLevel(specAtoBOnAttributeChange));
+    assertEquals(0, registry.getMaximumPropagationSpecificationLevel());
+  }
+
+  @Test
+  void propagateChangesPropagatesOnlyHandledChanges() {
+    var mockObserver = new MockObserver();
+    specAtoBOnElementAddChange.registerObserver(mockObserver);
+    List<EChange<EObject>> changes = List.of(
+        EobjectFactory.eINSTANCE.createCreateEObject(),
+        AttributeFactory.eINSTANCE.createReplaceSingleValuedEAttribute(),
+        EobjectFactory.eINSTANCE.createCreateEObject());
+
+    specAtoBOnElementAddChange.propagateChanges(changes, null, null, null);
+
+    assertEquals(2, mockObserver.cpsStarts);
+    assertEquals(2, mockObserver.cpsEnds);
   }
 
   private static class MockObserver implements ChangePropagationObserver {
