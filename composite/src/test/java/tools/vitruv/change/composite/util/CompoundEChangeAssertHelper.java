@@ -53,7 +53,8 @@ public final class CompoundEChangeAssertHelper {
     ChangeAssertHelper.assertSizeGreaterEquals(changes, _plus);
     Iterable<? extends EChange<EObject>> filteredChanges = changes;
     for (final EObject deletedContainedElement : deletedContainedElements) {
-      filteredChanges = CompoundEChangeAssertHelper.assertRemoveFromContainer(filteredChanges, deletedContainedElement);
+      filteredChanges = CompoundEChangeAssertHelper.assertRemoveFromContainer(filteredChanges,
+          deletedContainedElement);
       filteredChanges = AtomicEChangeAssertHelper.assertDeleteEObject(filteredChanges, deletedContainedElement);
     }
     return AtomicEChangeAssertHelper.assertDeleteEObject(filteredChanges, expectedOldValue);
@@ -65,11 +66,11 @@ public final class CompoundEChangeAssertHelper {
     final EReference containmentFeature = expectedOldValue.eContainmentFeature();
     if (containmentFeature.isMany()) {
       final int index = ((List<?>) container.eGet(containmentFeature)).indexOf(expectedOldValue);
-      return AtomicEChangeAssertHelper.assertRemoveEReference(changes, container, containmentFeature,
-          expectedOldValue, index, true);
+      return AtomicEChangeAssertHelper.assertRemoveEReference(changes, container,
+          containmentFeature, expectedOldValue, index, true);
     }
-    return AtomicEChangeAssertHelper.assertReplaceSingleValuedEReference(changes, container, containmentFeature,
-        expectedOldValue, null, true, false, false);
+    return AtomicEChangeAssertHelper.assertReplaceSingleValuedEReference(changes, container,
+        containmentFeature, expectedOldValue, null, true, false, false);
   }
 
   public static Iterable<? extends EChange<EObject>> assertCreateAndInsertRootEObject(

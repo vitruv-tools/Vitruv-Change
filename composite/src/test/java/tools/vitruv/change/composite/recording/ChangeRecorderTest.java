@@ -298,7 +298,11 @@ public class ChangeRecorderTest {
       resource.getContents().clear();
     };
     this.record(_function_2);
-    MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(), ChangeRecorderTest.hasEChanges(RemoveRootEObject.class, RemoveEReference.class, DeleteEObject.class, RemoveEReference.class, DeleteEObject.class, ReplaceSingleValuedEReference.class, DeleteEObject.class, DeleteEObject.class));
+    MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(),
+        ChangeRecorderTest.hasEChanges(RemoveRootEObject.class,
+            RemoveEReference.class, DeleteEObject.class,
+            RemoveEReference.class, DeleteEObject.class,
+            ReplaceSingleValuedEReference.class, DeleteEObject.class, DeleteEObject.class));
   }
 
   @DisplayName("adds an object set as containment to the recording")
@@ -529,7 +533,9 @@ public class ChangeRecorderTest {
       }
     };
     this.record(_function_1);
-    MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(), ChangeRecorderTest.hasEChanges(RemoveRootEObject.class, ReplaceSingleValuedEReference.class, DeleteEObject.class, DeleteEObject.class));
+    MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(),
+        ChangeRecorderTest.hasEChanges(RemoveRootEObject.class,
+            ReplaceSingleValuedEReference.class, DeleteEObject.class, DeleteEObject.class));
   }
 
   @ParameterizedTest(name = "while isRecording={0}")
@@ -860,8 +866,10 @@ public class ChangeRecorderTest {
   @Test
   @DisplayName("does not delete cascade removed objects that are a root of their own resource")
   public void doesNotDeleteObjectsInOwnResource() {
-    final Resource containerResource = resourceSet.createResource(URI.createURI("test://container.aet"));
-    final Resource containedResource = resourceSet.createResource(URI.createURI("test://contained.aet"));
+    final Resource containerResource =
+        resourceSet.createResource(URI.createURI("test://container.aet"));
+    final Resource containedResource =
+        resourceSet.createResource(URI.createURI("test://contained.aet"));
     final Root container = AllElementTypesCreators.aet.Root();
     final Root contained = AllElementTypesCreators.aet.Root();
     final NonRoot containedChild = AllElementTypesCreators.aet.NonRoot();
@@ -871,7 +879,8 @@ public class ChangeRecorderTest {
     // cross-resource containment: contained stays contained in container
     containedResource.getContents().add(contained);
     changeRecorder.addToRecording(resourceSet);
-    final TransactionalChange<EObject> change = record(() -> containerResource.getContents().clear());
+    final TransactionalChange<EObject> change =
+        record(() -> containerResource.getContents().clear());
     MatcherAssert.assertThat(change, hasEChanges(RemoveRootEObject.class,
         ReplaceSingleValuedEReference.class, DeleteEObject.class));
     final ReplaceSingleValuedEReference<EObject> removeContained =
