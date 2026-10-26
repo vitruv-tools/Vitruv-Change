@@ -220,4 +220,42 @@ class UuidResolvingTest {
     rootResource.getContents().clear();
     assertThrows(IllegalStateException.class, () -> uuidResolver.endTransaction());
   }
+
+  @Test
+  @DisplayName("unregister element without unregistering its contents")
+  void unregisterContainerWithoutUnregisteringContents() {
+    var root = aet.Root();
+    NonRoot child = aet.NonRoot();
+    root.setSingleValuedContainmentEReference(child);
+    URI resourceUri = URI.createFileURI(testProjectPath.resolve("root.aet").toString());
+    resourceSet.createResource(resourceUri).getContents().add(root);
+    final Uuid rootUuid = uuidResolver.registerEObject(root);
+    uuidResolver.registerEObject(child);
+    uuidResolver.endTransaction();
+
+    EcoreUtil.remove(root);
+    uuidResolver.unregisterEObject(rootUuid, root);
+
+    // The child is not touched in this transaction, but left the resource set with its container.
+    assertThrows(IllegalStateException.class, () -> uuidResolver.endTransaction());
+  }
+
+  @Test
+  @DisplayName("unregister element together with its contents")
+  void unregisterContainerAndContents() {
+    var root = aet.Root();
+    NonRoot child = aet.NonRoot();
+    root.setSingleValuedContainmentEReference(child);
+    URI resourceUri = URI.createFileURI(testProjectPath.resolve("root.aet").toString());
+    resourceSet.createResource(resourceUri).getContents().add(root);
+    final Uuid rootUuid = uuidResolver.registerEObject(root);
+    final Uuid childUuid = uuidResolver.registerEObject(child);
+    uuidResolver.endTransaction();
+
+    EcoreUtil.remove(root);
+    uuidResolver.unregisterEObject(childUuid, child);
+    uuidResolver.unregisterEObject(rootUuid, root);
+
+    assertDoesNotThrow(() -> uuidResolver.endTransaction());
+  }
 }
