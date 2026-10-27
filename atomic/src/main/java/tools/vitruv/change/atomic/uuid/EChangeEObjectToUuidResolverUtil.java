@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EObject;
@@ -17,6 +18,8 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.change.atomic.eobject.CreateEObject;
+import tools.vitruv.change.atomic.eobject.DeleteEObject;
 import tools.vitruv.change.atomic.eobject.EObjectAddedEChange;
 import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange;
 import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange;
@@ -24,6 +27,7 @@ import tools.vitruv.change.atomic.feature.FeatureEChange;
 import tools.vitruv.change.atomic.root.InsertRootEObject;
 import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute;
 import tools.vitruv.change.atomic.feature.reference.InsertEReference;
+import tools.vitruv.change.atomic.feature.reference.RemoveEReference;
 
 /**
  * A utility class for resolving lists of EChange&lt;EObject&gt; to lists of EChange&lt;Uuid&gt;.
@@ -153,22 +157,32 @@ public final class EChangeEObjectToUuidResolverUtil {
   private SingleResolutionResult resolveSingleChanges(List<EChange<EObject>> changes) {
     List<EChange<Uuid>> resultList = new ArrayList<>();
 
-    for (int i = 0; i < changes.size(); i++) {
+    for (int i = 0; i < changes.size(); i++) {    	
     	EChange<EObject> change = changes.get(i);
-//    	System.out.println("Resolving change " + (i + 1) + "/" + changes.size() + ": " + change);
-//    	System.out.println("Change type: " + change.getClass().getSimpleName());
-//    	if(i == 700) {
-//    		System.out.println("Debug breakpoint reached at change index 700");
-//		}
-
       if (change instanceof InsertRootEObject<EObject> insertChange) {
         insertChange.setResource(targetResource);
       }
 
       if (change instanceof EObjectExistenceEChange<EObject> existenceChange) {
-        EObject resolvedElement = resolveOrCreateElement(existenceChange.getAffectedElement(),
-            existenceChange, proxyUriToObject);
-        existenceChange.setAffectedElement(resolvedElement);
+//    	  System.out.print("Change for the creation of a " + existenceChange.getAffectedElement().getClass().getSimpleName());
+    	  if (change instanceof CreateEObject<? extends EObject> createChange) {
+    		  String affectedElementUri = ((InternalEObject) existenceChange.getAffectedElement()).eProxyURI().toString();
+    		  String[] parts = affectedElementUri.split("#");
+    		  String createdUri = createChange.getIdAttributeValue(); 
+    		  String checkForExistingElementUri = parts[0] + "#" + createdUri;    		  
+    		  if(proxyUriToObject.containsKey(checkForExistingElementUri)) {
+    			//This element was already created -> Skip;    			
+//    			System.out.println(" with URI " + checkForExistingElementUri + " is skipped, because an element with the same URI was already created.");
+    			continue;
+    		  }
+//    		  System.out.println(" with URI " + affectedElementUri + " is resolved to a new element with URI " + checkForExistingElementUri);
+    		  EObject resolvedElement = resolveOrCreateElement(existenceChange.getAffectedElement(), existenceChange, proxyUriToObject);
+    		  existenceChange.setAffectedElement(resolvedElement);    	  
+    	  }
+    	  if (change instanceof DeleteEObject<EObject> deleteObjChange) {
+    		System.out.println("Change for the deletion of a " + deleteObjChange.getAffectedElement().getClass().getSimpleName());
+    		int z = 0;    		
+    	  }
       }
 
       if (change instanceof FeatureEChange<EObject, ?> featChange) {
@@ -188,7 +202,7 @@ public final class EChangeEObjectToUuidResolverUtil {
 	    	  EObject affectedElement = insertRefChange.getAffectedElement();
 	    	  Object x = affectedElement.eGet(referenceFeature);
 //	    	  System.out.println("Getting the Reference in which you are supposed to add: " + x);
-    	  }    			  
+    	  }
       }
 
       if (change instanceof EObjectAddedEChange<EObject> addChange) {
@@ -198,6 +212,39 @@ public final class EChangeEObjectToUuidResolverUtil {
         
         addChange.setNewValue(resolvedElement);
       }
+      
+      if (change instanceof DeleteEObject<EObject> deleteChange) {
+    	EObject unresolvedAffectedElement = deleteChange.getAffectedElement();
+    	EClass affectedEObjectType = deleteChange.getAffectedEObjectType();
+    	String id = deleteChange.getIdAttributeValue();
+    	
+    	EObject resolvedElement = resolveOrGetElement(unresolvedAffectedElement, deleteChange,
+			proxyUriToObject);
+		deleteChange.setAffectedElement(resolvedElement);
+	  }
+      
+      if (change instanceof RemoveEReference<EObject> removeRefChange) {    	  
+//    	  if (true) continue; //skip for now, because it is not clear how to handle this change type
+		  //get the actual reference-feature-list of the affectedElement
+		  EStructuralFeature referenceFeature = removeRefChange.getAffectedFeature();
+		  EObject affectedElement = removeRefChange.getAffectedElement();
+		  EObject oldValue = removeRefChange.getOldValue();
+		  removeRefChange.setIndex(-1);
+		  		  
+		  EObject resolvedAffectedElement = resolveOrGetElement(affectedElement, removeRefChange, proxyUriToObject);
+		  EObject resolvedElement = resolveOrGetElement(removeRefChange.getOldValue(), removeRefChange, proxyUriToObject);
+		  
+		  removeRefChange.setAffectedElement(resolvedAffectedElement);
+		  removeRefChange.setOldValue(resolvedElement);	  
+		  
+		  System.out.println("Removing reference from element: " + affectedElement + " for feature: " + referenceFeature.getName() + " with old value: " + oldValue);
+//		  if (!referenceFeature.isMany()) {
+//	    	  removeRefChange.getAffectedFeature()
+//	    	  EObject resolvedElement = resolveOrGetElement(affectedElement, removeRefChange,
+//	              proxyUriToObject);
+//	    	  Object x = affectedElement.eGet(referenceFeature);
+//		  }
+	  }
 
       if (change instanceof EObjectSubtractedEChange<EObject> subChange) {
     	EObject oldValueToBeResolved = subChange.getOldValue();
@@ -263,7 +310,12 @@ public final class EChangeEObjectToUuidResolverUtil {
 
   private static EObject resolveOrCreateElement(EObject element, EObjectExistenceEChange<?> change,
       Map<String, EObject> proxyUriToObj) {
-    return resolveElement(element, change, (obj) -> {
+    return resolveElement(element, change, (obj) -> {    	
+//    	if(proxyUriToObj.containsKey(((InternalEObject) obj).eProxyURI().toString())) {
+//    		EObject existingElement = proxyUriToObj.get(((InternalEObject) obj).eProxyURI().toString());
+////    		System.out.println("Reusing existing element for proxy URI " + ((InternalEObject) obj).eProxyURI() + ": " + existingElement);
+//    		return existingElement;
+//    	}
       EObject newElement = EcoreUtil.create(change.getAffectedEObjectType());
       String uri = ((InternalEObject) obj).eProxyURI().toString();
       proxyUriToObj.put(uri, newElement);
@@ -275,6 +327,18 @@ public final class EChangeEObjectToUuidResolverUtil {
       Map<String, EObject> proxyUriToObj) {
     return resolveElement(element, change, (obj) -> {
       String uri = ((InternalEObject) obj).eProxyURI().toString();
+      EObject existingElement = proxyUriToObj.get(uri);
+      //set id attribute if it exist
+      if (existingElement != null) {
+		EStructuralFeature idFeature = existingElement.eClass().getEIDAttribute();
+		if (idFeature != null) {
+		  Object idValue = existingElement.eGet(idFeature);
+		  if (idValue == null) {
+			String idFromUri = uri.substring(uri.indexOf('#') + 1);
+			existingElement.eSet(idFeature, idFromUri);
+		  }
+		}
+	  }
       return proxyUriToObj.get(uri);
     });
   }

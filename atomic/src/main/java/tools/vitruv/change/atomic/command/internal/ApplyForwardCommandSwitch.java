@@ -2,6 +2,7 @@ package tools.vitruv.change.atomic.command.internal;
 
 import static tools.vitruv.change.atomic.command.internal.ChangeCommandUtil.alreadyContainsObject;
 import static tools.vitruv.change.atomic.command.internal.ChangeCommandUtil.getEditingDomain;
+import static tools.vitruv.change.atomic.command.internal.ChangeCommandUtil.getIndexOfObject;
 
 import edu.kit.ipd.sdq.activextendannotations.Utility;
 import java.util.List;
@@ -130,8 +131,14 @@ class ApplyForwardCommandSwitch extends ApplyCommandSwitch {
       }
       return List.of();
     }
-    return List.of(new RemoveAtCommand(editingDomain, element, feature, change.getOldValue(), 
-      change.getIndex()));
+    // change.getOldValue() existiert in element::feature
+    // determine correct index of oldValue in element::feature, if unset since the change may be loaded from file not recorded
+    int index = change.getIndex();
+    if (index == -1) {
+	  index = getIndexOfObject(element, feature, change.getOldValue());
+	}
+    
+    return List.of(new RemoveAtCommand(editingDomain, element, feature, change.getOldValue(), index));
   }
 
   /**

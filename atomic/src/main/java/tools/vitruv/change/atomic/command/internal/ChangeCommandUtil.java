@@ -62,4 +62,20 @@ public class ChangeCommandUtil {
     
     return featureContents.contains(value);
   }
+  
+  public static int getIndexOfObject(
+	EObject affectedEObject, EReference reference, EObject value) {
+	    checkState(affectedEObject.eClass().getEAllReferences().contains(reference),
+	            "Given object %s does not contain reference %s", affectedEObject, reference);
+	        var contents = affectedEObject.eGet(reference);
+	        List<EObject> featureContents; 
+	        if (reference.isMany()) {
+	          featureContents = (List<EObject>) contents;
+	        } else {
+	          featureContents = new LinkedList<>();
+	          featureContents.add((EObject) contents);
+	        }
+	        int index = featureContents.indexOf(value);
+	        return index;
+  }
 }
