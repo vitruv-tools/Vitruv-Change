@@ -25,7 +25,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import tools.vitruv.change.atomic.hid.HierarchicalId;
 import tools.vitruv.change.atomic.hid.ObjectResolutionUtil;
-import tools.vitruv.change.atomic.hid.internal.HierarchicalIdResolver;
+import tools.vitruv.change.atomic.hid.internal.HierarchicalIdCalculator;
 
 /**
  * A UUID resolver manages the mapping of {@link org.eclipse.emf.ecore.EObject} to UUIDs within one
@@ -280,7 +280,7 @@ class UuidResolverImpl implements UuidResolver {
    *     resources shall be considered.
    */
   private Map<Uuid, HierarchicalId> generateUuidToIdMapping(Collection<Resource> resourcesFilter) {
-    HierarchicalIdResolver idUnresolver = HierarchicalIdResolver.create(resourceSet);
+    HierarchicalIdCalculator idCalculator = new HierarchicalIdCalculator();
     Map<Uuid, HierarchicalId> uuidToIdMapping = new HashMap<>();
     for (var entry : eObjectToUuid.entrySet()) {
       EObject eObject = entry.getKey();
@@ -291,7 +291,7 @@ class UuidResolverImpl implements UuidResolver {
       if (resourcesFilter != null && !resourcesFilter.contains(eObject.eResource())) {
         continue;
       }
-      HierarchicalId id = idUnresolver.getAndUpdateId(eObject);
+      HierarchicalId id = idCalculator.getId(eObject);
       Uuid uuid = entry.getValue();
       uuidToIdMapping.put(uuid, id);
     }
@@ -317,11 +317,11 @@ class UuidResolverImpl implements UuidResolver {
       ResourceSet targetResourceSet,
       Map<Resource, Resource> sourceToTargetResourceMapping)
       throws IllegalStateException {
-    var idResolver = HierarchicalIdResolver.create(targetResourceSet);
     for (var entry : uuidToIdMapping.entrySet()) {
       Uuid uuid = entry.getKey();
-      HierarchicalId id = entry.getValue();
-      EObject targetEObject = idResolver.getEObject(id);
+      URI idUri = URI.createURI(entry.getValue().getId());
+      // resolves like HierarchicalIdResolver#getEObject, without calculating the object's ID again
+      EObject targetEObject = targetResourceSet.getEObject(idUri, isReadOnlyUri(idUri));
       checkState(
           targetEObject != null,
           "could not find object corresponding to %s in resource set %s",
