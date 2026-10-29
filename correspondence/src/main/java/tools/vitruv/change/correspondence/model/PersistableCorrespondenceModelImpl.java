@@ -27,6 +27,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.CorrespondenceFactory;
 import tools.vitruv.change.correspondence.Correspondences;
+import tools.vitruv.change.utils.StreamUtils;
 
 /** A persistable representation of a {@link CorrespondenceModel}. */
 class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceModel {
@@ -42,11 +43,15 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
    * @param resourceUri the URI of the resource to store the correspondences in
    */
   public PersistableCorrespondenceModelImpl(URI resourceUri) {
-    this.correspondences = CorrespondenceFactory.eINSTANCE.createCorrespondences();
+    this(CorrespondenceFactory.eINSTANCE.createCorrespondences(), resourceUri);
+  }
+
+  private PersistableCorrespondenceModelImpl(Correspondences correspondences, URI resourceUri) {
+    this.correspondences = correspondences;
     this.correspondenceIndex = new CorrespondenceIndex(correspondences);
     if (resourceUri != null) {
       this.correspondencesResource =
-          withGlobalFactories(new ResourceSetImpl()).createResource(resourceUri);
+              withGlobalFactories(new ResourceSetImpl()).createResource(resourceUri);
       this.correspondencesResource.getContents().add(correspondences);
     } else {
       this.correspondencesResource = null;
@@ -101,6 +106,32 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
         logger.error("Could not save correspondences resource", e);
       }
     }
+  }
+
+  @Override
+  public PersistableCorrespondenceModel copy(Map<EObject, EObject> originalToCopyMapping) {
+    Correspondences copiedCorrespondences = EcoreUtil.copy(this.correspondences);
+
+    for (int index = 0; index < copiedCorrespondences.getCorrespondences().size(); index++) {
+      Correspondence originalCorrespondence = this.correspondences.getCorrespondences().get(index);
+      Correspondence copiedCorrespondence = copiedCorrespondences.getCorrespondences().get(index);
+
+      var newLeftEObjects = StreamUtils.mapIfMappable(
+          copiedCorrespondence.getLeftEObjects().stream(), originalToCopyMapping).toList();
+      var newRightEObjects = StreamUtils.mapIfMappable(
+          copiedCorrespondence.getRightEObjects().stream(), originalToCopyMapping).toList();
+
+      replace(copiedCorrespondence.getLeftEObjects(), newLeftEObjects);
+      replace(copiedCorrespondence.getRightEObjects(), newRightEObjects);
+
+      originalToCopyMapping.put(originalCorrespondence, copiedCorrespondence);
+    }
+
+    URI resourceUri = this.correspondencesResource != null
+                      ? this.correspondencesResource.getURI()
+                      : null;
+
+    return new PersistableCorrespondenceModelImpl(copiedCorrespondences, resourceUri);
   }
 
   @Override
