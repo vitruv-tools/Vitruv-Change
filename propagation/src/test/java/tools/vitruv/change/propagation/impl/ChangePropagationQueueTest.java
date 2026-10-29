@@ -21,12 +21,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EcoreFactory;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.change.atomic.feature.FeatureEChange;
 import tools.vitruv.change.atomic.uuid.Uuid;
+import tools.vitruv.change.atomic.uuid.UuidResolver;
 import tools.vitruv.change.composite.MetamodelDescriptor;
 import tools.vitruv.change.composite.description.CompositeChange;
 import tools.vitruv.change.composite.description.PropagatedChange;
@@ -67,6 +72,7 @@ class ChangePropagationQueueTest {
   private final List<TransactionalChange<EObject>> recordedByCurrentRun = new ArrayList<>();
 
   private ChangeRecordingModelRepository repository;
+  private UuidResolver uuidResolver;
   private InteractionResultProvider blockingProvider;
   private InternalUserInteractor userInteractor;
   private ScriptedSpecification modelsSpec;
@@ -76,6 +82,8 @@ class ChangePropagationQueueTest {
   @SuppressWarnings("unchecked")
   void setUp() {
     repository = mock(ChangeRecordingModelRepository.class);
+    uuidResolver = UuidResolver.create(new ResourceSetImpl());
+    when(repository.getUuidResolver()).thenReturn(uuidResolver);
     EditableCorrespondenceModelView<Correspondence> correspondenceModel =
         mock(EditableCorrespondenceModelView.class);
     when(repository.getCorrespondenceModel()).thenReturn(correspondenceModel);
@@ -243,6 +251,141 @@ class ChangePropagationQueueTest {
     queue.unblock(lastPart);
     assertEquals(List.of(part2, part3), originalChangesOf(queue.propagateUntilBlocked(List.of())));
     assertFalse(queue.isPending(7));
+  }
+
+  // ---- changes sharing model elements ----------------------------------------------------------
+
+  @Test
+  void changeSharingElementsWithADeferredChange_waitsForIt_withoutBeingApplied() {
+    // An interface is added and its reaction asks the user, then a signature is added to it.
+    EObject paymentInterface = element();
+    TransactionalChange<EObject> addInterface = changeOf(models, paymentInterface);
+    modelsSpec.askFor = List.of(addInterface);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(addInterface), 1);
+    assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
+    EObject signature = element();
+    TransactionalChange<EObject> addSignature = changeOf(models, paymentInterface, signature);
+    VitruviusChange<Uuid> addSignatureInput = inputOf(addSignature, idOf(paymentInterface));
+    queue.enqueueChange(addSignatureInput, 2);
+
+    List<QueuedPropagationStep> steps = queue.propagateUntilBlocked(List.of());
+
+    // The signature is not added before the interface has been propagated ...
+    assertEquals(List.of(Outcome.SKIPPED_BLOCKED, Outcome.SKIPPED_BLOCKED), outcomesOf(steps));
+    QueuedChange waiting = queue.getQueuedChange(2).orElseThrow();
+    assertEquals(PropagationBlockReason.EARLIER_CHANGE, waiting.blockReason());
+    assertNull(waiting.pendingInteraction());
+    verify(repository, never()).applyChange(addSignatureInput);
+
+    // ... but right after it, once the interface's question has been answered.
+    queue.registerUserInteractions(1, confirmation(QUESTION, true));
+    steps = queue.propagateUntilBlocked(List.of());
+    assertEquals(List.of(addInterface, addSignature), originalChangesOf(steps));
+    assertFalse(queue.isPending(2));
+  }
+
+  @Test
+  void changeSharingNoElementWithADeferredChange_overtakesIt() {
+    EObject paymentInterface = element();
+    TransactionalChange<EObject> addInterface = changeOf(models, paymentInterface);
+    modelsSpec.askFor = List.of(addInterface);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(addInterface), 1);
+    queue.propagateNext();
+    EObject otherInterface = element();
+    TransactionalChange<EObject> renameOther = changeOf(models, otherInterface);
+    queue.enqueueChange(inputOf(renameOther, idOf(otherInterface)), 2);
+
+    List<QueuedPropagationStep> steps = queue.propagateUntilBlocked(List.of());
+
+    assertEquals(List.of(renameOther), originalChangesOf(steps));
+    assertFalse(queue.isPending(2));
+    assertTrue(queue.isPending(1));
+  }
+
+  @Test
+  void itemProducedByAnOvertakingChange_waitsForTheEarlierChangeItSharesElementsWith() {
+    EObject paymentInterface = element();
+    TransactionalChange<EObject> addInterface = changeOf(models, paymentInterface);
+    modelsSpec.askFor = List.of(addInterface);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(addInterface), 1);
+    queue.propagateNext();
+    // The later change shares no element with the deferred one, but what it produces does.
+    TransactionalChange<EObject> produced = changeOf(otherModels, paymentInterface);
+    modelsSpec.onFirstRun = spec -> recordedByCurrentRun.add(produced);
+    EObject component = element();
+    TransactionalChange<EObject> addComponent = changeOf(models, component);
+    queue.enqueueChange(inputOf(addComponent, idOf(component)), 2);
+
+    List<QueuedPropagationStep> steps = queue.propagateUntilBlocked(List.of());
+
+    assertEquals(List.of(addComponent), originalChangesOf(steps));
+    QueuedChange child = queue.getQueuedChanges().stream()
+        .filter(it -> it.rootTaskId() == 2)
+        .findFirst()
+        .orElseThrow();
+    assertEquals(PropagationBlockReason.EARLIER_CHANGE, child.blockReason());
+
+    queue.registerUserInteractions(1, confirmation(QUESTION, true));
+    steps = queue.propagateUntilBlocked(List.of());
+    assertEquals(List.of(addInterface, produced), originalChangesOf(steps));
+    assertFalse(queue.isPending(2));
+  }
+
+  @Test
+  void changesNotAppliedYet_keepTheirOrder_ifTheyShareElements() {
+    EObject paymentInterface = element();
+    TransactionalChange<EObject> addInterface = changeOf(models, paymentInterface);
+    modelsSpec.askFor = List.of(addInterface);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(addInterface), 1);
+    queue.propagateNext();
+    // A signature is added to the interface, then a parameter to the signature, which only exists
+    // once the first of the two changes has been applied.
+    EObject signature = EcoreFactory.eINSTANCE.createEOperation();
+    Uuid signatureId = uuidResolver.generateUuid(signature);
+    TransactionalChange<EObject> addSignature = changeOf(models, paymentInterface, signature);
+    TransactionalChange<EObject> addParameter = changeOf(models, signature);
+    queue.enqueueChange(inputOf(addSignature, idOf(paymentInterface), signatureId), 2);
+    VitruviusChange<Uuid> addParameterInput = inputOf(addParameter, signatureId);
+    queue.enqueueChange(addParameterInput, 3);
+
+    queue.propagateUntilBlocked(List.of());
+
+    assertEquals(
+        PropagationBlockReason.EARLIER_CHANGE,
+        queue.getQueuedChange(3).orElseThrow().blockReason());
+    verify(repository, never()).applyChange(addParameterInput);
+    queue.registerUserInteractions(1, confirmation(QUESTION, true));
+    List<QueuedPropagationStep> steps = queue.propagateUntilBlocked(List.of());
+    assertEquals(List.of(addInterface, addSignature, addParameter), originalChangesOf(steps));
+  }
+
+  @Test
+  void changeWaitingForAFailingChange_goesAheadOnceTheFailedChangeIsRemoved() {
+    EObject paymentInterface = element();
+    TransactionalChange<EObject> addInterface = changeOf(models, paymentInterface);
+    modelsSpec.askFor = List.of(addInterface);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(addInterface), 1);
+    queue.propagateNext();
+    TransactionalChange<EObject> addSignature = changeOf(models, paymentInterface);
+    queue.enqueueChange(inputOf(addSignature, idOf(paymentInterface)), 2);
+    queue.propagateUntilBlocked(List.of());
+    IllegalStateException failure = new IllegalStateException("reaction failed");
+    modelsSpec.beforeAsking =
+        spec -> {
+          throw failure;
+        };
+    queue.registerUserInteractions(1, confirmation(QUESTION, true));
+
+    assertThrows(RuntimeException.class, () -> queue.propagateUntilBlocked(List.of()));
+
+    assertFalse(queue.isPending(1));
+    assertFalse(queue.getQueuedChange(2).orElseThrow().blocked());
+    assertEquals(List.of(addSignature), originalChangesOf(queue.propagateUntilBlocked(List.of())));
   }
 
   // ---- user interactions -----------------------------------------------------------------------
@@ -896,6 +1039,46 @@ class ChangePropagationQueueTest {
         .flatMap(step -> step.propagatedChanges().stream())
         .map(PropagatedChange::getOriginalChange)
         .toList();
+  }
+
+  /** Creates a model element that has an id, as if it had been created by an earlier change. */
+  private EObject element() {
+    EObject element = EcoreFactory.eINSTANCE.createEClass();
+    uuidResolver.registerEObject(uuidResolver.generateUuid(element), element);
+    return element;
+  }
+
+  private Uuid idOf(EObject element) {
+    return uuidResolver.getUuid(element);
+  }
+
+  /** Creates a change of the given models that modifies the given elements. */
+  private TransactionalChange<EObject> changeOf(
+      MetamodelDescriptor descriptor, EObject... elements) {
+    TransactionalChange<EObject> change = change(descriptor);
+    List<EChange<EObject>> eChanges =
+        Stream.of(elements).map(ChangePropagationQueueTest::<EObject>modifying).toList();
+    when(change.getEChanges()).thenReturn(eChanges);
+    return change;
+  }
+
+  /**
+   * Creates an input change that modifies the elements with the given ids and that the repository
+   * applies as the given change.
+   */
+  private VitruviusChange<Uuid> inputOf(TransactionalChange<EObject> resolved, Uuid... ids) {
+    VitruviusChange<Uuid> inputChange = input(resolved);
+    List<EChange<Uuid>> eChanges =
+        Stream.of(ids).map(ChangePropagationQueueTest::<Uuid>modifying).toList();
+    when(inputChange.getEChanges()).thenReturn(eChanges);
+    return inputChange;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <E> EChange<E> modifying(E element) {
+    FeatureEChange<E, ?> eChange = mock(FeatureEChange.class);
+    when(eChange.getAffectedElement()).thenReturn(element);
+    return eChange;
   }
 
   @SuppressWarnings("unchecked")

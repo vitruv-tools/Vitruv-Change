@@ -3,16 +3,23 @@ package tools.vitruv.change.propagation.impl;
 import com.google.common.base.Preconditions;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.emf.ecore.EObject;
+import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.change.atomic.eobject.EObjectAddedEChange;
+import tools.vitruv.change.atomic.eobject.EObjectExistenceEChange;
+import tools.vitruv.change.atomic.eobject.EObjectSubtractedEChange;
+import tools.vitruv.change.atomic.feature.FeatureEChange;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.composite.description.PropagatedChange;
 import tools.vitruv.change.composite.description.TransactionalChange;
@@ -45,6 +52,17 @@ import tools.vitruv.change.propagation.QueuedPropagationStep;
  * unanswered user interaction is blocked, and propagated again from the start once an answer is
  * registered.
  *
+ * <p>For the same reason, a change only overtakes an earlier change that has not been propagated
+ * completely if the two share no model element: no element that one of them creates, deletes,
+ * modifies, or adds to or removes from a reference is one of those of the other. A change that has
+ * been applied to the models before another one is earlier than it. A change that has not been
+ * applied yet comes after all applied ones, and after the changes enqueued before it that have not
+ * been applied either. It is compared by the ids of its elements and only applied once it may go
+ * ahead, so it is never applied on top of a change whose propagation has not finished. An item that
+ * has to wait is blocked with {@link PropagationBlockReason#EARLIER_CHANGE} once the queue has come
+ * across it, and checked again whenever an item has been propagated or a change removed. Elements
+ * that the specifications only read are not taken into account.
+ *
  * <p>If propagating an item fails for any other reason, the whole change is removed from the queue,
  * just as {@link ChangePropagator#propagateChange} stops at the first exception. The models keep
  * what was applied and propagated before the failure.
@@ -73,6 +91,18 @@ public class ChangePropagationQueue {
     private PropagationBlockReason blockReason;
     private PendingUserInteraction pendingInteraction;
 
+    /** For a root item, when it was enqueued relative to the other changes. */
+    private long enqueueOrder;
+
+    /** Whether the item waits for an earlier change it shares model elements with. */
+    private boolean waitsForEarlierChange;
+
+    /** The ids of the elements of the input change; computed when first needed. */
+    private Set<Uuid> inputElements;
+
+    /** The elements of the applied change; computed when first needed. */
+    private Set<EObject> elements;
+
     private QueueItem(final int taskId, final Integer parentTaskId, final int rootTaskId) {
       this.taskId = taskId;
       this.parentTaskId = parentTaskId;
@@ -98,6 +128,12 @@ public class ChangePropagationQueue {
 
   private final Map<Integer, PropagationBlockReason> blockedRoots = new HashMap<>();
   private QueueItem executingItem;
+
+  /** When each pending change was applied to the models, relative to the other changes. */
+  private final Map<Integer, Long> startOrderByRoot = new HashMap<>();
+
+  /** The next value for {@link QueueItem#enqueueOrder} and {@link #startOrderByRoot}. */
+  private long nextOrder;
 
   /**
    * Creates an empty queue that propagates changes with the given change propagator.
@@ -139,6 +175,7 @@ public class ChangePropagationQueue {
       Preconditions.checkArgument(!isTaskIdInUse(taskId), "Task id %s is already in use", taskId);
       final QueueItem item = new QueueItem(taskId, null, taskId);
       item.inputChange = change;
+      item.enqueueOrder = nextOrder++;
       queue.addLast(item);
       return taskId;
     }
@@ -204,7 +241,8 @@ public class ChangePropagationQueue {
    * Lifts a block set by {@link #block(int, PropagationBlockReason)}. The change goes on once none
    * of its items is blocked anymore. Blocks caused by unanswered user interactions are lifted by
    * {@link #registerUserInteractions(int, UserInteractionBase...)} instead, so an item that still
-   * waits for an answer stays blocked until the answer is registered.
+   * waits for an answer stays blocked until the answer is registered. Likewise, an item that waits
+   * for an earlier change it shares model elements with stays blocked until it may go ahead.
    *
    * @param taskId the id passed to {@link #block(int, PropagationBlockReason)}
    * @throws IllegalArgumentException if nothing with this id is pending
@@ -270,8 +308,9 @@ public class ChangePropagationQueue {
   /**
    * Attempts to propagate the first queue item once.
    *
-   * <p>If the item, its change or another item of its change is blocked, the item and the rest of
-   * its change are moved to the end of the queue, keeping their order. Otherwise the item is
+   * <p>If the item, its change or another item of its change is blocked, or the item shares model
+   * elements with an earlier change that has not been propagated completely, the item and the rest
+   * of its change are moved to the end of the queue, keeping their order. Otherwise the item is
    * propagated (an enqueued change is applied to the models first): either it is propagated
    * completely and the changes this produced are queued as its children at the front of the queue,
    * or it needs an unanswered user interaction, in which case it is put back at the front of the
@@ -294,6 +333,9 @@ public class ChangePropagationQueue {
         item = queue.peekFirst();
         if (item == null) {
           return Optional.empty();
+        }
+        if (!isBlocked(item) && sharesElementsWithEarlierChange(item)) {
+          item.waitsForEarlierChange = true;
         }
         if (isBlocked(item)) {
           moveChangeToEnd(item.rootTaskId);
@@ -340,6 +382,7 @@ public class ChangePropagationQueue {
       // propagating the first part is deferred.
       final List<QueueItem> siblings = applyInputChange(item);
       synchronized (queueLock) {
+        startOrderByRoot.put(item.rootTaskId, nextOrder++);
         addAllFirst(siblings);
       }
     }
@@ -354,6 +397,7 @@ public class ChangePropagationQueue {
       executingItem = null;
       addAllFirst(followUps);
       forgetRootIfDone(item.rootTaskId);
+      stopWaitingForEarlierChanges();
     }
     return new QueuedPropagationStep(
         item.taskId, QueuedPropagationStep.Outcome.PROPAGATED, propagated);
@@ -393,6 +437,7 @@ public class ChangePropagationQueue {
       // before stays in the models.
       queue.removeIf(it -> it.rootTaskId == item.rootTaskId);
       forgetRootIfDone(item.rootTaskId);
+      stopWaitingForEarlierChanges();
     }
     final NonDeferrablePropagationException nonDeferrable =
         findCause(failure, NonDeferrablePropagationException.class);
@@ -499,6 +544,7 @@ public class ChangePropagationQueue {
   private void applyNewAnswers(final QueueItem item, final List<UserInteractionBase> newAnswers) {
     final boolean blockedOtherwise =
         (item.blockReason != null && item.blockReason != PropagationBlockReason.USER_INTERACTION)
+            || item.waitsForEarlierChange
             || blockedRoots.containsKey(item.rootTaskId)
             || blockOfOtherItemOfChange(item) != null;
     if (!blockedOtherwise || isAnsweredBy(item.pendingInteraction, newAnswers)) {
@@ -575,23 +621,113 @@ public class ChangePropagationQueue {
 
   /**
    * Returns why an item cannot be propagated right now, {@code null} if it can: its own block, the
-   * block of its change, or the block of another queued item of its change, which it waits for.
+   * block of its change, the earlier change it waits for, or the block of another queued item of
+   * its change, which it waits for.
    */
   private PropagationBlockReason blockReasonOf(final QueueItem item) {
     if (item.blockReason != null) {
       return item.blockReason;
     }
     final PropagationBlockReason changeBlock = blockedRoots.get(item.rootTaskId);
-    return changeBlock != null ? changeBlock : blockOfOtherItemOfChange(item);
+    if (changeBlock != null) {
+      return changeBlock;
+    }
+    return item.waitsForEarlierChange
+        ? PropagationBlockReason.EARLIER_CHANGE
+        : blockOfOtherItemOfChange(item);
   }
 
   /** Returns the block of another queued item of the item's change, {@code null} if none. */
   private PropagationBlockReason blockOfOtherItemOfChange(final QueueItem item) {
     return queue.stream()
-        .filter(it -> it != item && it.rootTaskId == item.rootTaskId && it.blockReason != null)
-        .map(it -> it.blockReason)
+        .filter(it -> it != item && it.rootTaskId == item.rootTaskId)
+        .map(ChangePropagationQueue::ownBlockReasonOf)
+        .filter(Objects::nonNull)
         .findFirst()
         .orElse(null);
+  }
+
+  /** Returns the block of the item itself, without those of its change. */
+  private static PropagationBlockReason ownBlockReasonOf(final QueueItem item) {
+    if (item.blockReason != null) {
+      return item.blockReason;
+    }
+    return item.waitsForEarlierChange ? PropagationBlockReason.EARLIER_CHANGE : null;
+  }
+
+  /**
+   * Whether the item has to wait for an earlier change that has not been propagated completely
+   * because they share model elements. The item of an applied change is compared with the queued
+   * items of the changes applied before its change. A change that has not been applied yet is
+   * compared with the queued items of all applied changes, by the elements its ids currently stand
+   * for, and with the changes enqueued before it that have not been applied either, by its ids.
+   */
+  private boolean sharesElementsWithEarlierChange(final QueueItem item) {
+    if (item.inputChange == null) {
+      final Long startOrder = startOrderByRoot.get(item.rootTaskId);
+      final Set<EObject> itemElements = elementsOf(item);
+      return queue.stream()
+          .filter(other -> other.rootTaskId != item.rootTaskId && other.change != null)
+          .filter(other -> startOrderByRoot.get(other.rootTaskId) < startOrder)
+          .anyMatch(other -> !Collections.disjoint(elementsOf(other), itemElements));
+    }
+    final Set<Uuid> itemIds = inputElementsOf(item);
+    if (itemIds.isEmpty()) {
+      return false;
+    }
+    final Set<EObject> existingItemElements = changePropagator.getExistingElements(itemIds);
+    return queue.stream()
+        .filter(other -> other.rootTaskId != item.rootTaskId)
+        .anyMatch(
+            other ->
+                other.inputChange != null
+                    ? other.enqueueOrder < item.enqueueOrder
+                        && !Collections.disjoint(inputElementsOf(other), itemIds)
+                    : other.change != null
+                        && !Collections.disjoint(elementsOf(other), existingItemElements));
+  }
+
+  /** Lets every item check again whether it has to wait for an earlier change. */
+  private void stopWaitingForEarlierChanges() {
+    queue.forEach(it -> it.waitsForEarlierChange = false);
+  }
+
+  private static Set<EObject> elementsOf(final QueueItem item) {
+    if (item.elements == null) {
+      item.elements = elementsChangedBy(item.change.getEChanges());
+    }
+    return item.elements;
+  }
+
+  private static Set<Uuid> inputElementsOf(final QueueItem item) {
+    if (item.inputElements == null) {
+      item.inputElements = elementsChangedBy(item.inputChange.getEChanges());
+    }
+    return item.inputElements;
+  }
+
+  /**
+   * Returns the elements that atomic changes create, delete or modify, and those they add to or
+   * remove from a reference.
+   */
+  private static <E> Set<E> elementsChangedBy(final List<EChange<E>> eChanges) {
+    final Set<E> elements = new HashSet<>();
+    for (final EChange<E> eChange : eChanges) {
+      if (eChange instanceof FeatureEChange<E, ?> featureChange) {
+        elements.add(featureChange.getAffectedElement());
+      }
+      if (eChange instanceof EObjectExistenceEChange<E> existenceChange) {
+        elements.add(existenceChange.getAffectedElement());
+      }
+      if (eChange instanceof EObjectAddedEChange<E> addedChange) {
+        elements.add(addedChange.getNewValue());
+      }
+      if (eChange instanceof EObjectSubtractedEChange<E> subtractedChange) {
+        elements.add(subtractedChange.getOldValue());
+      }
+    }
+    elements.remove(null);
+    return elements;
   }
 
   /**
@@ -641,12 +777,13 @@ public class ChangePropagationQueue {
     return List.copyOf(unusedUserInteractionsByRoot.getOrDefault(rootTaskId, List.of()));
   }
 
-  /** Drops the answers and blocks of a change once nothing of it is pending anymore. */
+  /** Drops the answers, blocks and order of a change once nothing of it is pending anymore. */
   private void forgetRootIfDone(final int rootTaskId) {
     if (!isPendingRoot(rootTaskId)) {
       userInteractionsByRoot.remove(rootTaskId);
       unusedUserInteractionsByRoot.remove(rootTaskId);
       blockedRoots.remove(rootTaskId);
+      startOrderByRoot.remove(rootTaskId);
     }
   }
 

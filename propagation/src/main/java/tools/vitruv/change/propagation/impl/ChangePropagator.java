@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.uuid.Uuid;
+import tools.vitruv.change.atomic.uuid.UuidResolver;
 import tools.vitruv.change.composite.MetamodelDescriptor;
 import tools.vitruv.change.composite.description.CompositeChange;
 import tools.vitruv.change.composite.description.CompositeContainerChange;
@@ -376,6 +377,18 @@ public class ChangePropagator {
     final List<TransactionalChange<EObject>> parts = new ArrayList<>();
     this.getTransactionalChangeSequence(this.applyAndMarkModified(change)).forEach(parts::add);
     return parts;
+  }
+
+  /**
+   * Returns the model elements the given ids currently stand for. Ids of elements that do not
+   * exist (yet) are skipped.
+   */
+  Set<EObject> getExistingElements(final Set<Uuid> uuids) {
+    final UuidResolver uuidResolver = this.modelRepository.getUuidResolver();
+    return uuids.stream()
+        .filter(uuidResolver::hasEObject)
+        .map(uuidResolver::getEObject)
+        .collect(Collectors.toSet());
   }
 
   /**
