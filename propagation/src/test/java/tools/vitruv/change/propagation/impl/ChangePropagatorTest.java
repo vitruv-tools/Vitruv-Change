@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -29,6 +30,8 @@ import tools.vitruv.change.atomic.root.InsertRootEObject;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.atomic.uuid.UuidResolver;
 import tools.vitruv.change.composite.MetamodelDescriptor;
+import tools.vitruv.change.composite.description.AnnotationSource;
+import tools.vitruv.change.composite.description.VitruviusChangeFactory;
 import tools.vitruv.change.composite.description.VitruviusChangeResolver;
 import tools.vitruv.change.composite.description.VitruviusChangeResolverFactory;
 import tools.vitruv.change.composite.recording.ChangeRecorder;
@@ -122,6 +125,76 @@ class ChangePropagatorTest {
     assertEquals(2, repositoryRoot().getSingleValuedEAttribute());
   }
 
+  @Test
+  void specificationReceivesAnnotationsOfTheChange() {
+    var specification = new RecordingSpecification("spec", (changes, previousState) -> { });
+    var propagator = createPropagator(Map.of(specification, 0));
+    var author = new Author("alice");
+
+    propagateInView(propagator, author, this::createRootInView);
+
+    assertEquals(List.of(Optional.of(author)), specification.receivedAuthors);
+  }
+
+  @Test
+  void specificationReceivesEmptyAnnotationsForChangeWithoutAnnotations() {
+    var specification = new RecordingSpecification("spec", (changes, previousState) -> { });
+    var propagator = createPropagator(Map.of(specification, 0));
+
+    propagateInView(propagator, null, this::createRootInView);
+
+    assertEquals(List.of(Optional.empty()), specification.receivedAuthors);
+  }
+
+  @Test
+  void transitivelyPropagatedChangesKeepTheAnnotations() {
+    var specification = new RecordingSpecification("spec", (changes, previousState) -> {
+      if (changes.stream().anyMatch(InsertRootEObject.class::isInstance)) {
+        repositoryRoot().setSingleValuedEAttribute(42);
+      }
+    });
+    var propagator = createPropagator(Map.of(specification, 0));
+    var author = new Author("alice");
+
+    propagateInView(propagator, author, this::createRootInView);
+
+    assertEquals(List.of(Optional.of(author), Optional.of(author)),
+        specification.receivedAuthors,
+        "the change made by the specification must be propagated with the same annotations");
+  }
+
+  @Test
+  void higherLevelReceivesTheAnnotations() {
+    var lowerLevel = new RecordingSpecification("lower", (changes, previousState) -> { });
+    var higherLevel = new RecordingSpecification("higher", (changes, previousState) -> { });
+    var propagator = createPropagator(Map.of(lowerLevel, 0, higherLevel, 1));
+    var author = new Author("alice");
+
+    propagateInView(propagator, author, this::createRootInView);
+
+    assertEquals(List.of(Optional.of(author)), lowerLevel.receivedAuthors);
+    assertEquals(List.of(Optional.of(author)), higherLevel.receivedAuthors);
+  }
+
+  @Test
+  void transactionalChangesReceiveTheAnnotationsOfTheirCompositeChange() {
+    var specification = new RecordingSpecification("spec", (changes, previousState) -> { });
+    var propagator = createPropagator(Map.of(specification, 0));
+    var author = new Author("alice");
+    viewRecorder.beginRecording();
+    createRootInView();
+    var transactionalChange = viewChangeResolver.assignIds(viewRecorder.endRecording());
+    var compositeChange = VitruviusChangeFactory.getInstance()
+        .createCompositeChange(List.of(transactionalChange));
+    compositeChange.setAnnotation(Author.class, author);
+
+    propagator.propagateChange(compositeChange, List.of());
+
+    assertEquals(List.of(Optional.of(author)), specification.receivedAuthors);
+  }
+
+  private record Author(String name) {}
+
   private Root createRootInView() {
     Root root = AllElementTypesFactory.eINSTANCE.createRoot();
     root.setId("root");
@@ -135,10 +208,18 @@ class ChangePropagatorTest {
   }
 
   private void propagateInView(ChangePropagator propagator, Runnable modification) {
+    propagateInView(propagator, null, modification);
+  }
+
+  private void propagateInView(ChangePropagator propagator, Author author,
+      Runnable modification) {
     viewRecorder.beginRecording();
     modification.run();
-    propagator.propagateChange(
-        viewChangeResolver.assignIds(viewRecorder.endRecording()), List.of());
+    var change = viewChangeResolver.assignIds(viewRecorder.endRecording());
+    if (author != null) {
+      change.setAnnotation(Author.class, author);
+    }
+    propagator.propagateChange(change, List.of());
   }
 
   private ChangePropagator createPropagator(Map<ChangePropagationSpecification, Integer> levels) {
@@ -153,6 +234,7 @@ class ChangePropagatorTest {
     private final String name;
     private final BiConsumer<List<EChange<EObject>>, ModelRepositorySnapshot> reaction;
     private final List<EChange<EObject>> receivedChanges = new ArrayList<>();
+    private final List<Optional<Author>> receivedAuthors = new ArrayList<>();
 
     RecordingSpecification(String name,
         BiConsumer<List<EChange<EObject>>, ModelRepositorySnapshot> reaction) {
@@ -170,10 +252,12 @@ class ChangePropagatorTest {
 
     @Override
     public void propagateChanges(List<EChange<EObject>> changes,
+        AnnotationSource changeAnnotations,
         EditableCorrespondenceModelView<Correspondence> correspondenceModel,
         ResourceAccess resourceAccess, ModelRepositorySnapshot previousState) {
       invocations.add(name);
       receivedChanges.addAll(changes);
+      receivedAuthors.add(changeAnnotations.getAnnotation(Author.class));
       reaction.accept(changes, previousState);
     }
 
