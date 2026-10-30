@@ -26,6 +26,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import tools.vitruv.change.atomic.hid.HierarchicalId;
 import tools.vitruv.change.atomic.hid.ObjectResolutionUtil;
 import tools.vitruv.change.atomic.hid.internal.HierarchicalIdResolver;
+import tools.vitruv.change.atomic.resolve.ElementRemovalTracker;
 
 /**
  * A UUID resolver manages the mapping of {@link org.eclipse.emf.ecore.EObject} to UUIDs within one
@@ -40,10 +41,12 @@ class UuidResolverImpl implements UuidResolver {
 
   private final ResourceSet resourceSet;
   private final BiMap<EObject, Uuid> eObjectToUuid = HashBiMap.create();
+  private final ElementRemovalTracker removalTracker;
 
   public UuidResolverImpl(ResourceSet resourceSet) {
     checkArgument(resourceSet != null, "Resource set may not be null");
     this.resourceSet = resourceSet;
+    this.removalTracker = new ElementRemovalTracker(resourceSet);
   }
 
   @Override
@@ -106,6 +109,7 @@ class UuidResolverImpl implements UuidResolver {
       LOGGER.trace("Adding UUID {} for EObject: {}", uuid, eObject);
     }
     eObjectToUuid.put(eObject, uuid);
+    removalTracker.touch(eObject);
   }
 
   @Override
@@ -118,6 +122,8 @@ class UuidResolverImpl implements UuidResolver {
         eObject,
         uuid);
     eObjectToUuid.remove(eObject);
+    // Its contents must have been unregistered as well, which the end of the transaction checks.
+    removalTracker.touch(eObject);
   }
 
   @Override
@@ -136,15 +142,17 @@ class UuidResolverImpl implements UuidResolver {
 
   @Override
   public void endTransaction() {
-    var iterator = eObjectToUuid.keySet().iterator();
-    while (iterator.hasNext()) {
-      EObject object = iterator.next();
-      checkState(object.eResource() != null, "dangling object %s detected", object);
-      checkState(
-          object.eResource().getResourceSet() == resourceSet,
-          "object %s is contained in wrong resource set",
-          object);
+    // Only elements that may have left the resource set can have become dangling.
+    for (EObject object : removalTracker.getElementsThatMayHaveLeft()) {
+      if (eObjectToUuid.containsKey(object)) {
+        checkState(object.eResource() != null, "dangling object %s detected", object);
+        checkState(
+            object.eResource().getResourceSet() == resourceSet,
+            "object %s is contained in wrong resource set",
+            object);
+      }
     }
+    removalTracker.endTransaction();
   }
 
   @Override
@@ -227,7 +235,11 @@ class UuidResolverImpl implements UuidResolver {
     if (isReadOnlyEObject(eObject)) {
       return getUuidForReadOnlyEObject(eObject);
     }
-    return eObjectToUuid.get(eObject);
+    Uuid uuid = eObjectToUuid.get(eObject);
+    if (uuid != null) {
+      removalTracker.touch(eObject);
+    }
+    return uuid;
   }
 
   private Uuid getUuidForReadOnlyEObject(EObject eObject) {
@@ -248,7 +260,9 @@ class UuidResolverImpl implements UuidResolver {
     if (isReadOnlyUuid(uuid)) {
       return getEObjectForReadOnlyUuid(uuid);
     }
-    return eObjectToUuid.inverse().get(uuid);
+    EObject eObject = eObjectToUuid.inverse().get(uuid);
+    removalTracker.touch(eObject);
+    return eObject;
   }
 
   private EObject getEObjectForReadOnlyUuid(Uuid uuid) {
