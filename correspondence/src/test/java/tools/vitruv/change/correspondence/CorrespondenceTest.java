@@ -207,6 +207,22 @@ class CorrespondenceTest {
     assertNull(correspondencesForA.get("2"));
   }
 
+  @Test
+  void testHasCorrespondencesOnModel() {
+    EObject a = Pcm_mockupFactory.eINSTANCE.createComponent();
+    EObject b = Pcm_mockupFactory.eINSTANCE.createPInterface();
+    EObject c = Pcm_mockupFactory.eINSTANCE.createPMethod();
+    PersistableCorrespondenceModel correspondenceModel = this.createCorrespondenceModel(false);
+
+    assertFalse(correspondenceModel.hasCorrespondences(List.of(a)));
+
+    this.wrapCorrespondenceModelIntoView(correspondenceModel).addCorrespondenceBetween(a, b, null);
+
+    assertTrue(correspondenceModel.hasCorrespondences(List.of(a)));
+    assertTrue(correspondenceModel.hasCorrespondences(List.of(b)));
+    assertFalse(correspondenceModel.hasCorrespondences(List.of(c)));
+  }
+
   private void validateSingleCorrespondence(
       final EditableCorrespondenceModelView<Correspondence> correspondenceModel,
       final Repository repo,
