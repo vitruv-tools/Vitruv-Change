@@ -20,6 +20,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.uuid.Uuid;
+import tools.vitruv.change.composite.description.Annotatable;
 import tools.vitruv.change.composite.description.CompositeContainerChange;
 import tools.vitruv.change.composite.description.PropagatedChange;
 import tools.vitruv.change.composite.description.TransactionalChange;
@@ -137,8 +138,10 @@ public class ChangePropagator {
     }
 
     private Iterable<TransactionalChangeWithPreviousState> propagateChangeForChangePropagationSpecification(final TransactionalChange<EObject> change, final ModelRepositorySnapshot previousState, final ModelRepositorySnapshot currentState, final ChangePropagationSpecification propagationSpecification) {
-      final Runnable _function = () -> propagationSpecification.propagateChanges(change.getEChanges(), this.outer.modelRepository.getCorrespondenceModel(), this.outer.modelRepository, previousState);
+      final Runnable _function = () -> propagationSpecification.propagateChanges(change.getEChanges(), change, this.outer.modelRepository.getCorrespondenceModel(), this.outer.modelRepository, previousState);
       final Iterable<TransactionalChange<EObject>> transitiveChanges = this.outer.modelRepository.recordChanges(_function);
+      // consequential changes keep the annotations of the change that caused them
+      transitiveChanges.forEach(it -> inheritAnnotations(change, it));
       StreamSupport.stream(transitiveChanges.spliterator(), false)
                    .flatMap(it -> it.getAffectedEObjects().stream())
                    .map(EObject::eResource)
@@ -274,6 +277,8 @@ public class ChangePropagator {
       try (ModelRepositorySnapshot previousState = this.modelRepository.createSnapshot()) {
         TransactionalChange<EObject> resolvedChange =
             (TransactionalChange<EObject>) this.modelRepository.applyChange(transactionalChange);
+        // a transactional change inside a composite change also carries the composite's annotations
+        inheritAnnotations(change, resolvedChange);
 
         resolvedChange.getAffectedEObjects().stream()
                        .map(EObject::eResource)
@@ -328,9 +333,25 @@ public class ChangePropagator {
       eChanges.addAll(propagatedChange.getConsequentialChanges().getEChanges());
     }
 
-    return new TransactionalChangeWithPreviousState(
-        VitruviusChangeFactory.getInstance().createTransactionalChange(eChanges),
-        change.previousState()
-    );
+    TransactionalChange<EObject> mergedChange =
+        VitruviusChangeFactory.getInstance().createTransactionalChange(eChanges);
+    inheritAnnotations(change.change(), mergedChange);
+    return new TransactionalChangeWithPreviousState(mergedChange, change.previousState());
+  }
+
+  /**
+   * Copies the annotations of <code>source</code> to <code>target</code>,
+   * unless <code>target</code> already has an annotation of the same type.
+   */
+  private static void inheritAnnotations(Annotatable source, Annotatable target) {
+    source.getAnnotations().forEach((type, value) -> {
+      if (target.getAnnotation(type).isEmpty()) {
+        setAnnotation(target, type, value);
+      }
+    });
+  }
+
+  private static <T> void setAnnotation(Annotatable target, Class<T> type, Object value) {
+    target.setAnnotation(type, type.cast(value));
   }
 }
