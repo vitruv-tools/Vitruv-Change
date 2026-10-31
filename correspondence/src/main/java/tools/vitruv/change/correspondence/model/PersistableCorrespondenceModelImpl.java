@@ -34,6 +34,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   private static final Logger logger =
       LogManager.getLogger(PersistableCorrespondenceModelImpl.class);
   private final Correspondences correspondences;
+  private final CorrespondenceIndex correspondenceIndex;
   private final Resource correspondencesResource;
 
   /**
@@ -47,6 +48,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
 
   private PersistableCorrespondenceModelImpl(Correspondences correspondences, URI resourceUri) {
     this.correspondences = correspondences;
+    this.correspondenceIndex = new CorrespondenceIndex(correspondences);
     if (resourceUri != null) {
       this.correspondencesResource =
               withGlobalFactories(new ResourceSetImpl()).createResource(resourceUri);
@@ -204,18 +206,16 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   private Set<Correspondence> getCorrespondences(List<EObject> eObjects) {
-    return this.correspondences.getCorrespondences().stream()
-        .filter(correspondence -> isEitherSideOfCorrespondence(correspondence, eObjects))
-        .collect(Collectors.toSet());
+    return new HashSet<>(correspondenceIndex.getCorrespondences(eObjects));
   }
 
   private Set<Correspondence> getCorrespondencesBetween(
       List<EObject> firstEObjects, List<EObject> secondEObjects) {
-    return this.correspondences.getCorrespondences().stream()
+    // The index only returns correspondences that have the first objects as one of their sides.
+    return correspondenceIndex.getCorrespondences(firstEObjects).stream()
         .filter(
             correspondence ->
-                isEitherSideOfCorrespondence(correspondence, firstEObjects)
-                    && isEitherSideOfCorrespondence(correspondence, secondEObjects)
+                isEitherSideOfCorrespondence(correspondence, secondEObjects)
                     && (!firstEObjects.equals(secondEObjects)
                         || correspondence
                             .getLeftEObjects()

@@ -9,6 +9,7 @@ import edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil;
 import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.common.util.URIUtil;
 import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -205,6 +206,51 @@ class CorrespondenceTest {
         correspondenceView.getCorrespondingEObjectsWithTag(List.of(b, d)).get(null));
     assertEquals(Set.of(b, c), correspondencesForA.get("1"));
     assertNull(correspondencesForA.get("2"));
+  }
+
+  @Test
+  void testCorrespondencesOfRemovedElementsAreNotFoundAfterSaving() {
+    final Repository repo = this.createPcmRepositoryWithInterfaceAndComponent();
+    final UPackage pkg = this.createUmlPackageWithInterfaceAndClass();
+    final PInterface repoInterface =
+        IterableUtil.<EList<PInterface>, PInterface>claimOne(repo.getInterfaces());
+    final UInterface pkgInterface =
+        IterableUtil.<EList<UInterface>, UInterface>claimOne(pkg.getInterfaces());
+    final PersistableCorrespondenceModel correspondenceModel =
+        this.createCorrespondenceModel(false);
+    final EditableCorrespondenceModelView<Correspondence> correspondenceView =
+        this.wrapCorrespondenceModelIntoView(correspondenceModel);
+    correspondenceView.addCorrespondenceBetween(repoInterface, pkgInterface, null);
+
+    pkg.getInterfaces().remove(pkgInterface);
+    correspondenceModel.save();
+
+    assertTrue(correspondenceView.getCorrespondingEObjects(repoInterface).isEmpty());
+    assertTrue(correspondenceView.getCorrespondingEObjects(pkgInterface).isEmpty());
+  }
+
+  @Test
+  void testLookupsAmongManyCorrespondences() {
+    final EditableCorrespondenceModelView<Correspondence> correspondenceView =
+        this.createCorrespondenceModelAndReturnView();
+    final List<EObject> lefts = new ArrayList<>();
+    final List<EObject> rights = new ArrayList<>();
+    for (int i = 0; i < 500; i++) {
+      final EObject left = Pcm_mockupFactory.eINSTANCE.createComponent();
+      final EObject right = Uml_mockupFactory.eINSTANCE.createUClass();
+      correspondenceView.addCorrespondenceBetween(left, right, null);
+      lefts.add(left);
+      rights.add(right);
+    }
+
+    for (int i = 0; i < lefts.size(); i++) {
+      final EObject left = lefts.get(i);
+      final EObject right = rights.get(i);
+      assertEquals(Set.of(right), correspondenceView.getCorrespondingEObjects(left));
+      assertEquals(Set.of(left), correspondenceView.getCorrespondingEObjects(right));
+    }
+    assertTrue(
+        correspondenceView.getCorrespondingEObjects(List.of(lefts.get(0), lefts.get(1))).isEmpty());
   }
 
   private void validateSingleCorrespondence(
