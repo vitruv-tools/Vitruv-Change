@@ -10,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Objects;
@@ -65,6 +67,11 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
           return result;
         }
       });
+      try {
+        Files.deleteIfExists(this.workspace.getParent());
+      } catch (DirectoryNotEmptyException othersRemaining) {
+        // Keep the parent while it holds workspaces of other or earlier runs.
+      }
     }
 
     public WorkspaceGuard(final Path workspace) {
@@ -117,6 +124,8 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
 
   private static final String OBSERVED_FAILURE = "observedFailure";
 
+  private static final Duration STALE_WORKSPACE_AGE = Duration.ofDays(1);
+
   private static final ExtensionContext.Namespace projectNamespace = ExtensionContext.Namespace
       .create(TestProjectManager.class, "projects");
 
@@ -158,11 +167,56 @@ public class TestProjectManager implements ParameterResolver, AfterEachCallback 
     if (TestProjectManager.workspaceCache != null) {
       return TestProjectManager.workspaceCache;
     }
-    final Path targetDir = resolveWorkspaceRoot().resolve("Vitruv");
-    TestProjectManager.deleteRecursively(targetDir);
-    TestProjectManager.workspaceCache = TestProjectManager.createUniqueDirectory(targetDir);
+    final Path workspacesDir = resolveWorkspaceRoot().resolve("Vitruv");
+    // Every test JVM gets its own workspace, so that concurrently running test JVMs
+    // (parallel builds, forked test executions) do not delete each other's projects.
+    TestProjectManager.deleteStaleWorkspaces(workspacesDir);
+    try {
+      Files.createDirectories(workspacesDir);
+      TestProjectManager.workspaceCache = Files.createTempDirectory(workspacesDir, "workspace-");
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
     TestProjectManager.log.info("Running in the test workspace at {}", TestProjectManager.workspaceCache);
     return TestProjectManager.workspaceCache;
+  }
+
+  /**
+   * Deletes the workspaces of earlier runs which have not been modified for
+   * {@link #STALE_WORKSPACE_AGE}, such as retained test projects. Workspaces that cannot be
+   * deleted, e.g. because another process still uses them, are kept.
+   */
+  private static void deleteStaleWorkspaces(final Path workspacesDir) {
+    final Instant staleBefore = Instant.now().minus(TestProjectManager.STALE_WORKSPACE_AGE);
+    try (Stream<Path> workspaces = TestProjectManager.listIfExists(workspacesDir)) {
+      workspaces.filter(workspace -> TestProjectManager.isModifiedBefore(workspace, staleBefore))
+          .forEach(workspace -> {
+            try {
+              TestProjectManager.deleteRecursively(workspace);
+            } catch (UncheckedIOException e) {
+              TestProjectManager.log.debug("Could not delete stale test workspace {}",
+                  workspace, e);
+            }
+          });
+    }
+  }
+
+  private static boolean isModifiedBefore(final Path path, final Instant instant) {
+    try {
+      return Files.getLastModifiedTime(path).toInstant().isBefore(instant);
+    } catch (IOException e) {
+      return false;
+    }
+  }
+
+  private static Stream<Path> listIfExists(final Path path) {
+    try {
+      return Files.list(path);
+    } catch (NoSuchFileException e) {
+      return Stream.empty();
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   private static Path resolveWorkspaceRoot() {
