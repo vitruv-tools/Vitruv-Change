@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import tools.vitruv.change.atomic.EChange;
@@ -48,13 +49,28 @@ public final class CompoundEChangeAssertHelper {
     final List<EObject> deletedContainedElements = Lists.newArrayList(expectedOldValue.eAllContents());
     Collections.reverse(deletedContainedElements);
     int _size = deletedContainedElements.size();
-    int _plus = (1 + _size);
+    int _plus = (1 + 2 * _size);
     ChangeAssertHelper.assertSizeGreaterEquals(changes, _plus);
     Iterable<? extends EChange<EObject>> filteredChanges = changes;
     for (final EObject deletedContainedElement : deletedContainedElements) {
+      filteredChanges = CompoundEChangeAssertHelper.assertRemoveFromContainer(filteredChanges,
+          deletedContainedElement);
       filteredChanges = AtomicEChangeAssertHelper.assertDeleteEObject(filteredChanges, deletedContainedElement);
     }
     return AtomicEChangeAssertHelper.assertDeleteEObject(filteredChanges, expectedOldValue);
+  }
+
+  public static Iterable<? extends EChange<EObject>> assertRemoveFromContainer(
+      final Iterable<? extends EChange<EObject>> changes, final EObject expectedOldValue) {
+    final EObject container = expectedOldValue.eContainer();
+    final EReference containmentFeature = expectedOldValue.eContainmentFeature();
+    if (containmentFeature.isMany()) {
+      final int index = ((List<?>) container.eGet(containmentFeature)).indexOf(expectedOldValue);
+      return AtomicEChangeAssertHelper.assertRemoveEReference(changes, container,
+          containmentFeature, expectedOldValue, index, true);
+    }
+    return AtomicEChangeAssertHelper.assertReplaceSingleValuedEReference(changes, container,
+        containmentFeature, expectedOldValue, null, true, false, false);
   }
 
   public static Iterable<? extends EChange<EObject>> assertCreateAndInsertRootEObject(
