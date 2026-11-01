@@ -256,8 +256,8 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
 
   @Override
   public boolean hasCorrespondences(List<EObject> eObjects) {
-    Set<Correspondence> tempCorrespondences = this.getCorrespondences(eObjects);
-    return tempCorrespondences != null && tempCorrespondences.isEmpty();
+    // Still inverted, as before; see #589.
+    return this.getCorrespondences(eObjects).isEmpty();
   }
 
   @Override
