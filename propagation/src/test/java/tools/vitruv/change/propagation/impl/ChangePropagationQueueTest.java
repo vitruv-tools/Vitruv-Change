@@ -2,6 +2,7 @@ package tools.vitruv.change.propagation.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -384,6 +385,27 @@ class ChangePropagationQueueTest {
     assertThrows(RuntimeException.class, () -> queue.propagateUntilBlocked(List.of()));
 
     assertFalse(queue.isPending(1));
+    assertFalse(queue.getQueuedChange(2).orElseThrow().blocked());
+    assertEquals(List.of(addSignature), originalChangesOf(queue.propagateUntilBlocked(List.of())));
+  }
+
+  @Test
+  void changeWaitingForARemovedChange_goesAhead() {
+    EObject paymentInterface = element();
+    TransactionalChange<EObject> addInterface = changeOf(models, paymentInterface);
+    modelsSpec.askFor = List.of(addInterface);
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(addInterface), 1);
+    queue.propagateNext();
+    TransactionalChange<EObject> addSignature = changeOf(models, paymentInterface);
+    queue.enqueueChange(inputOf(addSignature, idOf(paymentInterface)), 2);
+    queue.propagateUntilBlocked(List.of());
+    assertEquals(
+        PropagationBlockReason.EARLIER_CHANGE,
+        queue.getQueuedChange(2).orElseThrow().blockReason());
+
+    queue.removeChange(1);
+
     assertFalse(queue.getQueuedChange(2).orElseThrow().blocked());
     assertEquals(List.of(addSignature), originalChangesOf(queue.propagateUntilBlocked(List.of())));
   }
@@ -962,6 +984,92 @@ class ChangePropagationQueueTest {
     propagator.propagateChange(input(askingChange), List.of());
 
     assertEquals(List.of(Boolean.TRUE), modelsSpec.answers);
+  }
+
+  // ---- removing changes ------------------------------------------------------------------------
+
+  @Test
+  void removingADeferredChange_removesAllItsItems_whileOtherChangesProceed() {
+    TransactionalChange<EObject> askingChange = change(models);
+    modelsSpec.askFor = List.of(askingChange);
+    ChangePropagationQueue queue = queue();
+    VitruviusChange<Uuid> askingInput = compositeInput(askingChange, change(models));
+    queue.enqueueChange(askingInput, 1);
+    assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
+    TransactionalChange<EObject> other = change(models);
+    queue.enqueueChange(input(other), 2);
+
+    queue.removeChange(1);
+
+    assertFalse(queue.isPending(1));
+    assertEquals(List.of(2), queue.getQueuedChanges().stream().map(QueuedChange::taskId).toList());
+    assertEquals(List.of(other), originalChangesOf(queue.propagateUntilBlocked(List.of())));
+    // The models keep the input that was already applied.
+    verify(repository, times(1)).applyChange(askingInput);
+  }
+
+  @Test
+  void removingAChangeNotAppliedYet_leavesTheModelsUnchanged() {
+    ChangePropagationQueue queue = queue();
+    VitruviusChange<Uuid> inputChange = input(change(models));
+    queue.enqueueChange(inputChange, 1);
+
+    queue.removeChange(1);
+
+    assertFalse(queue.isPending(1));
+    assertTrue(queue.propagateUntilBlocked(List.of()).isEmpty());
+    verify(repository, never()).applyChange(inputChange);
+  }
+
+  @Test
+  void removingAChange_forgetsItsAnswersAndBlocks() {
+    ChangePropagationQueue queue = queue();
+    queue.enqueueChange(input(change(models)), 1);
+    queue.block(1, PropagationBlockReason.TRANSACTION);
+    queue.registerUserInteractions(1, confirmation(QUESTION, true));
+
+    queue.removeChange(1);
+
+    // A new change under the same task id starts without the block and the answer.
+    TransactionalChange<EObject> askingChange = change(models);
+    modelsSpec.askFor = List.of(askingChange);
+    queue.enqueueChange(input(askingChange), 1);
+    assertFalse(queue.getQueuedChange(1).orElseThrow().blocked());
+    assertEquals(Outcome.DEFERRED, queue.propagateNext().orElseThrow().outcome());
+  }
+
+  @Test
+  void removeChange_rejectsUnknownTaskIds_andItemsProducedByAChange() {
+    modelsSpec.onFirstRun = spec -> recordedByCurrentRun.add(change(otherModels));
+    ChangePropagationQueue queue = queue();
+    assertThrows(IllegalArgumentException.class, () -> queue.removeChange(5));
+    queue.enqueueChange(input(change(models)), 1);
+    queue.propagateNext();
+    int child = queue.getQueuedChanges().get(0).taskId();
+
+    assertThrows(IllegalArgumentException.class, () -> queue.removeChange(child));
+
+    assertTrue(queue.isPending(child));
+  }
+
+  @Test
+  void removeChange_rejectsAChangeWhileItIsBeingPropagated() {
+    ChangePropagationQueue queue = queue();
+    AtomicReference<IllegalStateException> rejection = new AtomicReference<>();
+    modelsSpec.onFirstRun =
+        spec -> {
+          try {
+            inAnotherThread(() -> queue.removeChange(1));
+          } catch (IllegalStateException e) {
+            rejection.set(e);
+          }
+        };
+    queue.enqueueChange(input(change(models)), 1);
+
+    assertEquals(Outcome.PROPAGATED, queue.propagateNext().orElseThrow().outcome());
+
+    assertNotNull(rejection.get());
+    assertFalse(queue.isPending(1));
   }
 
   // ---- fixtures

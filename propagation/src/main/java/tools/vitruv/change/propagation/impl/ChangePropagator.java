@@ -66,7 +66,7 @@ public class ChangePropagator {
 
     private List<PropagatedChange> propagateSingleChange(final TransactionalChange<EObject> change) {
       final StepResult step = this.propagateOneStep(change);
-      final ArrayList<PropagatedChange> resultingChanges = new ArrayList<PropagatedChange>();
+      final List<PropagatedChange> resultingChanges = new ArrayList<>();
       resultingChanges.add(step.propagatedChange());
       if (!Objects.equals(this.outer.changePropagationMode, ChangePropagationMode.SINGLE_STEP)) {
         try {

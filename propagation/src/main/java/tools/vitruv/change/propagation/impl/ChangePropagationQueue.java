@@ -65,7 +65,8 @@ import tools.vitruv.change.propagation.QueuedPropagationStep;
  *
  * <p>If propagating an item fails for any other reason, the whole change is removed from the queue,
  * just as {@link ChangePropagator#propagateChange} stops at the first exception. The models keep
- * what was applied and propagated before the failure.
+ * what was applied and propagated before the failure. A change can also be removed with {@link
+ * #removeChange(int)}, e.g. if the user interaction it waits for is never answered.
  *
  * <p>Notifications do not defer an item. They are passed on to the user interaction result
  * provider that was installed before, once the propagation step has completed or failed. Those of a
@@ -205,8 +206,8 @@ public class ChangePropagationQueue {
    * produced, still waits to be propagated.
    *
    * @param taskId the task id returned by {@link #enqueueChange(VitruviusChange)}
-   * @return {@code false} once the change has been propagated completely or its propagation has
-   *     failed
+   * @return {@code false} once the change has been propagated completely, its propagation has
+   *     failed or it has been removed
    */
   public boolean isPending(final int taskId) {
     synchronized (queueLock) {
@@ -293,6 +294,32 @@ public class ChangePropagationQueue {
           applyNewAnswers(item, answers);
         }
       }
+    }
+  }
+
+  /**
+   * Removes a change from the queue, together with all items its propagation has produced so far,
+   * e.g. because the user interaction it waits for is never answered. Its answers and blocks are
+   * dropped, and the changes that wait for it because they share model elements with it may go
+   * ahead. As when its propagation fails, the models keep what was applied and propagated before:
+   * a change that has already been applied stays in the models without the rest of its
+   * propagation. A change that has not been applied yet leaves the models unchanged.
+   *
+   * @param taskId the task id returned by {@link #enqueueChange(VitruviusChange)}
+   * @throws IllegalArgumentException if no change enqueued under this task id is pending
+   * @throws IllegalStateException if an item of the change is being propagated
+   */
+  public void removeChange(final int taskId) {
+    synchronized (queueLock) {
+      Preconditions.checkArgument(
+          isPendingRoot(taskId), "No pending change with task id %s", taskId);
+      Preconditions.checkState(
+          executingItem == null || executingItem.rootTaskId != taskId,
+          "Change %s is being propagated",
+          taskId);
+      queue.removeIf(it -> it.rootTaskId == taskId);
+      forgetRootIfDone(taskId);
+      stopWaitingForEarlierChanges();
     }
   }
 
