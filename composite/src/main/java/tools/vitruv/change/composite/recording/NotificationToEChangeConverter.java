@@ -45,6 +45,26 @@ final class NotificationToEChangeConverter {
     return this.changeFactory.<EObject>createDeleteEObjectChange(eObject);
   }
 
+  /**
+   * Creates the change removing the given element from its current container: a
+   * {@link RemoveEReference} if the containment reference is many-valued, or a
+   * {@link ReplaceSingleValuedEReference} to <code>null</code> otherwise.
+   *
+   * @param eObject the contained element, must have a container
+   * @return the change removing the element from its container
+   */
+  public EChange<EObject> createRemoveFromContainerChange(final EObject eObject) {
+    final EObject container = eObject.eContainer();
+    final EReference containmentFeature = eObject.eContainmentFeature();
+    if (containmentFeature.isMany()) {
+      final int index = ((List<?>) container.eGet(containmentFeature)).indexOf(eObject);
+      return this.changeFactory.<EObject>createRemoveReferenceChange(
+          container, containmentFeature, eObject, index);
+    }
+    return this.changeFactory.<EObject>createReplaceSingleReferenceChange(
+        container, containmentFeature, eObject, null);
+  }
+
   private String convertExceptionMessage(final EventType eventType, final String notificationType) {
     return String.format(
             "Event type %s for %s Notifications unexpected.",
