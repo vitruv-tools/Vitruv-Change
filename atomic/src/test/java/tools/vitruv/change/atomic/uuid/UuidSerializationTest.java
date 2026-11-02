@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.aet;
 
+import allElementTypes.Root;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,6 +85,41 @@ class UuidSerializationTest {
           assertEquals(
               uuid, loadUuidResolver.getUuid(loadElement), "loaded UUID does not match element");
         });
+  }
+
+  @Test
+  @DisplayName("store and load elements in lists and in several roots of a resource")
+  void storeAndLoadElementsInListsAndSeveralRoots() {
+    URI uri = URI.createFileURI(testProjectPath.resolve("roots.aet").toString());
+    Resource storeResource = storeResourceSet.createResource(uri);
+    Resource loadResource = loadResourceSet.createResource(uri);
+    for (int i = 0; i < 3; i++) {
+      storeResource.getContents().add(createRootWithNestedChildren(20));
+      loadResource.getContents().add(createRootWithNestedChildren(20));
+    }
+    storeResource.getAllContents().forEachRemaining(storeUuidResolver::registerEObject);
+
+    URI serializationUri = getSerializationUri();
+    assertDoesNotThrow(() -> storeUuidResolver.storeAtUri(serializationUri));
+    assertDoesNotThrow(() -> loadUuidResolver.loadFromUri(serializationUri));
+
+    var storeElements = storeResource.getAllContents();
+    var loadElements = loadResource.getAllContents();
+    while (storeElements.hasNext()) {
+      Uuid uuid = storeUuidResolver.getUuid(storeElements.next());
+      assertEquals(loadElements.next(), loadUuidResolver.getEObject(uuid));
+    }
+  }
+
+  private Root createRootWithNestedChildren(int childrenCount) {
+    var root = aet.Root();
+    var nestedRoot = aet.Root();
+    for (int i = 0; i < childrenCount; i++) {
+      root.getMultiValuedContainmentEReference().add(aet.NonRoot());
+      nestedRoot.getMultiValuedContainmentEReference().add(aet.NonRoot());
+    }
+    root.setRecursiveRoot(nestedRoot);
+    return root;
   }
 
   @Test

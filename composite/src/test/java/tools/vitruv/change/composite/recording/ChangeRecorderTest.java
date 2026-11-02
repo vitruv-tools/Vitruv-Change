@@ -298,7 +298,11 @@ public class ChangeRecorderTest {
       resource.getContents().clear();
     };
     this.record(_function_2);
-    MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(), ChangeRecorderTest.hasEChanges(RemoveRootEObject.class, DeleteEObject.class, DeleteEObject.class, DeleteEObject.class, DeleteEObject.class));
+    MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(),
+        ChangeRecorderTest.hasEChanges(RemoveRootEObject.class,
+            RemoveEReference.class, DeleteEObject.class,
+            RemoveEReference.class, DeleteEObject.class,
+            ReplaceSingleValuedEReference.class, DeleteEObject.class, DeleteEObject.class));
   }
 
   @DisplayName("adds an object set as containment to the recording")
@@ -529,7 +533,9 @@ public class ChangeRecorderTest {
       }
     };
     this.record(_function_1);
-    MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(), ChangeRecorderTest.hasEChanges(RemoveRootEObject.class, DeleteEObject.class, DeleteEObject.class));
+    MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(),
+        ChangeRecorderTest.hasEChanges(RemoveRootEObject.class,
+            ReplaceSingleValuedEReference.class, DeleteEObject.class, DeleteEObject.class));
   }
 
   @ParameterizedTest(name = "while isRecording={0}")
@@ -823,6 +829,65 @@ public class ChangeRecorderTest {
         .map(it -> ((DeleteEObject<EObject>) it).getAffectedElement())
         .collect(Collectors.toList());
     Assertions.assertEquals(removalOrder, deleted);
+  }
+
+  @Test
+  @DisplayName("removes cascade deleted objects from their containers before deleting them")
+  public void removesCascadeDeletedObjectsFromContainers() {
+    final Root root = wrapIntoRecordedResource(AllElementTypesCreators.aet.Root());
+    final Root container = AllElementTypesCreators.aet.Root();
+    final NonRoot single = AllElementTypesCreators.aet.NonRoot();
+    final List<NonRoot> multi = List.of(AllElementTypesCreators.aet.NonRoot(),
+        AllElementTypesCreators.aet.NonRoot());
+    container.setSingleValuedContainmentEReference(single);
+    container.getMultiValuedContainmentEReference().addAll(multi);
+    record(() -> root.setRecursiveRoot(container));
+    final TransactionalChange<EObject> change = record(() -> root.setRecursiveRoot(null));
+    final List<EChange<EObject>> changes = change.getEChanges();
+    MatcherAssert.assertThat(change, hasEChanges(ReplaceSingleValuedEReference.class,
+        RemoveEReference.class, DeleteEObject.class, RemoveEReference.class, DeleteEObject.class,
+        ReplaceSingleValuedEReference.class, DeleteEObject.class, DeleteEObject.class));
+    // the list elements are removed back to front, so that each index is valid when applied
+    final RemoveEReference<EObject> removeSecond = (RemoveEReference<EObject>) changes.get(1);
+    Assertions.assertEquals(multi.get(1), removeSecond.getOldValue());
+    Assertions.assertEquals(1, removeSecond.getIndex());
+    final RemoveEReference<EObject> removeFirst = (RemoveEReference<EObject>) changes.get(3);
+    Assertions.assertEquals(multi.get(0), removeFirst.getOldValue());
+    Assertions.assertEquals(0, removeFirst.getIndex());
+    final ReplaceSingleValuedEReference<EObject> removeSingle =
+        (ReplaceSingleValuedEReference<EObject>) changes.get(5);
+    Assertions.assertEquals(container, removeSingle.getAffectedElement());
+    Assertions.assertEquals(single, removeSingle.getOldValue());
+    Assertions.assertNull(removeSingle.getNewValue());
+    Assertions.assertEquals(container,
+        ((DeleteEObject<EObject>) changes.get(7)).getAffectedElement());
+  }
+
+  @Test
+  @DisplayName("does not delete cascade removed objects that are a root of their own resource")
+  public void doesNotDeleteObjectsInOwnResource() {
+    final Resource containerResource =
+        resourceSet.createResource(URI.createURI("test://container.aet"));
+    final Resource containedResource =
+        resourceSet.createResource(URI.createURI("test://contained.aet"));
+    final Root container = AllElementTypesCreators.aet.Root();
+    final Root contained = AllElementTypesCreators.aet.Root();
+    final NonRoot containedChild = AllElementTypesCreators.aet.NonRoot();
+    contained.setSingleValuedContainmentEReference(containedChild);
+    container.setRecursiveRoot(contained);
+    containerResource.getContents().add(container);
+    // cross-resource containment: contained stays contained in container
+    containedResource.getContents().add(contained);
+    changeRecorder.addToRecording(resourceSet);
+    final TransactionalChange<EObject> change =
+        record(() -> containerResource.getContents().clear());
+    MatcherAssert.assertThat(change, hasEChanges(RemoveRootEObject.class,
+        ReplaceSingleValuedEReference.class, DeleteEObject.class));
+    final ReplaceSingleValuedEReference<EObject> removeContained =
+        (ReplaceSingleValuedEReference<EObject>) change.getEChanges().get(1);
+    Assertions.assertEquals(contained, removeContained.getOldValue());
+    Assertions.assertEquals(container,
+        ((DeleteEObject<EObject>) change.getEChanges().get(2)).getAffectedElement());
   }
 
   @ParameterizedTest(name = "while isRecording={0}")

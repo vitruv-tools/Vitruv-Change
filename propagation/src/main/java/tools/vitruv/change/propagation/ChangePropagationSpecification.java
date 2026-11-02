@@ -1,5 +1,6 @@
 package tools.vitruv.change.propagation;
 
+import java.util.List;
 import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.composite.MetamodelDescriptor;
@@ -57,6 +58,65 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
    */
   boolean doesHandleChange(EChange<EObject> change,
       EditableCorrespondenceModelView<Correspondence> correspondenceModel);
+
+  /**
+   * Performs modifications in target models identified by accessing the given
+   * <code>CorrespondenceModel</code> for the elements changed by the given <code>EChange</code>
+   * in order to reflect the changes in the target model.
+   *
+   * @param changes - the atomic changes which shall be propagated.
+   *     Should affect only elements in an instance of a source metamodel of this specification
+   *     (see {@link #getSourceMetamodelDescriptor}). Must not be <code>null</code>.
+   * @param correspondenceModel - the correspondence model to retrieve information about the target
+   *     model from. Must not be <code>null</code>.
+   * @param resourceAccess - an object for resource access,
+   *     in particular to create new model files. Must not be <code>null</code>.
+   * @param previousState the state of the models before the changes were applied
+   * @deprecated The change propagation calls
+   *     {@link #propagateChanges(List, AnnotationSource, EditableCorrespondenceModelView,
+   *     ResourceAccess, ModelRepositorySnapshot)}, which also provides the annotations of the
+   *     propagated change. Override that method instead.
+   */
+  @Deprecated(since = "4.0.2")
+  @SuppressWarnings("java:S1133")
+  default void propagateChanges(List<EChange<EObject>> changes,
+                                EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+                                ResourceAccess resourceAccess,
+                                ModelRepositorySnapshot previousState) {
+    propagateChanges(changes, AnnotationSource.EMPTY, correspondenceModel, resourceAccess,
+        previousState);
+  }
+
+  /**
+   * Performs modifications in target models identified by accessing the given
+   * <code>CorrespondenceModel</code> for the elements changed by the given <code>EChange</code>
+   * in order to reflect the changes in the target model.
+   * By default, every handled change is passed to
+   * {@link #propagateChange(EChange, AnnotationSource, EditableCorrespondenceModelView,
+   * ResourceAccess)}.
+   *
+   * @param changes - the atomic changes which shall be propagated.
+   *     Should affect only elements in an instance of a source metamodel of this specification
+   *     (see {@link #getSourceMetamodelDescriptor}). Must not be <code>null</code>.
+   * @param changeAnnotations - read-only annotations of the transactional change that contains
+   *     the <code>changes</code>. Must not be <code>null</code>.
+   * @param correspondenceModel - the correspondence model to retrieve information about the target
+   *     model from. Must not be <code>null</code>.
+   * @param resourceAccess - an object for resource access,
+   *     in particular to create new model files. Must not be <code>null</code>.
+   * @param previousState the state of the models before the changes were applied
+   */
+  default void propagateChanges(List<EChange<EObject>> changes,
+                                AnnotationSource changeAnnotations,
+                                EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+                                ResourceAccess resourceAccess,
+                                ModelRepositorySnapshot previousState) {
+    changes
+        .stream()
+        .filter(change -> doesHandleChange(change, correspondenceModel))
+        .forEach(change ->
+            propagateChange(change, changeAnnotations, correspondenceModel, resourceAccess));
+  }
 
   /**
    * Performs modifications in target models identified by accessing the given

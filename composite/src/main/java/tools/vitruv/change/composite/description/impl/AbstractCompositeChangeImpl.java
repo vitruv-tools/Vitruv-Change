@@ -10,36 +10,39 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.composite.MetamodelDescriptor;
 import tools.vitruv.change.composite.description.CompositeChange;
+import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.interaction.UserInteractionBase;
 
-public abstract class AbstractCompositeChangeImpl<Element extends Object, ContanedChange extends VitruviusChange<Element>> implements CompositeChange<Element, ContanedChange> {
-  private List<ContanedChange> changes;
+public abstract class AbstractCompositeChangeImpl<Element extends Object, ContainedChange extends VitruviusChange<Element>> implements CompositeChange<Element, ContainedChange> {
+  private List<ContainedChange> changes;
   protected final Map<Class<?>, Object> annotations = new HashMap<>();
 
-  public AbstractCompositeChangeImpl(final List<? extends ContanedChange> changes) {
-    this.changes = List.<ContanedChange>copyOf(changes);
+  public AbstractCompositeChangeImpl(final List<? extends ContainedChange> changes) {
+    this.changes = List.copyOf(changes);
   }
 
   @Override
-  public List<ContanedChange> getChanges() {
+  public List<ContainedChange> getChanges() {
     return this.changes;
   }
 
   @Override
   public boolean containsConcreteChange() {
-    return this.changes.stream().anyMatch(it -> it.containsConcreteChange());
+    return this.changes.stream().anyMatch(VitruviusChange::containsConcreteChange);
   }
 
   @Override
   public Set<URI> getChangedURIs() {
     LinkedHashSet<URI> result = new LinkedHashSet<>();
-    for (ContanedChange it : this.changes) {
+    for (ContainedChange it : this.changes) {
       result.addAll(it.getChangedURIs());
     }
     return result;
@@ -48,7 +51,7 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contan
   @Override
   public Set<MetamodelDescriptor> getAffectedEObjectsMetamodelDescriptors() {
     HashSet<MetamodelDescriptor> result = new HashSet<>();
-    for (ContanedChange it : this.changes) {
+    for (ContainedChange it : this.changes) {
       result.addAll(it.getAffectedEObjectsMetamodelDescriptors());
     }
     return result;
@@ -57,7 +60,7 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contan
   @Override
   public List<EChange<Element>> getEChanges() {
     List<EChange<Element>> result = new ArrayList<>();
-    for (ContanedChange it : this.changes) {
+    for (ContainedChange it : this.changes) {
       result.addAll(it.getEChanges());
     }
     return result;
@@ -66,7 +69,7 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contan
   @Override
   public Set<EObject> getAffectedEObjects() {
     LinkedHashSet<EObject> result = new LinkedHashSet<>();
-    for (ContanedChange it : this.changes) {
+    for (ContainedChange it : this.changes) {
       result.addAll(it.getAffectedEObjects());
     }
     return result;
@@ -75,7 +78,7 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contan
   @Override
   public Set<EObject> getAffectedAndReferencedEObjects() {
     LinkedHashSet<EObject> result = new LinkedHashSet<>();
-    for (ContanedChange it : this.changes) {
+    for (ContainedChange it : this.changes) {
       result.addAll(it.getAffectedAndReferencedEObjects());
     }
     return result;
@@ -84,7 +87,7 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contan
   @Override
   public Iterable<UserInteractionBase> getUserInteractions() {
     List<UserInteractionBase> result = new ArrayList<>();
-    for (ContanedChange it : this.changes) {
+    for (ContainedChange it : this.changes) {
       it.getUserInteractions().forEach(result::add);
     }
     return result;
@@ -106,13 +109,21 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contan
   }
 
   @Override
+  public Iterable<TransactionalChange<Element>> getTransactionalChangeSequence() {
+    return changes.stream()
+        .flatMap(it ->
+                     StreamSupport.stream(it.getTransactionalChangeSequence().spliterator(), false))
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public String toString() {
     if (this.changes.isEmpty()) {
       return this.getClass().getSimpleName() + " (empty)";
     } else {
       StringBuilder _builder = new StringBuilder();
       _builder.append(this.getClass().getSimpleName()).append(": [").append(System.lineSeparator());
-      for (ContanedChange change : this.changes) {
+      for (ContainedChange change : this.changes) {
         _builder.append("\t").append(change).append(System.lineSeparator());
       }
       _builder.append("]").append(System.lineSeparator());

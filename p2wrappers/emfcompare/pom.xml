@@ -8,7 +8,7 @@
   <parent>
     <groupId>tools.vitruv</groupId>
     <artifactId>tools.vitruv.change.p2wrappers</artifactId>
-    <version>4.0.1-SNAPSHOT</version>
+    <version>4.0.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>tools.vitruv.change.p2wrappers.emfcompare</artifactId>
@@ -28,6 +28,14 @@
       </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
+        <configuration>
+          <!-- bundle only EMF Compare; its runtime dependencies stay regular dependencies -->
+          <artifactSet>
+            <includes>
+              <include>emf-compare:*</include>
+            </includes>
+          </artifactSet>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
@@ -53,6 +61,11 @@
       <groupId>emf-compare</groupId>
       <artifactId>org.eclipse.emf.compare</artifactId>
       <version>3.5.3.202212280858</version>
+    </dependency>
+    <!-- runtime dependency of EMF Compare -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
   </dependencies>
 </project>

@@ -2,6 +2,8 @@ package tools.vitruv.change.composite.description;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -57,4 +59,11 @@ public interface VitruviusChange<Element> extends Annotatable {
    * modified without affecting the original change.
    */
   public VitruviusChange<Element> copy();
+
+  /**
+   * Get the sequence of transactional changes contained within this change.
+   *
+   * @return the change sequence
+   */
+  public Iterable<TransactionalChange<Element>> getTransactionalChangeSequence();
 }
