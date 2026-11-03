@@ -70,8 +70,9 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
   }
 
   /**
-   * Copy a resource set and create a mapping between all objects of the original and the copy.
+   * Copy a resource set and create a mapping between the objects of the original and the copy.
    * This means all resources of the resource set are copied, including all contents.
+   * Objects that cannot be found in the copy by their URI are not part of the mapping.
    *
    * @param originalResourceSet the resource set to copy
    * @return a copy of the resource set and the mapping
@@ -112,7 +113,12 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
     URI sourceUri = EcoreUtil.getURI(original);
     EObject copied = copiedResourceSet.getEObject(sourceUri, false);
 
-    mapping.put(original, copied);
+    // Elements that cannot be found in the copy by their URI stay unmapped, e.g., the elements of
+    // UML profiles, which the copy of a UML model reloads instead of copying. If several elements
+    // resolve to the same copy, only the first one is mapped.
+    if (copied != null && !mapping.containsValue(copied)) {
+      mapping.put(original, copied);
+    }
   }
 
   @Override
