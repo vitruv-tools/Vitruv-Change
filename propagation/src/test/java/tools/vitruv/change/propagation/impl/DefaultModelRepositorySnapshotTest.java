@@ -33,6 +33,7 @@ import tools.vitruv.change.testutils.TestProjectManager;
 class DefaultModelRepositorySnapshotTest {
   private static final String TAG = "tag";
   private static final String NOT_FOUND_IN_COPY_EXTENSION = "notfoundincopy";
+  private static final String UML_EXTENSION = "uml";
 
   private DefaultChangeRecordingModelRepository modelRepository;
   private Path testProjectPath;
@@ -161,6 +162,34 @@ class DefaultModelRepositorySnapshotTest {
       }
     } finally {
       Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().remove(NOT_FOUND_IN_COPY_EXTENSION);
+    }
+  }
+
+  @Test
+  void creatingSnapshotKeepsModificationStateOfUmlResources() {
+    // The copy of a resource with the extension of UML models saves the original resource and
+    // loads it again. Saving marked the original as unmodified, so the repository did not persist
+    // the changes made to it before the snapshot was created.
+    Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put(UML_EXTENSION,
+        new XMIResourceFactoryImpl());
+    try {
+      Root umlRoot = AllElementTypesFactory.eINSTANCE.createRoot();
+      umlRoot.setId("umlRoot");
+      URI umlModelUri = createModelUri("model." + UML_EXTENSION);
+      modelRepository.persistAsRoot(umlRoot, umlModelUri);
+      Resource umlResource = modelRepository.getModelResource(umlModelUri);
+      Resource xmiResource = modelRepository.getModelResource(modelUri);
+      xmiResource.setModified(false);
+
+      try (ModelRepositorySnapshot snapshot = modelRepository.createSnapshot()) {
+        assertTrue(umlResource.isModified());
+        assertFalse(xmiResource.isModified());
+        Root snapshotUmlRoot = (Root) snapshot.getRepositoryToSnapshotMap().get(umlRoot);
+        assertTrue(snapshotUmlRoot.eResource().isModified());
+        assertEquals(umlModelUri, snapshotUmlRoot.eResource().getURI());
+      }
+    } finally {
+      Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().remove(UML_EXTENSION);
     }
   }
 

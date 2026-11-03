@@ -7,6 +7,7 @@ import com.google.common.collect.HashBiMap;
 import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceCopier;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -80,9 +81,18 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
   public static ResourceSetCopy copyResourceSet(ResourceSet originalResourceSet) {
     ResourceSet copiedResourceSet = withGlobalFactories(new ResourceSetImpl());
 
+    // the copier saves UML resources to copy them, which marks the originals as unmodified
+    Map<Resource, Boolean> originalModificationStates = new HashMap<>();
+    originalResourceSet.getResources()
+        .forEach(resource -> originalModificationStates.put(resource, resource.isModified()));
+
     Map<Resource, Resource> resourceCopies
         = ResourceCopier.copyViewResources(originalResourceSet.getResources(), copiedResourceSet);
-    resourceCopies.forEach((original, copy) -> copy.setModified(original.isModified()));
+    resourceCopies.forEach((original, copy) -> {
+      boolean modified = originalModificationStates.get(original);
+      original.setModified(modified);
+      copy.setModified(modified);
+    });
 
     BiMap<EObject, EObject> mapping = createOriginalToCopyMapping(originalResourceSet, copiedResourceSet);
 
