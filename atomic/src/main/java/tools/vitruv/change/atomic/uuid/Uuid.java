@@ -12,7 +12,13 @@ public final class Uuid {
     this.rawValue = rawValue;
   }
 
-  String getRawValue() {
+  /**
+   * Returns the textual value of this UUID, e.g. to identify the element in exported models or in
+   * answers of a server. Two UUIDs are equal if and only if their raw values are equal.
+   *
+   * @return the raw value, never {@code null}
+   */
+  public String getRawValue() {
     return rawValue;
   }
 
