@@ -87,9 +87,7 @@ public abstract class EChangeTest {
   }
 
   protected void applyBackward(final List<? extends EChange<EObject>> changes) {
-    final Consumer<EChange<EObject>> _function = (EChange<EObject> it) -> {
-      this.applyBackward(it);
-    };
+    final Consumer<EChange<EObject>> _function = this::applyBackward;
     Lists.reverse(changes).forEach(_function);
   }
 

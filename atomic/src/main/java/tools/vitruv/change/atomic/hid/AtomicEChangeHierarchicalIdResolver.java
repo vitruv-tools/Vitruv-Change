@@ -21,7 +21,7 @@ import tools.vitruv.change.atomic.root.RemoveRootEObject;
  * A resolver for resolving a change with {@link HierarchicalId} to {@link EObject} or vice versa.
  */
 public class AtomicEChangeHierarchicalIdResolver {
-  private HierarchicalIdResolver idResolver;
+  private final HierarchicalIdResolver idResolver;
 
   /**
    * Creates a new {@link AtomicEChangeHierarchicalIdResolver} with the given {@link

@@ -11,7 +11,7 @@ import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribut
  * Helper class to compare different instances of the same change.
  */
 public class EChangeAssertEquals {
-  protected static void _assertEquals(final EChange<?> change, final EChange<?> change2) {
+  protected static void _assertEquals() {
     Assertions.assertTrue(false);
   }
 
@@ -19,7 +19,7 @@ public class EChangeAssertEquals {
    * Compares two {@link ReplaceSingleValuedEAttribute} EChanges.
    */
   protected static void _assertEquals(final ReplaceSingleValuedEAttribute<?, ?> change, final EChange<?> change2) {
-    ReplaceSingleValuedEAttribute replaceChange = EChangeAssertEquals.assertIsInstanceOf(change2, ReplaceSingleValuedEAttribute.class);
+    var replaceChange = EChangeAssertEquals.assertIsInstanceOf(change2, ReplaceSingleValuedEAttribute.class);
     Assertions.assertSame(change.getAffectedElement(), replaceChange.getAffectedElement());
     Assertions.assertSame(change.getAffectedFeature(), replaceChange.getAffectedFeature());
     Assertions.assertEquals(change.getOldValue(), replaceChange.getOldValue());
@@ -30,7 +30,7 @@ public class EChangeAssertEquals {
    * Compares two {@link InsertEAttributeValue} EChanges.
    */
   protected static void _assertEquals(final InsertEAttributeValue<?, ?> change, final EChange<?> change2) {
-    InsertEAttributeValue insertChange = EChangeAssertEquals.assertIsInstanceOf(change2, InsertEAttributeValue.class);
+    var insertChange = EChangeAssertEquals.assertIsInstanceOf(change2, InsertEAttributeValue.class);
     Assertions.assertSame(change.getAffectedElement(), insertChange.getAffectedElement());
     Assertions.assertSame(change.getAffectedFeature(), insertChange.getAffectedFeature());
     Assertions.assertEquals(change.getNewValue(), insertChange.getNewValue());
@@ -40,7 +40,7 @@ public class EChangeAssertEquals {
    * Compares two {@link RemoveEAttributeValue} EChanges.
    */
   protected static void _assertEquals(final RemoveEAttributeValue<?, ?> change, final EChange<?> change2) {
-    RemoveEAttributeValue removeChange = EChangeAssertEquals.assertIsInstanceOf(change2, RemoveEAttributeValue.class);
+    var removeChange = EChangeAssertEquals.assertIsInstanceOf(change2, RemoveEAttributeValue.class);
     Assertions.assertSame(change.getAffectedElement(), removeChange.getAffectedElement());
     Assertions.assertSame(change.getAffectedFeature(), removeChange.getAffectedFeature());
     Assertions.assertEquals(change.getOldValue(), removeChange.getOldValue());
@@ -61,7 +61,7 @@ public class EChangeAssertEquals {
       _assertEquals((ReplaceSingleValuedEAttribute<?, ?>)change, change2);
       return;
     } else if (change != null) {
-      _assertEquals(change, change2);
+      _assertEquals();
       return;
     } else {
       throw new IllegalArgumentException("Unhandled parameter types: " +
