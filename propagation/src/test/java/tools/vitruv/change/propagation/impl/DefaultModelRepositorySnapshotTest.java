@@ -12,9 +12,9 @@ import allElementTypes.Root;
 import java.nio.file.Path;
 import java.util.Set;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.junit.jupiter.api.AfterEach;
@@ -151,7 +151,8 @@ class DefaultModelRepositorySnapshotTest {
       NonRoot otherNonRoot = AllElementTypesFactory.eINSTANCE.createNonRoot();
       otherNonRoot.setId("otherNonRoot");
       otherRoot.setSingleValuedContainmentEReference(otherNonRoot);
-      modelRepository.persistAsRoot(otherRoot, createModelUri("other." + NOT_FOUND_IN_COPY_EXTENSION));
+      modelRepository.persistAsRoot(otherRoot,
+          createModelUri("other." + NOT_FOUND_IN_COPY_EXTENSION));
 
       try (ModelRepositorySnapshot snapshot = modelRepository.createSnapshot()) {
         assertFalse(snapshot.getRepositoryToSnapshotMap().containsKey(otherRoot));
@@ -161,7 +162,8 @@ class DefaultModelRepositorySnapshotTest {
         assertTrue(EcoreUtil.equals(root, snapshotRoot));
       }
     } finally {
-      Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().remove(NOT_FOUND_IN_COPY_EXTENSION);
+      Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap()
+          .remove(NOT_FOUND_IN_COPY_EXTENSION);
     }
   }
 
