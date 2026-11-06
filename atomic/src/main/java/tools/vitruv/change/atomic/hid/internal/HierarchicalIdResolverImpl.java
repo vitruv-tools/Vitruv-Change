@@ -18,6 +18,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import tools.vitruv.change.atomic.hid.HierarchicalId;
 import tools.vitruv.change.atomic.hid.ObjectResolutionUtil;
+import tools.vitruv.change.atomic.resolve.ElementRemovalTracker;
 
 /**
  * {@link HierarchicalIdResolverImpl} implements the {@link HierarchicalIdResolver} interface,
@@ -29,6 +30,7 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
   private final ResourceSet resourceSet;
   private final BiMap<EObject, HierarchicalId> eObjectToId = HashBiMap.create();
   private final CacheIdsRepository cacheIds = new CacheIdsRepository();
+  private final ElementRemovalTracker removalTracker;
 
   /**
    * Instantiates an ID resolver with the given {@link ResourceSet} for resolving objects.
@@ -40,6 +42,7 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
   public HierarchicalIdResolverImpl(ResourceSet resourceSet) {
     checkArgument(resourceSet != null, "Resource set may not be null");
     this.resourceSet = resourceSet;
+    this.removalTracker = new ElementRemovalTracker(resourceSet);
   }
   
   @Override
@@ -50,16 +53,18 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
   }
   
   private void cleanupRemovedElements() {
-    for (final var iterator = eObjectToId.keySet().iterator(); iterator.hasNext();) {
-      final var object = iterator.next();
-      if (object.eResource() == null || object.eResource().getResourceSet() == null) {
-        var id = eObjectToId.get(object);
+    // Only elements that may have left the resource set can have been removed.
+    for (final var object : removalTracker.getElementsThatMayHaveLeft()) {
+      final var id = eObjectToId.get(object);
+      if (id != null
+          && (object.eResource() == null || object.eResource().getResourceSet() == null)) {
         if (id.isCache()) {
           cacheIds.push(id);
         }
-        iterator.remove();
+        eObjectToId.remove(object);
       }
     }
+    removalTracker.endTransaction();
   }
 
   @Override
@@ -119,7 +124,9 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
   }
     
   private EObject getStoredEObject(URI uri) {
-    return eObjectToId.inverse().get(new HierarchicalId(uri.toString()));
+    final EObject eObject = eObjectToId.inverse().get(new HierarchicalId(uri.toString()));
+    removalTracker.touch(eObject);
+    return eObject;
   }
   
   private EObject getAndRegisterNonStoredEObject(URI uri) {
@@ -145,6 +152,7 @@ public class HierarchicalIdResolverImpl implements HierarchicalIdResolver {
       eObjectToId.inverse().remove(oldId);
     }
     eObjectToId.put(eObject, id);
+    removalTracker.touch(eObject);
     if (oldId != null && oldId.isCache()) {
       cacheIds.push(oldId);
     }
