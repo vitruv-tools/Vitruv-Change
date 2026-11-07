@@ -11,7 +11,9 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.change.ChangeDescription;
 import org.eclipse.emf.ecore.resource.Resource;
-import java.util.function.Function;
+
+import java.util.function.Predicate;
+
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.atomic.TypeInferringAtomicEChangeFactory;
 import tools.vitruv.change.atomic.TypeInferringCompoundEChangeFactory;
@@ -55,7 +57,7 @@ final class EChangeCreationUtil {
 
   public static List<EChange<EObject>> createAdditiveEChangeForReferencedObject(
       final EObject referencingEObject, final EReference reference,
-      final Function<EObject, Boolean> isCreate) {
+      final Predicate<EObject> isCreate) {
     if (reference.isMany()) {
       final List<EChange<EObject>> result = new ArrayList<>();
       final EList<EObject> referenceValues =
@@ -64,18 +66,17 @@ final class EChangeCreationUtil {
         final Object currentValues = referencingEObject.eGet(reference);
         result.addAll(EChangeCreationUtil.createInsertReferenceChange(referencingEObject, reference,
             ((EList<?>) currentValues).indexOf(referenceValue), referenceValue,
-            isCreate.apply(referenceValue).booleanValue()));
+                isCreate.test(referenceValue)));
       }
       return result;
     }
     final EObject referenceValue =
-        EChangeCreationUtil.getReferenceValueList(referencingEObject, reference).get(0);
+        EChangeCreationUtil.getReferenceValueList(referencingEObject, reference).getFirst();
     return EChangeCreationUtil.createReplaceSingleValuedReferenceChange(referencingEObject,
-        reference, null, referenceValue, isCreate.apply(referenceValue).booleanValue());
+        reference, null, referenceValue, isCreate.test(referenceValue));
   }
 
-  private static boolean isChangeableUnderivedPersistedNotContainingFeature(final EObject eObject,
-      final EStructuralFeature feature) {
+  private static boolean isChangeableUnderivedPersistedNotContainingFeature(final EStructuralFeature feature) {
     // Skip the container reference (the opposite of a containment), which the containment implies.
     // Comparing the feature with eContainingFeature would not do, as an object can be contained in
     // a reference it declares itself, and comparing the value with eContainer would also skip
@@ -103,7 +104,7 @@ final class EChangeCreationUtil {
 
   public static boolean hasChangeableUnderivedPersistedNotContainingNonDefaultValue(final EObject eObject,
       final EStructuralFeature feature) {
-    return (EChangeCreationUtil.isChangeableUnderivedPersistedNotContainingFeature(eObject, feature) &&
+    return (EChangeCreationUtil.isChangeableUnderivedPersistedNotContainingFeature(feature) &&
         EChangeCreationUtil.valueIsNonDefault(eObject, feature));
   }
 

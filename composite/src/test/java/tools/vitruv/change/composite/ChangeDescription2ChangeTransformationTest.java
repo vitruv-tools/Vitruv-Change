@@ -57,8 +57,7 @@ public abstract class ChangeDescription2ChangeTransformationTest {
     this.tempFolder = tempFolder;
     this.resourceSet = ResourceSetUtil.withGlobalFactories(new ResourceSetImpl());
     this.uuidResolver = UuidResolver.create(this.resourceSet);
-    ChangeRecorder _changeRecorder = new ChangeRecorder(this.resourceSet);
-    this.changeRecorder = _changeRecorder;
+      this.changeRecorder = new ChangeRecorder(this.resourceSet);
     this.changeResolver = VitruviusChangeResolverFactory.forUuids(this.uuidResolver);
     this.startRecording(this.resourceSet);
   }
@@ -68,7 +67,7 @@ public abstract class ChangeDescription2ChangeTransformationTest {
     this.changeRecorder.close();
   }
 
-  protected <T extends Notifier> List<EChange<EObject>> record(
+  protected <T extends Notifier> List<EChange<EObject>> record_(
       final T objectToRecord, final Consumer<T> operationToRecord) {
     final TransactionalChange<EObject> recordedChange =
         this.<T>recordComposite(objectToRecord, operationToRecord);
@@ -117,20 +116,18 @@ public abstract class ChangeDescription2ChangeTransformationTest {
       _contents.add(root);
       return root;
     } else {
-      EObject _get = resource.getContents().get(0);
+      EObject _get = resource.getContents().getFirst();
       return ((Root) _get);
     }
   }
 
   private List<EChange<EObject>> startRecording(final Notifier notifier) {
-    List<EChange<EObject>> _xblockexpression = null;
-    {
-      boolean _isRecording = this.changeRecorder.isRecording();
-      boolean _not = (!_isRecording);
-      Preconditions.checkState(_not);
-      this.changeRecorder.addToRecording(notifier);
-      _xblockexpression = this.changeRecorder.beginRecording();
-    }
+    List<EChange<EObject>> _xblockexpression;
+    boolean _isRecording = this.changeRecorder.isRecording();
+    boolean _not = (!_isRecording);
+    Preconditions.checkState(_not);
+    this.changeRecorder.addToRecording(notifier);
+    _xblockexpression = this.changeRecorder.beginRecording();
     return _xblockexpression;
   }
 

@@ -24,11 +24,11 @@ import tools.vitruv.change.testutils.metamodels.AllElementTypesCreators;
 public class ChangeDescription2InsertEReferenceTest extends ChangeDescription2ChangeTransformationTest {
   @ParameterizedTest
   @MethodSource("provideParametersInsertMultipleAtOnceAtIndex")
-  public void testInsertMultipleAtOnceContainment(final int count, final int insertAt) {
+  void testInsertMultipleAtOnceContainment(final int count, final int insertAt) {
     List<NonRoot> preparationElements = IntStream.range(0, 10)
         .mapToObj(i -> AllElementTypesCreators.aet.NonRoot())
-        .collect(Collectors.toList());
-    this.<Root>record(this.getUniquePersistedRoot(), it ->
+        .toList();
+    this.<Root>record_(this.getUniquePersistedRoot(), it ->
         Iterables.addAll(it.getMultiValuedContainmentEReference(), preparationElements));
     List<NonRoot> nonRootElements = IntStream.range(0, count)
         .mapToObj(i -> {
@@ -36,8 +36,8 @@ public class ChangeDescription2InsertEReferenceTest extends ChangeDescription2Ch
           element.setId(String.valueOf(i));
           return element;
         })
-        .collect(Collectors.toList());
-    Iterable<? extends EChange<EObject>> actualChanges = this.<Root>record(this.getUniquePersistedRoot(), it ->
+        .toList();
+    Iterable<? extends EChange<EObject>> actualChanges = this.<Root>record_(this.getUniquePersistedRoot(), it ->
         it.getMultiValuedContainmentEReference().addAll(insertAt, nonRootElements));
     Assertions.assertEquals(Iterables.size(actualChanges), nonRootElements.size() * 3);
     for (int i = 0; i < nonRootElements.size(); i++) {
@@ -52,18 +52,18 @@ public class ChangeDescription2InsertEReferenceTest extends ChangeDescription2Ch
 
   @ParameterizedTest
   @MethodSource("provideParametersInsertMultipleAtOnceAtIndex")
-  public void testInsertMultipleAtOnceNonContainment(final int count, final int insertAt) {
+  void testInsertMultipleAtOnceNonContainment(final int count, final int insertAt) {
     List<NonRoot> preparationElements = IntStream.range(0, 10)
         .mapToObj(i -> AllElementTypesCreators.aet.NonRoot())
-        .collect(Collectors.toList());
+        .toList();
     this.getUniquePersistedRoot().getMultiValuedContainmentEReference().addAll(preparationElements);
-    this.<Root>record(this.getUniquePersistedRoot(), it ->
+    this.<Root>record_(this.getUniquePersistedRoot(), it ->
         it.getMultiValuedNonContainmentEReference().addAll(preparationElements));
     List<NonRoot> nonRootElements = IntStream.range(0, count)
         .mapToObj(i -> AllElementTypesCreators.aet.NonRoot())
-        .collect(Collectors.toList());
+        .toList();
     this.getUniquePersistedRoot().getMultiValuedContainmentEReference().addAll(nonRootElements);
-    Iterable<? extends EChange<EObject>> actualChanges = this.<Root>record(this.getUniquePersistedRoot(), it ->
+    Iterable<? extends EChange<EObject>> actualChanges = this.<Root>record_(this.getUniquePersistedRoot(), it ->
         it.getMultiValuedNonContainmentEReference().addAll(insertAt, nonRootElements));
     Assertions.assertEquals(Iterables.size(actualChanges), nonRootElements.size());
     for (int i = 0; i < nonRootElements.size(); i++) {
@@ -83,12 +83,12 @@ public class ChangeDescription2InsertEReferenceTest extends ChangeDescription2Ch
   }
 
   @Test
-  public void testInsertSingleNonContainment() {
+  void testInsertSingleNonContainment() {
     this.insertAndAssertSingleNonContainment(0);
   }
 
   @Test
-  public void testInsertMultipleIterativelyNonContainment() {
+  void testInsertMultipleIterativelyNonContainment() {
     this.insertAndAssertSingleNonContainment(0);
     this.insertAndAssertSingleNonContainment(1);
     this.insertAndAssertSingleNonContainment(2);
@@ -96,12 +96,12 @@ public class ChangeDescription2InsertEReferenceTest extends ChangeDescription2Ch
   }
 
   @Test
-  public void testInsertSingleContainment() {
+  void testInsertSingleContainment() {
     this.insertAndAssertSingleContainment(0);
   }
 
   @Test
-  public void testInsertMultipleIterativelyContainment() {
+  void testInsertMultipleIterativelyContainment() {
     this.insertAndAssertSingleContainment(0);
     this.insertAndAssertSingleContainment(1);
     this.insertAndAssertSingleContainment(2);
@@ -114,7 +114,7 @@ public class ChangeDescription2InsertEReferenceTest extends ChangeDescription2Ch
     final Consumer<Root> _function = (Root it) -> {
       it.getMultiValuedContainmentEReference().add(expectedIndex, nonRoot);
     };
-    final List<EChange<EObject>> result = this.<Root>record(this.getUniquePersistedRoot(), _function);
+    final List<EChange<EObject>> result = this.<Root>record_(this.getUniquePersistedRoot(), _function);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertReplaceSingleValuedEAttribute(
         CompoundEChangeAssertHelper.assertCreateAndInsertNonRoot(
             ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 3),
@@ -126,7 +126,7 @@ public class ChangeDescription2InsertEReferenceTest extends ChangeDescription2Ch
   private void insertAndAssertSingleNonContainment(final int expectedIndex) {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     this.getUniquePersistedRoot().getMultiValuedContainmentEReference().add(expectedIndex, nonRoot);
-    final List<EChange<EObject>> result = this.<Root>record(this.getUniquePersistedRoot(), it ->
+    final List<EChange<EObject>> result = this.<Root>record_(this.getUniquePersistedRoot(), it ->
         it.getMultiValuedNonContainmentEReference().add(expectedIndex, nonRoot));
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEReference(
         ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 1),

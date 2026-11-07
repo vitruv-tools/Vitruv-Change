@@ -16,7 +16,7 @@ import tools.vitruv.change.testutils.metamodels.AllElementTypesCreators;
 public class VitruviusChangeURITest extends ChangeDescription2ChangeTransformationTest {
   @Test
   @DisplayName("create model elements and ensure their change URIs match resource URI")
-  public void createModelElements() {
+  void createModelElements() {
     final Resource resource = this.resourceAt("test");
     final Root root = AllElementTypesCreators.aet.Root();
     final Consumer<Resource> _function = (Resource it) -> {
@@ -36,7 +36,7 @@ public class VitruviusChangeURITest extends ChangeDescription2ChangeTransformati
 
   @Test
   @DisplayName("delete resource and ensure change URIs for proxy elements match resource URI")
-  public void deleteModel() {
+  void deleteModel() {
     final Resource resource = this.resourceAt("test");
     final Root root = AllElementTypesCreators.aet.Root();
     final Consumer<Resource> _function = (Resource it) -> {

@@ -20,10 +20,10 @@ public class ChangeDescriptionComplexSequencesTest extends ChangeDescription2Cha
    * not recognized by EMF.
    */
   @Test
-  public void testOverwritingSequence() {
+  void testOverwritingSequence() {
     Root root = getUniquePersistedRoot();
     NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
-    List<EChange<EObject>> result = record(root, it -> {
+    List<EChange<EObject>> result = record_(root, it -> {
       it.setSingleValuedContainmentEReference(nonRoot);
       it.setSingleValuedContainmentEReference(null);
       it.setSingleValuedContainmentEReference(nonRoot);
@@ -41,11 +41,11 @@ public class ChangeDescriptionComplexSequencesTest extends ChangeDescription2Cha
   }
 
   @Test
-  public void testInsertTreeInContainment() {
+  void testInsertTreeInContainment() {
     Root root = getUniquePersistedRoot();
     NonRootObjectContainerHelper nonRootObjectsContainer = AllElementTypesCreators.aet.NonRootObjectContainerHelper();
     NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
-    List<EChange<EObject>> result = record(root, it -> {
+    List<EChange<EObject>> result = record_(root, it -> {
       nonRootObjectsContainer.getNonRootObjectsContainment().add(nonRoot);
       it.setNonRootObjectContainerHelper(nonRootObjectsContainer);
     });
@@ -64,12 +64,12 @@ public class ChangeDescriptionComplexSequencesTest extends ChangeDescription2Cha
   }
 
   @Test
-  public void testInsertComplexTreeInContainment() {
+  void testInsertComplexTreeInContainment() {
     Root root = getUniquePersistedRoot();
     Root secondRoot = AllElementTypesCreators.aet.Root();
     NonRootObjectContainerHelper nonRootObjectsContainer = AllElementTypesCreators.aet.NonRootObjectContainerHelper();
     NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
-    List<EChange<EObject>> result = record(root, it -> {
+    List<EChange<EObject>> result = record_(root, it -> {
       secondRoot.setSingleValuedNonContainmentEReference(nonRoot);
       nonRootObjectsContainer.getNonRootObjectsContainment().add(nonRoot);
       secondRoot.setNonRootObjectContainerHelper(nonRootObjectsContainer);

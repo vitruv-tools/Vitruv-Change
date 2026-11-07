@@ -28,37 +28,18 @@ class NotificationInfo implements Notification {
   public EventType getEventTypeEnum() {
     EventType switchResult = null;
     int eventType = this.notification.getEventType();
-    switch (eventType) {
-      case Notification.SET:
-        switchResult = EventType.SET;
-        break;
-      case Notification.UNSET:
-        switchResult = EventType.UNSET;
-        break;
-      case Notification.ADD:
-        switchResult = EventType.ADD;
-        break;
-      case Notification.REMOVE:
-        switchResult = EventType.REMOVE;
-        break;
-      case Notification.ADD_MANY:
-        switchResult = EventType.ADD_MANY;
-        break;
-      case Notification.REMOVE_MANY:
-        switchResult = EventType.REMOVE_MANY;
-        break;
-      case Notification.MOVE:
-        switchResult = EventType.MOVE;
-        break;
-      case Notification.REMOVING_ADAPTER:
-        switchResult = EventType.REMOVING_ADAPTER;
-        break;
-      case Notification.RESOLVE:
-        switchResult = EventType.RESOLVE;
-        break;
-      default:
-        throw new IllegalArgumentException("Unexpected eventType.");
-    }
+      switchResult = switch (eventType) {
+          case Notification.SET -> EventType.SET;
+          case Notification.UNSET -> EventType.UNSET;
+          case Notification.ADD -> EventType.ADD;
+          case Notification.REMOVE -> EventType.REMOVE;
+          case Notification.ADD_MANY -> EventType.ADD_MANY;
+          case Notification.REMOVE_MANY -> EventType.REMOVE_MANY;
+          case Notification.MOVE -> EventType.MOVE;
+          case Notification.REMOVING_ADAPTER -> EventType.REMOVING_ADAPTER;
+          case Notification.RESOLVE -> EventType.RESOLVE;
+          default -> throw new IllegalArgumentException("Unexpected eventType.");
+      };
     return switchResult;
   }
 
@@ -66,18 +47,8 @@ class NotificationInfo implements Notification {
    * @return the structural feature affected
    */
   public EStructuralFeature getStructuralFeature() {
-    EStructuralFeature xblockexpression = null;
-    {
-      final Object feature = this.getFeature();
-      EStructuralFeature xifexpression = null;
-      if ((feature instanceof EStructuralFeature)) {
-        xifexpression = ((EStructuralFeature) feature);
-      } else {
-        xifexpression = null;
-      }
-      xblockexpression = xifexpression;
-    }
-    return xblockexpression;
+    final Object feature = getFeature();
+    return feature instanceof EStructuralFeature ? (EStructuralFeature) feature : null;
   }
 
   public boolean isStructuralFeatureNotification() {
@@ -101,36 +72,16 @@ class NotificationInfo implements Notification {
    * @return the EAttribute if the notification relates to an attribute, null otherwise
    */
   public EAttribute getAttribute() {
-    EAttribute xblockexpression = null;
-    {
-      final Object feature = this.getFeature();
-      EAttribute xifexpression = null;
-      if ((feature instanceof EAttribute)) {
-        xifexpression = ((EAttribute) feature);
-      } else {
-        xifexpression = null;
-      }
-      xblockexpression = xifexpression;
-    }
-    return xblockexpression;
+    final Object feature = this.getFeature();
+    return feature instanceof  EAttribute ? (EAttribute) feature : null;
   }
 
   /**
    * @return the EReference if the notification relates to a reference feature, null otherwise
    */
   public EReference getReference() {
-    EReference xblockexpression = null;
-    {
-      final Object feature = this.getFeature();
-      EReference xifexpression = null;
-      if ((feature instanceof EReference)) {
-        xifexpression = ((EReference) feature);
-      } else {
-        xifexpression = null;
-      }
-      xblockexpression = xifexpression;
-    }
-    return xblockexpression;
+    final Object feature = this.getFeature();
+    return feature instanceof EReference ? (EReference) feature : null;
   }
 
   /**
@@ -234,7 +185,7 @@ class NotificationInfo implements Notification {
   }
 
   public int getInitialIndex() {
-    int xifexpression = (int) 0;
+    int xifexpression;
     int position = this.getPosition();
     boolean tripleEquals = (position == Notification.NO_INDEX);
     if (tripleEquals) {
@@ -288,22 +239,15 @@ class NotificationInfo implements Notification {
   }
 
   private String getEventTypeDebugName() {
-    switch (this.notification.getEventType()) {
-      case Notification.ADD:
-        return "ADD";
-      case Notification.SET:
-        return "SET";
-      case Notification.ADD_MANY:
-        return "ADDMANY";
-      case Notification.REMOVE:
-        return "REMOVE";
-      case Notification.REMOVE_MANY:
-        return "REMOVEMANY";
-      case Notification.MOVE:
-        return "MOVE";
-      default:
-        return String.valueOf(this.notification.getEventType());
-    }
+      return switch (this.notification.getEventType()) {
+          case Notification.ADD -> "ADD";
+          case Notification.SET -> "SET";
+          case Notification.ADD_MANY -> "ADDMANY";
+          case Notification.REMOVE -> "REMOVE";
+          case Notification.REMOVE_MANY -> "REMOVEMANY";
+          case Notification.MOVE -> "MOVE";
+          default -> String.valueOf(this.notification.getEventType());
+      };
   }
 
   private String getFeatureDebugName() {

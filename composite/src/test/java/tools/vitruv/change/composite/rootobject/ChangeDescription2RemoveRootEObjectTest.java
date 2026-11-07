@@ -20,7 +20,7 @@ public class ChangeDescription2RemoveRootEObjectTest extends ChangeDescription2C
     final Consumer<Resource> _function = (Resource it) -> {
       EcoreUtil.delete(root);
     };
-    final List<EChange<EObject>> result = this.<Resource>record(resource, _function);
+    final List<EChange<EObject>> result = this.<Resource>record_(resource, _function);
     final boolean isDelete = true;
     AtomicEChangeAssertHelper.assertRemoveRoot(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 2), root, isDelete, resource);
   }

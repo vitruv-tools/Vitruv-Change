@@ -4,7 +4,7 @@ import java.util.List;
 import tools.vitruv.change.composite.description.CompositeContainerChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 
-public class CompositeContainerChangeImpl<Element extends Object> extends AbstractCompositeChangeImpl<Element, VitruviusChange<Element>> implements CompositeContainerChange<Element> {
+public class CompositeContainerChangeImpl<Element> extends AbstractCompositeChangeImpl<Element, VitruviusChange<Element>> implements CompositeContainerChange<Element> {
   public CompositeContainerChangeImpl(final List<? extends VitruviusChange<Element>> changes) {
     super(changes);
   }

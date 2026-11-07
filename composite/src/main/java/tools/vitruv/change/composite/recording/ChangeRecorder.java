@@ -159,18 +159,14 @@ public class ChangeRecorder implements AutoCloseable {
       boolean _not = (!_isEmpty);
       if (_not) {
         final Consumer<EChange<EObject>> _function = (EChange<EObject> it) -> {
-          boolean _matched = false;
-          if (it instanceof EObjectAddedEChange) {
-            _matched=true;
-            EObject _newValue = ((EObjectAddedEChange<EObject>)it).getNewValue();
-            this.outer.existingObjects.add(_newValue);
-            boolean _matched_1 = false;
-            if (it instanceof UpdateReferenceEChange) {
-              _matched_1=true;
-              EObject _affectedElement = ((UpdateReferenceEChange<EObject>)it).getAffectedElement();
-              this.outer.existingObjects.add(_affectedElement);
+            if (it instanceof EObjectAddedEChange) {
+              EObject _newValue = ((EObjectAddedEChange<EObject>)it).getNewValue();
+              this.outer.existingObjects.add(_newValue);
+              if (it instanceof UpdateReferenceEChange) {
+                EObject _affectedElement = ((UpdateReferenceEChange<EObject>)it).getAffectedElement();
+                this.outer.existingObjects.add(_affectedElement);
+              }
             }
-          }
         };
         changes.forEach(_function);
       }
@@ -191,7 +187,7 @@ public class ChangeRecorder implements AutoCloseable {
           }
           _xblockexpression = this.outer.addAdapter(it);
         }
-        return Boolean.valueOf(_xblockexpression);
+        return _xblockexpression;
       };
       ChangeRecorder.recursively(resource, _function);
     }
@@ -202,8 +198,6 @@ public class ChangeRecorder implements AutoCloseable {
       if ((_newValue instanceof EObject)) {
         Object _newValue_1 = notification.getNewValue();
         _xifexpression = ((EObject) _newValue_1);
-      } else {
-        _xifexpression = null;
       }
       final EObject newEObject = _xifexpression;
       boolean _and = false;
@@ -212,13 +206,11 @@ public class ChangeRecorder implements AutoCloseable {
         _eResource=newEObject.eResource();
       }
       boolean _tripleNotEquals = (_eResource != null);
-      if (!_tripleNotEquals) {
-        _and = false;
-      } else {
-        boolean _contains = this.currentlyLoadingResources.contains(newEObject.eResource());
-        _and = _contains;
+
+      if (_tripleNotEquals) {
+        _and = this.currentlyLoadingResources.contains(newEObject.eResource());
       }
-      return _and;
+        return _and;
     }
 
     private boolean affectsUnloadingResource(final Notification notification) {
@@ -238,11 +230,9 @@ public class ChangeRecorder implements AutoCloseable {
       if (((Notifier) newValue)!=null) {
         final Function<Notifier, Boolean> _function = (Notifier it) -> {
           boolean _xblockexpression = false;
-          {
-            this.outer.toDesinfect.remove(it);
-            _xblockexpression = this.outer.addAdapter(it);
-          }
-          return Boolean.valueOf(_xblockexpression);
+          this.outer.toDesinfect.remove(it);
+          _xblockexpression = this.outer.addAdapter(it);
+          return _xblockexpression;
         };
         ChangeRecorder.recursively(((Notifier) newValue), _function);
       }
@@ -298,10 +288,9 @@ public class ChangeRecorder implements AutoCloseable {
   public ChangeRecorder(final ResourceSet resourceSet) {
     this.resourceSet = resourceSet;
     final BiFunction<EObject, EObject, Boolean> _function = (EObject affectedObject, EObject addedObject) -> {
-      return Boolean.valueOf(this.isCreateChange(affectedObject, addedObject));
+      return this.isCreateChange(affectedObject, addedObject);
     };
-    NotificationToEChangeConverter _notificationToEChangeConverter = new NotificationToEChangeConverter(_function);
-    this.converter = _notificationToEChangeConverter;
+    this.converter = new NotificationToEChangeConverter(_function);
   }
 
   private boolean isCreateChange(final EObject affectedObject, final EObject addedObject) {
@@ -329,13 +318,11 @@ public class ChangeRecorder implements AutoCloseable {
     if (_add) {
       final Function<Notifier, Boolean> _function = (Notifier it) -> {
         boolean _xblockexpression = false;
-        {
-          if ((it instanceof EObject)) {
-            this.existingObjects.add(((EObject)it));
-          }
-          _xblockexpression = this.addAdapter(it);
+        if ((it instanceof EObject)) {
+          this.existingObjects.add(((EObject)it));
         }
-        return Boolean.valueOf(_xblockexpression);
+        _xblockexpression = this.addAdapter(it);
+        return _xblockexpression;
       };
       ChangeRecorder.recursively(notifier, _function);
     }
@@ -350,7 +337,7 @@ public class ChangeRecorder implements AutoCloseable {
     Preconditions.<Notifier>checkNotNull(notifier, "notifier");
     this.rootObjects.remove(notifier);
     final Function<Notifier, Boolean> _function = (Notifier it) -> {
-      return Boolean.valueOf(this.removeAdapter(it));
+      return this.removeAdapter(it);
     };
     ChangeRecorder.recursively(notifier, _function);
   }
@@ -360,21 +347,21 @@ public class ChangeRecorder implements AutoCloseable {
    */
   public List<EChange<EObject>> beginRecording() {
     List<EChange<EObject>> _xblockexpression = null;
-    {
-      this.checkNotDisposed();
-      Preconditions.checkState((!this.isRecording), "This recorder is already recording!");
-      final Consumer<Notifier> _function = (Notifier it) -> {
-        final Function<Notifier, Boolean> _function_1 = (Notifier it_1) -> {
-          return Boolean.valueOf(this.removeAdapter(it_1));
-        };
-        ChangeRecorder.recursively(it, _function_1);
+    this.checkNotDisposed();
+
+    Preconditions.checkState((!this.isRecording), "This recorder is already recording!");
+    final Consumer<Notifier> _function = (Notifier it) -> {
+      final Function<Notifier, Boolean> _function_1 = (Notifier it_1) -> {
+        return this.removeAdapter(it_1);
       };
-      this.toDesinfect.forEach(_function);
-      this.toDesinfect.clear();
-      this.isRecording = true;
-      ArrayList<EChange<EObject>> _arrayList = new ArrayList<EChange<EObject>>();
-      _xblockexpression = this.resultChanges = _arrayList;
-    }
+      ChangeRecorder.recursively(it, _function_1);
+    };
+    this.toDesinfect.forEach(_function);
+    this.toDesinfect.clear();
+    this.isRecording = true;
+    ArrayList<EChange<EObject>> _arrayList = new ArrayList<EChange<EObject>>();
+    _xblockexpression = this.resultChanges = _arrayList;
+
     return _xblockexpression;
   }
 
@@ -387,7 +374,7 @@ public class ChangeRecorder implements AutoCloseable {
     this.existingObjects.clear();
     final Consumer<Notifier> _function = (Notifier it) -> {
       final Function<Notifier, Boolean> _function_1 = (Notifier it_1) -> {
-        return Boolean.valueOf(this.removeAdapter(it_1));
+        return this.removeAdapter(it_1);
       };
       ChangeRecorder.recursively(it, _function_1);
     };
@@ -503,11 +490,10 @@ public class ChangeRecorder implements AutoCloseable {
 
   public TransactionalChange<EObject> getChange() {
     TransactionalChange<EObject> _xblockexpression = null;
-    {
-      this.checkNotDisposed();
-      Preconditions.checkState((!this.isRecording), "This recorder is still recording!");
-      _xblockexpression = VitruviusChangeFactory.getInstance().<EObject>createTransactionalChange(this.resultChanges);
-    }
+    this.checkNotDisposed();
+    Preconditions.checkState((!this.isRecording), "This recorder is still recording!");
+    _xblockexpression = VitruviusChangeFactory.getInstance().<EObject>createTransactionalChange(this.resultChanges);
+
     return _xblockexpression;
   }
 
@@ -517,7 +503,7 @@ public class ChangeRecorder implements AutoCloseable {
 
   private static void _recursively(final ResourceSet resourceSet, final Function<Notifier, Boolean> action) {
     Boolean _apply = action.apply(resourceSet);
-    if ((_apply).booleanValue()) {
+    if (_apply) {
       final Consumer<Resource> _function = (Resource it) -> {
         ChangeRecorder.recursively(it, action);
       };
@@ -527,7 +513,7 @@ public class ChangeRecorder implements AutoCloseable {
 
   private static void _recursively(final Resource resource, final Function<Notifier, Boolean> action) {
     Boolean _apply = action.apply(resource);
-    if ((_apply).booleanValue()) {
+    if (_apply) {
       final Consumer<EObject> _function = (EObject it) -> {
         ChangeRecorder.recursively(it, action);
       };
@@ -537,10 +523,10 @@ public class ChangeRecorder implements AutoCloseable {
 
   private static void _recursively(final EObject object, final Function<Notifier, Boolean> action) {
     Boolean _apply = action.apply(object);
-    if ((_apply).booleanValue()) {
+    if (_apply) {
       for (final TreeIterator<Notifier> properContents = EcoreUtil.<Notifier>getAllProperContents(object, true); properContents.hasNext();) {
         Boolean _apply_1 = action.apply(properContents.next());
-        boolean _not = (!(_apply_1).booleanValue());
+        boolean _not = (!_apply_1);
         if (_not) {
           properContents.prune();
         }
@@ -554,47 +540,42 @@ public class ChangeRecorder implements AutoCloseable {
 
   private boolean addAdapter(final Notifier notifier) {
     boolean _xblockexpression = false;
-    {
-      final EList<Adapter> eAdapters = notifier.eAdapters();
-      _xblockexpression = ((!eAdapters.contains(this.recordingAdapter)) && eAdapters.add(this.recordingAdapter));
-    }
+
+    final EList<Adapter> eAdapters = notifier.eAdapters();
+    _xblockexpression = ((!eAdapters.contains(this.recordingAdapter)) && eAdapters.add(this.recordingAdapter));
+
     return _xblockexpression;
   }
 
   private boolean isInOurResourceSet(final Notifier notifier) {
-    if (notifier == null) {
-      return true;
-    }
-    if (notifier instanceof EObject) {
-      return this.isInOurResourceSet(((EObject) notifier).eResource());
-    }
-    if (notifier instanceof Resource) {
-      return this.isInOurResourceSet(((Resource) notifier).getResourceSet());
-    }
-    if (notifier instanceof ResourceSet) {
-      return Objects.equals(notifier, this.resourceSet);
-    }
+      switch (notifier) {
+          case null -> {
+              return true;
+          }
+          case EObject eObject -> {
+              return this.isInOurResourceSet(eObject.eResource());
+          }
+          case Resource resource -> {
+              return this.isInOurResourceSet(resource.getResourceSet());
+          }
+          case ResourceSet set -> {
+              return Objects.equals(notifier, this.resourceSet);
+          }
+          default -> {
+          }
+      }
 
-    String simpleName = notifier.getClass().getSimpleName();
+      String simpleName = notifier.getClass().getSimpleName();
     String message = ("Unexpected notifier type: " + simpleName);
     throw new IllegalStateException(message);
   }
   private static void recursively(final Notifier object, final Function<Notifier, Boolean> action) {
-    if (object instanceof EObject
-         && action != null) {
-      _recursively((EObject)object, action);
-      return;
-    } else if (object instanceof Resource
-         && action != null) {
-      _recursively((Resource)object, action);
-      return;
-    } else if (object instanceof ResourceSet
-         && action != null) {
-      _recursively((ResourceSet)object, action);
-      return;
-    } else {
-      throw new IllegalArgumentException("Unhandled parameter types: " +
-        Arrays.<Object>asList(object, action).toString());
-    }
+      switch (object) {
+          case EObject eObject when action != null -> _recursively(eObject, action);
+          case Resource resource when action != null -> _recursively(resource, action);
+          case ResourceSet set when action != null -> _recursively(set, action);
+          case null, default -> throw new IllegalArgumentException("Unhandled parameter types: " +
+                  Arrays.<Object>asList(object, action).toString());
+      }
   }
 }

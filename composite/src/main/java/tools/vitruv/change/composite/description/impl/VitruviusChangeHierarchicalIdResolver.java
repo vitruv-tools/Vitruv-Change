@@ -8,7 +8,7 @@ import tools.vitruv.change.composite.description.VitruviusChange;
 /** Resolves and applies {@link VitruviusChange}s of {@link HierarchicalId}s. */
 public class VitruviusChangeHierarchicalIdResolver
     extends AbstractVitruviusChangeResolver<HierarchicalId> {
-  private AtomicEChangeHierarchicalIdResolver atomicChangeResolver;
+  private final AtomicEChangeHierarchicalIdResolver atomicChangeResolver;
 
   /**
    * Creates a new {@link VitruviusChangeHierarchicalIdResolver} with the given {@link
@@ -48,13 +48,13 @@ public class VitruviusChangeHierarchicalIdResolver
   }
 
   private void applyBackward(VitruviusChange<EObject> change) {
-    if (change instanceof CompositeContainerChangeImpl<EObject> compositeChange) {
-      compositeChange.getChanges().reversed().forEach(this::applyBackward);
-    } else if (change instanceof TransactionalChangeImpl<EObject> transactionalChange) {
-      transactionalChange.getEChanges().reversed().forEach(atomicChangeResolver::applyBackward);
-    } else {
-      throw new IllegalStateException(
-          "trying to apply unknown change of class " + change.getClass().getSimpleName());
-    }
+      switch (change) {
+          case CompositeContainerChangeImpl<EObject> compositeChange ->
+                  compositeChange.getChanges().reversed().forEach(this::applyBackward);
+          case TransactionalChangeImpl<EObject> transactionalChange ->
+                  transactionalChange.getEChanges().reversed().forEach(atomicChangeResolver::applyBackward);
+          default -> throw new IllegalStateException(
+                  "trying to apply unknown change of class " + change.getClass().getSimpleName());
+      }
   }
 }
