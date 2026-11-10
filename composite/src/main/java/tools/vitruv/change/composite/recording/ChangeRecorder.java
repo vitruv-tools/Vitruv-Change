@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -463,12 +464,15 @@ public class ChangeRecorder implements AutoCloseable {
       allElementsToDelete.put(element, elementsToDelete);
     }
     final List<EChange<EObject>> deleteChanges = new ArrayList<>();
+    // the model is not modified here, so each index is looked up in the unchanged lists
+    final Map<EObject, Integer> indicesInContainer = new HashMap<>();
     for (final Map.Entry<EObject, Iterable<EObject>> entry : allElementsToDelete.entrySet()) {
       for (final EObject it : entry.getValue()) {
         // the removed element itself already left its container in a recorded change,
         // contained elements have to be removed from their containers before being deleted
         if (it != entry.getKey()) {
-          deleteChanges.add(this.converter.createRemoveFromContainerChange(it));
+          deleteChanges.add(this.converter.createRemoveFromContainerChange(
+              it, indexInContainer(it, indicesInContainer)));
         }
         // elements in their own resource (cross-resource containment) survive the deletion
         if (!isRootOfOwnResource(it)) {
@@ -477,6 +481,28 @@ public class ChangeRecorder implements AutoCloseable {
       }
     }
     Iterables.<EChange<EObject>>addAll(changes, deleteChanges);
+  }
+
+  /**
+   * Returns the index of the given element in its many-valued containment reference, or -1 if
+   * that reference is single-valued. Indexes the whole list on the first lookup in it, so that
+   * looking up all elements of a list takes linear instead of quadratic time.
+   */
+  private static int indexInContainer(final EObject element,
+      final Map<EObject, Integer> indicesInContainer) {
+    final EReference containmentFeature = element.eContainmentFeature();
+    if (!containmentFeature.isMany()) {
+      return -1;
+    }
+    final Integer knownIndex = indicesInContainer.get(element);
+    if (knownIndex != null) {
+      return knownIndex;
+    }
+    final List<?> siblings = (List<?>) element.eContainer().eGet(containmentFeature);
+    for (int index = 0; index < siblings.size(); index++) {
+      indicesInContainer.put((EObject) siblings.get(index), index);
+    }
+    return indicesInContainer.get(element);
   }
 
   /**
