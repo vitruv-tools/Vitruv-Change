@@ -20,7 +20,7 @@ import tools.vitruv.change.testutils.metamodels.AllElementTypesCreators;
 
 public class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2ChangeTransformationTest {
   @Test
-  public void testRemoveNonContainmentEReferenceFromList() {
+  void testRemoveNonContainmentEReferenceFromList() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root _uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> _function = (Root it) -> {
@@ -38,7 +38,7 @@ public class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2Ch
   }
 
   @Test
-  public void testRemoveNonContainmentEReferenceFromListWithExplicitUnset() {
+  void testRemoveNonContainmentEReferenceFromListWithExplicitUnset() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root _uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> _function = (Root it) -> {
@@ -55,7 +55,7 @@ public class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2Ch
   }
 
   @Test
-  public void testRemoveContainmentEReferenceFromList() {
+  void testRemoveContainmentEReferenceFromList() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root _uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> _function = (Root it) -> {
@@ -73,7 +73,7 @@ public class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2Ch
   }
 
   @Test
-  public void testRemoveContainmentEReferenceFromListWithExplicitUnset() {
+  void testRemoveContainmentEReferenceFromListWithExplicitUnset() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root _uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> _function = (Root it) -> {
@@ -90,7 +90,7 @@ public class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2Ch
   }
 
   @Test
-  public void testRemoveElementAndReinsertContainedOne() {
+  void testRemoveElementAndReinsertContainedOne() {
     final Root containedRoot = AllElementTypesCreators.aet.Root();
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root _uniquePersistedRoot = this.getUniquePersistedRoot();
@@ -111,7 +111,7 @@ public class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2Ch
   }
 
   @Test
-  public void testRemoveElementAndReinsertContainedInContainedOne() {
+  void testRemoveElementAndReinsertContainedInContainedOne() {
     final Root containedRoot = AllElementTypesCreators.aet.Root();
     final Root innerContainedRoot = AllElementTypesCreators.aet.Root();
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
@@ -153,7 +153,7 @@ public class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2Ch
   }
 
   @Test
-  public void testClearEReferences() {
+  void testClearEReferences() {
     final NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
     final NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
     Root _uniquePersistedRoot = this.getUniquePersistedRoot();

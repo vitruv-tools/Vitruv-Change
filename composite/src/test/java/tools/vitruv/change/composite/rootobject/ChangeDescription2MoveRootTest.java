@@ -16,7 +16,7 @@ import tools.vitruv.change.testutils.metamodels.AllElementTypesCreators;
 
 public class ChangeDescription2MoveRootTest extends ChangeDescription2ChangeTransformationTest {
   @Test
-  public void moveRootEObjectBetweenResources() {
+  void moveRootEObjectBetweenResources() {
     final Root root = AllElementTypesCreators.aet.Root();
     final Resource resource1 = this.resourceAt("resource1");
     final Resource resource2 = this.resourceAt("resource2");
@@ -36,7 +36,7 @@ public class ChangeDescription2MoveRootTest extends ChangeDescription2ChangeTran
   }
 
   @Test
-  public void moveResource() {
+  void moveResource() {
     final String originalResourceName = "resource";
     final String changedResourceName = "newLocation";
     final Root root = AllElementTypesCreators.aet.Root();

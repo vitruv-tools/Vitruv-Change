@@ -18,7 +18,7 @@ import tools.vitruv.change.testutils.metamodels.AllElementTypesCreators;
 
 public class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeDescription2ChangeTransformationTest {
   @Test
-  public void testReplaceSingleValuedEReferenceContainment() {
+  void testReplaceSingleValuedEReferenceContainment() {
     this.getUniquePersistedRoot();
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     final Consumer<Root> _function = (Root it) -> {
@@ -29,7 +29,7 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeD
   }
 
   @Test
-  public void testReplaceExistingSingleValuedEReferenceContainment() {
+  void testReplaceExistingSingleValuedEReferenceContainment() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     final NonRoot replaceNonRoot = AllElementTypesCreators.aet.NonRoot();
     Root _uniquePersistedRoot = this.getUniquePersistedRoot();
@@ -45,7 +45,7 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeD
   }
 
   @Test
-  public void testReplaceExistingSingleValuedEReferenceContainmentWithDefault() {
+  void testReplaceExistingSingleValuedEReferenceContainmentWithDefault() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root _uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> _function = (Root it) -> {
@@ -60,7 +60,7 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeD
   }
 
   @Test
-  public void testRemoveContainmentReferenceWithDelete() {
+  void testRemoveContainmentReferenceWithDelete() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root _uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> _function = (Root it) -> {
@@ -75,7 +75,7 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeD
   }
 
   @Test
-  public void testSetSingleValuedEReferenceNonContainment() {
+  void testSetSingleValuedEReferenceNonContainment() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root _uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> _function = (Root it) -> {
@@ -90,7 +90,7 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeD
   }
 
   @Test
-  public void testReplaceExistingSingleValuedEReferenceNonContainment() {
+  void testReplaceExistingSingleValuedEReferenceNonContainment() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     final NonRoot replaceNonRoot = AllElementTypesCreators.aet.NonRoot();
     Root _uniquePersistedRoot = this.getUniquePersistedRoot();
@@ -114,7 +114,7 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeD
   }
 
   @Test
-  public void testRemoveNonContainmentReferenceWithDelete() {
+  void testRemoveNonContainmentReferenceWithDelete() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root _uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> _function = (Root it) -> {
@@ -130,7 +130,7 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeD
   }
 
   @Test
-  public void testReplaceExistingSingleValuedEReferenceNonContainmentWithDefault() {
+  void testReplaceExistingSingleValuedEReferenceNonContainmentWithDefault() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root _uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> _function = (Root it) -> {
@@ -146,7 +146,7 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeD
   }
 
   @Test
-  public void testUnsetExistingSingleValuedEReferenceContainment() {
+  void testUnsetExistingSingleValuedEReferenceContainment() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root _uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> _function = (Root it) -> {
@@ -161,7 +161,7 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest extends ChangeD
   }
 
   @Test
-  public void testUnsetReplaceExistingSingleValuedEReferenceNonContainment() {
+  void testUnsetReplaceExistingSingleValuedEReferenceNonContainment() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root _uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> _function = (Root it) -> {

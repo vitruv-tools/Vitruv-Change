@@ -28,7 +28,7 @@ public class ChangeDescription2MoveEAttributeTest extends ChangeDescription2Chan
       it.getMultiValuedEAttribute().move(0, 1);
     };
     final List<EChange<EObject>> result = this.<Root>record_(this.getUniquePersistedRoot(), _function_1);
-    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEAttribute(AtomicEChangeAssertHelper.assertRemoveEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 2), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, 55, 1), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, 55, 0, false));
+    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEAttribute(AtomicEChangeAssertHelper.assertRemoveEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 2), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, 55, 1), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, 55, 0, false));
   }
 
   @Test
@@ -54,7 +54,6 @@ public class ChangeDescription2MoveEAttributeTest extends ChangeDescription2Chan
                             this.getUniquePersistedRoot(),
                             AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_UNSETTABLE_EATTRIBUTE,
                             55, 1),
-                    this.getUniquePersistedRoot(),
                     AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_UNSETTABLE_EATTRIBUTE,
                     55, 0, false));
   }
@@ -82,7 +81,6 @@ public class ChangeDescription2MoveEAttributeTest extends ChangeDescription2Chan
                             this.getUniquePersistedRoot(),
                             AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_UNORDERED_EATTRIBUTE,
                             55, 1),
-                    this.getUniquePersistedRoot(),
                     AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_UNORDERED_EATTRIBUTE,
                     55, 0, false));
   }

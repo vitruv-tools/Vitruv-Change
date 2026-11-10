@@ -45,7 +45,7 @@ public class ChangeDescription2InsertEAttributeValueTest extends ChangeDescripti
       _multiValuedEAttribute_2.add(66);
     };
     final List<EChange<EObject>> result = this.<Root>record_(this.getUniquePersistedRoot(), _function);
-    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEAttribute(AtomicEChangeAssertHelper.assertInsertEAttribute(AtomicEChangeAssertHelper.assertInsertEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 3), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, Integer.valueOf(42), 0, false), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, Integer.valueOf(55), 1, false), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, Integer.valueOf(66), 2, false));
+    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEAttribute(AtomicEChangeAssertHelper.assertInsertEAttribute(AtomicEChangeAssertHelper.assertInsertEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 3), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, 42, 0, false), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, 55, 1, false), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, 66, 2, false));
   }
 
   @Test
@@ -63,7 +63,7 @@ public class ChangeDescription2InsertEAttributeValueTest extends ChangeDescripti
       it.setRecursiveRoot(innerRoot);
     };
     final List<EChange<EObject>> result = this.<Root>record_(this.getUniquePersistedRoot(), _function_1);
-    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEAttribute(AtomicEChangeAssertHelper.assertInsertEAttribute(AtomicEChangeAssertHelper.assertReplaceSingleValuedEAttribute(CompoundEChangeAssertHelper.assertCreateAndReplaceNonRoot(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 5), innerRoot, this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__RECURSIVE_ROOT, false), innerRoot, AllElementTypesPackage.Literals.IDENTIFIED__ID, null, innerRoot.getId(), false, false), innerRoot, AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, Integer.valueOf(1), 0, false), innerRoot, AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, Integer.valueOf(2), 1, false));
+    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEAttribute(AtomicEChangeAssertHelper.assertInsertEAttribute(AtomicEChangeAssertHelper.assertReplaceSingleValuedEAttribute(CompoundEChangeAssertHelper.assertCreateAndReplaceNonRoot(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 5), innerRoot, this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__RECURSIVE_ROOT, false), innerRoot, AllElementTypesPackage.Literals.IDENTIFIED__ID, null, innerRoot.getId(), false, false), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, Integer.valueOf(1), 0, false), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, Integer.valueOf(2), 1, false));
   }
 
   void testInsertEAttributeValue(final int expectedIndex, final int expectedValue, final int position) {
@@ -72,7 +72,7 @@ public class ChangeDescription2InsertEAttributeValueTest extends ChangeDescripti
       it.getMultiValuedEAttribute().add(position, expectedValue);
     };
     final List<EChange<EObject>> result = this.<Root>record_(this.getUniquePersistedRoot(), _function);
-    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 1), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, Integer.valueOf(expectedValue), expectedIndex, false));
+    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 1), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, expectedValue, expectedIndex, false));
   }
 
   void testInsertEAttributeValue(final int expectedValue) {
@@ -84,6 +84,6 @@ public class ChangeDescription2InsertEAttributeValueTest extends ChangeDescripti
     final List<EChange<EObject>> result = this.<Root>record_(this.getUniquePersistedRoot(), _function);
     int _size = this.getUniquePersistedRoot().getMultiValuedEAttribute().size();
     final int index = (_size - 1);
-    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 1), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, expectedValue, index, false));
+    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 1), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, expectedValue, index, false));
   }
 }

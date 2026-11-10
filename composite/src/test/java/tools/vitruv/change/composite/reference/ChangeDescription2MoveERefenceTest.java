@@ -15,7 +15,7 @@ import tools.vitruv.change.testutils.metamodels.AllElementTypesCreators;
 
 public class ChangeDescription2MoveERefenceTest extends ChangeDescription2ChangeTransformationTest {
   @Test
-  public void moveMultiValuedNonContainmentEReference() {
+  void moveMultiValuedNonContainmentEReference() {
     final NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
     final NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
     final NonRoot nonRoot3 = AllElementTypesCreators.aet.NonRoot();
@@ -47,7 +47,7 @@ public class ChangeDescription2MoveERefenceTest extends ChangeDescription2Change
   }
 
   @Test
-  public void moveMultiValuedUnsettableNonContainmentEReference() {
+  void moveMultiValuedUnsettableNonContainmentEReference() {
     final NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
     final NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
     final NonRoot nonRoot3 = AllElementTypesCreators.aet.NonRoot();
@@ -79,7 +79,7 @@ public class ChangeDescription2MoveERefenceTest extends ChangeDescription2Change
   }
 
   @Test
-  public void moveMultiValuedUnorderedNonContainmentEReference() {
+  void moveMultiValuedUnorderedNonContainmentEReference() {
     final NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
     final NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
     final NonRoot nonRoot3 = AllElementTypesCreators.aet.NonRoot();
@@ -111,7 +111,7 @@ public class ChangeDescription2MoveERefenceTest extends ChangeDescription2Change
   }
 
   @Test
-  public void moveMultiValuedContainmentEReference() {
+  void moveMultiValuedContainmentEReference() {
     final NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
     final NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
     final NonRoot nonRoot3 = AllElementTypesCreators.aet.NonRoot();
@@ -133,7 +133,7 @@ public class ChangeDescription2MoveERefenceTest extends ChangeDescription2Change
   }
 
   @Test
-  public void moveMultiValuedUnsettableContainmentEReference() {
+  void moveMultiValuedUnsettableContainmentEReference() {
     final NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
     final NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
     final NonRoot nonRoot3 = AllElementTypesCreators.aet.NonRoot();
@@ -155,7 +155,7 @@ public class ChangeDescription2MoveERefenceTest extends ChangeDescription2Change
   }
 
   @Test
-  public void moveMultiValuedUnorderedContainmentEReference() {
+  void moveMultiValuedUnorderedContainmentEReference() {
     final NonRoot nonRoot1 = AllElementTypesCreators.aet.NonRoot();
     final NonRoot nonRoot2 = AllElementTypesCreators.aet.NonRoot();
     final NonRoot nonRoot3 = AllElementTypesCreators.aet.NonRoot();
