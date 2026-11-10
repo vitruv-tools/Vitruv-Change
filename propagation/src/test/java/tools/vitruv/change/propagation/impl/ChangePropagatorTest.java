@@ -2,10 +2,13 @@ package tools.vitruv.change.propagation.impl;
 
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import allElementTypes.AllElementTypesFactory;
 import allElementTypes.AllElementTypesPackage;
+import allElementTypes.NonRoot;
 import allElementTypes.Root;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -13,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -25,7 +29,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute;
+import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference;
 import tools.vitruv.change.atomic.root.InsertRootEObject;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.atomic.uuid.UuidResolver;
@@ -193,6 +199,85 @@ class ChangePropagatorTest {
     assertEquals(List.of(Optional.of(author)), specification.receivedAuthors);
   }
 
+  /**
+   * Tests that change propagation steps can be undone at any time.
+   *
+   * <p>Changes:
+   * <ol>
+   *   <li>Setting Root.singleValuedEAttribute triggers an update of Root.id.
+   *   This change should succeed.</li>
+   *   <li>Creating a NonRoot element triggers an insertion into Root,
+   *   which in turn leads to an exception.</li>
+   * </ol>
+   * After both changes, only the first should be accepted.
+   */
+  @Test
+  void undoFunctionalityWorks() {
+    Predicate<EChange<EObject>> changeRootAttributeTrigger = change ->
+        change instanceof ReplaceSingleValuedEAttribute<EObject, ?> replaceChange
+        && replaceChange.getAffectedFeature().equals(
+            AllElementTypesPackage.eINSTANCE.getRoot_SingleValuedEAttribute());
+    var specification1 = new RecordingSpecification("setRootIdOnRootAttribute",
+        (changes, previousState) -> {
+          if (changes.stream().anyMatch(changeRootAttributeTrigger)) {
+            repositoryRoot().setId("Foobar");
+          }
+        });
+
+    Predicate<EChange<EObject>> createNonRootTrigger = change ->
+        change instanceof CreateEObject<?> createEObject
+            && createEObject.getAffectedEObjectType().equals(
+            AllElementTypesPackage.eINSTANCE.getNonRoot());
+    var specification2 = new RecordingSpecification("addNonRootToRoot", (changes, previousState) -> {
+      Optional<EChange<EObject>> nonRootCreation =
+          changes.stream().filter(createNonRootTrigger).findFirst();
+      if (nonRootCreation.isPresent()) {
+        var nonRoot = (NonRoot)
+            ((CreateEObject<EObject>) nonRootCreation.get()).getAffectedElement();
+        repositoryRoot().setSingleValuedNonContainmentEReference(nonRoot);
+      }
+    });
+
+    Predicate<EChange<EObject>> insertNonRootIntoRootTrigger = change ->
+        change instanceof ReplaceSingleValuedEReference<?> replaceReference
+            && replaceReference.getAffectedFeature().equals(
+            AllElementTypesPackage.eINSTANCE.getRoot_SingleValuedNonContainmentEReference()
+        );
+    var specification3 = new RecordingSpecification("failWhenAddingNonRoot", (changes, previousState) -> {
+      if (changes.stream().anyMatch(insertNonRootIntoRootTrigger)) {
+        throw new RuntimeException("Fail on Insertion of Root");
+      }
+    });
+
+    // Setup view
+    var propagator = createPropagator(
+        Map.of(
+            specification1, 0,
+            specification2, 0,
+            specification3, 0
+        ));
+    propagateInView(propagator, this::createRootInView);
+    // Change 1 triggers specification 1
+    var root = (Root) viewResourceSet.getResource(modelUri, true).getContents().get(0);
+    propagateInView(propagator, () -> root.setSingleValuedEAttribute(42));
+    // Change 1 succeeds
+    assertEquals(42, repositoryRoot().getSingleValuedEAttribute());
+    assertEquals("Foobar", repositoryRoot().getId());
+
+    // Change 2 triggers an error
+    assertThrows(RuntimeException.class, () -> propagateInView(propagator, () -> {
+      var nonRoot = AllElementTypesFactory.eINSTANCE.createNonRoot();
+      nonRoot.setId("barbaz");
+      root.setSingleValuedContainmentEReference(nonRoot);
+    }));
+    // NonRoot is empty
+    assertNull(repositoryRoot().getSingleValuedContainmentEReference());
+    assertNull(repositoryRoot().getSingleValuedNonContainmentEReference());
+    // Change 1 effects are still there
+    assertEquals(42, repositoryRoot().getSingleValuedEAttribute());
+    assertEquals("Foobar", repositoryRoot().getId());
+  }
+
   private record Author(String name) {}
 
   private Root createRootInView() {
@@ -232,10 +317,21 @@ class ChangePropagatorTest {
   /** Records its invocations and the changes it receives, then applies the given reaction. */
   private class RecordingSpecification extends AbstractChangePropagationSpecification {
     private final String name;
+    /**
+     * {@code reaction} contains the underlying logic of the specification.
+     */
     private final BiConsumer<List<EChange<EObject>>, ModelRepositorySnapshot> reaction;
     private final List<EChange<EObject>> receivedChanges = new ArrayList<>();
     private final List<Optional<Author>> receivedAuthors = new ArrayList<>();
 
+    /**
+     * Creates a new {@link RecordingSpecification}.
+     *
+     * @param name {@link String}
+     * @param reaction {@link BiConsumer}
+     *     A function that processes a {@link EChange} list
+     *     for a given {@link ModelRepositorySnapshot}.
+     */
     RecordingSpecification(String name,
         BiConsumer<List<EChange<EObject>>, ModelRepositorySnapshot> reaction) {
       super(MetamodelDescriptor.with(AllElementTypesPackage.eNS_URI),
@@ -244,6 +340,16 @@ class ChangePropagatorTest {
       this.reaction = reaction;
     }
 
+    /**
+     * A {@link RecordingSpecification} "always" handles any change.
+     * The actual handler logic must be part of the {@link RecordingSpecification#reaction}.
+     *
+     * @param change - the atomic change for which to check
+     *      whether this specification reacts to it. Must not be <code>null</code>.
+     * @param correspondenceModel - the correspondence model to retrieve information
+     *      about the target model from. Must not be <code>null</code>.
+     * @return true
+     */
     @Override
     public boolean doesHandleChange(EChange<EObject> change,
         EditableCorrespondenceModelView<Correspondence> correspondenceModel) {
@@ -261,6 +367,12 @@ class ChangePropagatorTest {
       reaction.accept(changes, previousState);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Always throws an {@link UnsupportedOperationException}. Single {@link EChange}s are
+     * not supported. Call {@link RecordingSpecification#propagateChanges} instead.
+     */
     @Override
     public void propagateChange(EChange<EObject> change,
         EditableCorrespondenceModelView<Correspondence> correspondenceModel,
