@@ -110,6 +110,48 @@ class MultiResourceSetUuidResolvingTest {
   }
 
   @Test
+  @DisplayName("look up each target resource only once")
+  void looksUpEachTargetResourceOnce() {
+    // looking up a resource may go through all resources of the resource set
+    Map<URI, Integer> lookups = new HashMap<>();
+    ResourceSet countingResourceSet = withGlobalFactories(new ResourceSetImpl() {
+      @Override
+      public Resource getResource(URI uri, boolean loadOnDemand) {
+        lookups.merge(uri, 1, Integer::sum);
+        return super.getResource(uri, loadOnDemand);
+      }
+    });
+    UuidResolver countingUuidResolver = UuidResolver.create(countingResourceSet);
+    Map<Resource, Resource> sourceToTargetResourceMap = new HashMap<>();
+    for (int i = 0; i < 3; i++) {
+      URI uri = URI.createFileURI(testProjectPath.resolve("root" + i + ".aet").toString());
+      Resource sourceResource = sourceResourceSet.createResource(uri);
+      var sourceRoot = aet.Root();
+      sourceResource.getContents().add(sourceRoot);
+      for (int j = 0; j < 5; j++) {
+        sourceRoot.getMultiValuedContainmentEReference().add(aet.NonRoot());
+      }
+      sourceRoot.eAllContents().forEachRemaining(sourceUuidResolver::registerEObject);
+      sourceUuidResolver.registerEObject(sourceRoot);
+      Resource targetResource = countingResourceSet.createResource(uri);
+      targetResource.getContents().add(EcoreUtil.copy(sourceRoot));
+      sourceToTargetResourceMap.put(sourceResource, targetResource);
+    }
+
+    sourceUuidResolver.resolveResources(sourceToTargetResourceMap, countingUuidResolver);
+
+    sourceToTargetResourceMap.forEach((sourceResource, targetResource) -> {
+      EObject sourceRoot = sourceResource.getContents().get(0);
+      EObject targetRoot = targetResource.getContents().get(0);
+      assertEquals(sourceUuidResolver.getUuid(sourceRoot),
+          countingUuidResolver.getUuid(targetRoot));
+      assertEquals(sourceUuidResolver.getUuid(sourceRoot.eContents().get(4)),
+          countingUuidResolver.getUuid(targetRoot.eContents().get(4)));
+      assertEquals(1, lookups.get(targetResource.getURI()));
+    });
+  }
+
+  @Test
   @DisplayName("resolve only subset of available resources")
   void resolveSubsetResources() {
     URI resolveUri = URI.createFileURI(testProjectPath.resolve("root1.aet").toString());

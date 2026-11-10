@@ -317,11 +317,17 @@ class UuidResolverImpl implements UuidResolver {
       ResourceSet targetResourceSet,
       Map<Resource, Resource> sourceToTargetResourceMapping)
       throws IllegalStateException {
+    // Looking up a resource in a resource set may compare its URI with that of every resource, so
+    // each resource is only looked up once.
+    Map<URI, Resource> targetResources = new HashMap<>();
     for (var entry : uuidToIdMapping.entrySet()) {
       Uuid uuid = entry.getKey();
       URI idUri = URI.createURI(entry.getValue().getId());
       // resolves like HierarchicalIdResolver#getEObject, without calculating the object's ID again
-      EObject targetEObject = targetResourceSet.getEObject(idUri, isReadOnlyUri(idUri));
+      Resource targetResource = targetResources.computeIfAbsent(idUri.trimFragment(),
+          resourceUri -> targetResourceSet.getResource(resourceUri, isReadOnlyUri(resourceUri)));
+      EObject targetEObject =
+          targetResource == null ? null : targetResource.getEObject(idUri.fragment());
       checkState(
           targetEObject != null,
           "could not find object corresponding to %s in resource set %s",
