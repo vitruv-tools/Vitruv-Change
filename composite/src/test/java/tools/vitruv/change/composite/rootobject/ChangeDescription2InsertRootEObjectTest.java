@@ -23,7 +23,7 @@ public class ChangeDescription2InsertRootEObjectTest extends ChangeDescription2C
       EList<EObject> _contents = it.getContents();
       _contents.add(root);
     };
-    final List<EChange<EObject>> result = this.<Resource>record(resource, _function);
+    final List<EChange<EObject>> result = this.<Resource>record_(resource, _function);
     final boolean isCreate = true;
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertReplaceSingleValuedEAttribute(AtomicEChangeAssertHelper.assertInsertRoot(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 3), root, isCreate, resource), root, AllElementTypesPackage.Literals.IDENTIFIED__ID, null, root.getId(), false, false));
   }
@@ -37,7 +37,7 @@ public class ChangeDescription2InsertRootEObjectTest extends ChangeDescription2C
       EList<EObject> _contents = it.getContents();
       _contents.add(root);
     };
-    final List<EChange<EObject>> result1 = this.<Resource>record(resource1, _function);
+    final List<EChange<EObject>> result1 = this.<Resource>record_(resource1, _function);
     final boolean isCreate = true;
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertReplaceSingleValuedEAttribute(AtomicEChangeAssertHelper.assertInsertRoot(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result1, 3), root, isCreate, resource1), root, AllElementTypesPackage.Literals.IDENTIFIED__ID, null, root.getId(), false, false));
     final Root root2 = AllElementTypesCreators.aet.Root();
@@ -45,7 +45,7 @@ public class ChangeDescription2InsertRootEObjectTest extends ChangeDescription2C
       EList<EObject> _contents = it.getContents();
       _contents.add(root2);
     };
-    final List<EChange<EObject>> result2 = this.<Resource>record(resource2, _function_1);
+    final List<EChange<EObject>> result2 = this.<Resource>record_(resource2, _function_1);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertReplaceSingleValuedEAttribute(AtomicEChangeAssertHelper.assertInsertRoot(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result2, 3), root2, isCreate, resource2), root2, AllElementTypesPackage.Literals.IDENTIFIED__ID, null, root2.getId(), false, false));
   }
 }

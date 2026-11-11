@@ -13,17 +13,16 @@ public class VitruviusChangeFactory {
 
   public static VitruviusChangeFactory getInstance() {
     if ((VitruviusChangeFactory.instance == null)) {
-      VitruviusChangeFactory _vitruviusChangeFactory = new VitruviusChangeFactory();
-      VitruviusChangeFactory.instance = _vitruviusChangeFactory;
+        VitruviusChangeFactory.instance = new VitruviusChangeFactory();
     }
     return VitruviusChangeFactory.instance;
   }
 
-  public <Element extends Object> TransactionalChange<Element> createTransactionalChange(final Iterable<? extends EChange<Element>> changes) {
+  public <Element> TransactionalChange<Element> createTransactionalChange(final Iterable<? extends EChange<Element>> changes) {
     return new TransactionalChangeImpl<Element>(changes);
   }
 
-  public <Element extends Object> CompositeContainerChange<Element> createCompositeChange(final Iterable<? extends VitruviusChange<Element>> innerChanges) {
+  public <Element> CompositeContainerChange<Element> createCompositeChange(final Iterable<? extends VitruviusChange<Element>> innerChanges) {
     return new CompositeContainerChangeImpl<Element>(Lists.newArrayList(innerChanges));
   }
 }

@@ -55,10 +55,10 @@ public final class AtomicEChangeAssertHelper {
       final Iterable<? extends EChange<EObject>> changes, final Object expectedNewValue, final String uri,
       final Resource resource) {
     ChangeAssertHelper.assertSizeGreaterEquals(changes, 1);
-    final InsertRootEObject insertRopot = ChangeAssertHelper.<InsertRootEObject>assertType(
+    final InsertRootEObject insertRoot = ChangeAssertHelper.<InsertRootEObject>assertType(
         changes.iterator().next(), InsertRootEObject.class);
-    ChangeAssertHelper.assertNewValue(insertRopot, expectedNewValue);
-    AtomicEChangeAssertHelper.assertRootEChange(insertRopot, uri, resource);
+    ChangeAssertHelper.assertNewValue(insertRoot, expectedNewValue);
+    AtomicEChangeAssertHelper.assertRootEChange(insertRoot, uri, resource);
     return Iterables.skip(changes, 1);
   }
 
@@ -85,13 +85,13 @@ public final class AtomicEChangeAssertHelper {
     ChangeAssertHelper.assertAffectedEFeature(removeEAttributeValue, affectedFeature);
     ChangeAssertHelper.assertOldValue(removeEAttributeValue, expectedOldValue);
     ChangeAssertHelper.assertNewValue(removeEAttributeValue, expectedNewValue);
-    Assertions.assertEquals(Boolean.valueOf(wasUnset), Boolean.valueOf(removeEAttributeValue.isWasUnset()));
-    Assertions.assertEquals(Boolean.valueOf(isUnset), Boolean.valueOf(removeEAttributeValue.isIsUnset()));
+    Assertions.assertEquals(wasUnset, removeEAttributeValue.isWasUnset());
+    Assertions.assertEquals(isUnset, removeEAttributeValue.isIsUnset());
     return Iterables.skip(changes, 1);
   }
 
   public static Iterable<? extends EChange<EObject>> assertInsertEAttribute(
-      final Iterable<? extends EChange<EObject>> changes, final EObject affectedEObject,
+      final Iterable<? extends EChange<EObject>> changes,
       final EStructuralFeature affectedFeature, final Object expectedNewValue, final int expectedIndex,
       final boolean wasUnset) {
     ChangeAssertHelper.assertSizeGreaterEquals(changes, 1);
@@ -101,7 +101,7 @@ public final class AtomicEChangeAssertHelper {
     ChangeAssertHelper.assertNewValue(insertEAttributValue, expectedNewValue);
     ChangeAssertHelper.assertIndex(insertEAttributValue, expectedIndex);
     ChangeAssertHelper.assertAffectedEFeature(insertEAttributValue, affectedFeature);
-    Assertions.assertEquals(Boolean.valueOf(wasUnset), Boolean.valueOf(insertEAttributValue.isWasUnset()));
+    Assertions.assertEquals(wasUnset, insertEAttributValue.isWasUnset());
     return Iterables.skip(changes, 1);
   }
 
@@ -125,13 +125,13 @@ public final class AtomicEChangeAssertHelper {
     ChangeAssertHelper.assertSizeGreaterEquals(changes, 1);
     final ReplaceSingleValuedEReference replaceChange = ChangeAssertHelper.<ReplaceSingleValuedEReference>assertType(
         changes.iterator().next(), ReplaceSingleValuedEReference.class);
-    ChangeAssertHelper.<AdditiveEChange<?, ?>, Object>assertOldAndNewValue(replaceChange, expectedOldValue,
+    ChangeAssertHelper.<AdditiveEChange<?, ?>>assertOldAndNewValue(replaceChange, expectedOldValue,
         expectedNewValue);
     ChangeAssertHelper.assertAffectedEFeature(replaceChange, affectedFeature);
     ChangeAssertHelper.assertAffectedEObject(replaceChange, affectedEObject);
     ChangeAssertHelper.assertContainment(replaceChange, isContainment);
-    Assertions.assertEquals(Boolean.valueOf(wasUnset), Boolean.valueOf(replaceChange.isWasUnset()));
-    Assertions.assertEquals(Boolean.valueOf(isUnset), Boolean.valueOf(replaceChange.isIsUnset()));
+    Assertions.assertEquals(wasUnset, replaceChange.isWasUnset());
+    Assertions.assertEquals(isUnset, replaceChange.isIsUnset());
     return Iterables.skip(changes, 1);
   }
 
@@ -185,7 +185,7 @@ public final class AtomicEChangeAssertHelper {
     ChangeAssertHelper.assertNewValue(insertEReference, expectedNewValue);
     ChangeAssertHelper.assertIndex(insertEReference, expectedIndex);
     ChangeAssertHelper.assertContainment(insertEReference, isContainment);
-    Assertions.assertEquals(Boolean.valueOf(wasUnset), Boolean.valueOf(insertEReference.isWasUnset()));
+    Assertions.assertEquals(wasUnset, insertEReference.isWasUnset());
     return Iterables.skip(changes, 1);
   }
 

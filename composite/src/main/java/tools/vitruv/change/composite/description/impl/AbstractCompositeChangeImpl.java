@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -21,11 +20,11 @@ import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.interaction.UserInteractionBase;
 
-public abstract class AbstractCompositeChangeImpl<Element extends Object, ContainedChange extends VitruviusChange<Element>> implements CompositeChange<Element, ContainedChange> {
-  private List<ContainedChange> changes;
+public abstract class AbstractCompositeChangeImpl<Element, ContainedChange extends VitruviusChange<Element>> implements CompositeChange<Element, ContainedChange> {
+  private final List<ContainedChange> changes;
   protected final Map<Class<?>, Object> annotations = new HashMap<>();
 
-  public AbstractCompositeChangeImpl(final List<? extends ContainedChange> changes) {
+  protected AbstractCompositeChangeImpl(final List<? extends ContainedChange> changes) {
     this.changes = List.copyOf(changes);
   }
 
@@ -110,10 +109,10 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contai
 
   @Override
   public Iterable<TransactionalChange<Element>> getTransactionalChangeSequence() {
-    return changes.stream()
-        .flatMap(it ->
-                     StreamSupport.stream(it.getTransactionalChangeSequence().spliterator(), false))
-        .collect(Collectors.toList());
+      return changes.stream()
+              .flatMap(it ->
+                      StreamSupport.stream(it.getTransactionalChangeSequence().spliterator(), false))
+              .toList();
   }
 
   @Override

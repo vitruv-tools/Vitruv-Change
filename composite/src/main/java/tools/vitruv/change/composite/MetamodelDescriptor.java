@@ -16,13 +16,10 @@ public final class MetamodelDescriptor {
   private final Set<String> nsUris;
 
   private MetamodelDescriptor(final Set<String> nsUris) {
-    final Consumer<String> _function = (String it) -> {
-      Preconditions.checkArgument((it != null), 
-        "metamodel descriptor to be instantiated for namespace URIs %s must not contain a null URI", nsUris);
-    };
+    final Consumer<String> _function = (String it) -> Preconditions.checkArgument((it != null),
+      "metamodel descriptor to be instantiated for namespace URIs %s must not contain a null URI", nsUris);
     nsUris.forEach(_function);
-    HashSet<String> _hashSet = new HashSet<String>(nsUris);
-    this.nsUris = _hashSet;
+    this.nsUris = new HashSet<String>(nsUris);
   }
 
   /**
@@ -36,11 +33,11 @@ public final class MetamodelDescriptor {
    */
   public boolean contains(final MetamodelDescriptor descriptorForPotentiallyContainedMetamodel) {
     boolean _xblockexpression = false;
-    {
-      Preconditions.checkArgument((descriptorForPotentiallyContainedMetamodel != null), 
-        "metamodel descriptor to check for containment in %s must not be null", this);
-      _xblockexpression = this.nsUris.containsAll(descriptorForPotentiallyContainedMetamodel.nsUris);
-    }
+
+    Preconditions.checkArgument((descriptorForPotentiallyContainedMetamodel != null),
+            "metamodel descriptor to check for containment in %s must not be null", this);
+    _xblockexpression = this.nsUris.containsAll(descriptorForPotentiallyContainedMetamodel.nsUris);
+
     return _xblockexpression;
   }
 
@@ -59,12 +56,10 @@ public final class MetamodelDescriptor {
   @Override
   public boolean equals(final Object obj) {
     boolean _xblockexpression = false;
-    {
-      if ((obj instanceof MetamodelDescriptor)) {
-        return Objects.equals(this.nsUris, ((MetamodelDescriptor)obj).nsUris);
-      }
-      _xblockexpression = false;
-    }
+
+    if ((obj instanceof MetamodelDescriptor))
+      return Objects.equals(this.nsUris, ((MetamodelDescriptor) obj).nsUris);
+
     return _xblockexpression;
   }
 

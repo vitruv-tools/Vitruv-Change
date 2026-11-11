@@ -33,8 +33,9 @@ class VitruviusChangeAnnotationTest {
     change.setAnnotation(Author.class, AUTHOR);
 
     assertEquals(Optional.of(AUTHOR), change.getAnnotation(Author.class));
-    assertEquals(Map.of(Author.class, AUTHOR), change.getAnnotations());
-    assertThrows(UnsupportedOperationException.class, () -> change.getAnnotations().clear());
+    Map<Class<?>, Object> annotations = change.getAnnotations();
+    assertEquals(Map.of(Author.class, AUTHOR), annotations);
+    assertThrows(UnsupportedOperationException.class, annotations::clear);
   }
 
   @Test

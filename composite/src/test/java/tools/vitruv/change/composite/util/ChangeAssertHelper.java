@@ -20,7 +20,7 @@ import tools.vitruv.change.atomic.root.RootEChange;
 import tools.vitruv.change.testutils.matchers.ModelMatchers;
 
 public final class ChangeAssertHelper {
-  public static <T extends AdditiveEChange<?, ?>, SubtractiveEChange extends Object> void assertOldAndNewValue(
+  public static <T extends AdditiveEChange<?, ?>> void assertOldAndNewValue(
       final T eChange, final Object oldValue, final Object newValue) {
     ChangeAssertHelper.assertOldValue(eChange, oldValue);
     ChangeAssertHelper.assertNewValue(eChange, newValue);
@@ -41,10 +41,8 @@ public final class ChangeAssertHelper {
   public static void assertNewValue(final AdditiveEChange<?, ?> eChange, final Object newValue) {
     final Object newValueInChange = eChange.getNewValue();
     boolean condition = ((newValue == null) && (newValueInChange == null));
-    if (((newValue instanceof EObject) && (newValueInChange instanceof EObject))) {
-      final EObject newEObject = ((EObject) newValue);
-      EObject newEObjectInChange = ((EObject) newValueInChange);
-      MatcherAssert.<EObject>assertThat(
+    if (((newValue instanceof EObject newEObject) && (newValueInChange instanceof EObject newEObjectInChange))) {
+        MatcherAssert.<EObject>assertThat(
           "new value in change '" + newValueInChange + "' must be the same as the given new value '" + newValue + "!",
           newEObject, ModelMatchers.<EObject>equalsDeeply(newEObjectInChange));
     } else {
@@ -65,14 +63,10 @@ public final class ChangeAssertHelper {
           expectedAffectedEObject,
           ModelMatchers.<EObject>equalsDeeply(((FeatureEChange<EObject, ?>) eChange).getAffectedElement()));
     }
-    if (!_matched) {
-      if (eChange instanceof EObjectExistenceEChange) {
-        _matched = true;
-        MatcherAssert.<EObject>assertThat(
-            "The actual affected EObject is a different one than the expected affected EObject or its copy",
-            expectedAffectedEObject,
-            ModelMatchers.<EObject>equalsDeeply(((EObjectExistenceEChange<EObject>) eChange).getAffectedElement()));
-      }
+    if (!_matched && eChange instanceof EObjectExistenceEChange) {
+      _matched = true;
+      MatcherAssert.<EObject>assertThat("The actual affected EObject is a different one than the expected affected EObject or its copy",
+              expectedAffectedEObject, ModelMatchers.<EObject>equalsDeeply(((EObjectExistenceEChange<EObject>) eChange).getAffectedElement()));
     }
     if (!_matched) {
       throw new IllegalArgumentException();
@@ -86,7 +80,7 @@ public final class ChangeAssertHelper {
 
   public static void assertContainment(final UpdateReferenceEChange<?> updateEReference, final boolean expectedValue) {
     boolean _isContainment = updateEReference.isContainment();
-    Assertions.assertEquals(Boolean.valueOf(expectedValue), Boolean.valueOf(_isContainment),
+    Assertions.assertEquals(expectedValue, _isContainment,
         "The containment information of the change " + updateEReference + " is wrong");
   }
 
@@ -106,7 +100,7 @@ public final class ChangeAssertHelper {
     Assertions.assertEquals(expectedIndex, change.getIndex(), "The value is not at the correct index");
   }
 
-  public static <T extends Object> T assertType(final Object original, final Class<T> type) {
+  public static <T> T assertType(final Object original, final Class<T> type) {
     MatcherAssert.<Object>assertThat(original, Is.<Object>is(IsInstanceOf.<Object>instanceOf(type)));
     return ((T) original);
   }

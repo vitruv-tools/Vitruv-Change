@@ -16,7 +16,7 @@ import tools.vitruv.change.testutils.metamodels.AllElementTypesCreators;
 
 public class ChangeDescription2MoveRootTest extends ChangeDescription2ChangeTransformationTest {
   @Test
-  public void moveRootEObjectBetweenResources() {
+  void moveRootEObjectBetweenResources() {
     final Root root = AllElementTypesCreators.aet.Root();
     final Resource resource1 = this.resourceAt("resource1");
     final Resource resource2 = this.resourceAt("resource2");
@@ -29,14 +29,14 @@ public class ChangeDescription2MoveRootTest extends ChangeDescription2ChangeTran
       };
       _function_1.accept(resource2);
     };
-    final List<EChange<EObject>> result = this.<ResourceSet>record(resource1.getResourceSet(), _function);
+    final List<EChange<EObject>> result = this.<ResourceSet>record_(resource1.getResourceSet(), _function);
     final boolean isDelete = false;
     final boolean isCreate = false;
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertRoot(AtomicEChangeAssertHelper.assertRemoveRoot(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 2), root, isDelete, resource1), root, isCreate, resource2));
   }
 
   @Test
-  public void moveResource() {
+  void moveResource() {
     final String originalResourceName = "resource";
     final String changedResourceName = "newLocation";
     final Root root = AllElementTypesCreators.aet.Root();
@@ -51,7 +51,7 @@ public class ChangeDescription2MoveRootTest extends ChangeDescription2ChangeTran
     final Consumer<Resource> _function_1 = (Resource it) -> {
       it.setURI(this.getUri(changedResourceName + ".xmi"));
     };
-    final List<EChange<EObject>> result = this.<Resource>record(resource, _function_1);
+    final List<EChange<EObject>> result = this.<Resource>record_(resource, _function_1);
     final boolean isDelete = false;
     final boolean isCreate = false;
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertRoot(AtomicEChangeAssertHelper.assertRemoveRoot(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 2), root, isDelete, this.resourceAt(originalResourceName), originalUri), root, isCreate, this.resourceAt(changedResourceName)));
