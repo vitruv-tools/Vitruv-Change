@@ -143,7 +143,7 @@ public class DefaultChangeRecordingModelRepository
         save(modelResource);
       }
     }
-    resourcesToDelete.stream().forEach(this::delete);
+    resourcesToDelete.forEach(this::delete);
     correspondenceModel.save();
   }
 
