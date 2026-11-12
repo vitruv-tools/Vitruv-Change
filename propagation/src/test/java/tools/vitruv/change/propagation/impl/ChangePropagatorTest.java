@@ -2,6 +2,7 @@ package tools.vitruv.change.propagation.impl;
 
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import allElementTypes.AllElementTypesFactory;
@@ -11,8 +12,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -60,6 +63,7 @@ class ChangePropagatorTest {
   private VitruviusChangeResolver<Uuid> viewChangeResolver;
   private URI modelUri;
   private final List<String> invocations = new ArrayList<>();
+  private int createdSnapshots;
 
   @BeforeAll
   static void registerResourceFactory() {
@@ -70,7 +74,13 @@ class ChangePropagatorTest {
 
   @BeforeEach
   void setUp(@TestProject Path testProjectPath) {
-    modelRepository = new DefaultChangeRecordingModelRepository(null, testProjectPath);
+    modelRepository = new DefaultChangeRecordingModelRepository(null, testProjectPath) {
+      @Override
+      public ModelRepositorySnapshot createSnapshot() {
+        createdSnapshots++;
+        return super.createSnapshot();
+      }
+    };
     viewResourceSet = withGlobalFactories(new ResourceSetImpl());
     viewRecorder = new ChangeRecorder(viewResourceSet);
     viewRecorder.addToRecording(viewResourceSet);
@@ -123,6 +133,62 @@ class ChangePropagatorTest {
 
     assertEquals(List.of(1), previousValues);
     assertEquals(2, repositoryRoot().getSingleValuedEAttribute());
+  }
+
+  @Test
+  void noSnapshotIsCreatedIfNoSpecificationUsesTheStateBeforeTheChange() {
+    var specification = new SingleChangeSpecification(change -> {
+      if (change instanceof InsertRootEObject) {
+        repositoryRoot().setSingleValuedEAttribute(42);
+      }
+    });
+    var propagator = createPropagator(Map.of(specification, 0));
+    List<Root> viewRoot = new ArrayList<>();
+    propagateInView(propagator, () -> viewRoot.add(createRootInView()));
+
+    propagateInView(propagator, () -> viewRoot.get(0).setSingleValuedEAttribute(2));
+
+    assertFalse(specification.usesPreviousState());
+    assertEquals(0, createdSnapshots);
+    assertTrue(specification.receivedChanges.stream()
+        .anyMatch(ReplaceSingleValuedEAttribute.class::isInstance),
+        "the specification must still receive the changes");
+    assertEquals(2, repositoryRoot().getSingleValuedEAttribute());
+  }
+
+  @Test
+  void snapshotsAreCreatedIfOneSpecificationUsesTheStateBeforeTheChange() {
+    List<ModelRepositorySnapshot> receivedStates = new ArrayList<>();
+    var usingSpecification = new RecordingSpecification("using",
+        (changes, previousState) -> receivedStates.add(previousState));
+    var otherSpecification = new SingleChangeSpecification(change -> {});
+    var propagator = createPropagator(Map.of(usingSpecification, 0, otherSpecification, 0));
+
+    propagateInView(propagator, this::createRootInView);
+
+    assertTrue(usingSpecification.usesPreviousState());
+    assertTrue(createdSnapshots > 0);
+    assertFalse(receivedStates.isEmpty());
+    assertTrue(receivedStates.stream().allMatch(Objects::nonNull));
+  }
+
+  @Test
+  void specificationCanDeclareThatItDoesNotUseTheStateBeforeTheChange() {
+    List<ModelRepositorySnapshot> receivedStates = new ArrayList<>();
+    var specification = new RecordingSpecification("spec",
+        (changes, previousState) -> receivedStates.add(previousState)) {
+      @Override
+      public boolean usesPreviousState() {
+        return false;
+      }
+    };
+    var propagator = createPropagator(Map.of(specification, 0));
+
+    propagateInView(propagator, this::createRootInView);
+
+    assertEquals(0, createdSnapshots);
+    assertFalse(receivedStates.isEmpty());
+    assertTrue(receivedStates.stream().allMatch(Objects::isNull));
   }
 
   @Test
@@ -266,6 +332,35 @@ class ChangePropagatorTest {
         EditableCorrespondenceModelView<Correspondence> correspondenceModel,
         ResourceAccess resourceAccess) {
       throw new UnsupportedOperationException("changes are propagated as a whole");
+    }
+  }
+
+  /**
+   * Receives the changes one by one, like reactions and commonalities, and thus does not use the
+   * state before a change.
+   */
+  private static class SingleChangeSpecification extends AbstractChangePropagationSpecification {
+    private final Consumer<EChange<EObject>> reaction;
+    private final List<EChange<EObject>> receivedChanges = new ArrayList<>();
+
+    SingleChangeSpecification(Consumer<EChange<EObject>> reaction) {
+      super(MetamodelDescriptor.with(AllElementTypesPackage.eNS_URI),
+          MetamodelDescriptor.with(AllElementTypesPackage.eNS_URI));
+      this.reaction = reaction;
+    }
+
+    @Override
+    public boolean doesHandleChange(EChange<EObject> change,
+        EditableCorrespondenceModelView<Correspondence> correspondenceModel) {
+      return true;
+    }
+
+    @Override
+    public void propagateChange(EChange<EObject> change,
+        EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+        ResourceAccess resourceAccess) {
+      receivedChanges.add(change);
+      reaction.accept(change);
     }
   }
 }

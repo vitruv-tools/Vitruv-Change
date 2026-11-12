@@ -38,6 +38,10 @@ public interface HierarchicalIdResolver {
   /**
    * Ends a transactions such that all {@link EObject}s not being contained in a resource, which is
    * contained in a resource set, are removed from the ID mapping.
+   *
+   * <p>Only elements that may have left the resource set are considered: the elements this resolver
+   * handled during the transaction, the roots removed from resources since the previous transaction
+   * ended, and everything contained in those that left the resource set.
    */
   void endTransaction();
   

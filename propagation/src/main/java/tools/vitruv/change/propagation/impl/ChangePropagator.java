@@ -60,7 +60,9 @@ public class ChangePropagator {
 
     private List<PropagatedChange> propagateSingleChange(final TransactionalChange<EObject> change, final ModelRepositorySnapshot previousState) {
       try (
-          ModelRepositorySnapshot currentState = !outer.changePropagationMode.equals(ChangePropagationMode.SINGLE_STEP) ? this.outer.modelRepository.createSnapshot() : null) {
+          ModelRepositorySnapshot currentState =
+              outer.changePropagationMode.equals(ChangePropagationMode.SINGLE_STEP)
+                  ? null : this.outer.createSnapshotIfUsed()) {
         Preconditions.checkState(!change.getAffectedEObjects().isEmpty(),
           "There are no objects affected by this change:%s%s", System.lineSeparator(), change);
         final AutoCloseable userInteractorChange = this.installUserInteractorForChange(change);
@@ -274,7 +276,7 @@ public class ChangePropagator {
     List<PropagatedChange> result = new ArrayList<>();
 
     for (TransactionalChange<Uuid> transactionalChange : change.getTransactionalChangeSequence()) {
-      try (ModelRepositorySnapshot previousState = this.modelRepository.createSnapshot()) {
+      try (ModelRepositorySnapshot previousState = createSnapshotIfUsed()) {
         TransactionalChange<EObject> resolvedChange =
             (TransactionalChange<EObject>) this.modelRepository.applyChange(transactionalChange);
         // a transactional change inside a composite change also carries the composite's annotations
@@ -337,6 +339,16 @@ public class ChangePropagator {
         VitruviusChangeFactory.getInstance().createTransactionalChange(eChanges);
     inheritAnnotations(change.change(), mergedChange);
     return new TransactionalChangeWithPreviousState(mergedChange, change.previousState());
+  }
+
+  /**
+   * Creates a snapshot of the model repository if a specification uses the state before a change.
+   * Otherwise returns <code>null</code>, as creating a snapshot copies all models.
+   */
+  private ModelRepositorySnapshot createSnapshotIfUsed() {
+    boolean previousStateUsed = StreamSupport.stream(changePropagationProvider.spliterator(), false)
+        .anyMatch(ChangePropagationSpecification::usesPreviousState);
+    return previousStateUsed ? modelRepository.createSnapshot() : null;
   }
 
   /**
