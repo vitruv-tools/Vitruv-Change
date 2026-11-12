@@ -104,7 +104,8 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
    *     model from. Must not be <code>null</code>.
    * @param resourceAccess - an object for resource access,
    *     in particular to create new model files. Must not be <code>null</code>.
-   * @param previousState the state of the models before the changes were applied
+   * @param previousState the state of the models before the changes were applied, or
+   *     <code>null</code> if no specification uses it (see {@link #usesPreviousState()})
    */
   default void propagateChanges(List<EChange<EObject>> changes,
                                 AnnotationSource changeAnnotations,
@@ -116,6 +117,31 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
         .filter(change -> doesHandleChange(change, correspondenceModel))
         .forEach(change ->
             propagateChange(change, changeAnnotations, correspondenceModel, resourceAccess));
+  }
+
+  /**
+   * Returns whether this specification uses the <code>previousState</code> passed to
+   * {@link #propagateChanges(List, AnnotationSource, EditableCorrespondenceModelView,
+   * ResourceAccess, ModelRepositorySnapshot)}. Creating that state copies all models and the
+   * correspondence model, so the change propagation only creates it if a specification uses it.
+   * If no specification uses it, <code>previousState</code> is <code>null</code>.
+   *
+   * <p>By default, a specification is assumed to use the state if its class overrides the method
+   * that receives it. A specification that overrides it without reading the state can return
+   * <code>false</code>.
+   *
+   * @return whether this specification uses the state of the models before a change
+   */
+  default boolean usesPreviousState() {
+    try {
+      return getClass()
+          .getMethod("propagateChanges", List.class, AnnotationSource.class,
+              EditableCorrespondenceModelView.class, ResourceAccess.class,
+              ModelRepositorySnapshot.class)
+          .getDeclaringClass() != ChangePropagationSpecification.class;
+    } catch (NoSuchMethodException e) {
+      return true;
+    }
   }
 
   /**

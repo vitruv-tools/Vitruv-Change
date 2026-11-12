@@ -110,6 +110,48 @@ class MultiResourceSetUuidResolvingTest {
   }
 
   @Test
+  @DisplayName("look up each target resource only once")
+  void looksUpEachTargetResourceOnce() {
+    // looking up a resource may go through all resources of the resource set
+    Map<URI, Integer> lookups = new HashMap<>();
+    ResourceSet countingResourceSet = withGlobalFactories(new ResourceSetImpl() {
+      @Override
+      public Resource getResource(URI uri, boolean loadOnDemand) {
+        lookups.merge(uri, 1, Integer::sum);
+        return super.getResource(uri, loadOnDemand);
+      }
+    });
+    UuidResolver countingUuidResolver = UuidResolver.create(countingResourceSet);
+    Map<Resource, Resource> sourceToTargetResourceMap = new HashMap<>();
+    for (int i = 0; i < 3; i++) {
+      URI uri = URI.createFileURI(testProjectPath.resolve("root" + i + ".aet").toString());
+      Resource sourceResource = sourceResourceSet.createResource(uri);
+      var sourceRoot = aet.Root();
+      sourceResource.getContents().add(sourceRoot);
+      for (int j = 0; j < 5; j++) {
+        sourceRoot.getMultiValuedContainmentEReference().add(aet.NonRoot());
+      }
+      sourceRoot.eAllContents().forEachRemaining(sourceUuidResolver::registerEObject);
+      sourceUuidResolver.registerEObject(sourceRoot);
+      Resource targetResource = countingResourceSet.createResource(uri);
+      targetResource.getContents().add(EcoreUtil.copy(sourceRoot));
+      sourceToTargetResourceMap.put(sourceResource, targetResource);
+    }
+
+    sourceUuidResolver.resolveResources(sourceToTargetResourceMap, countingUuidResolver);
+
+    sourceToTargetResourceMap.forEach((sourceResource, targetResource) -> {
+      EObject sourceRoot = sourceResource.getContents().get(0);
+      EObject targetRoot = targetResource.getContents().get(0);
+      assertEquals(sourceUuidResolver.getUuid(sourceRoot),
+          countingUuidResolver.getUuid(targetRoot));
+      assertEquals(sourceUuidResolver.getUuid(sourceRoot.eContents().get(4)),
+          countingUuidResolver.getUuid(targetRoot.eContents().get(4)));
+      assertEquals(1, lookups.get(targetResource.getURI()));
+    });
+  }
+
+  @Test
   @DisplayName("resolve only subset of available resources")
   void resolveSubsetResources() {
     URI resolveUri = URI.createFileURI(testProjectPath.resolve("root1.aet").toString());
@@ -162,25 +204,29 @@ class MultiResourceSetUuidResolvingTest {
   }
 
   @Test
-  @DisplayName("resolve resource with dangling element")
+  @DisplayName("resolve resource while another element is dangling")
   void resolveResourceWithDanglingElement() {
+    // Only the elements of the resolved resources are considered. A dangling element is detected
+    // at the end of the transaction instead.
     URI uri = URI.createFileURI(testProjectPath.resolve("root.aet").toString());
     Resource sourceResource = sourceResourceSet.createResource(uri);
     Resource targetResource = targetResourceSet.createResource(uri);
+    var sourceRoot = aet.Root();
+    sourceResource.getContents().add(sourceRoot);
+    Uuid rootUuid = sourceUuidResolver.registerEObject(sourceRoot);
+    var targetRoot = EcoreUtil.copy(sourceRoot);
+    targetResource.getContents().add(targetRoot);
     var danglingElement = aet.Root();
     Uuid danglingUuid = sourceUuidResolver.registerEObject(danglingElement);
 
-    Map<Resource, Resource> sourceToTargetMapping = Map.of(sourceResource, targetResource);
-    assertThrows(
-        IllegalStateException.class,
-        () -> sourceUuidResolver.resolveResources(sourceToTargetMapping, targetUuidResolver));
+    sourceUuidResolver.resolveResources(Map.of(sourceResource, targetResource), targetUuidResolver);
+
+    assertEquals(rootUuid, targetUuidResolver.getUuid(targetRoot));
     assertThrows(
         IllegalStateException.class,
         () -> targetUuidResolver.getEObject(danglingUuid),
-        "target UUID resolver must not be modified when resolving fails");
-    assertThrows(
-        IllegalStateException.class,
-        () -> targetUuidResolver.getUuid(danglingElement),
-        "target UUID resolver must not be modified when resolving fails");
+        "dangling element must not be resolved");
+    assertThrows(IllegalStateException.class, sourceUuidResolver::endTransaction,
+        "the end of the transaction must detect the dangling element");
   }
 }
