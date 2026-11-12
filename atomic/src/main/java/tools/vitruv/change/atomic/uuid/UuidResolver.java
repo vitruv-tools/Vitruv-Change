@@ -162,6 +162,12 @@ public interface UuidResolver {
   /**
    * Stores the contents of this resolver at the given {@link URI}.
    *
+   * <p>The file is not written again if the last store of this resolver was to the same URI and
+   * nothing changed since then: no element was registered or unregistered, the IDs of the
+   * registered elements, which depend on their resources and their positions in them, are the same,
+   * and the file still has the size and modification time it had after storing. So the file must
+   * not be written by anything else.
+   *
    * @param uri is the {@link URI} to store the serialization at. Must not be <code>null</code> and
    *     must be a file URI.
    * @throws IOException if saving to file fails.
