@@ -50,7 +50,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   /**
    * The URIs of the elements in the correspondences when the correspondences were last written,
    * with which the file refers to them. {@code null} if the correspondences have not been written
-   * yet or not all of these elements have an ID, see {@link #collectElementUris()}.
+   * yet, and empty if not all of these elements have an ID, see {@link #collectElementUris()}.
    */
   private Map<EObject, ElementUri> writtenElementUris;
 
@@ -160,10 +160,10 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   /**
-   * Returns the URIs of the elements in the correspondences, or {@code null} if the URI fragment of
+   * Returns the URIs of the elements in the correspondences, or an empty map if the URI fragment of
    * one of them is a path of indices, as for elements without an ID. Computing such a fragment
    * searches the lists on the path, so checking these URIs can take as long as writing the file.
-   * The correspondences are then written on every save.
+   * None of the elements then has a written URI, so the correspondences are written on every save.
    */
   private Map<EObject, ElementUri> collectElementUris() {
     Map<EObject, ElementUri> elementUris = new IdentityHashMap<>();
@@ -172,7 +172,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
       for (EObject element : correspondence.eCrossReferences()) {
         ElementUri uri = ElementUri.of(element);
         if (uri.hasPathFragment() && !isOfStaticMetamodel(element)) {
-          return null;
+          return Map.of();
         }
         elementUris.put(element, uri);
       }
