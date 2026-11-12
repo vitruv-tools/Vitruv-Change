@@ -77,7 +77,8 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
    *     ResourceAccess, ModelRepositorySnapshot)}, which also provides the annotations of the
    *     propagated change. Override that method instead.
    */
-  @Deprecated
+  @Deprecated(since = "4.0.2")
+  @SuppressWarnings("java:S1133")
   default void propagateChanges(List<EChange<EObject>> changes,
                                 EditableCorrespondenceModelView<Correspondence> correspondenceModel,
                                 ResourceAccess resourceAccess,
