@@ -61,8 +61,8 @@ public class ChangePropagator {
     private List<PropagatedChange> propagateSingleChange(final TransactionalChange<EObject> change, final ModelRepositorySnapshot previousState) {
       try (
           ModelRepositorySnapshot currentState =
-              !outer.changePropagationMode.equals(ChangePropagationMode.SINGLE_STEP)
-                  ? this.outer.createSnapshotIfUsed() : null) {
+              outer.changePropagationMode.equals(ChangePropagationMode.SINGLE_STEP)
+                  ? null : this.outer.createSnapshotIfUsed()) {
         Preconditions.checkState(!change.getAffectedEObjects().isEmpty(),
           "There are no objects affected by this change:%s%s", System.lineSeparator(), change);
         final AutoCloseable userInteractorChange = this.installUserInteractorForChange(change);
