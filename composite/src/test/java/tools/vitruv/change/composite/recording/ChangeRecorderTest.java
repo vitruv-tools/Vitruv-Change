@@ -907,7 +907,7 @@ public class ChangeRecorderTest {
     final List<EObject> created = change.getEChanges().stream()
         .filter(CreateEObject.class::isInstance)
         .map(it -> ((CreateEObject<EObject>) it).getAffectedElement())
-        .collect(Collectors.toList());
+        .toList();
     Assertions.assertEquals(List.of(inner, child), created);
   }
 

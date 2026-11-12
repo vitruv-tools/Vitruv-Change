@@ -295,8 +295,9 @@ class UuidSerializationTest {
     storeAndCheck();
 
     root.getMultiValuedContainmentEReference().remove(1);
+    URI serializationUri = getSerializationUri();
     assertThrows(
-        IllegalStateException.class, () -> storeUuidResolver.storeAtUri(getSerializationUri()));
+        IllegalStateException.class, () -> storeUuidResolver.storeAtUri(serializationUri));
   }
 
   @Test
@@ -306,8 +307,9 @@ class UuidSerializationTest {
     storeAndCheck();
 
     storeResourceSet.getResources().remove(root.eResource());
+    URI serializationUri = getSerializationUri();
     assertThrows(
-        IllegalStateException.class, () -> storeUuidResolver.storeAtUri(getSerializationUri()));
+        IllegalStateException.class, () -> storeUuidResolver.storeAtUri(serializationUri));
   }
 
   @Test
@@ -317,8 +319,9 @@ class UuidSerializationTest {
     storeAndCheck();
 
     root.eResource().unload();
+    URI serializationUri = getSerializationUri();
     assertThrows(
-        IllegalStateException.class, () -> storeUuidResolver.storeAtUri(getSerializationUri()));
+        IllegalStateException.class, () -> storeUuidResolver.storeAtUri(serializationUri));
   }
 
   /** Creates a resource with a root that contains the given number of children, all registered. */
