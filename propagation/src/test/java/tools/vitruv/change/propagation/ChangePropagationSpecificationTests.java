@@ -148,6 +148,30 @@ class ChangePropagationSpecificationTests {
   }
 
   @Test
+  void propagateChangesPassesAnnotationsToEachChange() {
+    var recordingSpec = new AnnotationRecordingSpec(descriptorA, descriptorB);
+    var tag = new Object();
+    AnnotationSource annotations =
+        AnnotationSource.of(type -> type == Object.class ? Optional.of(tag) : Optional.empty());
+    List<EChange<EObject>> changes = List.of(EobjectFactory.eINSTANCE.createCreateEObject());
+
+    recordingSpec.propagateChanges(changes, annotations, null, null, null);
+
+    assertSame(annotations, recordingSpec.lastAnnotations);
+  }
+
+  @SuppressWarnings("deprecation")
+  @Test
+  void propagateChangesWithoutAnnotationsUsesEmptyAnnotations() {
+    var recordingSpec = new AnnotationRecordingSpec(descriptorA, descriptorB);
+    List<EChange<EObject>> changes = List.of(EobjectFactory.eINSTANCE.createCreateEObject());
+
+    recordingSpec.propagateChanges(changes, null, null, null);
+
+    assertSame(AnnotationSource.EMPTY, recordingSpec.lastAnnotations);
+  }
+
+  @Test
   void handleIncompatibleSubprocessors() {
     var compositeSpecificationForDescriptorsBAndA =
         new CompositeChangePropagationSpecification(descriptorB, descriptorA);

@@ -133,7 +133,23 @@ public class ChangeDescription2RemoveEReferenceTest extends ChangeDescription2Ch
       it.setSingleValuedContainmentEReference(nonRoot);
     };
     final List<EChange<EObject>> result = this.<Root>record(this.getUniquePersistedRoot(), _function_1);
-    AtomicEChangeAssertHelper.assertEmpty(CompoundEChangeAssertHelper.assertDeleteEObjectAndContainedElements(AtomicEChangeAssertHelper.assertReplaceSingleValuedEReference(AtomicEChangeAssertHelper.assertReplaceSingleValuedEReference(AtomicEChangeAssertHelper.assertReplaceSingleValuedEReference(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 5), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__RECURSIVE_ROOT, containedRoot, null, true, false, false), innerContainedRoot, AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE, nonRoot, null, true, false, false), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE, null, nonRoot, true, false, false), containedRoot));
+    AtomicEChangeAssertHelper.assertEmpty(
+        CompoundEChangeAssertHelper.assertDeleteEObjectAndContainedElements(
+            AtomicEChangeAssertHelper.assertReplaceSingleValuedEReference(
+                AtomicEChangeAssertHelper.assertReplaceSingleValuedEReference(
+                    AtomicEChangeAssertHelper.assertReplaceSingleValuedEReference(
+                        ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(
+                            result, 6),
+                        this.getUniquePersistedRoot(),
+                        AllElementTypesPackage.Literals.ROOT__RECURSIVE_ROOT,
+                        containedRoot, null, true, false, false),
+                    innerContainedRoot,
+                    AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE,
+                    nonRoot, null, true, false, false),
+                this.getUniquePersistedRoot(),
+                AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_CONTAINMENT_EREFERENCE,
+                null, nonRoot, true, false, false),
+            containedRoot));
   }
 
   @Test
