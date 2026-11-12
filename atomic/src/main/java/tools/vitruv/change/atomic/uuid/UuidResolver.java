@@ -101,6 +101,12 @@ public interface UuidResolver {
    * Ends a transactions such that any registered {@link org.eclipse.emf.ecore.EObject} not being
    * contained in a resource throws an error.
    *
+   * <p>Only elements that may have left the resource set are checked, not all registered ones: the
+   * elements this resolver handled during the transaction, the roots removed from resources since
+   * the previous transaction ended, and everything contained in those that left the resource set.
+   * This covers all elements of changes resolved or assigned through this resolver. An element
+   * removed from deeper inside a resource without involving this resolver is not detected.
+   *
    * @throws IllegalStateException if an uncontained element is registered.
    */
   public void endTransaction() throws IllegalStateException;

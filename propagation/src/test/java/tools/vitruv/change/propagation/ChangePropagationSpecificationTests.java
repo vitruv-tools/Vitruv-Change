@@ -221,6 +221,29 @@ class ChangePropagationSpecificationTests {
   }
 
   @Test
+  void specificationsPropagatingSingleChangesDoNotUseThePreviousState() {
+    assertFalse(specAtoBOnAttributeChange.usesPreviousState());
+    var composite = new CompositeChangePropagationSpecification(descriptorA, descriptorB);
+    composite.addChangeMainprocessor(specAtoBOnAttributeChange);
+    assertFalse(composite.usesPreviousState());
+  }
+
+  @Test
+  void specificationOverridingPropagateChangesUsesThePreviousState() {
+    var specification = new MockChangePropagationSpecification(
+        AttributePackage.eINSTANCE.getReplaceSingleValuedEAttribute(), descriptorA, descriptorB) {
+      @Override
+      public void propagateChanges(List<EChange<EObject>> changes,
+          AnnotationSource changeAnnotations,
+          EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+          ResourceAccess resourceAccess, ModelRepositorySnapshot previousState) {
+        // uses the previous state
+      }
+    };
+    assertTrue(specification.usesPreviousState());
+  }
+
+  @Test
   void propagateChangesPropagatesOnlyHandledChanges() {
     var mockObserver = new MockObserver();
     specAtoBOnElementAddChange.registerObserver(mockObserver);
