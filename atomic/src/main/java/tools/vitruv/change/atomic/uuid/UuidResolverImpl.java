@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.InternalEObject;
@@ -296,20 +297,47 @@ class UuidResolverImpl implements UuidResolver {
   private Map<Uuid, HierarchicalId> generateUuidToIdMapping(Collection<Resource> resourcesFilter) {
     HierarchicalIdCalculator idCalculator = new HierarchicalIdCalculator();
     Map<Uuid, HierarchicalId> uuidToIdMapping = new HashMap<>();
+    if (resourcesFilter != null) {
+      // goes over the contents of the filtered resources instead of all registered elements
+      for (Resource resource : resourcesFilter) {
+        addUuidToIdMappingOfResource(resource, idCalculator, uuidToIdMapping);
+      }
+      return uuidToIdMapping;
+    }
     for (var entry : eObjectToUuid.entrySet()) {
       EObject eObject = entry.getKey();
       checkState(
           eObject.eResource() != null && eObject.eResource().getResourceSet() != null,
           "trying to unresolve dangling EObject %s",
           eObject);
-      if (resourcesFilter != null && !resourcesFilter.contains(eObject.eResource())) {
-        continue;
-      }
       HierarchicalId id = idCalculator.getId(eObject);
       Uuid uuid = entry.getValue();
       uuidToIdMapping.put(uuid, id);
     }
     return uuidToIdMapping;
+  }
+
+  /**
+   * Adds the hierarchical IDs of the registered {@link EObject}s contained in the given resource to
+   * the given mapping. Elements of other resources contained in it (cross-resource containment) are
+   * skipped with their contents.
+   */
+  private void addUuidToIdMappingOfResource(
+      Resource resource,
+      HierarchicalIdCalculator idCalculator,
+      Map<Uuid, HierarchicalId> uuidToIdMapping) {
+    TreeIterator<EObject> contents = EcoreUtil.getAllContents(resource, false);
+    while (contents.hasNext()) {
+      EObject eObject = contents.next();
+      if (eObject.eResource() != resource) {
+        contents.prune();
+        continue;
+      }
+      Uuid uuid = eObjectToUuid.get(eObject);
+      if (uuid != null) {
+        uuidToIdMapping.put(uuid, idCalculator.getId(eObject));
+      }
+    }
   }
 
   /**
@@ -331,11 +359,17 @@ class UuidResolverImpl implements UuidResolver {
       ResourceSet targetResourceSet,
       Map<Resource, Resource> sourceToTargetResourceMapping)
       throws IllegalStateException {
+    // Looking up a resource in a resource set may compare its URI with that of every resource, so
+    // each resource is only looked up once.
+    Map<URI, Resource> targetResources = new HashMap<>();
     for (var entry : uuidToIdMapping.entrySet()) {
       Uuid uuid = entry.getKey();
       URI idUri = URI.createURI(entry.getValue().getId());
       // resolves like HierarchicalIdResolver#getEObject, without calculating the object's ID again
-      EObject targetEObject = targetResourceSet.getEObject(idUri, isReadOnlyUri(idUri));
+      Resource targetResource = targetResources.computeIfAbsent(idUri.trimFragment(),
+          resourceUri -> targetResourceSet.getResource(resourceUri, isReadOnlyUri(resourceUri)));
+      EObject targetEObject =
+          targetResource == null ? null : targetResource.getEObject(idUri.fragment());
       checkState(
           targetEObject != null,
           "could not find object corresponding to %s in resource set %s",
