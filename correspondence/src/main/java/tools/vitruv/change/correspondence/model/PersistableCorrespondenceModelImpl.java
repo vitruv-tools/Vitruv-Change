@@ -5,9 +5,11 @@ import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.Resour
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EModelElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -38,6 +41,20 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   private final Resource correspondencesResource;
 
   /**
+   * About how many times a correspondence can be moved in the list for the cost of removing a
+   * correspondence from the list or adding it again, with its adapters and index entries; measured
+   * with 128,000 correspondences. {@link #removeAll} compares the two costs.
+   */
+  private static final long MOVES_PER_DETACHED_OR_ATTACHED_CORRESPONDENCE = 10_000;
+
+  /**
+   * The URIs of the elements in the correspondences when the correspondences were last written,
+   * with which the file refers to them. {@code null} if the correspondences have not been written
+   * yet, and empty if not all of these elements have an ID, see {@link #collectElementUris()}.
+   */
+  private Map<EObject, ElementUri> writtenElementUris;
+
+  /**
    * Creates a new correspondence model with the given resource URI.
    *
    * @param resourceUri the URI of the resource to store the correspondences in
@@ -53,6 +70,8 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
       this.correspondencesResource =
               withGlobalFactories(new ResourceSetImpl()).createResource(resourceUri);
       this.correspondencesResource.getContents().add(correspondences);
+      // marks the resource as modified whenever the correspondences change
+      this.correspondencesResource.setTrackingModification(true);
     } else {
       this.correspondencesResource = null;
     }
@@ -96,15 +115,110 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
     return resolvedEObjects;
   }
 
+  /**
+   * Removes the correspondences of elements that are not in a resource anymore and writes the
+   * correspondences if they or the URIs of their elements have changed since they were last
+   * written. Whether the file is up to date is decided from what this model wrote, so the file must
+   * not be written by anything else, such as a {@link #copy copy} of this model.
+   */
   @Override
   public void save() {
     removeCorrespondencesForRemovedElements();
-    if (this.correspondencesResource != null) {
-      try {
-        this.correspondencesResource.save(null);
-      } catch (IOException e) {
-        logger.error("Could not save correspondences resource", e);
+    if (this.correspondencesResource == null || isWrittenAsIs()) {
+      return;
+    }
+    // a failed write leaves the file in an unknown state, so the next save writes it again
+    this.writtenElementUris = null;
+    try {
+      this.correspondencesResource.save(null);
+      this.correspondencesResource.setModified(false);
+      this.writtenElementUris = collectElementUris();
+    } catch (IOException e) {
+      logger.error("Could not save correspondences resource", e);
+    }
+  }
+
+  /**
+   * Returns whether writing the correspondences would not change the file: the correspondences have
+   * not changed since they were last written, and their elements still have the URIs the file
+   * refers to them by. Path fragments in these URIs change when the models change, for example
+   * when an element is inserted before a referenced one.
+   */
+  private boolean isWrittenAsIs() {
+    if (writtenElementUris == null || correspondencesResource.isModified()) {
+      return false;
+    }
+    for (Correspondence correspondence : correspondences.getCorrespondences()) {
+      for (EObject element : correspondence.eCrossReferences()) {
+        ElementUri writtenUri = writtenElementUris.get(element);
+        if (writtenUri == null || !writtenUri.isUriOf(element)) {
+          return false;
+        }
       }
+    }
+    return true;
+  }
+
+  /**
+   * Returns the URIs of the elements in the correspondences, or an empty map if the URI fragment of
+   * one of them is a path of indices, as for elements without an ID. Computing such a fragment
+   * searches the lists on the path, so checking these URIs can take as long as writing the file.
+   * None of the elements then has a written URI, so the correspondences are written on every save.
+   */
+  private Map<EObject, ElementUri> collectElementUris() {
+    Map<EObject, ElementUri> elementUris = new IdentityHashMap<>();
+    for (Correspondence correspondence : correspondences.getCorrespondences()) {
+      // the left and right objects, and those of further references of a subclass
+      for (EObject element : correspondence.eCrossReferences()) {
+        ElementUri uri = ElementUri.of(element);
+        if (uri.hasPathFragment() && !isOfStaticMetamodel(element)) {
+          return Map.of();
+        }
+        elementUris.put(element, uri);
+      }
+    }
+    return elementUris;
+  }
+
+  /**
+   * Returns whether the element belongs to a generated or registered metamodel, whose resource is
+   * not in a resource set. Its fragment is a path of names, which does not change.
+   */
+  private static boolean isOfStaticMetamodel(EObject element) {
+    return element instanceof EModelElement
+        && element.eResource() != null
+        && element.eResource().getResourceSet() == null;
+  }
+
+  /**
+   * The URI by which the correspondence file refers to an element: the URI of the element's
+   * resource and the element's URI fragment in it, or the element's whole URI if it is a proxy or
+   * not in a resource. Comparing them does not create URIs, which EMF keeps in a global pool.
+   *
+   * @param uri the URI of the element's resource, or the element's URI if {@code fragment} is
+   *     {@code null}
+   * @param fragment the element's URI fragment in its resource
+   */
+  private record ElementUri(URI uri, String fragment) {
+    static ElementUri of(EObject element) {
+      Resource resource = element.eResource();
+      return element.eIsProxy() || resource == null
+          ? new ElementUri(EcoreUtil.getURI(element), null)
+          : new ElementUri(resource.getURI(), resource.getURIFragment(element));
+    }
+
+    boolean isUriOf(EObject element) {
+      Resource resource = element.eResource();
+      if (element.eIsProxy() || resource == null) {
+        return fragment == null && uri.equals(EcoreUtil.getURI(element));
+      }
+      return fragment != null
+          && fragment.equals(resource.getURIFragment(element))
+          && Objects.equals(uri, resource.getURI());
+    }
+
+    boolean hasPathFragment() {
+      return fragment != null && fragment.startsWith("/");
     }
   }
 
@@ -149,9 +263,11 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   private void removeCorrespondencesForRemovedElements() {
-    Iterator<Correspondence> iterator = correspondences.getCorrespondences().iterator();
-    while (iterator.hasNext()) {
-      Correspondence element = iterator.next();
+    List<Correspondence> staleCorrespondences = new ArrayList<>();
+    List<Integer> staleIndices = new ArrayList<>();
+    List<Correspondence> list = correspondences.getCorrespondences();
+    for (int index = 0; index < list.size(); index++) {
+      Correspondence element = list.get(index);
       if (element.getLeftEObjects().stream().anyMatch(this::isNotInManagedResource)
           || element.getRightEObjects().stream().anyMatch(this::isNotInManagedResource)) {
         checkState(
@@ -164,16 +280,57 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
             Stream.concat(element.getLeftEObjects().stream(), element.getRightEObjects().stream())
                 .filter(this::isNotInManagedResource)
                 .toList());
-        iterator.remove();
-        if (logger.isTraceEnabled()) {
-          logger.trace(
-              "Correspondence between {} and {} has been removed as all its elements have been"
-                  + " removed from resources.",
-              element.getLeftEObjects(),
-              element.getRightEObjects());
-        }
+        staleCorrespondences.add(element);
+        staleIndices.add(index);
       }
     }
+    if (staleCorrespondences.isEmpty()) {
+      return;
+    }
+
+    removeAll(staleCorrespondences, staleIndices);
+    if (logger.isTraceEnabled()) {
+      for (Correspondence element : staleCorrespondences) {
+        logger.trace(
+            "Correspondence between {} and {} has been removed as all its elements have been"
+                + " removed from resources.",
+            element.getLeftEObjects(),
+            element.getRightEObjects());
+      }
+    }
+  }
+
+  /**
+   * Removes the given correspondences, which are at the given ascending indices of the
+   * correspondence list. Removing a correspondence moves all correspondences after it, so removing
+   * many of them one by one can take quadratic time, as does {@code EList.removeAll}. If that would
+   * cost more than rebuilding the list, the list's contents are replaced by the remaining
+   * correspondences instead, which takes linear time but removes and adds every remaining
+   * correspondence. This only pays off for many stale correspondences in very long lists.
+   */
+  private void removeAll(List<Correspondence> staleCorrespondences, List<Integer> staleIndices) {
+    List<Correspondence> list = correspondences.getCorrespondences();
+    // removing from the back, the stale correspondences still to remove are not moved
+    long moves = 0;
+    for (int position = staleIndices.size() - 1; position >= 0; position--) {
+      int removedBehind = staleIndices.size() - 1 - position;
+      moves += list.size() - 1 - staleIndices.get(position) - removedBehind;
+    }
+    // rebuilding removes all correspondences and adds the remaining ones again
+    long rebuildCost = MOVES_PER_DETACHED_OR_ATTACHED_CORRESPONDENCE
+        * (2L * list.size() - staleIndices.size());
+    if (moves <= rebuildCost) {
+      for (int position = staleIndices.size() - 1; position >= 0; position--) {
+        list.remove((int) staleIndices.get(position));
+      }
+      return;
+    }
+    Set<Correspondence> stale = Collections.newSetFromMap(new IdentityHashMap<>());
+    stale.addAll(staleCorrespondences);
+    List<Correspondence> remaining =
+        list.stream().filter(correspondence -> !stale.contains(correspondence)).toList();
+    list.clear();
+    list.addAll(remaining);
   }
 
   private boolean isNotInManagedResource(EObject object) {
