@@ -286,19 +286,7 @@ class UuidResolverImpl implements UuidResolver {
     if (resourcesFilter != null) {
       // goes over the contents of the filtered resources instead of all registered elements
       for (Resource resource : resourcesFilter) {
-        TreeIterator<EObject> contents = EcoreUtil.getAllContents(resource, false);
-        while (contents.hasNext()) {
-          EObject eObject = contents.next();
-          if (eObject.eResource() != resource) {
-            // contained in another resource (cross-resource containment)
-            contents.prune();
-            continue;
-          }
-          Uuid uuid = eObjectToUuid.get(eObject);
-          if (uuid != null) {
-            uuidToIdMapping.put(uuid, idCalculator.getId(eObject));
-          }
-        }
+        addUuidToIdMappingOfResource(resource, idCalculator, uuidToIdMapping);
       }
       return uuidToIdMapping;
     }
@@ -313,6 +301,29 @@ class UuidResolverImpl implements UuidResolver {
       uuidToIdMapping.put(uuid, id);
     }
     return uuidToIdMapping;
+  }
+
+  /**
+   * Adds the hierarchical IDs of the registered {@link EObject}s contained in the given resource to
+   * the given mapping. Elements of other resources contained in it (cross-resource containment) are
+   * skipped with their contents.
+   */
+  private void addUuidToIdMappingOfResource(
+      Resource resource,
+      HierarchicalIdCalculator idCalculator,
+      Map<Uuid, HierarchicalId> uuidToIdMapping) {
+    TreeIterator<EObject> contents = EcoreUtil.getAllContents(resource, false);
+    while (contents.hasNext()) {
+      EObject eObject = contents.next();
+      if (eObject.eResource() != resource) {
+        contents.prune();
+        continue;
+      }
+      Uuid uuid = eObjectToUuid.get(eObject);
+      if (uuid != null) {
+        uuidToIdMapping.put(uuid, idCalculator.getId(eObject));
+      }
+    }
   }
 
   /**
