@@ -12,6 +12,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +31,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import tools.vitruv.change.atomic.hid.HierarchicalId;
 import tools.vitruv.change.atomic.hid.ObjectResolutionUtil;
 import tools.vitruv.change.atomic.hid.internal.HierarchicalIdCalculator;
+import tools.vitruv.change.atomic.hid.internal.IdPathSnapshot;
 import tools.vitruv.change.atomic.resolve.ElementRemovalTracker;
 
 /**
@@ -43,6 +48,12 @@ class UuidResolverImpl implements UuidResolver {
   private final ResourceSet resourceSet;
   private final BiMap<EObject, Uuid> eObjectToUuid = HashBiMap.create();
   private final ElementRemovalTracker removalTracker;
+
+  /**
+   * What {@link #storeAtUri} wrote last, or {@code null} if the file may not contain the current
+   * mapping. Every change of {@link #eObjectToUuid} must reset it.
+   */
+  private StoredMapping storedMapping;
 
   public UuidResolverImpl(ResourceSet resourceSet) {
     checkArgument(resourceSet != null, "Resource set may not be null");
@@ -109,6 +120,7 @@ class UuidResolverImpl implements UuidResolver {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Adding UUID {} for EObject: {}", uuid, eObject);
     }
+    storedMapping = null;
     eObjectToUuid.put(eObject, uuid);
     removalTracker.touch(eObject);
   }
@@ -122,6 +134,7 @@ class UuidResolverImpl implements UuidResolver {
         "trying to unregister element %s but is not registered for uuid %s",
         eObject,
         uuid);
+    storedMapping = null;
     eObjectToUuid.remove(eObject);
     // Its contents must have been unregistered as well, which the end of the transaction checks.
     removalTracker.touch(eObject);
@@ -185,7 +198,8 @@ class UuidResolverImpl implements UuidResolver {
                     "trying to resolve resource %s from different resource set",
                     resource));
     Map<Uuid, HierarchicalId> uuidToIdMapping =
-        generateUuidToIdMapping(sourceToTargetResourceMapping.keySet());
+        generateUuidToIdMapping(
+            sourceToTargetResourceMapping.keySet(), new HierarchicalIdCalculator());
     applyUuidToIdMapping(
         uuidToIdMapping, targetUuidResolver, targetResourceSet, sourceToTargetResourceMapping);
   }
@@ -220,8 +234,15 @@ class UuidResolverImpl implements UuidResolver {
   @Override
   public void storeAtUri(URI uri) throws IOException {
     checkState(uri.isFile(), "Storing UUID resolver requires a file uri but was %s", uri);
-    Map<Uuid, HierarchicalId> uuidToIdMapping = generateUuidToIdMapping(null);
     File file = new File(uri.toFileString());
+    if (isStoredAsIs(uri, file)) {
+      return;
+    }
+    // if calculating or writing fails, the next store writes the file again
+    storedMapping = null;
+    IdPathSnapshot idPaths = new IdPathSnapshot();
+    Map<Uuid, HierarchicalId> uuidToIdMapping =
+        generateUuidToIdMapping(null, new HierarchicalIdCalculator(idPaths));
     try (FileWriter writer = new FileWriter(file)) {
       for (var entry : uuidToIdMapping.entrySet()) {
         String uuid = entry.getKey().getRawValue();
@@ -229,6 +250,37 @@ class UuidResolverImpl implements UuidResolver {
         writer.write(uuid + SERIALIZATION_SEPARATOR + id);
         writer.write(System.lineSeparator());
       }
+    }
+    BasicFileAttributes attributes = readAttributes(file);
+    if (attributes != null) {
+      storedMapping =
+          new StoredMapping(uri, attributes.size(), attributes.lastModifiedTime(), idPaths);
+    }
+  }
+
+  /**
+   * Returns whether the file at the given URI still contains the current mapping: the last store
+   * of this resolver wrote it, it still has the size and modification time it had then, no element
+   * was registered or unregistered since, and the IDs of the registered elements are the same.
+   */
+  private boolean isStoredAsIs(URI uri, File file) {
+    if (storedMapping == null || !storedMapping.uri().equals(uri)) {
+      return false;
+    }
+    BasicFileAttributes attributes = readAttributes(file);
+    return attributes != null
+        && attributes.isRegularFile()
+        && attributes.size() == storedMapping.size()
+        && attributes.lastModifiedTime().equals(storedMapping.lastModified())
+        && storedMapping.idPaths().isUnchanged();
+  }
+
+  /** Returns the attributes of the given file, or {@code null} if they cannot be read. */
+  private static BasicFileAttributes readAttributes(File file) {
+    try {
+      return Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+    } catch (IOException | InvalidPathException e) {
+      return null;
     }
   }
 
@@ -293,9 +345,10 @@ class UuidResolverImpl implements UuidResolver {
    *
    * @param resourcesFilter is the filter for the resources to consider, or <code>null</code> if all
    *     resources shall be considered.
+   * @param idCalculator calculates the hierarchical IDs.
    */
-  private Map<Uuid, HierarchicalId> generateUuidToIdMapping(Collection<Resource> resourcesFilter) {
-    HierarchicalIdCalculator idCalculator = new HierarchicalIdCalculator();
+  private Map<Uuid, HierarchicalId> generateUuidToIdMapping(
+      Collection<Resource> resourcesFilter, HierarchicalIdCalculator idCalculator) {
     Map<Uuid, HierarchicalId> uuidToIdMapping = new HashMap<>();
     if (resourcesFilter != null) {
       // goes over the contents of the filtered resources instead of all registered elements
@@ -387,4 +440,14 @@ class UuidResolverImpl implements UuidResolver {
       targetUuidResolver.registerEObject(uuid, targetEObject);
     }
   }
+
+  /**
+   * The file that {@link #storeAtUri} wrote last, and the paths of the IDs it wrote into it.
+   *
+   * @param uri the URI of the file
+   * @param size the size of the file after writing it
+   * @param lastModified the modification time of the file after writing it
+   * @param idPaths the paths of the IDs in the file
+   */
+  private record StoredMapping(URI uri, long size, FileTime lastModified, IdPathSnapshot idPaths) {}
 }
