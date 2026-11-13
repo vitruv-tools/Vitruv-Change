@@ -129,8 +129,10 @@ class MultiResourceSetUuidResolvingTest {
         sourceResourceSet.getResource(resolveUri, false),
         targetResourceSet.getResource(resolveUri, false),
         targetUuidResolver);
-    var resolvedRoot = targetResourceSet.getResource(resolveUri, false).getContents().getFirst();
-    var notResolvedRoot = targetResourceSet.getResource(notResolvedUri, false).getContents().getFirst();
+    var resolvedRoot = targetResourceSet.getResource(resolveUri, false)
+            .getContents().getFirst();
+    var notResolvedRoot = targetResourceSet.getResource(notResolvedUri, false)
+            .getContents().getFirst();
     assertDoesNotThrow(
         () -> targetUuidResolver.getUuid(resolvedRoot), "element missing in target UUID resolver");
     assertThrows(
