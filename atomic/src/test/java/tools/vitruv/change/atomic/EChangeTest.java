@@ -61,22 +61,17 @@ public abstract class EChangeTest {
       final URI fileUri = URIUtil.createFileURI(modelFile.toFile());
       this.resourceSet = ResourceSetUtil.withGlobalFactories(new ResourceSetImpl());
       this.uuidResolver = UuidResolver.create(this.resourceSet);
-      AtomicEChangeUuidResolver _atomicEChangeUuidResolver = new AtomicEChangeUuidResolver(this.uuidResolver);
-      this.atomicChangeResolver = _atomicEChangeUuidResolver;
+      this.atomicChangeResolver = new AtomicEChangeUuidResolver(this.uuidResolver);
       this.resource = this.resourceSet.createResource(fileUri);
       this.rootObject = AllElementTypesCreators.aet.Root();
       this.uuidResolver.registerEObject(this.rootObject);
       EList<EObject> _contents = this.resource.getContents();
       _contents.add(this.rootObject);
       this.resource.save(null);
-      AtomicEChangeUnresolver _atomicEChangeUnresolver = new AtomicEChangeUnresolver(this.uuidResolver, this.resourceSet);
-      this.changeUnresolver = _atomicEChangeUnresolver;
-      TypeInferringAtomicEChangeFactory _typeInferringAtomicEChangeFactory = new TypeInferringAtomicEChangeFactory();
-      this.atomicFactory = _typeInferringAtomicEChangeFactory;
-      TypeInferringCompoundEChangeFactory _typeInferringCompoundEChangeFactory = new TypeInferringCompoundEChangeFactory(this.atomicFactory);
-      this.compoundFactory = _typeInferringCompoundEChangeFactory;
-      EChangeAssertHelper _eChangeAssertHelper = new EChangeAssertHelper();
-      this.helper = _eChangeAssertHelper;
+      this.changeUnresolver = new AtomicEChangeUnresolver(this.uuidResolver, this.resourceSet);
+      this.atomicFactory = new TypeInferringAtomicEChangeFactory();
+      this.compoundFactory = new TypeInferringCompoundEChangeFactory(this.atomicFactory);
+      this.helper = new EChangeAssertHelper();
     } catch (Throwable _e) {
       throw new RuntimeException(_e);
     }
@@ -87,10 +82,8 @@ public abstract class EChangeTest {
   }
 
   protected void applyBackward(final List<? extends EChange<EObject>> changes) {
-    final Consumer<EChange<EObject>> _function = (EChange<EObject> it) -> {
-      this.applyBackward(it);
-    };
-    Lists.reverse(changes).forEach(_function);
+    final Consumer<EChange<EObject>> applyBackwardFunction = this::applyBackward;
+    Lists.reverse(changes).forEach(applyBackwardFunction);
   }
 
   protected void applyBackward(final EChange<EObject> change) {

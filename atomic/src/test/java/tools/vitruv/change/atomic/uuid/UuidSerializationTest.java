@@ -373,8 +373,8 @@ class UuidSerializationTest {
   void storeDanglingElement() {
     var danglingElement = aet.Root();
     storeUuidResolver.registerEObject(danglingElement);
-    assertThrows(
-        IllegalStateException.class, () -> storeUuidResolver.storeAtUri(getSerializationUri()));
+    URI uri = getSerializationUri();
+    assertThrows(IllegalStateException.class, () -> storeUuidResolver.storeAtUri(uri));
   }
 
   @Test
