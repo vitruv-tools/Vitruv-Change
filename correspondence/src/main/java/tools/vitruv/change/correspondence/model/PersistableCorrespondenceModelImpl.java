@@ -27,10 +27,10 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
 import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.CorrespondenceFactory;
 import tools.vitruv.change.correspondence.Correspondences;
-import tools.vitruv.change.utils.StreamUtils;
 
 /** A persistable representation of a {@link CorrespondenceModel}. */
 class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceModel {
@@ -224,21 +224,23 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
 
   @Override
   public PersistableCorrespondenceModel copy(Map<EObject, EObject> originalToCopyMapping) {
-    Correspondences copiedCorrespondences = EcoreUtil.copy(this.correspondences);
+    // The copies of the corresponding objects are taken from the mapping while copying, objects
+    // without a copy in the mapping are kept.
+    Copier copier = new Copier() {
+      @Override
+      public EObject get(Object original) {
+        EObject copy = super.get(original);
+        return copy != null ? copy : originalToCopyMapping.get(original);
+      }
+    };
+    Correspondences copiedCorrespondences = (Correspondences) copier.copy(this.correspondences);
+    copier.copyReferences();
 
-    for (int index = 0; index < copiedCorrespondences.getCorrespondences().size(); index++) {
-      Correspondence originalCorrespondence = this.correspondences.getCorrespondences().get(index);
-      Correspondence copiedCorrespondence = copiedCorrespondences.getCorrespondences().get(index);
-
-      var newLeftEObjects = StreamUtils.mapIfMappable(
-          copiedCorrespondence.getLeftEObjects().stream(), originalToCopyMapping).toList();
-      var newRightEObjects = StreamUtils.mapIfMappable(
-          copiedCorrespondence.getRightEObjects().stream(), originalToCopyMapping).toList();
-
-      replace(copiedCorrespondence.getLeftEObjects(), newLeftEObjects);
-      replace(copiedCorrespondence.getRightEObjects(), newRightEObjects);
-
-      originalToCopyMapping.put(originalCorrespondence, copiedCorrespondence);
+    List<Correspondence> originalCorrespondences = this.correspondences.getCorrespondences();
+    List<Correspondence> copiedCorrespondenceList = copiedCorrespondences.getCorrespondences();
+    for (int index = 0; index < copiedCorrespondenceList.size(); index++) {
+      originalToCopyMapping.put(
+          originalCorrespondences.get(index), copiedCorrespondenceList.get(index));
     }
 
     URI resourceUri = this.correspondencesResource != null

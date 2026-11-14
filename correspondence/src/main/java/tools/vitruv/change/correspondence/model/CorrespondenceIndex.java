@@ -21,19 +21,24 @@ import tools.vitruv.change.correspondence.Correspondences;
  *
  * <p>The index is an adapter on the container. It follows every change to the correspondences
  * in the container and to their left and right objects, no matter who makes it.
+ *
+ * <p>The index is only built when it is first queried. Many correspondence models, e.g., the
+ * copies in repository snapshots, are never queried.
  */
 class CorrespondenceIndex extends EContentAdapter {
+  private final Correspondences indexedCorrespondences;
   private final Map<List<EObject>, Set<Correspondence>> correspondencesBySide = new HashMap<>();
   private final Map<Correspondence, Set<List<EObject>>> sidesOfCorrespondence = new HashMap<>();
+  private boolean built;
 
   /**
-   * Indexes the correspondences in the given container and keeps the index up to date.
+   * Creates an index of the correspondences in the given container, which keeps itself up to date
+   * once it is built.
    *
    * @param correspondences the container whose correspondences to index
    */
   CorrespondenceIndex(Correspondences correspondences) {
-    correspondences.getCorrespondences().forEach(this::index);
-    correspondences.eAdapters().add(this);
+    this.indexedCorrespondences = correspondences;
   }
 
   /**
@@ -44,6 +49,11 @@ class CorrespondenceIndex extends EContentAdapter {
    * @return an unmodifiable view of the correspondences, empty if there are none
    */
   Set<Correspondence> getCorrespondences(List<EObject> side) {
+    if (!built) {
+      built = true;
+      indexedCorrespondences.getCorrespondences().forEach(this::index);
+      indexedCorrespondences.eAdapters().add(this);
+    }
     Set<Correspondence> correspondences = correspondencesBySide.get(side);
     return correspondences == null ? Set.of() : Collections.unmodifiableSet(correspondences);
   }

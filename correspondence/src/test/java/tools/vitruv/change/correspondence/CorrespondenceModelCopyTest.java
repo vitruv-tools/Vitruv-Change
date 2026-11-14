@@ -3,12 +3,15 @@ package tools.vitruv.change.correspondence;
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -66,6 +69,30 @@ class CorrespondenceModelCopyTest {
     assertEquals(Set.of(copiedRepository), view(copy).getCorrespondingEObjects(umlPackage, TAG));
     assertFalse(view(copy).hasCorrespondences(repository));
     assertEquals(Set.of(TAG), copy.getAllTags());
+  }
+
+  @Test
+  void copyKeepsUnmappedObjectsAndTheOrderOfEachSide() {
+    PersistableCorrespondenceModel original =
+        CorrespondenceModelFactory.createPersistableCorrespondenceModel(null);
+    Repository otherRepository = Pcm_mockupFactory.eINSTANCE.createRepository();
+    UPackage otherPackage = Uml_mockupFactory.eINSTANCE.createUPackage();
+    Correspondence originalCorrespondence = view(original).addCorrespondenceBetween(
+        List.of(repository, otherRepository), List.of(umlPackage, otherPackage), TAG);
+    Repository copiedOtherRepository = EcoreUtil.copy(otherRepository);
+    Map<EObject, EObject> mapping = new HashMap<>(Map.of(otherRepository, copiedOtherRepository));
+
+    PersistableCorrespondenceModel copy = original.copy(mapping);
+
+    assertEquals(Set.of(List.of(umlPackage, otherPackage)), view(copy).getCorrespondingEObjects(
+        List.of(repository, copiedOtherRepository), TAG));
+    Correspondence copiedCorrespondence = (Correspondence) mapping.get(originalCorrespondence);
+    assertNotSame(originalCorrespondence, copiedCorrespondence);
+    assertEquals(List.of(repository, copiedOtherRepository),
+        copiedCorrespondence.getLeftEObjects());
+    assertEquals(List.of(umlPackage, otherPackage), copiedCorrespondence.getRightEObjects());
+    assertEquals(TAG, copiedCorrespondence.getTag());
+    assertEquals(List.of(repository, otherRepository), originalCorrespondence.getLeftEObjects());
   }
 
   @Test
