@@ -81,8 +81,6 @@ public class ChangePropagator {
           propagatedChanges = allSpecs.stream()
               .flatMap(it -> StreamSupport.stream(this.propagateChangeForChangePropagationSpecification(change, previousState, currentState, it).spliterator(), false))
               .toList();
-        } catch (Exception e) {
-          throw new RuntimeException(e);
         } finally {
           this.outer.userInteractor.deregisterUserInputListener(this);
           this.outer.changePropagationProvider.forEach(it -> it.deregisterObserver(this));
@@ -113,8 +111,12 @@ public class ChangePropagator {
           Iterables.<PropagatedChange>addAll(resultingChanges, _propagateTransitiveChanges);
         }
         return resultingChanges;
-      } catch (Throwable _e) {
-        throw new RuntimeException(_e);
+      } catch (RuntimeException | Error e) {
+        // keep exceptions of change propagation specifications as they are
+        throw e;
+      } catch (Exception e) {
+        // only closing the snapshot or the user interactor change throws checked exceptions
+        throw new RuntimeException(e);
       }
     }
 

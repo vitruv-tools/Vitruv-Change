@@ -3,6 +3,8 @@ package tools.vitruv.change.propagation.impl;
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import allElementTypes.AllElementTypesFactory;
@@ -257,6 +259,38 @@ class ChangePropagatorTest {
     propagator.propagateChange(compositeChange, List.of());
 
     assertEquals(List.of(Optional.of(author)), specification.receivedAuthors);
+  }
+
+  @Test
+  void exceptionOfSpecificationIsThrownUnwrapped() {
+    var failure = new IllegalStateException("rejected by the specification");
+    var specification = new RecordingSpecification("spec", (changes, previousState) -> {
+      throw failure;
+    });
+    var propagator = createPropagator(Map.of(specification, 0));
+
+    var thrown = assertThrows(IllegalStateException.class,
+        () -> propagateInView(propagator, this::createRootInView));
+
+    assertSame(failure, thrown);
+  }
+
+  @Test
+  void exceptionDuringTransitivePropagationIsThrownUnwrapped() {
+    var failure = new UnsupportedOperationException("rejected in the transitive step");
+    var specification = new RecordingSpecification("spec", (changes, previousState) -> {
+      if (changes.stream().anyMatch(InsertRootEObject.class::isInstance)) {
+        repositoryRoot().setSingleValuedEAttribute(42);
+      } else {
+        throw failure;
+      }
+    });
+    var propagator = createPropagator(Map.of(specification, 0));
+
+    var thrown = assertThrows(UnsupportedOperationException.class,
+        () -> propagateInView(propagator, this::createRootInView));
+
+    assertSame(failure, thrown);
   }
 
   private record Author(String name) {}
