@@ -1,6 +1,11 @@
 package tools.vitruv.change.propagation;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.emf.ecore.EObject;
+import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.change.atomic.command.internal.ApplyEChangeSwitch;
+import tools.vitruv.change.atomic.eobject.CreateEObject;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.atomic.uuid.UuidResolver;
 import tools.vitruv.change.composite.description.TransactionalChange;
@@ -55,4 +60,31 @@ public interface ChangeRecordingModelRepository extends ResourceAccess, AutoClos
    * @return the created snapshot
    */
   ModelRepositorySnapshot createSnapshot();
+
+  /**
+   * Reverts applied changes (e.g. of an aborted propagation): applies the atomic changes of
+   * {@code appliedChanges} backward, the last one first, and unregisters the UUIDs of the objects
+   * they created. Must not be called while recording. The correspondence model is not reverted.
+   *
+   * @param appliedChanges - the resolved changes, in the order they were applied
+   */
+  default void revertChanges(List<TransactionalChange<EObject>> appliedChanges) {
+    List<EObject> createdObjects = new ArrayList<>();
+    for (int i = appliedChanges.size() - 1; i >= 0; i--) {
+      List<EChange<EObject>> eChanges = appliedChanges.get(i).getEChanges();
+      for (int j = eChanges.size() - 1; j >= 0; j--) {
+        EChange<EObject> eChange = eChanges.get(j);
+        ApplyEChangeSwitch.applyEChange(eChange, false);
+        if (eChange instanceof CreateEObject<EObject> create) {
+          createdObjects.add(create.getAffectedElement());
+        }
+      }
+    }
+    UuidResolver uuidResolver = getUuidResolver();
+    for (EObject created : createdObjects) {
+      if (uuidResolver.hasUuid(created)) {
+        uuidResolver.unregisterEObject(uuidResolver.getUuid(created), created);
+      }
+    }
+  }
 }

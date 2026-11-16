@@ -152,8 +152,10 @@ public class ChangePropagator {
     }
 
     private Iterable<TransactionalChangeWithPreviousState> propagateChangeForChangePropagationSpecification(final TransactionalChange<EObject> change, final ModelRepositorySnapshot previousState, final ModelRepositorySnapshot currentState, final ChangePropagationSpecification propagationSpecification) {
+      this.outer.stepGuard.beforeStep(change, propagationSpecification);
       final Runnable _function = () -> propagationSpecification.propagateChanges(change.getEChanges(), change, this.outer.modelRepository.getCorrespondenceModel(), this.outer.modelRepository, previousState);
       final Iterable<TransactionalChange<EObject>> transitiveChanges = this.outer.modelRepository.recordChanges(_function);
+      transitiveChanges.forEach(this.outer.currentAttempt.get().appliedChanges::add);
       // consequential changes keep the annotations of the change that caused them
       transitiveChanges.forEach(it -> inheritAnnotations(change, it));
       StreamSupport.stream(transitiveChanges.spliterator(), false)
@@ -212,6 +214,7 @@ public class ChangePropagator {
         return;
       }
       this.userInteractions.add(interaction);
+      this.outer.currentAttempt.get().userInteractions.add(interaction);
     }
 
     @Override
@@ -247,6 +250,33 @@ public class ChangePropagator {
   private final InternalUserInteractor userInteractor;
 
   private final ChangePropagationMode changePropagationMode;
+
+  /** What one attempt to propagate a change has applied and asked, to revert and replay it. */
+  private static final class Attempt {
+    private final List<TransactionalChange<EObject>> appliedChanges = new ArrayList<>();
+    private final List<UserInteractionBase> userInteractions = new ArrayList<>();
+  }
+
+  /** The attempt running on the current thread (propagations are confined to their thread). */
+  private final ThreadLocal<Attempt> currentAttempt = new ThreadLocal<>();
+
+  private volatile PropagationStepGuard stepGuard = PropagationStepGuard.NONE;
+
+  private volatile int maximumAttempts = 10;
+
+  /**
+   * Sets the guard that is called before the user's change is applied and before each propagation
+   * step, e.g. to acquire locks. See {@link PropagationStepGuard}.
+   */
+  public void setStepGuard(PropagationStepGuard stepGuard) {
+    this.stepGuard = Objects.requireNonNull(stepGuard);
+  }
+
+  /** How often a propagation is attempted before an abort is passed to the caller (default 10). */
+  public void setMaximumAttempts(int maximumAttempts) {
+    Preconditions.checkArgument(maximumAttempts > 0, "at least one attempt is required");
+    this.maximumAttempts = maximumAttempts;
+  }
 
   /**
    * Creates a change propagator to which changes can be passed, which are
@@ -286,17 +316,81 @@ public class ChangePropagator {
     if (ChangePropagator.logger.isTraceEnabled()) {
       ChangePropagator.logger.trace("Will begin propagation of change :\n\t" + change);
     }
+    Preconditions.checkState(currentAttempt.get() == null,
+        "A propagation is already running on this thread");
+    List<UserInteractionBase> answersToReplay = List.of();
+    for (int attemptNumber = 1; ; attemptNumber++) {
+      Attempt attempt = new Attempt();
+      currentAttempt.set(attempt);
+      boolean committed = false;
+      try (AutoCloseable replay = replayUserInteractions(answersToReplay)) {
+        stepGuard.beginPropagation(change);
+        List<PropagatedChange> result = propagateChangeOnce(change, observers, attempt);
+        committed = true;
+        return result;
+      } catch (Exception e) {
+        PropagationAbortedException abort = findAbort(e);
+        if (abort == null) {
+          throw e instanceof RuntimeException runtimeException
+              ? runtimeException : new RuntimeException(e);
+        }
+        logger.debug("Propagation aborted (attempt {}), reverting {} changes: {}", attemptNumber,
+            attempt.appliedChanges.size(), abort.getMessage());
+        modelRepository.revertChanges(attempt.appliedChanges);
+        if (!attempt.userInteractions.isEmpty()) {
+          answersToReplay = List.copyOf(attempt.userInteractions);
+        }
+        if (attemptNumber >= maximumAttempts) {
+          throw abort;
+        }
+      } finally {
+        currentAttempt.remove();
+        stepGuard.endPropagation(change, committed);
+      }
+    }
+  }
 
+  private static PropagationAbortedException findAbort(Throwable throwable) {
+    for (Throwable t = throwable; t != null; t = t.getCause()) {
+      if (t instanceof PropagationAbortedException abort) {
+        return abort;
+      }
+    }
+    return null;
+  }
+
+  /** Answers the interactions of a retried propagation with those of the aborted attempt. */
+  private AutoCloseable replayUserInteractions(List<UserInteractionBase> answers) {
+    if (answers.isEmpty()) {
+      return () -> { };
+    }
+    return this.userInteractor.replaceUserInteractionResultProvider(currentProvider ->
+        UserInteractionFactory.instance.createPredefinedInteractionResultProvider(currentProvider,
+            answers.toArray(UserInteractionBase[]::new)));
+  }
+
+  private List<PropagatedChange> propagateChangeOnce(final VitruviusChange<Uuid> change,
+      final Iterable<ChangePropagationObserver> observers, final Attempt attempt) {
     this.changePropagationProvider.forEach(spec -> observers.forEach(spec::registerObserver));
+    try {
+      return propagateTransactionalChanges(change, attempt);
+    } finally {
+      this.changePropagationProvider.forEach(spec -> observers.forEach(spec::deregisterObserver));
+    }
+  }
 
+  private List<PropagatedChange> propagateTransactionalChanges(final VitruviusChange<Uuid> change,
+      final Attempt attempt) {
     int maximumLevel = this.changePropagationProvider.getMaximumPropagationSpecificationLevel();
 
     List<PropagatedChange> result = new ArrayList<>();
 
     for (TransactionalChange<Uuid> transactionalChange : change.getTransactionalChangeSequence()) {
       try (ModelRepositorySnapshot previousState = createSnapshotIfUsed()) {
+        stepGuard.beforeApply(transactionalChange);
         TransactionalChange<EObject> resolvedChange =
             (TransactionalChange<EObject>) this.modelRepository.applyChange(transactionalChange);
+        attempt.appliedChanges.add(resolvedChange);
         // a transactional change inside a composite change also carries the composite's annotations
         inheritAnnotations(change, resolvedChange);
 
@@ -315,9 +409,6 @@ public class ChangePropagator {
             this.propagateChange(changeWithPreviousState, maximumLevel).propagatedChanges());
       }
     }
-
-    this.changePropagationProvider.forEach(spec -> observers.forEach(spec::deregisterObserver));
-
     return result;
   }
 
