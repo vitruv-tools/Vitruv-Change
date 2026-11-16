@@ -10,9 +10,19 @@ import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.composite.ChangeDescription2ChangeTransformationTest;
 import tools.vitruv.change.composite.util.AtomicEChangeAssertHelper;
 
-public class ChangeDescription2ReplaceSingleValuedEAttributeTest extends ChangeDescription2ChangeTransformationTest {
+/**
+ * Tests that changing a single-valued attribute is recorded as the expected
+ * {@link tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribute}
+ * change.
+ *
+ * <p>Covers setting a value, resetting it to the default, and unsetting it, for
+ * both ordinary and unsettable attributes. Unsetting an ordinary attribute is
+ * expected to be recorded the same way as setting its default value.
+ */
+public class ChangeDescription2ReplaceSingleValuedEAttributeTest
+        extends ChangeDescription2ChangeTransformationTest {
   /**
-   * Write value to non-unsettable EAttribute
+   * Write value to non-unsettable EAttribute.
    */
   @Test
   void testReplaceSingleValuedEAttributeValueFromDefault() {
@@ -20,46 +30,61 @@ public class ChangeDescription2ReplaceSingleValuedEAttributeTest extends ChangeD
     final Consumer<Root> _function = (Root it) -> {
       it.setSingleValuedEAttribute(42);
     };
-    final List<EChange<EObject>> result = this.<Root>record_(this.getUniquePersistedRoot(), _function);
-    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 1), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_EATTRIBUTE, 0, 42, false, false));
+    final List<EChange<EObject>> result = this.record_(this.getUniquePersistedRoot(), _function);
+    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
+            .assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest
+                    .assertChangeCount(result, 1),
+                    this.getUniquePersistedRoot(),
+                    AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_EATTRIBUTE,
+                    0, 42, false, false));
   }
 
   /**
-   * Write default value to non-unsettable EAttribute
+   * Write default value to non-unsettable EAttribute.
    */
   @Test
   void testReplaceSingleValuedEAttributeValueWithDefault() {
-    Root _uniquePersistedRoot = this.getUniquePersistedRoot();
+    Root uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> _function = (Root it) -> {
       it.setSingleValuedEAttribute(42);
     };
-    _function.accept(_uniquePersistedRoot);
+    _function.accept(uniquePersistedRoot);
     final Consumer<Root> _function_1 = (Root it) -> {
       it.setSingleValuedEAttribute(0);
     };
-    final List<EChange<EObject>> result = this.<Root>record_(this.getUniquePersistedRoot(), _function_1);
-    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 1), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_EATTRIBUTE, 42, 0, false, false));
+    final List<EChange<EObject>> result = this.record_(this.getUniquePersistedRoot(), _function_1);
+    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
+            .assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest
+                    .assertChangeCount(result, 1),
+                    this.getUniquePersistedRoot(),
+                    AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_EATTRIBUTE,
+                    42, 0, false, false));
   }
 
   /**
-   * Explicitly unset non-unsettable EAttribute (should be same as writing default value to it)
+   * Explicitly unset non-unsettable EAttribute (should be same as writing default value to it).
    */
   @Test
   void testUnsetSingleValuedEAttributeValue() {
-    Root _uniquePersistedRoot = this.getUniquePersistedRoot();
+    Root uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> _function = (Root it) -> {
       it.setSingleValuedEAttribute(42);
     };
-    _function.accept(_uniquePersistedRoot);
+    _function.accept(uniquePersistedRoot);
     final Consumer<Root> _function_1 = (Root it) -> {
       it.eUnset(AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_EATTRIBUTE);
     };
-    final List<EChange<EObject>> result = this.<Root>record_(this.getUniquePersistedRoot(), _function_1);
-    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 1), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_EATTRIBUTE, 42, 0, false, false));
+    final List<EChange<EObject>> result = this.record_(this.getUniquePersistedRoot(), _function_1);
+    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
+            .assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest
+                    .assertChangeCount(result, 1),
+                    this.getUniquePersistedRoot(),
+                    AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_EATTRIBUTE,
+                    42, 0, false, false));
   }
 
   /**
-   * Write value to unsettable EAttribute
+   * Write value to unsettable EAttribute.
    */
   @Test
   void testReplaceUnsettableSingleValuedEAttributeValueFromDefault() {
@@ -67,41 +92,54 @@ public class ChangeDescription2ReplaceSingleValuedEAttributeTest extends ChangeD
     final Consumer<Root> _function = (Root it) -> {
       it.setSingleValuedUnsettableEAttribute(42);
     };
-    final List<EChange<EObject>> result = this.<Root>record_(this.getUniquePersistedRoot(), _function);
-    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 1), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_UNSETTABLE_EATTRIBUTE, 0, 42, false, false));
+    final List<EChange<EObject>> result = this.record_(this.getUniquePersistedRoot(), _function);
+    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
+            .assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest
+                    .assertChangeCount(result, 1),
+                    this.getUniquePersistedRoot(),
+                    AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_UNSETTABLE_EATTRIBUTE,
+                    0, 42, false, false));
   }
 
   /**
-   * Write default value to unsettable EAttribute
+   * Write default value to unsettable EAttribute.
    */
   @Test
   void testReplaceUnsettableSingleValuedEAttributeValueWithDefault() {
-    Root _uniquePersistedRoot = this.getUniquePersistedRoot();
+    Root uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> _function = (Root it) -> {
       it.setSingleValuedUnsettableEAttribute(42);
     };
-    _function.accept(_uniquePersistedRoot);
+    _function.accept(uniquePersistedRoot);
     final Consumer<Root> _function_1 = (Root it) -> {
       it.setSingleValuedUnsettableEAttribute(0);
     };
-    final List<EChange<EObject>> result = this.<Root>record_(this.getUniquePersistedRoot(), _function_1);
-    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 1), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_UNSETTABLE_EATTRIBUTE, 42, 0, false, false));
+    final List<EChange<EObject>> result = this.record_(this.getUniquePersistedRoot(), _function_1);
+    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
+            .assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest
+                    .assertChangeCount(result, 1), this.getUniquePersistedRoot(),
+                    AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_UNSETTABLE_EATTRIBUTE,
+                    42, 0, false, false));
   }
 
   /**
-   * Unset unsettable EAttribute
+   * Unset unsettable EAttribute.
    */
   @Test
   void testUnsetUnsettableSingleValuedEAttributeValue() {
-    Root _uniquePersistedRoot = this.getUniquePersistedRoot();
+    Root uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> _function = (Root it) -> {
       it.setSingleValuedUnsettableEAttribute(42);
     };
-    _function.accept(_uniquePersistedRoot);
+    _function.accept(uniquePersistedRoot);
     final Consumer<Root> _function_1 = (Root it) -> {
       it.eUnset(AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_UNSETTABLE_EATTRIBUTE);
     };
-    final List<EChange<EObject>> result = this.<Root>record_(this.getUniquePersistedRoot(), _function_1);
-    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 1), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_UNSETTABLE_EATTRIBUTE, 42, 0, false, true));
+    final List<EChange<EObject>> result = this.record_(this.getUniquePersistedRoot(), _function_1);
+    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
+            .assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest
+                    .assertChangeCount(result, 1), this.getUniquePersistedRoot(),
+                    AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_UNSETTABLE_EATTRIBUTE,
+                    42, 0, false, true));
   }
 }

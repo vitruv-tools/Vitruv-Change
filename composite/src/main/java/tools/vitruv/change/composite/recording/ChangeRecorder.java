@@ -152,7 +152,8 @@ public class ChangeRecorder implements AutoCloseable {
               .getFeatureID(Resource.class) == Resource.RESOURCE__IS_LOADED;
     }
 
-    private Iterable<? extends EChange<EObject>> extractRelevantChanges(final Notification notification) {
+    private Iterable<? extends EChange<EObject>> extractRelevantChanges(
+            final Notification notification) {
       Iterable<? extends EChange<EObject>> xifexpression = null;
       if ((this.affectsLoadingResource(notification)
               || this.affectsUnloadingResource(notification))) {

@@ -20,10 +20,32 @@ import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.interaction.UserInteractionBase;
 
-public abstract class AbstractCompositeChangeImpl<Element, ContainedChange extends VitruviusChange<Element>> implements CompositeChange<Element, ContainedChange> {
+/**
+ * Base implementation of a {@link CompositeChange} that holds an ordered,
+ * immutable list of contained changes.
+ *
+ * <p>Most queries (changed URIs, affected objects, {@link EChange}s, user
+ * interactions, etc.) are answered by combining the results of all contained
+ * changes in order. Annotations are stored per composite change and are not
+ * passed on to the contained changes.
+ *
+ * @param <Element> the type of elements referenced by the changes
+ * @param <ContainedChange> the type of changes contained in this composite change
+ */
+public abstract class AbstractCompositeChangeImpl<Element,
+        ContainedChange extends VitruviusChange<Element>> implements CompositeChange<Element,
+        ContainedChange> {
   private final List<ContainedChange> changes;
   protected final Map<Class<?>, Object> annotations = new HashMap<>();
 
+  /**
+   * Creates a composite change containing the given changes.
+   *
+   * <p>The list is copied, so later modifications to it do not affect this change.
+   *
+   * @param changes the changes to contain, in order; must not be {@code null}
+   *     and must not contain {@code null} elements
+   */
   protected AbstractCompositeChangeImpl(final List<? extends ContainedChange> changes) {
     this.changes = List.copyOf(changes);
   }
@@ -109,10 +131,10 @@ public abstract class AbstractCompositeChangeImpl<Element, ContainedChange exten
 
   @Override
   public Iterable<TransactionalChange<Element>> getTransactionalChangeSequence() {
-      return changes.stream()
-              .flatMap(it ->
-                      StreamSupport.stream(it.getTransactionalChangeSequence().spliterator(), false))
-              .toList();
+    return changes.stream()
+            .flatMap(it ->
+                    StreamSupport.stream(it.getTransactionalChangeSequence().spliterator(), false))
+            .toList();
   }
 
   @Override
@@ -120,21 +142,24 @@ public abstract class AbstractCompositeChangeImpl<Element, ContainedChange exten
     if (this.changes.isEmpty()) {
       return this.getClass().getSimpleName() + " (empty)";
     } else {
-      StringBuilder _builder = new StringBuilder();
-      _builder.append(this.getClass().getSimpleName()).append(": [").append(System.lineSeparator());
+      StringBuilder builder = new StringBuilder();
+      builder.append(this.getClass().getSimpleName()).append(": [").append(System.lineSeparator());
       for (ContainedChange change : this.changes) {
-        _builder.append("\t").append(change).append(System.lineSeparator());
+        builder.append("\t").append(change).append(System.lineSeparator());
       }
-      _builder.append("]").append(System.lineSeparator());
-      return _builder.toString();
+      builder.append("]").append(System.lineSeparator());
+      return builder.toString();
     }
   }
 
   /**
    * Indicates whether some other object is "equal to" this composite change.
-   * This means it is a composite change which contains the same changes as this one in no particular order.
-   * @param other is the object to compare with.
-   * @return true, if the object is a composite change and has the same changes in any order.
+   * This is the case if it is a {@link CompositeChange} containing the same
+   * changes in the same order.
+   *
+   * @param other the object to compare with
+   * @return {@code true} if the object is a composite change with the same
+   *     changes in the same order
    */
   @Override
   public boolean equals(final Object other) {
@@ -145,8 +170,8 @@ public abstract class AbstractCompositeChangeImpl<Element, ContainedChange exten
       return false;
     }
     if (other instanceof CompositeChange<?, ?>) {
-      List<? extends VitruviusChange<?>> _changes = ((CompositeChange<?, ?>)other).getChanges();
-      return Objects.equals(this.changes, _changes);
+      List<? extends VitruviusChange<?>> changes = ((CompositeChange<?, ?>) other).getChanges();
+      return Objects.equals(this.changes, changes);
     }
     return false;
   }
