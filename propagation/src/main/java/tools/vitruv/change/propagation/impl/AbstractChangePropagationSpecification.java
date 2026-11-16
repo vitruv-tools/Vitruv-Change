@@ -1,7 +1,7 @@
 package tools.vitruv.change.propagation.impl;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.composite.MetamodelDescriptor;
@@ -15,7 +15,7 @@ import tools.vitruv.change.propagation.ChangePropagationSpecification;
 public abstract class AbstractChangePropagationSpecification 
     implements ChangePropagationSpecification {
   private final List<ChangePropagationObserver> propagationObservers;
-  private UserInteractor userInteractor;
+  private volatile UserInteractor userInteractor;
   private MetamodelDescriptor sourceMetamodelDescriptor;
   private MetamodelDescriptor targetMetamodelDescriptor;
 
@@ -30,7 +30,8 @@ public abstract class AbstractChangePropagationSpecification
       MetamodelDescriptor targetMetamodelDescriptor) {
     this.sourceMetamodelDescriptor = sourceMetamodelDescriptor;
     this.targetMetamodelDescriptor = targetMetamodelDescriptor;
-    this.propagationObservers = new ArrayList<>();
+    // concurrent change propagations register and notify observers at the same time
+    this.propagationObservers = new CopyOnWriteArrayList<>();
   }
 
   protected UserInteractor getUserInteractor() {
