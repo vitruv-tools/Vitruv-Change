@@ -13,16 +13,10 @@ import tools.vitruv.change.atomic.feature.attribute.ReplaceSingleValuedEAttribut
 public class EChangeAssertEquals {
 
   /**
-   * Fallback for unsupported {@link EChange} types; always fails.
-   */
-  protected static void assertEquals() {
-      Assertions.fail();
-  }
-
-  /**
    * Compares two {@link ReplaceSingleValuedEAttribute} EChanges.
    */
-  protected static void _assertEquals(final ReplaceSingleValuedEAttribute<?, ?> change, final EChange<?> change2) {
+  protected static void assertEqualsChange(
+          final ReplaceSingleValuedEAttribute<?, ?> change, final EChange<?> change2) {
     var replaceChange = EChangeAssertEquals
             .assertIsInstanceOf(change2, ReplaceSingleValuedEAttribute.class);
     Assertions.assertSame(change.getAffectedElement(), replaceChange.getAffectedElement());
@@ -34,7 +28,8 @@ public class EChangeAssertEquals {
   /**
    * Compares two {@link InsertEAttributeValue} EChanges.
    */
-  protected static void _assertEquals(final InsertEAttributeValue<?, ?> change, final EChange<?> change2) {
+  protected static void assertEqualsChange(
+          final InsertEAttributeValue<?, ?> change, final EChange<?> change2) {
     InsertEAttributeValue insertChange = EChangeAssertEquals
             .assertIsInstanceOf(change2, InsertEAttributeValue.class);
     Assertions.assertSame(change.getAffectedElement(), insertChange.getAffectedElement());
@@ -45,7 +40,8 @@ public class EChangeAssertEquals {
   /**
    * Compares two {@link RemoveEAttributeValue} EChanges.
    */
-  protected static void _assertEquals(final RemoveEAttributeValue<?, ?> change, final EChange<?> change2) {
+  protected static void assertEqualsChange(
+          final RemoveEAttributeValue<?, ?> change, final EChange<?> change2) {
     var removeChange = EChangeAssertEquals
             .assertIsInstanceOf(change2, RemoveEAttributeValue.class);
     Assertions.assertSame(change.getAffectedElement(), removeChange.getAffectedElement());
@@ -53,22 +49,43 @@ public class EChangeAssertEquals {
     Assertions.assertEquals(change.getOldValue(), removeChange.getOldValue());
   }
 
-  private static <E extends Object, T extends EChange<? extends E>> T assertIsInstanceOf(final EChange<E> change, final Class<T> type) {
+  private static <E, T extends EChange<? extends E>> T assertIsInstanceOf(
+          final EChange<E> change, final Class<T> type) {
     Assertions.assertTrue(type.isInstance(change));
     return type.cast(change);
   }
+
+  /**
+   * Fallback for unsupported {@link EChange} types; always fails.
+   */
+  protected static void assertEquals() {
+    Assertions.fail();
+  }
+
+  /**
+   * Asserts that two {@link EChange}s are equal.
+   *
+   * <p>Delegates to the matching comparison method based on the type of
+   * {@code change}. Supported types are {@link InsertEAttributeValue},
+   * {@link RemoveEAttributeValue} and {@link ReplaceSingleValuedEAttribute};
+   * any other type fails the assertion.
+   *
+   * @param change the expected change
+   * @param change2 the actual change to compare against
+   * @throws IllegalArgumentException if {@code change} is {@code null}
+   */
   public static void assertEquals(final EChange<?> change, final EChange<?> change2) {
     if (change instanceof InsertEAttributeValue) {
-      _assertEquals((InsertEAttributeValue<?, ?>)change, change2);
+      assertEqualsChange((InsertEAttributeValue<?, ?>) change, change2);
     } else if (change instanceof RemoveEAttributeValue) {
-      _assertEquals((RemoveEAttributeValue<?, ?>)change, change2);
+      assertEqualsChange((RemoveEAttributeValue<?, ?>) change, change2);
     } else if (change instanceof ReplaceSingleValuedEAttribute) {
-      _assertEquals((ReplaceSingleValuedEAttribute<?, ?>)change, change2);
+      assertEqualsChange((ReplaceSingleValuedEAttribute<?, ?>) change, change2);
     } else if (change != null) {
       assertEquals();
     } else {
-      throw new IllegalArgumentException("Unhandled parameter types: " +
-        Arrays.<Object>asList(change, change2).toString());
+      throw new IllegalArgumentException("Unhandled parameter types: "
+              + Arrays.<Object>asList(change, change2).toString());
     }
   }
 }
