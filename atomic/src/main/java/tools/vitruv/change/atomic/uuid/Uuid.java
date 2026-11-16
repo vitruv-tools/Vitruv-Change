@@ -1,5 +1,7 @@
 package tools.vitruv.change.atomic.uuid;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 /**
  * A UUID is a permanent identifier which is associated with an element for its entire lifetime. A
  * UUID is bound to a resource set, i.e. two elements at the same location in identical resources of
@@ -10,6 +12,18 @@ public final class Uuid {
 
   Uuid(String rawValue) {
     this.rawValue = rawValue;
+  }
+
+  /**
+   * Returns the UUID with the given raw value, e.g. to restore a UUID that was stored with
+   * {@link #getRawValue()}.
+   *
+   * @param rawValue the raw value, must not be {@code null}
+   * @return the UUID with that raw value
+   */
+  public static Uuid of(String rawValue) {
+    checkArgument(rawValue != null, "the raw value of a UUID must not be null");
+    return new Uuid(rawValue);
   }
 
   /**
