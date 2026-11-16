@@ -88,7 +88,7 @@ public class ChangeRecorderTest {
           return false;
         }
       }
-      return (actualTypes.hasNext());
+      return (!actualTypes.hasNext());
     }
 
     public EChangeSequenceMatcher(final List<Class<? extends EChange>> expectedTypes) {
@@ -328,6 +328,7 @@ public class ChangeRecorderTest {
             ReplaceSingleValuedEReference.class, DeleteEObject.class, DeleteEObject.class));
   }
 
+  @Test
   @DisplayName("adds an object set as containment to the recording")
   void recordsOnSetContainment() {
     final Root root = this.wrapIntoRecordedResource(AllElementTypesCreators.aet.Root());
@@ -344,6 +345,7 @@ public class ChangeRecorderTest {
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
   }
 
+  @Test
   @DisplayName("adds an object added as containment to the recording")
   void recordsOnAddedContainment() {
     final Root root = this.wrapIntoRecordedResource(AllElementTypesCreators.aet.Root());
@@ -361,6 +363,7 @@ public class ChangeRecorderTest {
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
   }
 
+  @Test
   @DisplayName("adds an object that was resolved from its proxy to the recording")
   void recordsOnResolvedProxyInContainment(@TestProject final Path testDir) {
     final NonRoot savedNonRoot = AllElementTypesCreators.aet.NonRoot();
@@ -408,6 +411,7 @@ public class ChangeRecorderTest {
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
   }
 
+  @Test
   @DisplayName("adds multiple objects added as containments to the recording")
   void recordsOnMultipleAddedContainment() {
     final Root root = this.<Root>wrapIntoRecordedResource(AllElementTypesCreators.aet.Root());
@@ -430,6 +434,7 @@ public class ChangeRecorderTest {
                     ReplaceSingleValuedEAttribute.class));
   }
 
+  @Test
   @DisplayName("adds an object added as root to the recording")
   void recordsOnAddedRoot() {
     final Resource resource = this.resourceSet.createResource(URI.createURI("test://test.aet"));
@@ -448,6 +453,7 @@ public class ChangeRecorderTest {
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
   }
 
+  @Test
   @DisplayName("removes a root object while recording")
   void recordsOnRemovedRoot() {
     final Resource resource = this.resourceSet.createResource(URI.createURI("test://test.aet"));
@@ -465,6 +471,7 @@ public class ChangeRecorderTest {
                     DeleteEObject.class));
   }
 
+  @Test
   @DisplayName("adds multiple objects added as roots to the recording")
   void recordsOnMultipleAddedRoot() {
     final Resource resource = this.resourceSet.createResource(URI.createURI("test://test.aet"));
@@ -488,6 +495,7 @@ public class ChangeRecorderTest {
                     ReplaceSingleValuedEAttribute.class));
   }
 
+  @Test
   @DisplayName("adds loaded objects to the recording")
   void recordsOnLoadedObject(@TestProject final Path testProject) {
     final URI resourceUri = URI.createFileURI(testProject.resolve("test.aet").toString());
