@@ -12,9 +12,11 @@ import allElementTypes.Root;
 import java.nio.file.Path;
 import java.util.Set;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +32,8 @@ import tools.vitruv.change.testutils.TestProjectManager;
 @ExtendWith({TestProjectManager.class, TestLogging.class, RegisterMetamodelsInStandalone.class})
 class DefaultModelRepositorySnapshotTest {
   private static final String TAG = "tag";
+  private static final String NOT_FOUND_IN_COPY_EXTENSION = "notfoundincopy";
+  private static final String UML_EXTENSION = "uml";
 
   private DefaultChangeRecordingModelRepository modelRepository;
   private Path testProjectPath;
@@ -127,6 +131,68 @@ class DefaultModelRepositorySnapshotTest {
     assertTrue(snapshot.getModelResources().isEmpty());
     assertEquals(1, root.getSingleValuedEAttribute());
     assertSame(root, modelRepository.getModelResource(modelUri).getContents().get(0));
+  }
+
+  @Test
+  void elementsThatCannotBeFoundInTheCopyStayUnmapped() {
+    // Resources of this type cannot look up their elements by URI fragment. Two such elements
+    // made creating the mapping fail, as both were mapped to null. This happens, e.g., for the
+    // elements of UML profiles, which the copy of a UML model reloads instead of copying.
+    Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put(NOT_FOUND_IN_COPY_EXTENSION,
+        (Resource.Factory) uri -> new XMIResourceImpl(uri) {
+          @Override
+          public EObject getEObject(String uriFragment) {
+            return null;
+          }
+        });
+    try {
+      Root otherRoot = AllElementTypesFactory.eINSTANCE.createRoot();
+      otherRoot.setId("otherRoot");
+      NonRoot otherNonRoot = AllElementTypesFactory.eINSTANCE.createNonRoot();
+      otherNonRoot.setId("otherNonRoot");
+      otherRoot.setSingleValuedContainmentEReference(otherNonRoot);
+      modelRepository.persistAsRoot(otherRoot,
+          createModelUri("other." + NOT_FOUND_IN_COPY_EXTENSION));
+
+      try (ModelRepositorySnapshot snapshot = modelRepository.createSnapshot()) {
+        assertFalse(snapshot.getRepositoryToSnapshotMap().containsKey(otherRoot));
+        assertFalse(snapshot.getRepositoryToSnapshotMap().containsKey(otherNonRoot));
+        Root snapshotRoot = (Root) snapshot.getRepositoryToSnapshotMap().get(root);
+        assertNotSame(root, snapshotRoot);
+        assertTrue(EcoreUtil.equals(root, snapshotRoot));
+      }
+    } finally {
+      Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap()
+          .remove(NOT_FOUND_IN_COPY_EXTENSION);
+    }
+  }
+
+  @Test
+  void creatingSnapshotKeepsModificationStateOfUmlResources() {
+    // The copy of a resource with the extension of UML models saves the original resource and
+    // loads it again. Saving marked the original as unmodified, so the repository did not persist
+    // the changes made to it before the snapshot was created.
+    Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put(UML_EXTENSION,
+        new XMIResourceFactoryImpl());
+    try {
+      Root umlRoot = AllElementTypesFactory.eINSTANCE.createRoot();
+      umlRoot.setId("umlRoot");
+      URI umlModelUri = createModelUri("model." + UML_EXTENSION);
+      modelRepository.persistAsRoot(umlRoot, umlModelUri);
+      Resource umlResource = modelRepository.getModelResource(umlModelUri);
+      Resource xmiResource = modelRepository.getModelResource(modelUri);
+      xmiResource.setModified(false);
+
+      try (ModelRepositorySnapshot snapshot = modelRepository.createSnapshot()) {
+        assertTrue(umlResource.isModified());
+        assertFalse(xmiResource.isModified());
+        Root snapshotUmlRoot = (Root) snapshot.getRepositoryToSnapshotMap().get(umlRoot);
+        assertTrue(snapshotUmlRoot.eResource().isModified());
+        assertEquals(umlModelUri, snapshotUmlRoot.eResource().getURI());
+      }
+    } finally {
+      Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().remove(UML_EXTENSION);
+    }
   }
 
   private URI createModelUri(String fileName) {
