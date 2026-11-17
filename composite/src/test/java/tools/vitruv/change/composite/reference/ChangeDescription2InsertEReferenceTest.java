@@ -6,7 +6,6 @@ import allElementTypes.Root;
 import com.google.common.collect.Iterables;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.eclipse.emf.ecore.EObject;
@@ -40,7 +39,7 @@ public class ChangeDescription2InsertEReferenceTest
     List<NonRoot> preparationElements = IntStream.range(0, 10)
         .mapToObj(i -> AllElementTypesCreators.aet.NonRoot())
         .toList();
-    this.<Root>record_(this.getUniquePersistedRoot(), it ->
+    this.record_(this.getUniquePersistedRoot(), it ->
         Iterables.addAll(it.getMultiValuedContainmentEReference(), preparationElements));
     List<NonRoot> nonRootElements = IntStream.range(0, count)
         .mapToObj(i -> {
@@ -50,7 +49,7 @@ public class ChangeDescription2InsertEReferenceTest
         })
         .toList();
     Iterable<? extends EChange<EObject>> actualChanges
-            = this.<Root>record_(this.getUniquePersistedRoot(), it ->
+            = this.record_(this.getUniquePersistedRoot(), it ->
         it.getMultiValuedContainmentEReference().addAll(insertAt, nonRootElements));
     Assertions.assertEquals(Iterables.size(actualChanges), nonRootElements.size() * 3);
     for (int i = 0; i < nonRootElements.size(); i++) {
@@ -79,14 +78,14 @@ public class ChangeDescription2InsertEReferenceTest
         .mapToObj(i -> AllElementTypesCreators.aet.NonRoot())
         .toList();
     this.getUniquePersistedRoot().getMultiValuedContainmentEReference().addAll(preparationElements);
-    this.<Root>record_(this.getUniquePersistedRoot(), it ->
+    this.record_(this.getUniquePersistedRoot(), it ->
         it.getMultiValuedNonContainmentEReference().addAll(preparationElements));
     List<NonRoot> nonRootElements = IntStream.range(0, count)
         .mapToObj(i -> AllElementTypesCreators.aet.NonRoot())
         .toList();
     this.getUniquePersistedRoot().getMultiValuedContainmentEReference().addAll(nonRootElements);
     Iterable<? extends EChange<EObject>> actualChanges
-            = this.<Root>record_(this.getUniquePersistedRoot(), it ->
+            = this.record_(this.getUniquePersistedRoot(), it ->
         it.getMultiValuedNonContainmentEReference().addAll(insertAt, nonRootElements));
     Assertions.assertEquals(Iterables.size(actualChanges), nonRootElements.size());
     for (int i = 0; i < nonRootElements.size(); i++) {
@@ -145,16 +144,15 @@ public class ChangeDescription2InsertEReferenceTest
   private void insertAndAssertSingleContainment(final int expectedIndex) {
     this.getUniquePersistedRoot();
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
-    final Consumer<Root> _function = (Root it) -> {
-      it.getMultiValuedContainmentEReference().add(expectedIndex, nonRoot);
-    };
+    final Consumer<Root> _function = (Root it)
+            -> it.getMultiValuedContainmentEReference().add(expectedIndex, nonRoot);
     final List<EChange<EObject>> result
-            = this.<Root>record_(this.getUniquePersistedRoot(), _function);
+            = this.record_(this.getUniquePersistedRoot(), _function);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertReplaceSingleValuedEAttribute(
         CompoundEChangeAssertHelper.assertCreateAndInsertNonRoot(
             ChangeDescription2ChangeTransformationTest
-                    .<EObject>assertChangeCount(result, 3),
+                    .assertChangeCount(result, 3),
             this.getUniquePersistedRoot(),
             AllElementTypesPackage
                     .Literals.ROOT__MULTI_VALUED_CONTAINMENT_EREFERENCE,
@@ -170,10 +168,10 @@ public class ChangeDescription2InsertEReferenceTest
   private void insertAndAssertSingleNonContainment(final int expectedIndex) {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     this.getUniquePersistedRoot().getMultiValuedContainmentEReference().add(expectedIndex, nonRoot);
-    final List<EChange<EObject>> result = this.<Root>record_(this.getUniquePersistedRoot(), it ->
+    final List<EChange<EObject>> result = this.record_(this.getUniquePersistedRoot(), it ->
         it.getMultiValuedNonContainmentEReference().add(expectedIndex, nonRoot));
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEReference(
-        ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 1),
+        ChangeDescription2ChangeTransformationTest.assertChangeCount(result, 1),
         this.getUniquePersistedRoot(),
         AllElementTypesPackage
                 .Literals.ROOT__MULTI_VALUED_NON_CONTAINMENT_EREFERENCE,
