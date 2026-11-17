@@ -39,9 +39,9 @@ import tools.vitruv.change.atomic.resolve.ElementRemovalTracker;
  * resource set. UUIDs are used to uniquely identify an element in changes, independent of the
  * location within a resource set and the actual resource set instance.
  *
- * <p>The resolver can be used from several threads: its operations synchronize on the resolver. A
- * transaction (see {@link #endTransaction()}) still covers the changes of all threads since the
- * previous end of a transaction.
+ * <p>The resolver can be used from several threads: its operations synchronize on the resolver,
+ * and each thread has its own transaction (see {@link #endTransaction()} and {@link
+ * ElementRemovalTracker}).
  */
 class UuidResolverImpl implements UuidResolver {
   private static final Logger LOGGER = LogManager.getLogger(UuidResolverImpl.class);
