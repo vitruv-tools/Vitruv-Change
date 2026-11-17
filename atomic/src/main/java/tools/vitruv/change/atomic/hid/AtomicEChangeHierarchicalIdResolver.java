@@ -103,9 +103,9 @@ public class AtomicEChangeHierarchicalIdResolver {
 
   private EChange<HierarchicalId> unresolve(EChange<EObject> resolvedChange) {
     return AtomicEChangeResolverHelper.resolveChange(
-        resolvedChange,
-        eObject -> idResolver.getAndUpdateId(eObject),
-        resource -> idResolver.getResource(resource.getURI()));
+            resolvedChange,
+            idResolver::getAndUpdateId,
+            resource -> idResolver.getResource(resource.getURI()));
   }
 
   private void applyForward(EChange<EObject> resolvedChange) {
