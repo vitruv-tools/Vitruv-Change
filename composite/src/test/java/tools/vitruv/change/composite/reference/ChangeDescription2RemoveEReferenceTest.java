@@ -40,7 +40,7 @@ public class ChangeDescription2RemoveEReferenceTest
       multiValuedNonContainmentEReference.remove(nonRoot);
     };
     final List<EChange<EObject>> result
-            = this.<Root>record_(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper
             .assertEmpty(AtomicEChangeAssertHelper
                     .assertRemoveEReference(ChangeDescription2ChangeTransformationTest
@@ -67,7 +67,7 @@ public class ChangeDescription2RemoveEReferenceTest
               .Literals.ROOT__MULTI_VALUED_UNSETTABLE_NON_CONTAINMENT_EREFERENCE);
     };
     final List<EChange<EObject>> result
-            = this.<Root>record_(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper.assertEmpty(
             AtomicEChangeAssertHelper.assertUnsetFeature(
                     AtomicEChangeAssertHelper.assertRemoveEReference(
@@ -99,7 +99,7 @@ public class ChangeDescription2RemoveEReferenceTest
       multiValuedContainmentEReference.remove(nonRoot);
     };
     final List<EChange<EObject>> result
-            = this.<Root>record_(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper.assertEmpty(
             AtomicEChangeAssertHelper.assertDeleteEObject(
                     AtomicEChangeAssertHelper.assertRemoveEReference(
@@ -127,7 +127,7 @@ public class ChangeDescription2RemoveEReferenceTest
               .Literals.ROOT__MULTI_VALUED_UNSETTABLE_CONTAINMENT_EREFERENCE);
     };
     final List<EChange<EObject>> result
-            = this.<Root>record_(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper.assertEmpty(
             AtomicEChangeAssertHelper.assertDeleteEObject(
                     AtomicEChangeAssertHelper.assertUnsetFeature(
@@ -164,7 +164,7 @@ public class ChangeDescription2RemoveEReferenceTest
       it.setSingleValuedContainmentEReference(nonRoot);
     };
     final List<EChange<EObject>> result
-            = this.<Root>record_(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper.assertEmpty(
             CompoundEChangeAssertHelper.assertDeleteEObjectAndContainedElements(
                     AtomicEChangeAssertHelper.assertReplaceSingleValuedEReference(
@@ -221,7 +221,7 @@ public class ChangeDescription2RemoveEReferenceTest
       it.setSingleValuedContainmentEReference(nonRoot);
     };
     final List<EChange<EObject>> result
-            = this.<Root>record_(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper.assertEmpty(
         CompoundEChangeAssertHelper.assertDeleteEObjectAndContainedElements(
             AtomicEChangeAssertHelper.assertReplaceSingleValuedEReference(
@@ -257,7 +257,7 @@ public class ChangeDescription2RemoveEReferenceTest
       it.getMultiValuedContainmentEReference().clear();
     };
     final List<EChange<EObject>> result
-            = this.<Root>record_(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
     final Iterable<? extends EChange<EObject>> deleteChanges
             = ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(
                     AtomicEChangeAssertHelper.assertRemoveEReference(

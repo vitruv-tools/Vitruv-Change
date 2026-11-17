@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
-
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
@@ -38,12 +37,13 @@ import tools.vitruv.change.atomic.root.RemoveRootEObject;
  * @author Heiko Klare
  */
 final class NotificationToEChangeConverter {
-  private final TypeInferringAtomicEChangeFactory changeFactory = TypeInferringAtomicEChangeFactory.getInstance();
+  private final TypeInferringAtomicEChangeFactory changeFactory =
+          TypeInferringAtomicEChangeFactory.getInstance();
 
   private final BiFunction<EObject, EObject, Boolean> isCreateChange;
 
   public EChange<EObject> createDeleteChange(final EObject eObject) {
-    return this.changeFactory.<EObject>createDeleteEObjectChange(eObject);
+    return this.changeFactory.createDeleteEObjectChange(eObject);
   }
 
   /**
@@ -91,11 +91,11 @@ final class NotificationToEChangeConverter {
     );
   }
 
-  private final static String ATTRIBUTE_TYPE = "Attribute";
+  private static final String ATTRIBUTE_TYPE = "Attribute";
 
-  private final static String REFERENCE_TYPE = "Reference";
+  private static final String REFERENCE_TYPE = "Reference";
 
-  private final static String RESOURCE_CONTENTS_TYPE = "Resource Contents";
+  private static final String RESOURCE_CONTENTS_TYPE = "Resource Contents";
 
   /**
    * Converts the given notification to a list of {@link EChange}s.
@@ -237,149 +237,162 @@ final class NotificationToEChangeConverter {
     return new IllegalArgumentException(this.convertExceptionMessage(eventType, notificationType));
   }
 
-  private Iterable<? extends EChange<EObject>> handleMoveAttribute(final NotificationInfo notification) {
-    Object _oldValue = notification.getOldValue();
-    RemoveEAttributeValue<EObject, Object> _createRemoveAttributeChange = this.changeFactory
+  private Iterable<? extends EChange<EObject>> handleMoveAttribute(
+          final NotificationInfo notification) {
+    Object oldValue = notification.getOldValue();
+    RemoveEAttributeValue<EObject, Object> createRemoveAttributeChange = this.changeFactory
         .<EObject, Object>createRemoveAttributeChange(notification.getNotifierModelElement(),
-            notification.getAttribute(), (Integer) _oldValue, notification.getNewValue());
-    InsertEAttributeValue<EObject, Object> _createInsertAttributeChange = this.changeFactory
+            notification.getAttribute(), (Integer) oldValue, notification.getNewValue());
+    InsertEAttributeValue<EObject, Object> createInsertAttributeChange = this.changeFactory
         .<EObject, Object>createInsertAttributeChange(notification.getNotifierModelElement(),
             notification.getAttribute(), notification.getPosition(), notification.getNewValue());
-    return List.of(_createRemoveAttributeChange, _createInsertAttributeChange);
+    return List.of(createRemoveAttributeChange, createInsertAttributeChange);
   }
 
-  private Iterable<? extends EChange<EObject>> handleMoveReference(final NotificationInfo notification) {
-    Object _oldValue = notification.getOldValue();
-    RemoveEReference<EObject> _createRemoveReferenceChange = this.changeFactory.<EObject>createRemoveReferenceChange(
-        notification.getNotifierModelElement(), notification.getReference(), notification.getNewModelElementValue(),
-            (Integer) _oldValue);
-    InsertEReference<EObject> _createInsertReferenceChange = this.changeFactory.<EObject>createInsertReferenceChange(
-        notification.getNotifierModelElement(), notification.getReference(), notification.getNewModelElementValue(),
-        notification.getPosition());
-    return List.of(_createRemoveReferenceChange, _createInsertReferenceChange);
+  private Iterable<? extends EChange<EObject>> handleMoveReference(
+          final NotificationInfo notification) {
+    Object oldValue = notification.getOldValue();
+    RemoveEReference<EObject> createRemoveReferenceChange =
+            this.changeFactory.<EObject>createRemoveReferenceChange(
+                    notification.getNotifierModelElement(),
+                    notification.getReference(),
+                    notification.getNewModelElementValue(),
+            (Integer) oldValue);
+    InsertEReference<EObject> createInsertReferenceChange =
+            this.changeFactory.<EObject>createInsertReferenceChange(
+                    notification.getNotifierModelElement(),
+                    notification.getReference(),
+                    notification.getNewModelElementValue(),
+                    notification.getPosition());
+    return List.of(createRemoveReferenceChange, createInsertReferenceChange);
   }
 
-  private Iterable<? extends EChange<EObject>> handleSetAttribute(final NotificationInfo notification) {
+  private Iterable<? extends EChange<EObject>> handleSetAttribute(
+          final NotificationInfo notification) {
     final EAttribute attribute = notification.getAttribute();
     if (attribute == null) {
       return List.of();
     }
 
-    Iterable<? extends EChange<EObject>> _switchResult = null;
-    boolean _matched = false;
-    boolean _isMany = attribute.isMany();
-    boolean _not = (!_isMany);
-    if (_not) {
-      _matched = true;
-      _switchResult = this.handleReplaceAttribute(notification);
+    Iterable<? extends EChange<EObject>> switchResult = null;
+    boolean matched = false;
+    boolean isMany = attribute.isMany();
+    if (!isMany) {
+      matched = true;
+      switchResult = this.handleReplaceAttribute(notification);
     }
-    if (!_matched && (notification.getOldValue() != null) && (notification.getNewValue() != null)) {
-      _matched = true;
-      List<EChange<EObject>> _handleRemoveAttribute = this.handleRemoveAttribute(notification);
-      List<InsertEAttributeValue<EObject, Object>> _handleInsertAttribute = this.handleInsertAttribute(notification);
-      _switchResult = Iterables.<EChange<EObject>>concat(_handleRemoveAttribute, _handleInsertAttribute);
+    if (!matched && (notification.getOldValue() != null) && (notification.getNewValue() != null)) {
+      matched = true;
+      List<EChange<EObject>> handleRemoveAttribute = this.handleRemoveAttribute(notification);
+      List<InsertEAttributeValue<EObject, Object>> handleInsertAttribute =
+              this.handleInsertAttribute(notification);
+      switchResult = Iterables.concat(handleRemoveAttribute, handleInsertAttribute);
     }
-    if (!_matched) {
-      Object _newValue = notification.getNewValue();
-      boolean _tripleNotEquals = (_newValue != null);
-      if (_tripleNotEquals) {
-        _matched = true;
-        _switchResult = this.handleInsertAttribute(notification);
+    if (!matched) {
+      Object newValue = notification.getNewValue();
+      boolean tripleNotEquals = (newValue != null);
+      if (tripleNotEquals) {
+        matched = true;
+        switchResult = this.handleInsertAttribute(notification);
       }
     }
-    if (!_matched) {
-      Object _oldValue = notification.getOldValue();
-      boolean _tripleNotEquals_1 = (_oldValue != null);
-      if (_tripleNotEquals_1) {
-        _matched = true;
-        _switchResult = this.handleRemoveAttribute(notification);
+    if (!matched) {
+      Object oldValue = notification.getOldValue();
+      boolean tripleNotEquals1 = (oldValue != null);
+      if (tripleNotEquals1) {
+        matched = true;
+        switchResult = this.handleRemoveAttribute(notification);
       }
     }
-    if (!_matched) {
-      _switchResult = List.of();
+    if (!matched) {
+      switchResult = List.of();
     }
-    return _switchResult;
+    return switchResult;
   }
 
-  private Iterable<? extends EChange<EObject>> handleSetReference(final NotificationInfo notification) {
-    Iterable<? extends EChange<EObject>> _switchResult = null;
-    boolean _matched = false;
-    boolean _isMany = notification.getReference().isMany();
-    boolean _not = (!_isMany);
-    if (_not) {
-      _matched = true;
-      _switchResult = this.handleReplaceReference(notification);
+  private Iterable<? extends EChange<EObject>> handleSetReference(
+          final NotificationInfo notification) {
+    Iterable<? extends EChange<EObject>> switchResult = null;
+    boolean matched = false;
+    boolean isMany = notification.getReference().isMany();
+    if (!isMany) {
+      matched = true;
+      switchResult = this.handleReplaceReference(notification);
     }
-    if (!_matched && (notification.getOldValue() != null) && (notification.getNewValue() != null)) {
-      _matched = true;
-      Iterable<? extends EChange<EObject>> _handleRemoveReference = this.handleRemoveReference(notification);
-      Iterable<? extends EChange<EObject>> _handleInsertReference = this.handleInsertReference(notification);
-      _switchResult = Iterables.<EChange<EObject>>concat(_handleRemoveReference, _handleInsertReference);
+    if (!matched && (notification.getOldValue() != null) && (notification.getNewValue() != null)) {
+      matched = true;
+      Iterable<? extends EChange<EObject>> handleRemoveReference =
+              this.handleRemoveReference(notification);
+      Iterable<? extends EChange<EObject>> handleInsertReference =
+              this.handleInsertReference(notification);
+      switchResult = Iterables.concat(handleRemoveReference, handleInsertReference);
     }
-    if (!_matched) {
-      Object _newValue = notification.getNewValue();
-      boolean _tripleNotEquals = (_newValue != null);
-      if (_tripleNotEquals) {
-        _matched = true;
-        _switchResult = this.handleInsertReference(notification);
+    if (!matched) {
+      Object newValue = notification.getNewValue();
+      boolean tripleNotEquals = (newValue != null);
+      if (tripleNotEquals) {
+        matched = true;
+        switchResult = this.handleInsertReference(notification);
       }
     }
-    if (!_matched) {
-      Object _oldValue = notification.getOldValue();
-      boolean _tripleNotEquals_1 = (_oldValue != null);
-      if (_tripleNotEquals_1) {
-        _matched = true;
-        _switchResult = this.handleRemoveReference(notification);
+    if (!matched) {
+      Object oldValue = notification.getOldValue();
+      boolean tripleNotEquals1 = (oldValue != null);
+      if (tripleNotEquals1) {
+        matched = true;
+        switchResult = this.handleRemoveReference(notification);
       }
     }
-    if (!_matched) {
-      _switchResult = List.of();
+    if (!matched) {
+      switchResult = List.of();
     }
-    return _switchResult;
+    return switchResult;
   }
 
-  private Iterable<? extends EChange<EObject>> handleUnsetAttribute(final NotificationInfo notification) {
-    Iterable<? extends EChange<EObject>> _xifexpression = null;
-    boolean _isMany = notification.getAttribute().isMany();
-    boolean _not = (!_isMany);
-    if (_not) {
-      _xifexpression = this.handleSetAttribute(notification);
+  private Iterable<? extends EChange<EObject>> handleUnsetAttribute(
+          final NotificationInfo notification) {
+    Iterable<? extends EChange<EObject>> xifexpression = null;
+    boolean isMany = notification.getAttribute().isMany();
+    if (!isMany) {
+      xifexpression = this.handleSetAttribute(notification);
     } else {
-      _xifexpression = List.<UnsetFeature<EObject, EAttribute>>of(
-          this.changeFactory.<EObject, EAttribute>createUnsetFeatureChange(notification.getNotifierModelElement(),
+      xifexpression = List.of(
+          this.changeFactory.createUnsetFeatureChange(notification.getNotifierModelElement(),
               notification.getAttribute()));
     }
-    return _xifexpression;
+    return xifexpression;
   }
 
-  private Iterable<? extends EChange<EObject>> handleUnsetReference(final NotificationInfo notification) {
-    Iterable<? extends EChange<EObject>> _xifexpression = null;
-    boolean _isMany = notification.getReference().isMany();
-    boolean _not = (!_isMany);
-    if (_not) {
-      _xifexpression = this.handleSetReference(notification);
+  private Iterable<? extends EChange<EObject>> handleUnsetReference(
+          final NotificationInfo notification) {
+    Iterable<? extends EChange<EObject>> xifexpression = null;
+    boolean isMany = notification.getReference().isMany();
+    if (!isMany) {
+      xifexpression = this.handleSetReference(notification);
     } else {
-      _xifexpression = List.<UnsetFeature<EObject, EReference>>of(
-          this.changeFactory.<EObject, EReference>createUnsetFeatureChange(notification.getNotifierModelElement(),
+      xifexpression = List.of(
+          this.changeFactory.createUnsetFeatureChange(notification.getNotifierModelElement(),
               notification.getReference()));
     }
-    return _xifexpression;
+    return xifexpression;
   }
 
-  private Iterable<? extends EChange<EObject>> handleReplaceAttribute(final NotificationInfo notification) {
+  private Iterable<? extends EChange<EObject>> handleReplaceAttribute(
+          final NotificationInfo notification) {
     final ReplaceSingleValuedEAttribute<EObject, Object> change = AttributeFactory.eINSTANCE
-        .<EObject, Object>createReplaceSingleValuedEAttribute();
+        .createReplaceSingleValuedEAttribute();
     change.setOldValue(notification.getOldValue());
     change.setNewValue(notification.getNewValue());
     change.setAffectedFeature(notification.getAttribute());
     change.setAffectedElement(notification.getNotifierModelElement());
     change.setIsUnset(notification.wasUnset());
-    return List.<ReplaceSingleValuedEAttribute<EObject, Object>>of(change);
+    return List.of(change);
   }
 
-  private Iterable<? extends EChange<EObject>> handleReplaceReference(final NotificationInfo notification) {
+  private Iterable<? extends EChange<EObject>> handleReplaceReference(
+          final NotificationInfo notification) {
     final ReplaceSingleValuedEReference<EObject> change = this.changeFactory
-        .<EObject>createReplaceSingleReferenceChange(notification.getNotifierModelElement(),
+        .createReplaceSingleReferenceChange(notification.getNotifierModelElement(),
             notification.getReference(), notification.getOldModelElementValue(),
             notification.getNewModelElementValue());
     change.setIsUnset(notification.wasUnset());
@@ -388,202 +401,238 @@ final class NotificationToEChangeConverter {
 
   private List<EChange<EObject>> handleRemoveAttribute(final NotificationInfo notification) {
     return this.addUnsetChangeIfNecessary(
-        this.changeFactory.<EObject, Object>createRemoveAttributeChange(notification.getNotifierModelElement(),
+        this.changeFactory.createRemoveAttributeChange(notification.getNotifierModelElement(),
             notification.getAttribute(), notification.getPosition(), notification.getOldValue()),
         notification);
   }
 
-  private Iterable<? extends EChange<EObject>> handleMultiRemoveAttribute(final NotificationInfo notification) {
-    Iterable<? extends EChange<EObject>> _xifexpression;
-    Object _newValue = notification.getNewValue();
-    boolean _tripleEquals = (_newValue == null);
-    if (_tripleEquals) {
-      Iterable<? extends EChange<EObject>> _xblockexpression;
-      Object _oldValue = notification.getOldValue();
-      final List<?> oldValues = ((List<?>) _oldValue);
-      List<RemoveEAttributeValue<EObject, Object>> _mapped = new ArrayList<>();
-      for (int _i = 0; _i < oldValues.size(); _i++) {
-        Object value = oldValues.get(oldValues.size() - 1 - _i);
-        final int valueIndex = (notification.getInitialIndex() + oldValues.size() - 1) - _i;
-        _mapped.add(this.changeFactory.<EObject, Object>createRemoveAttributeChange(notification.getNotifierModelElement(), notification.getAttribute(), valueIndex, value));
+  private Iterable<? extends EChange<EObject>> handleMultiRemoveAttribute(
+          final NotificationInfo notification) {
+    Iterable<? extends EChange<EObject>> xifexpression;
+    Object newValue = notification.getNewValue();
+    boolean tripleEquals = (newValue == null);
+    if (tripleEquals) {
+      Iterable<? extends EChange<EObject>> xblockexpression;
+      Object oldValue = notification.getOldValue();
+      final List<?> oldValues = ((List<?>) oldValue);
+      List<RemoveEAttributeValue<EObject, Object>> mapped = new ArrayList<>();
+      for (int i = 0; i < oldValues.size(); i++) {
+        Object value = oldValues.get(oldValues.size() - 1 - i);
+        final int valueIndex = (notification.getInitialIndex() + oldValues.size() - 1) - i;
+        mapped.add(this.changeFactory
+                .createRemoveAttributeChange(notification
+                        .getNotifierModelElement(),
+                        notification.getAttribute(),
+                        valueIndex, value));
       }
-      _xblockexpression = this.<RemoveEAttributeValue<EObject, Object>>addUnsetChangeIfNecessary(_mapped, notification);
+      xblockexpression = this.addUnsetChangeIfNecessary(mapped, notification);
 
-      _xifexpression = _xblockexpression;
+      xifexpression = xblockexpression;
     } else {
-      _xifexpression = this.unsetChangeOrEmpty(notification);
+      xifexpression = this.unsetChangeOrEmpty(notification);
     }
-    return _xifexpression;
+    return xifexpression;
   }
 
-  private Iterable<? extends EChange<EObject>> handleRemoveReference(final NotificationInfo notification) {
+  private Iterable<? extends EChange<EObject>> handleRemoveReference(
+          final NotificationInfo notification) {
     return this.addUnsetChangeIfNecessary(
-        this.changeFactory.<EObject>createRemoveReferenceChange(notification.getNotifierModelElement(),
-            notification.getReference(), notification.getOldModelElementValue(), notification.getPosition()),
-        notification);
+        this.changeFactory.createRemoveReferenceChange(
+                notification.getNotifierModelElement(),
+                notification.getReference(),
+                notification.getOldModelElementValue(),
+                notification.getPosition()),
+            notification);
   }
 
   private Iterable<? extends EChange<EObject>> handleMultiRemoveReference(
       final NotificationInfo notification) {
-    Iterable<? extends EChange<EObject>> _xifexpression;
-    Object _newValue = notification.getNewValue();
-    boolean _tripleEquals = (_newValue == null);
-    if (_tripleEquals) {
-      Iterable<? extends EChange<EObject>> _xblockexpression;
-      Object _oldValue = notification.getOldValue();
-      final List<?> oldValues = (List<?>) _oldValue;
-      List<RemoveEReference<EObject>> _mapped = new ArrayList<>();
-      for (int _i = 0; _i < oldValues.size(); _i++) {
-        EObject value = (EObject) oldValues.get(oldValues.size() - 1 - _i);
-        final int valueIndex = (notification.getInitialIndex() + oldValues.size() - 1) - _i;
-        _mapped.add(this.changeFactory.<EObject>createRemoveReferenceChange(notification.getNotifierModelElement(), notification.getReference(), value, valueIndex));
+    Iterable<? extends EChange<EObject>> xifexpression;
+    Object newValue = notification.getNewValue();
+    boolean tripleEquals = (newValue == null);
+    if (tripleEquals) {
+      Iterable<? extends EChange<EObject>> xblockexpression;
+      Object oldValue = notification.getOldValue();
+      final List<?> oldValues = (List<?>) oldValue;
+      List<RemoveEReference<EObject>> mapped = new ArrayList<>();
+      for (int i = 0; i < oldValues.size(); i++) {
+        EObject value = (EObject) oldValues.get(oldValues.size() - 1 - i);
+        final int valueIndex = (notification.getInitialIndex() + oldValues.size() - 1) - i;
+        mapped.add(this.changeFactory.createRemoveReferenceChange(notification
+                        .getNotifierModelElement(),
+                        notification.getReference(),
+                        value, valueIndex));
       }
-      _xblockexpression = this.<RemoveEReference<EObject>>addUnsetChangeIfNecessary(_mapped, notification);
+      xblockexpression = this.addUnsetChangeIfNecessary(mapped, notification);
 
-      _xifexpression = _xblockexpression;
+      xifexpression = xblockexpression;
     } else {
-      _xifexpression = this.unsetChangeOrEmpty(notification);
+      xifexpression = this.unsetChangeOrEmpty(notification);
     }
-    return _xifexpression;
+    return xifexpression;
   }
 
   private List<InsertEAttributeValue<EObject, Object>> handleInsertAttribute(
       final NotificationInfo notification) {
-    return List.<InsertEAttributeValue<EObject, Object>>of(
-        this.changeFactory.<EObject, Object>createInsertAttributeChange(notification.getNotifierModelElement(),
+    return List.of(
+        this.changeFactory.createInsertAttributeChange(notification.getNotifierModelElement(),
             notification.getAttribute(), notification.getPosition(), notification.getNewValue()));
   }
 
   private List<InsertEAttributeValue<EObject, Object>> handleMultiInsertAttribute(
       final NotificationInfo notification) {
-    List<?> _newValue = ((List<?>) notification.getNewValue());
-    List<InsertEAttributeValue<EObject, Object>> _result = new ArrayList<>();
-    for (int _i = 0; _i < _newValue.size(); _i++) {
-      Object value = _newValue.get(_i);
-      _result.add(this.changeFactory.<EObject, Object>createInsertAttributeChange(
+    List<?> newValue = ((List<?>) notification.getNewValue());
+    List<InsertEAttributeValue<EObject, Object>> result = new ArrayList<>();
+    for (int i = 0; i < newValue.size(); i++) {
+      Object value = newValue.get(i);
+      result.add(this.changeFactory.createInsertAttributeChange(
           notification.getNotifierModelElement(), notification.getAttribute(),
-          notification.getInitialIndex() + _i, value));
+          notification.getInitialIndex() + i, value));
     }
-    return _result;
+    return result;
   }
 
-  private Iterable<? extends EChange<EObject>> handleInsertReference(final NotificationInfo notification) {
+  private Iterable<? extends EChange<EObject>> handleInsertReference(
+          final NotificationInfo notification) {
     return this.surroundWithCreateAndFeatureChangesIfNecessary(
-        this.changeFactory.<EObject>createInsertReferenceChange(notification.getNotifierModelElement(),
-            notification.getReference(), notification.getNewModelElementValue(), notification.getPosition()));
+        this.changeFactory.<EObject>createInsertReferenceChange(
+                notification.getNotifierModelElement(),
+                notification.getReference(),
+                notification.getNewModelElementValue(),
+                notification.getPosition()));
   }
 
   private Iterable<? extends EChange<EObject>> handleMultiInsertReference(
       final NotificationInfo notification) {
-    List<?> _newValue = ((List<?>) notification.getNewValue());
-    List<EChange<EObject>> _result = new ArrayList<>();
-    for (int _i = 0; _i < _newValue.size(); _i++) {
-      EObject value = (EObject)_newValue.get(_i);
-      Iterables.addAll(_result, this.surroundWithCreateAndFeatureChangesIfNecessary(
-          this.changeFactory.<EObject>createInsertReferenceChange(
+    List<?> newValue = ((List<?>) notification.getNewValue());
+    List<EChange<EObject>> result = new ArrayList<>();
+    for (int i = 0; i < newValue.size(); i++) {
+      EObject value = (EObject) newValue.get(i);
+      Iterables.addAll(result, this.surroundWithCreateAndFeatureChangesIfNecessary(
+          this.changeFactory.createInsertReferenceChange(
               notification.getNotifierModelElement(), notification.getReference(),
-              value, notification.getInitialIndex() + _i)));
+              value, notification.getInitialIndex() + i)));
     }
-    return _result;
+    return result;
   }
 
-  private Iterable<? extends EChange<EObject>> handleInsertRootChange(final NotificationInfo notification) {
-    return this.surroundWithCreateAndFeatureChangesIfNecessary(this.changeFactory.<EObject>createInsertRootChange(
-        notification.getNewModelElementValue(), notification.getNotifierResource(), notification.getPosition()));
+  private Iterable<? extends EChange<EObject>> handleInsertRootChange(
+          final NotificationInfo notification) {
+    return this.surroundWithCreateAndFeatureChangesIfNecessary(
+            this.changeFactory.<EObject>createInsertRootChange(
+                    notification.getNewModelElementValue(),
+                    notification.getNotifierResource(),
+                    notification.getPosition()));
   }
 
-  private List<EChange<EObject>> handleMultiInsertRootChange(final NotificationInfo notification) {
-    List<?> _newValue = ((List<?>) notification.getNewValue());
-    List<EChange<EObject>> _result = new ArrayList<>();
-    for (int _i = 0; _i < _newValue.size(); _i++) {
-      EObject value = (EObject)_newValue.get(_i);
-      Iterables.addAll(_result, this.surroundWithCreateAndFeatureChangesIfNecessary(
-          this.changeFactory.<EObject>createInsertRootChange(
-              value, notification.getNotifierResource(), notification.getInitialIndex() + _i)));
+  private List<EChange<EObject>> handleMultiInsertRootChange(
+          final NotificationInfo notification) {
+    List<?> newValue = ((List<?>) notification.getNewValue());
+    List<EChange<EObject>> result = new ArrayList<>();
+    for (int i = 0; i < newValue.size(); i++) {
+      EObject value = (EObject) newValue.get(i);
+      Iterables.addAll(result, this.surroundWithCreateAndFeatureChangesIfNecessary(
+          this.changeFactory.createInsertRootChange(
+              value, notification.getNotifierResource(), notification.getInitialIndex() + i)));
     }
-    return _result;
+    return result;
   }
 
-  private List<RemoveRootEObject<EObject>> handleRemoveRootChange(final NotificationInfo notification) {
-    return List.<RemoveRootEObject<EObject>>of(this.changeFactory.<EObject>createRemoveRootChange(
-        notification.getOldModelElementValue(), notification.getNotifierResource(), notification.getPosition()));
+  private List<RemoveRootEObject<EObject>> handleRemoveRootChange(
+          final NotificationInfo notification) {
+    return List.of(this.changeFactory.createRemoveRootChange(
+            notification.getOldModelElementValue(),
+            notification.getNotifierResource(),
+            notification.getPosition()));
   }
 
-  private List<RemoveRootEObject<EObject>> handleMultiRemoveRootChange(final NotificationInfo notification) {
-    List<RemoveRootEObject<EObject>> _xblockexpression = null;
-    Object _oldValue = notification.getOldValue();
-    final List<?> oldValues = ((List<?>) _oldValue);
-    List<RemoveRootEObject<EObject>> _mapped = new ArrayList<>();
-    for (int _i = 0; _i < oldValues.size(); _i++) {
-      EObject value = (EObject)oldValues.get(oldValues.size() - 1 - _i);
-      final int valueIndex = (notification.getInitialIndex() + oldValues.size() - 1) - _i;
-      _mapped.add(this.changeFactory.<EObject>createRemoveRootChange(value, notification.getNotifierResource(), valueIndex));
+  private List<RemoveRootEObject<EObject>> handleMultiRemoveRootChange(
+          final NotificationInfo notification) {
+    List<RemoveRootEObject<EObject>> xblockexpression = null;
+    Object oldValue = notification.getOldValue();
+    final List<?> oldValues = ((List<?>) oldValue);
+    List<RemoveRootEObject<EObject>> mapped = new ArrayList<>();
+    for (int i = 0; i < oldValues.size(); i++) {
+      EObject value = (EObject) oldValues.get(oldValues.size() - 1 - i);
+      final int valueIndex = (notification.getInitialIndex() + oldValues.size() - 1) - i;
+      mapped.add(this.changeFactory
+              .createRemoveRootChange(value, notification.getNotifierResource(), valueIndex));
     }
-    _xblockexpression = _mapped;
+    xblockexpression = mapped;
 
-    return _xblockexpression;
+    return xblockexpression;
   }
 
-  private Iterable<? extends EChange<EObject>> handleSetUriChange(final NotificationInfo notification) {
-    Iterable<EChange<EObject>> _xblockexpression;
-    Object _oldValue = notification.getOldValue();
-    final URI oldUri = ((URI) _oldValue);
-    List<EObject> _contents = new ArrayList<>(notification.getNotifierResource().getContents());
-    List<RemoveRootEObject<EObject>> _removeChanges = new ArrayList<>();
-    for (int _i = 0; _i < _contents.size(); _i++) {
-      EObject value = _contents.get(_contents.size() - 1 - _i);
-      final int valueIndex = (notification.getInitialIndex() + _contents.size() - 1) - _i;
-      final Resource oldResource = notification.getNotifierResource().getResourceSet().createResource(oldUri);
-      _removeChanges.add(this.changeFactory.<EObject>createRemoveRootChange(value, oldResource, oldUri, valueIndex));
+  private Iterable<? extends EChange<EObject>> handleSetUriChange(
+          final NotificationInfo notification) {
+    Iterable<EChange<EObject>> xblockexpression;
+    Object oldValue = notification.getOldValue();
+    final URI oldUri = ((URI) oldValue);
+    List<EObject> contents = new ArrayList<>(notification.getNotifierResource().getContents());
+    List<RemoveRootEObject<EObject>> removeChanges = new ArrayList<>();
+    for (int i = 0; i < contents.size(); i++) {
+      EObject value = contents.get(contents.size() - 1 - i);
+      final int valueIndex = (notification.getInitialIndex() + contents.size() - 1) - i;
+      final Resource oldResource =
+              notification.getNotifierResource().getResourceSet().createResource(oldUri);
+      removeChanges.add(this.changeFactory
+              .createRemoveRootChange(value, oldResource, oldUri, valueIndex));
     }
-    List<EChange<EObject>> _insertChanges = new ArrayList<>();
-    for (int _i = 0; _i < _contents.size(); _i++) {
-      EObject value = _contents.get(_i);
-      Iterables.addAll(_insertChanges, this.surroundWithCreateAndFeatureChangesIfNecessary(this.changeFactory.<EObject>createInsertRootChange(
-              value, notification.getNotifierResource(), notification.getInitialIndex() + _i)));
+    List<EChange<EObject>> insertChanges = new ArrayList<>();
+    for (int i = 0; i < contents.size(); i++) {
+      EObject value = contents.get(i);
+      Iterables.addAll(insertChanges,
+              this.surroundWithCreateAndFeatureChangesIfNecessary(
+                      this.changeFactory.createInsertRootChange(
+              value, notification.getNotifierResource(),
+                              notification.getInitialIndex() + i)));
     }
-    _xblockexpression = Iterables.<EChange<EObject>>concat(_removeChanges, _insertChanges);
+    xblockexpression = Iterables.<EChange<EObject>>concat(removeChanges, insertChanges);
 
-    return _xblockexpression;
+    return xblockexpression;
   }
 
   private Iterable<? extends EChange<EObject>> allAdditiveChangesForChangeRelevantFeatures(
       final EObjectAddedEChange<EObject> change) {
-    final BiFunction<EObject, EAttribute, Iterable<? extends EChange<EObject>>> _function = EChangeCreationUtil::createAdditiveEChangeForAttribute;
-    final BiFunction<EObject, EReference, Iterable<? extends EChange<EObject>>> _function_1 = (EObject object,
-        EReference reference) -> {
-      List<? extends EChange<EObject>> _xifexpression = null;
-      boolean _isContainment = reference.isContainment();
-      if (_isContainment) {
-        final Predicate<EObject> _function_2 = (EObject referencedObject) -> this.isCreateChange.apply(object, referencedObject);
-        _xifexpression = EChangeCreationUtil.createAdditiveEChangeForReferencedObject(object, reference, _function_2);
-      }
-      return _xifexpression;
-    };
-    Iterable<? extends EChange<EObject>> _walkChangeRelevantFeatures = NotificationToEChangeConverter
+    final BiFunction<EObject, EAttribute, Iterable<? extends EChange<EObject>>> _function =
+            EChangeCreationUtil::createAdditiveEChangeForAttribute;
+    final BiFunction<EObject, EReference, Iterable<? extends EChange<EObject>>> _function_1 =
+            (EObject object, EReference reference) -> {
+              List<? extends EChange<EObject>> xifexpression = null;
+              boolean isContainment = reference.isContainment();
+              if (isContainment) {
+                final Predicate<EObject> _function_2 = (EObject referencedObject) ->
+                        this.isCreateChange.apply(object, referencedObject);
+                xifexpression = EChangeCreationUtil
+                        .createAdditiveEChangeForReferencedObject(object, reference, _function_2);
+              }
+              return xifexpression;
+            };
+    Iterable<? extends EChange<EObject>> walkChangeRelevantFeatures = NotificationToEChangeConverter
         .walkChangeRelevantFeatures(change.getNewValue(), _function, _function_1);
-    final BiFunction<EObject, EReference, Iterable<? extends EChange<EObject>>> _function_2 = (EObject object,
-        EReference reference) -> {
-      List<? extends EChange<EObject>> _xifexpression = null;
-      boolean _isContainment = reference.isContainment();
-      boolean _not = (!_isContainment);
-      if (_not) {
-        final Predicate<EObject> _function_3 = (EObject it) -> {
-          return Boolean.FALSE;
-        };
-        _xifexpression = EChangeCreationUtil.createAdditiveEChangeForReferencedObject(object, reference, _function_3);
-      }
-      return _xifexpression;
-    };
-    Iterable<? extends EChange<EObject>> _walkChangeRelevantFeatures_1 = NotificationToEChangeConverter
-        .walkChangeRelevantFeatures(change.getNewValue(), null, _function_2);
-    return Iterables.<EChange<EObject>>concat(_walkChangeRelevantFeatures, _walkChangeRelevantFeatures_1);
+    final BiFunction<EObject, EReference, Iterable<? extends EChange<EObject>>> _function_2 =
+            (EObject object, EReference reference) -> {
+              List<? extends EChange<EObject>> xifexpression = null;
+              boolean isContainment = reference.isContainment();
+              if (!isContainment) {
+                final Predicate<EObject> _function_3 = (EObject it) -> Boolean.FALSE;
+                xifexpression = EChangeCreationUtil
+                        .createAdditiveEChangeForReferencedObject(object, reference, _function_3);
+              }
+              return xifexpression;
+            };
+    Iterable<? extends EChange<EObject>> walkChangeRelevantFeatures1 =
+            NotificationToEChangeConverter
+                    .walkChangeRelevantFeatures(change.getNewValue(), null, _function_2);
+    return Iterables.concat(walkChangeRelevantFeatures, walkChangeRelevantFeatures1);
   }
 
   private static Iterable<? extends EChange<EObject>> walkChangeRelevantFeatures(
           final EObject eObject,
-          final BiFunction<EObject, EAttribute, Iterable<? extends EChange<EObject>>> attributeVisitor,
-          final BiFunction<EObject, EReference, Iterable<? extends EChange<EObject>>> referenceVisitor) {
+          final BiFunction<EObject, EAttribute, Iterable<?
+                  extends EChange<EObject>>> attributeVisitor,
+          final BiFunction<EObject, EReference, Iterable<?
+                  extends EChange<EObject>>> referenceVisitor) {
     final List<EChange<EObject>> result = new ArrayList<>();
     collectChanges(eObject, attributeVisitor, referenceVisitor, result);
     return result;
@@ -591,8 +640,10 @@ final class NotificationToEChangeConverter {
 
   private static void collectChanges(
           final EObject eObject,
-          final BiFunction<EObject, EAttribute, Iterable<? extends EChange<EObject>>> attributeVisitor,
-          final BiFunction<EObject, EReference, Iterable<? extends EChange<EObject>>> referenceVisitor,
+          final BiFunction<EObject, EAttribute, Iterable<?
+                  extends EChange<EObject>>> attributeVisitor,
+          final BiFunction<EObject, EReference, Iterable<?
+                  extends EChange<EObject>>> referenceVisitor,
           final List<EChange<EObject>> result) {
     final List<EStructuralFeature> features = eObject.eClass().getEAllStructuralFeatures().stream()
             .filter(feature -> EChangeCreationUtil
@@ -605,7 +656,8 @@ final class NotificationToEChangeConverter {
     references.forEach(reference -> addVisitResult(eObject, reference, referenceVisitor, result));
     for (final EReference reference : references) {
       if (reference.isContainment()) {
-        for (final EObject child : NotificationToEChangeConverter.getReferencedElements(eObject, reference)) {
+        for (final EObject child : NotificationToEChangeConverter
+                .getReferencedElements(eObject, reference)) {
           collectChanges(child, attributeVisitor, referenceVisitor, result);
         }
       }
@@ -629,80 +681,88 @@ final class NotificationToEChangeConverter {
     return items.stream().filter(type::isInstance).map(type::cast).toList();
   }
 
-  private static Iterable<EObject> getReferencedElements(final EObject eObject, final EReference reference) {
+  private static Iterable<EObject> getReferencedElements(
+          final EObject eObject,
+          final EReference reference) {
     final Object value = eObject.eGet(reference);
     if (reference.isMany()) {
-        return (List<EObject>) value;
+      return (List<EObject>) value;
     }
     return value == null ? List.of() : List.of((EObject) value);
   }
 
-  private List<UnsetFeature<EObject, EStructuralFeature>> unsetChangeOrEmpty(final NotificationInfo notification) {
-    List<UnsetFeature<EObject, EStructuralFeature>> _xifexpression = null;
-    boolean _wasUnset = notification.wasUnset();
-    if (_wasUnset) {
-      _xifexpression = List.<UnsetFeature<EObject, EStructuralFeature>>of(
-          this.changeFactory.<EObject, EStructuralFeature>createUnsetFeatureChange(
+  private List<UnsetFeature<EObject, EStructuralFeature>> unsetChangeOrEmpty(
+          final NotificationInfo notification) {
+    List<UnsetFeature<EObject, EStructuralFeature>> xifexpression = null;
+    if (notification.wasUnset()) {
+      xifexpression = List.of(
+          this.changeFactory.createUnsetFeatureChange(
               notification.getNotifierModelElement(), notification.getStructuralFeature()));
     } else {
-      _xifexpression = List.of();
+      xifexpression = List.of();
     }
-    return _xifexpression;
+    return xifexpression;
   }
 
-  private <T extends EChange<EObject>> Iterable<? extends EChange<EObject>> addUnsetChangeIfNecessary(
-      final Iterable<T> changes, final NotificationInfo notification) {
-    Iterable<? extends EChange<EObject>> _xifexpression;
-    boolean _wasUnset = notification.wasUnset();
-    if (_wasUnset) {
-      List<UnsetFeature<EObject, EStructuralFeature>> _of = List.<UnsetFeature<EObject, EStructuralFeature>>of(
-          this.changeFactory.<EObject, EStructuralFeature>createUnsetFeatureChange(
-              notification.getNotifierModelElement(), notification.getStructuralFeature()));
-      _xifexpression = Iterables.<EChange<EObject>>concat(changes, _of);
-    } else {
-      _xifexpression = changes;
-    }
-    return _xifexpression;
-  }
-
-  private List<EChange<EObject>> addUnsetChangeIfNecessary(final EChange<EObject> change,
+  private <T extends EChange<EObject>> Iterable<?
+          extends EChange<EObject>> addUnsetChangeIfNecessary(
+      final Iterable<T> changes,
       final NotificationInfo notification) {
-    List<EChange<EObject>> _xifexpression;
-    boolean _wasUnset = notification.wasUnset();
-    if (_wasUnset) {
-      _xifexpression = List.<EChange<EObject>>of(change,
+    Iterable<? extends EChange<EObject>> xifexpression;
+    if (notification.wasUnset()) {
+      List<UnsetFeature<EObject, EStructuralFeature>> of = List.of(
           this.changeFactory.<EObject, EStructuralFeature>createUnsetFeatureChange(
               notification.getNotifierModelElement(), notification.getStructuralFeature()));
+      xifexpression = Iterables.<EChange<EObject>>concat(changes, of);
     } else {
-      _xifexpression = List.<EChange<EObject>>of(change);
+      xifexpression = changes;
     }
-    return _xifexpression;
+    return xifexpression;
+  }
+
+  private List<EChange<EObject>> addUnsetChangeIfNecessary(
+          final EChange<EObject> change,
+      final NotificationInfo notification) {
+    List<EChange<EObject>> xifexpression;
+    if (notification.wasUnset()) {
+      xifexpression = List.of(change,
+          this.changeFactory.createUnsetFeatureChange(
+              notification.getNotifierModelElement(), notification.getStructuralFeature()));
+    } else {
+      xifexpression = List.of(change);
+    }
+    return xifexpression;
   }
 
   private Iterable<? extends EChange<EObject>> surroundWithCreateAndFeatureChangesIfNecessary(
       final EObjectAddedEChange<EObject> change) {
-    EObject _switchResult = null;
-      if (change instanceof UpdateReferenceEChange) {
-        _switchResult = ((UpdateReferenceEChange<EObject>) change).getAffectedElement();
+    EObject switchResult = null;
+    if (change instanceof UpdateReferenceEChange) {
+      switchResult = ((UpdateReferenceEChange<EObject>) change).getAffectedElement();
     }
-    final EObject affectedElement = _switchResult;
-    Iterable<? extends EChange<EObject>> _xifexpression;
-    Boolean _apply = this.isCreateChange.apply(affectedElement, change.getNewValue());
-    if (_apply) {
-      Iterable<EChange<EObject>> _xblockexpression;
-      final CreateEObject<EObject> createChange = this.changeFactory.<EObject>createCreateEObjectChange(change.getNewValue());
-      List<EChange<EObject>> _of = List.<EChange<EObject>>of(createChange, change);
-      Iterable<? extends EChange<EObject>> _allAdditiveChangesForChangeRelevantFeatures = this.allAdditiveChangesForChangeRelevantFeatures(change);
-      _xblockexpression = Iterables.<EChange<EObject>>concat(_of, _allAdditiveChangesForChangeRelevantFeatures);
+    final EObject affectedElement = switchResult;
+    Iterable<? extends EChange<EObject>> xifexpression;
+    Boolean apply = this.isCreateChange.apply(affectedElement, change.getNewValue());
+    if (apply) {
+      Iterable<EChange<EObject>> xblockexpression;
+      final CreateEObject<EObject> createChange = this.changeFactory
+              .createCreateEObjectChange(change.getNewValue());
+      List<EChange<EObject>> of = List.of(createChange, change);
+      Iterable<? extends EChange<EObject>> allAdditiveChangesForChangeRelevantFeatures =
+              this.allAdditiveChangesForChangeRelevantFeatures(change);
+      xblockexpression = Iterables.concat(
+              of,
+              allAdditiveChangesForChangeRelevantFeatures);
 
-      _xifexpression = _xblockexpression;
+      xifexpression = xblockexpression;
     } else {
-      _xifexpression = List.<EObjectAddedEChange<EObject>>of(change);
+      xifexpression = List.<EObjectAddedEChange<EObject>>of(change);
     }
-    return _xifexpression;
+    return xifexpression;
   }
 
-  public NotificationToEChangeConverter(final BiFunction<EObject, EObject, Boolean> isCreateChange) {
+  public NotificationToEChangeConverter(
+          final BiFunction<EObject, EObject, Boolean> isCreateChange) {
     super();
     this.isCreateChange = isCreateChange;
   }

@@ -23,7 +23,7 @@ public class ChangeDescriptionComplexSequencesTest extends ChangeDescription2Cha
   void testOverwritingSequence() {
     Root root = getUniquePersistedRoot();
     NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
-    List<EChange<EObject>> result = record_(root, it -> {
+    List<EChange<EObject>> result = recordObject(root, it -> {
       it.setSingleValuedContainmentEReference(nonRoot);
       it.setSingleValuedContainmentEReference(null);
       it.setSingleValuedContainmentEReference(nonRoot);
@@ -45,7 +45,7 @@ public class ChangeDescriptionComplexSequencesTest extends ChangeDescription2Cha
     Root root = getUniquePersistedRoot();
     NonRootObjectContainerHelper nonRootObjectsContainer = AllElementTypesCreators.aet.NonRootObjectContainerHelper();
     NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
-    List<EChange<EObject>> result = record_(root, it -> {
+    List<EChange<EObject>> result = recordObject(root, it -> {
       nonRootObjectsContainer.getNonRootObjectsContainment().add(nonRoot);
       it.setNonRootObjectContainerHelper(nonRootObjectsContainer);
     });
@@ -69,7 +69,7 @@ public class ChangeDescriptionComplexSequencesTest extends ChangeDescription2Cha
     Root secondRoot = AllElementTypesCreators.aet.Root();
     NonRootObjectContainerHelper nonRootObjectsContainer = AllElementTypesCreators.aet.NonRootObjectContainerHelper();
     NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
-    List<EChange<EObject>> result = record_(root, it -> {
+    List<EChange<EObject>> result = recordObject(root, it -> {
       secondRoot.setSingleValuedNonContainmentEReference(nonRoot);
       nonRootObjectsContainer.getNonRootObjectsContainment().add(nonRoot);
       secondRoot.setNonRootObjectContainerHelper(nonRootObjectsContainer);

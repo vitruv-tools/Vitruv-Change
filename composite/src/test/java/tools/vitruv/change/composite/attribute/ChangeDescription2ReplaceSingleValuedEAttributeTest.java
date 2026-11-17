@@ -30,7 +30,7 @@ public class ChangeDescription2ReplaceSingleValuedEAttributeTest
     final Consumer<Root> _function = (Root it) -> {
       it.setSingleValuedEAttribute(42);
     };
-    final List<EChange<EObject>> result = this.record_(this.getUniquePersistedRoot(), _function);
+    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest
                     .assertChangeCount(result, 1),
@@ -52,7 +52,7 @@ public class ChangeDescription2ReplaceSingleValuedEAttributeTest
     final Consumer<Root> _function_1 = (Root it) -> {
       it.setSingleValuedEAttribute(0);
     };
-    final List<EChange<EObject>> result = this.record_(this.getUniquePersistedRoot(), _function_1);
+    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest
                     .assertChangeCount(result, 1),
@@ -74,7 +74,7 @@ public class ChangeDescription2ReplaceSingleValuedEAttributeTest
     final Consumer<Root> _function_1 = (Root it) -> {
       it.eUnset(AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_EATTRIBUTE);
     };
-    final List<EChange<EObject>> result = this.record_(this.getUniquePersistedRoot(), _function_1);
+    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest
                     .assertChangeCount(result, 1),
@@ -92,7 +92,7 @@ public class ChangeDescription2ReplaceSingleValuedEAttributeTest
     final Consumer<Root> _function = (Root it) -> {
       it.setSingleValuedUnsettableEAttribute(42);
     };
-    final List<EChange<EObject>> result = this.record_(this.getUniquePersistedRoot(), _function);
+    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest
                     .assertChangeCount(result, 1),
@@ -114,7 +114,7 @@ public class ChangeDescription2ReplaceSingleValuedEAttributeTest
     final Consumer<Root> _function_1 = (Root it) -> {
       it.setSingleValuedUnsettableEAttribute(0);
     };
-    final List<EChange<EObject>> result = this.record_(this.getUniquePersistedRoot(), _function_1);
+    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest
                     .assertChangeCount(result, 1), this.getUniquePersistedRoot(),
@@ -135,7 +135,7 @@ public class ChangeDescription2ReplaceSingleValuedEAttributeTest
     final Consumer<Root> _function_1 = (Root it) -> {
       it.eUnset(AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_UNSETTABLE_EATTRIBUTE);
     };
-    final List<EChange<EObject>> result = this.record_(this.getUniquePersistedRoot(), _function_1);
+    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertReplaceSingleValuedEAttribute(ChangeDescription2ChangeTransformationTest
                     .assertChangeCount(result, 1), this.getUniquePersistedRoot(),

@@ -39,7 +39,7 @@ public class ChangeDescription2InsertEReferenceTest
     List<NonRoot> preparationElements = IntStream.range(0, 10)
         .mapToObj(i -> AllElementTypesCreators.aet.NonRoot())
         .toList();
-    this.record_(this.getUniquePersistedRoot(), it ->
+    this.recordObject(this.getUniquePersistedRoot(), it ->
         Iterables.addAll(it.getMultiValuedContainmentEReference(), preparationElements));
     List<NonRoot> nonRootElements = IntStream.range(0, count)
         .mapToObj(i -> {
@@ -49,7 +49,7 @@ public class ChangeDescription2InsertEReferenceTest
         })
         .toList();
     Iterable<? extends EChange<EObject>> actualChanges
-            = this.record_(this.getUniquePersistedRoot(), it ->
+            = this.recordObject(this.getUniquePersistedRoot(), it ->
         it.getMultiValuedContainmentEReference().addAll(insertAt, nonRootElements));
     Assertions.assertEquals(Iterables.size(actualChanges), nonRootElements.size() * 3);
     for (int i = 0; i < nonRootElements.size(); i++) {
@@ -78,14 +78,14 @@ public class ChangeDescription2InsertEReferenceTest
         .mapToObj(i -> AllElementTypesCreators.aet.NonRoot())
         .toList();
     this.getUniquePersistedRoot().getMultiValuedContainmentEReference().addAll(preparationElements);
-    this.record_(this.getUniquePersistedRoot(), it ->
+    this.recordObject(this.getUniquePersistedRoot(), it ->
         it.getMultiValuedNonContainmentEReference().addAll(preparationElements));
     List<NonRoot> nonRootElements = IntStream.range(0, count)
         .mapToObj(i -> AllElementTypesCreators.aet.NonRoot())
         .toList();
     this.getUniquePersistedRoot().getMultiValuedContainmentEReference().addAll(nonRootElements);
     Iterable<? extends EChange<EObject>> actualChanges
-            = this.record_(this.getUniquePersistedRoot(), it ->
+            = this.recordObject(this.getUniquePersistedRoot(), it ->
         it.getMultiValuedNonContainmentEReference().addAll(insertAt, nonRootElements));
     Assertions.assertEquals(Iterables.size(actualChanges), nonRootElements.size());
     for (int i = 0; i < nonRootElements.size(); i++) {
@@ -147,7 +147,7 @@ public class ChangeDescription2InsertEReferenceTest
     final Consumer<Root> _function = (Root it)
             -> it.getMultiValuedContainmentEReference().add(expectedIndex, nonRoot);
     final List<EChange<EObject>> result
-            = this.record_(this.getUniquePersistedRoot(), _function);
+            = this.recordObject(this.getUniquePersistedRoot(), _function);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertReplaceSingleValuedEAttribute(
         CompoundEChangeAssertHelper.assertCreateAndInsertNonRoot(
@@ -168,7 +168,7 @@ public class ChangeDescription2InsertEReferenceTest
   private void insertAndAssertSingleNonContainment(final int expectedIndex) {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     this.getUniquePersistedRoot().getMultiValuedContainmentEReference().add(expectedIndex, nonRoot);
-    final List<EChange<EObject>> result = this.record_(this.getUniquePersistedRoot(), it ->
+    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), it ->
         it.getMultiValuedNonContainmentEReference().add(expectedIndex, nonRoot));
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEReference(
         ChangeDescription2ChangeTransformationTest.assertChangeCount(result, 1),
