@@ -61,6 +61,9 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
    */
   private Map<EObject, ElementUri> writtenElementUris;
 
+  /** The changes recorded per thread, see {@link #startRecording()}; absent if not recording. */
+  private final ThreadLocal<List<CorrespondenceChange>> recordedChanges = new ThreadLocal<>();
+
   /**
    * Creates a new correspondence model with the given resource URI.
    *
@@ -267,6 +270,8 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
     correspondence.getRightEObjects().addAll(secondEObjects);
     correspondence.setTag(tag);
     this.correspondences.getCorrespondences().add(correspondence);
+    record(CorrespondenceChange.Kind.ADDED, correspondence,
+        correspondences.getCorrespondences().size() - 1);
     return correspondence;
   }
 
@@ -327,6 +332,10 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
     // rebuilding removes all correspondences and adds the remaining ones again
     long rebuildCost = MOVES_PER_DETACHED_OR_ATTACHED_CORRESPONDENCE
         * (2L * list.size() - staleIndices.size());
+    for (int position = staleIndices.size() - 1; position >= 0; position--) {
+      record(CorrespondenceChange.Kind.REMOVED, staleCorrespondences.get(position),
+          staleIndices.get(position));
+    }
     if (moves <= rebuildCost) {
       for (int position = staleIndices.size() - 1; position >= 0; position--) {
         list.remove((int) staleIndices.get(position));
@@ -347,7 +356,52 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   private void removeCorrespondence(Correspondence correspondence) {
+    int index = correspondences.getCorrespondences().indexOf(correspondence);
     EcoreUtil.remove(correspondence);
+    if (index >= 0) {
+      record(CorrespondenceChange.Kind.REMOVED, correspondence, index);
+    }
+  }
+
+  private void record(CorrespondenceChange.Kind kind, Correspondence correspondence, int index) {
+    List<CorrespondenceChange> changes = recordedChanges.get();
+    if (changes != null) {
+      changes.add(new CorrespondenceChange(kind, correspondence, index));
+    }
+  }
+
+  @Override
+  public synchronized void startRecording() {
+    recordedChanges.set(new ArrayList<>());
+  }
+
+  @Override
+  public synchronized List<CorrespondenceChange> getRecordedChanges() {
+    List<CorrespondenceChange> changes = recordedChanges.get();
+    return changes == null ? List.of() : List.copyOf(changes);
+  }
+
+  @Override
+  public synchronized void revertRecordedChanges() {
+    List<CorrespondenceChange> changes = recordedChanges.get();
+    if (changes == null) {
+      return;
+    }
+    recordedChanges.remove(); // the undo is not recorded
+    List<Correspondence> list = correspondences.getCorrespondences();
+    for (int i = changes.size() - 1; i >= 0; i--) {
+      CorrespondenceChange change = changes.get(i);
+      switch (change.kind()) {
+        case ADDED -> list.remove(change.correspondence());
+        case REMOVED -> list.add(Math.min(change.index(), list.size()), change.correspondence());
+      }
+    }
+    recordedChanges.set(new ArrayList<>());
+  }
+
+  @Override
+  public synchronized void stopRecording() {
+    recordedChanges.remove();
   }
 
   @Override

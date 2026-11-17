@@ -206,4 +206,21 @@ public class DefaultChangeRecordingModelRepository
   public UuidResolver getUuidResolver() {
     return uuidResolver;
   }
+
+  @Override
+  public void beginPropagationAttempt() {
+    correspondenceModel.startRecording();
+  }
+
+  @Override
+  public void endPropagationAttempt() {
+    correspondenceModel.stopRecording();
+  }
+
+  /** Reverts the model changes and the correspondence changes of this propagation attempt. */
+  @Override
+  public void revertChanges(List<TransactionalChange<EObject>> appliedChanges) {
+    correspondenceModel.revertRecordedChanges();
+    PersistableChangeRecordingModelRepository.super.revertChanges(appliedChanges);
+  }
 }

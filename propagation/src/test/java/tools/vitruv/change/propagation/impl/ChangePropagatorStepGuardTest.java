@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -50,8 +51,9 @@ import tools.vitruv.change.testutils.TestProjectManager;
 import tools.vitruv.change.utils.ResourceAccess;
 
 /**
- * Tests the {@link PropagationStepGuard} hook of the {@link ChangePropagator}: call order, reverting
- * and retrying an aborted propagation, replaying user interactions.
+ * Tests the {@link PropagationStepGuard} hook of the {@link ChangePropagator}: call order,
+ * reverting and retrying an aborted propagation, replaying user interactions, reverting the
+ * correspondence changes of an aborted attempt, committing inside the guard.
  */
 @ExtendWith({TestProjectManager.class, TestLogging.class, RegisterMetamodelsInStandalone.class})
 class ChangePropagatorStepGuardTest {
@@ -310,6 +312,36 @@ class ChangePropagatorStepGuardTest {
     return viewChangeResolver.assignIds(viewRecorder.endRecording());
   }
 
+  /** The correspondence model the specification of the running step got. */
+  private EditableCorrespondenceModelView<Correspondence> currentCorrespondences;
+
+  @Test
+  void abortedPropagationRevertsItsCorrespondences() {
+    int[] attempts = new int[1];
+    var specification = new Specification((root, change) -> {
+      if (change instanceof ReplaceSingleValuedEAttribute<EObject, ?> replace
+          && replace.getAffectedFeature()
+              == AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_EATTRIBUTE
+          && Integer.valueOf(2).equals(replace.getNewValue())) {
+        currentCorrespondences.addCorrespondenceBetween(root, root, "attempt" + ++attempts[0]);
+        // a model change, so that there is a second step (where the first attempt is aborted)
+        root.setSingleValuedPrimitiveTypeEAttribute(7);
+      }
+    });
+    var propagator = createPropagator(specification);
+    createRoot(propagator);
+    propagator.setStepGuard(abortFirstAttemptAtStep(2));
+
+    propagateInView(propagator, () -> viewRoot.setSingleValuedEAttribute(2));
+
+    assertEquals(2, attempts[0]);
+    var correspondences = modelRepository.getCorrespondenceModel();
+    assertEquals(Set.of(), correspondences.getCorrespondingEObjects(repositoryRoot(), "attempt1"),
+        "the correspondence of the aborted attempt is reverted");
+    assertEquals(Set.of(repositoryRoot()),
+        correspondences.getCorrespondingEObjects(repositoryRoot(), "attempt2"));
+  }
+
   private static boolean hasCause(Throwable throwable, Class<?> type) {
     for (Throwable t = throwable; t != null; t = t.getCause()) {
       if (type.isInstance(t)) {
@@ -449,6 +481,7 @@ class ChangePropagatorStepGuardTest {
       if (modelRepository.getModelResource(modelUri).getContents().isEmpty()) {
         return;
       }
+      currentCorrespondences = correspondenceModel;
       reaction.accept(repositoryRoot(), change);
     }
   }

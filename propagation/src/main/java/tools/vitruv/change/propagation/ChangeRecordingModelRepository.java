@@ -62,9 +62,20 @@ public interface ChangeRecordingModelRepository extends ResourceAccess, AutoClos
   ModelRepositorySnapshot createSnapshot();
 
   /**
+   * Called on the propagating thread when an attempt of a change propagation starts. A repository
+   * may start recording the correspondence changes of this thread, so that {@link #revertChanges}
+   * can undo them.
+   */
+  default void beginPropagationAttempt() {}
+
+  /** Called on the propagating thread when an attempt of a change propagation has ended. */
+  default void endPropagationAttempt() {}
+
+  /**
    * Reverts applied changes (e.g. of an aborted propagation): applies the atomic changes of
    * {@code appliedChanges} backward, the last one first, and unregisters the UUIDs of the objects
-   * they created. Must not be called while recording. The correspondence model is not reverted.
+   * they created. Must not be called while recording. Implementations that record correspondence
+   * changes (see {@link #beginPropagationAttempt()}) also revert those of the calling thread.
    *
    * @param appliedChanges - the resolved changes, in the order they were applied
    */

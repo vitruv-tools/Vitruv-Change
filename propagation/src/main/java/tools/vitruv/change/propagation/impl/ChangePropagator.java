@@ -344,6 +344,7 @@ public class ChangePropagator {
     for (int attemptNumber = 1; ; attemptNumber++) {
       Attempt attempt = new Attempt();
       currentAttempt.set(attempt);
+      modelRepository.beginPropagationAttempt();
       boolean committed = false;
       try (AutoCloseable replay = replayUserInteractions(answersToReplay)) {
         stepGuard.beginPropagation(change);
@@ -376,6 +377,7 @@ public class ChangePropagator {
         }
       } finally {
         currentAttempt.remove();
+        modelRepository.endPropagationAttempt();
         stepGuard.endPropagation(change, committed);
       }
     }
