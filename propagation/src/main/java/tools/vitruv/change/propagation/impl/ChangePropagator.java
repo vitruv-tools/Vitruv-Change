@@ -111,7 +111,7 @@ public class ChangePropagator {
           Iterables.<PropagatedChange>addAll(resultingChanges, _propagateTransitiveChanges);
         }
         return resultingChanges;
-      } catch (RuntimeException | Error e) {
+      } catch (RuntimeException e) {
         // keep exceptions of change propagation specifications as they are
         throw e;
       } catch (Exception e) {
