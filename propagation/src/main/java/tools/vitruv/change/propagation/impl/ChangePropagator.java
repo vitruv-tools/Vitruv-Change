@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -313,6 +314,27 @@ public class ChangePropagator {
    * @return - {@link List} of {@link PropagatedChange}
    */
   public List<PropagatedChange> propagateChange(final VitruviusChange<Uuid> change, final Iterable<ChangePropagationObserver> observers) {
+    return propagateChange(change, observers, result -> { });
+  }
+
+  /**
+   * Applies, then propagates <code>change</code> through the models in
+   * <code>modelRepository</code>, and runs <code>commit</code> on the result before the step guard
+   * ends the propagation. With a locking step guard, <code>commit</code> thus runs while the
+   * propagation still holds its locks: what it persists (saved resources, a change log record)
+   * contains no changes of concurrent propagations to the locked elements, and commits happen in
+   * the serialisation order. If <code>commit</code> throws, the changes of the propagation are
+   * reverted in memory (not what <code>commit</code> may already have written), the guard ends the
+   * propagation as not committed and the exception reaches the caller; it is not retried.
+   *
+   * @param change - {@link VitruviusChange}
+   * @param observers - {@link Iterable} of {@link ChangePropagationObserver}
+   * @param commit - persists the propagated changes
+   * @return - {@link List} of {@link PropagatedChange}
+   */
+  public List<PropagatedChange> propagateChange(final VitruviusChange<Uuid> change,
+      final Iterable<ChangePropagationObserver> observers,
+      final Consumer<List<PropagatedChange>> commit) {
     if (ChangePropagator.logger.isTraceEnabled()) {
       ChangePropagator.logger.trace("Will begin propagation of change :\n\t" + change);
     }
@@ -326,8 +348,17 @@ public class ChangePropagator {
       try (AutoCloseable replay = replayUserInteractions(answersToReplay)) {
         stepGuard.beginPropagation(change);
         List<PropagatedChange> result = propagateChangeOnce(change, observers, attempt);
+        try {
+          commit.accept(result);
+        } catch (RuntimeException e) {
+          logger.debug("Commit failed, reverting {} changes", attempt.appliedChanges.size());
+          modelRepository.revertChanges(attempt.appliedChanges);
+          throw new CommitFailedException(e);
+        }
         committed = true;
         return result;
+      } catch (CommitFailedException e) {
+        throw e.getCause();
       } catch (Exception e) {
         PropagationAbortedException abort = findAbort(e);
         if (abort == null) {
@@ -347,6 +378,20 @@ public class ChangePropagator {
         currentAttempt.remove();
         stepGuard.endPropagation(change, committed);
       }
+    }
+  }
+
+  /** Carries a failure of the commit past the abort handling (an abort in it is not retried). */
+  private static final class CommitFailedException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
+    CommitFailedException(RuntimeException cause) {
+      super(cause);
+    }
+
+    @Override
+    public synchronized RuntimeException getCause() {
+      return (RuntimeException) super.getCause();
     }
   }
 

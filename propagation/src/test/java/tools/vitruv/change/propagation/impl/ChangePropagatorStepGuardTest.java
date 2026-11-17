@@ -247,6 +247,69 @@ class ChangePropagatorStepGuardTest {
     assertEquals(List.of(false), ends);
   }
 
+  @Test
+  void commitRunsAfterTheLastStepBeforeTheGuardEnds() {
+    var specification = new Specification(COPY_TO_PRIMITIVE);
+    var propagator = createPropagator(specification);
+    createRoot(propagator);
+    List<String> calls = new ArrayList<>();
+    propagator.setStepGuard(recordingGuard(calls));
+
+    var change = recordInView(() -> viewRoot.setSingleValuedEAttribute(2));
+    propagator.propagateChange(change, List.of(), result -> calls.add(
+        "commit:" + repositoryRoot().getSingleValuedPrimitiveTypeEAttribute() + "/"
+            + !result.isEmpty()));
+
+    assertEquals(List.of("begin", "step", "step", "commit:20/true", "end:true"), calls);
+  }
+
+  @Test
+  void failedCommitIsRevertedAndNotRetried() {
+    var specification = new Specification(COPY_TO_PRIMITIVE);
+    var propagator = createPropagator(specification);
+    createRoot(propagator);
+    List<String> calls = new ArrayList<>();
+    propagator.setStepGuard(recordingGuard(calls));
+
+    var change = recordInView(() -> viewRoot.setSingleValuedEAttribute(2));
+    var failure = assertThrows(IllegalStateException.class,
+        () -> propagator.propagateChange(change, List.of(), result -> {
+          // an abort here must not lead to a retry either
+          throw new IllegalStateException("disk full", new PropagationAbortedException("x"));
+        }));
+
+    assertEquals("disk full", failure.getMessage());
+    assertEquals(List.of("begin", "step", "step", "end:false"), calls);
+    assertEquals(1, repositoryRoot().getSingleValuedEAttribute(), "the user change is reverted");
+    assertEquals(10, repositoryRoot().getSingleValuedPrimitiveTypeEAttribute());
+  }
+
+  private static PropagationStepGuard recordingGuard(List<String> calls) {
+    return new PropagationStepGuard() {
+      @Override
+      public void beginPropagation(VitruviusChange<Uuid> change) {
+        calls.add("begin");
+      }
+
+      @Override
+      public void beforeStep(TransactionalChange<EObject> change,
+          ChangePropagationSpecification spec) {
+        calls.add("step");
+      }
+
+      @Override
+      public void endPropagation(VitruviusChange<Uuid> change, boolean committed) {
+        calls.add("end:" + committed);
+      }
+    };
+  }
+
+  private VitruviusChange<Uuid> recordInView(Runnable modification) {
+    viewRecorder.beginRecording();
+    modification.run();
+    return viewChangeResolver.assignIds(viewRecorder.endRecording());
+  }
+
   private static boolean hasCause(Throwable throwable, Class<?> type) {
     for (Throwable t = throwable; t != null; t = t.getCause()) {
       if (type.isInstance(t)) {
