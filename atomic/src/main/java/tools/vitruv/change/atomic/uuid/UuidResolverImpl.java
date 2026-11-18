@@ -12,11 +12,16 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.InternalEObject;
@@ -26,6 +31,8 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import tools.vitruv.change.atomic.hid.HierarchicalId;
 import tools.vitruv.change.atomic.hid.ObjectResolutionUtil;
 import tools.vitruv.change.atomic.hid.internal.HierarchicalIdCalculator;
+import tools.vitruv.change.atomic.hid.internal.IdPathSnapshot;
+import tools.vitruv.change.atomic.resolve.ElementRemovalTracker;
 
 /**
  * A UUID resolver manages the mapping of {@link org.eclipse.emf.ecore.EObject} to UUIDs within one
@@ -40,10 +47,18 @@ class UuidResolverImpl implements UuidResolver {
 
   private final ResourceSet resourceSet;
   private final BiMap<EObject, Uuid> eObjectToUuid = HashBiMap.create();
+  private final ElementRemovalTracker removalTracker;
+
+  /**
+   * What {@link #storeAtUri} wrote last, or {@code null} if the file may not contain the current
+   * mapping. Every change of {@link #eObjectToUuid} must reset it.
+   */
+  private StoredMapping storedMapping;
 
   public UuidResolverImpl(ResourceSet resourceSet) {
     checkArgument(resourceSet != null, "Resource set may not be null");
     this.resourceSet = resourceSet;
+    this.removalTracker = new ElementRemovalTracker(resourceSet);
   }
 
   @Override
@@ -105,7 +120,9 @@ class UuidResolverImpl implements UuidResolver {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Adding UUID {} for EObject: {}", uuid, eObject);
     }
+    storedMapping = null;
     eObjectToUuid.put(eObject, uuid);
+    removalTracker.touch(eObject);
   }
 
   @Override
@@ -117,7 +134,10 @@ class UuidResolverImpl implements UuidResolver {
         "trying to unregister element %s but is not registered for uuid %s",
         eObject,
         uuid);
+    storedMapping = null;
     eObjectToUuid.remove(eObject);
+    // Its contents must have been unregistered as well, which the end of the transaction checks.
+    removalTracker.touch(eObject);
   }
 
   @Override
@@ -136,15 +156,17 @@ class UuidResolverImpl implements UuidResolver {
 
   @Override
   public void endTransaction() {
-    var iterator = eObjectToUuid.keySet().iterator();
-    while (iterator.hasNext()) {
-      EObject object = iterator.next();
-      checkState(object.eResource() != null, "dangling object %s detected", object);
-      checkState(
-          object.eResource().getResourceSet() == resourceSet,
-          "object %s is contained in wrong resource set",
-          object);
+    // Only elements that may have left the resource set can have become dangling.
+    for (EObject object : removalTracker.getElementsThatMayHaveLeft()) {
+      if (eObjectToUuid.containsKey(object)) {
+        checkState(object.eResource() != null, "dangling object %s detected", object);
+        checkState(
+            object.eResource().getResourceSet() == resourceSet,
+            "object %s is contained in wrong resource set",
+            object);
+      }
     }
+    removalTracker.endTransaction();
   }
 
   @Override
@@ -176,7 +198,8 @@ class UuidResolverImpl implements UuidResolver {
                     "trying to resolve resource %s from different resource set",
                     resource));
     Map<Uuid, HierarchicalId> uuidToIdMapping =
-        generateUuidToIdMapping(sourceToTargetResourceMapping.keySet());
+        generateUuidToIdMapping(
+            sourceToTargetResourceMapping.keySet(), new HierarchicalIdCalculator());
     applyUuidToIdMapping(
         uuidToIdMapping, targetUuidResolver, targetResourceSet, sourceToTargetResourceMapping);
   }
@@ -211,8 +234,15 @@ class UuidResolverImpl implements UuidResolver {
   @Override
   public void storeAtUri(URI uri) throws IOException {
     checkState(uri.isFile(), "Storing UUID resolver requires a file uri but was %s", uri);
-    Map<Uuid, HierarchicalId> uuidToIdMapping = generateUuidToIdMapping(null);
     File file = new File(uri.toFileString());
+    if (isStoredAsIs(uri, file)) {
+      return;
+    }
+    // if calculating or writing fails, the next store writes the file again
+    storedMapping = null;
+    IdPathSnapshot idPaths = new IdPathSnapshot();
+    Map<Uuid, HierarchicalId> uuidToIdMapping =
+        generateUuidToIdMapping(null, new HierarchicalIdCalculator(idPaths));
     try (FileWriter writer = new FileWriter(file)) {
       for (var entry : uuidToIdMapping.entrySet()) {
         String uuid = entry.getKey().getRawValue();
@@ -221,13 +251,48 @@ class UuidResolverImpl implements UuidResolver {
         writer.write(System.lineSeparator());
       }
     }
+    BasicFileAttributes attributes = readAttributes(file);
+    if (attributes != null) {
+      storedMapping =
+          new StoredMapping(uri, attributes.size(), attributes.lastModifiedTime(), idPaths);
+    }
+  }
+
+  /**
+   * Returns whether the file at the given URI still contains the current mapping: the last store
+   * of this resolver wrote it, it still has the size and modification time it had then, no element
+   * was registered or unregistered since, and the IDs of the registered elements are the same.
+   */
+  private boolean isStoredAsIs(URI uri, File file) {
+    if (storedMapping == null || !storedMapping.uri().equals(uri)) {
+      return false;
+    }
+    BasicFileAttributes attributes = readAttributes(file);
+    return attributes != null
+        && attributes.isRegularFile()
+        && attributes.size() == storedMapping.size()
+        && attributes.lastModifiedTime().equals(storedMapping.lastModified())
+        && storedMapping.idPaths().isUnchanged();
+  }
+
+  /** Returns the attributes of the given file, or {@code null} if they cannot be read. */
+  private static BasicFileAttributes readAttributes(File file) {
+    try {
+      return Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+    } catch (IOException | InvalidPathException e) {
+      return null;
+    }
   }
 
   private Uuid getUuidOrNull(EObject eObject) {
     if (isReadOnlyEObject(eObject)) {
       return getUuidForReadOnlyEObject(eObject);
     }
-    return eObjectToUuid.get(eObject);
+    Uuid uuid = eObjectToUuid.get(eObject);
+    if (uuid != null) {
+      removalTracker.touch(eObject);
+    }
+    return uuid;
   }
 
   private Uuid getUuidForReadOnlyEObject(EObject eObject) {
@@ -248,7 +313,9 @@ class UuidResolverImpl implements UuidResolver {
     if (isReadOnlyUuid(uuid)) {
       return getEObjectForReadOnlyUuid(uuid);
     }
-    return eObjectToUuid.inverse().get(uuid);
+    EObject eObject = eObjectToUuid.inverse().get(uuid);
+    removalTracker.touch(eObject);
+    return eObject;
   }
 
   private EObject getEObjectForReadOnlyUuid(Uuid uuid) {
@@ -278,24 +345,52 @@ class UuidResolverImpl implements UuidResolver {
    *
    * @param resourcesFilter is the filter for the resources to consider, or <code>null</code> if all
    *     resources shall be considered.
+   * @param idCalculator calculates the hierarchical IDs.
    */
-  private Map<Uuid, HierarchicalId> generateUuidToIdMapping(Collection<Resource> resourcesFilter) {
-    HierarchicalIdCalculator idCalculator = new HierarchicalIdCalculator();
+  private Map<Uuid, HierarchicalId> generateUuidToIdMapping(
+      Collection<Resource> resourcesFilter, HierarchicalIdCalculator idCalculator) {
     Map<Uuid, HierarchicalId> uuidToIdMapping = new HashMap<>();
+    if (resourcesFilter != null) {
+      // goes over the contents of the filtered resources instead of all registered elements
+      for (Resource resource : resourcesFilter) {
+        addUuidToIdMappingOfResource(resource, idCalculator, uuidToIdMapping);
+      }
+      return uuidToIdMapping;
+    }
     for (var entry : eObjectToUuid.entrySet()) {
       EObject eObject = entry.getKey();
       checkState(
           eObject.eResource() != null && eObject.eResource().getResourceSet() != null,
           "trying to unresolve dangling EObject %s",
           eObject);
-      if (resourcesFilter != null && !resourcesFilter.contains(eObject.eResource())) {
-        continue;
-      }
       HierarchicalId id = idCalculator.getId(eObject);
       Uuid uuid = entry.getValue();
       uuidToIdMapping.put(uuid, id);
     }
     return uuidToIdMapping;
+  }
+
+  /**
+   * Adds the hierarchical IDs of the registered {@link EObject}s contained in the given resource to
+   * the given mapping. Elements of other resources contained in it (cross-resource containment) are
+   * skipped with their contents.
+   */
+  private void addUuidToIdMappingOfResource(
+      Resource resource,
+      HierarchicalIdCalculator idCalculator,
+      Map<Uuid, HierarchicalId> uuidToIdMapping) {
+    TreeIterator<EObject> contents = EcoreUtil.getAllContents(resource, false);
+    while (contents.hasNext()) {
+      EObject eObject = contents.next();
+      if (eObject.eResource() != resource) {
+        contents.prune();
+        continue;
+      }
+      Uuid uuid = eObjectToUuid.get(eObject);
+      if (uuid != null) {
+        uuidToIdMapping.put(uuid, idCalculator.getId(eObject));
+      }
+    }
   }
 
   /**
@@ -317,11 +412,17 @@ class UuidResolverImpl implements UuidResolver {
       ResourceSet targetResourceSet,
       Map<Resource, Resource> sourceToTargetResourceMapping)
       throws IllegalStateException {
+    // Looking up a resource in a resource set may compare its URI with that of every resource, so
+    // each resource is only looked up once.
+    Map<URI, Resource> targetResources = new HashMap<>();
     for (var entry : uuidToIdMapping.entrySet()) {
       Uuid uuid = entry.getKey();
       URI idUri = URI.createURI(entry.getValue().getId());
       // resolves like HierarchicalIdResolver#getEObject, without calculating the object's ID again
-      EObject targetEObject = targetResourceSet.getEObject(idUri, isReadOnlyUri(idUri));
+      Resource targetResource = targetResources.computeIfAbsent(idUri.trimFragment(),
+          resourceUri -> targetResourceSet.getResource(resourceUri, isReadOnlyUri(resourceUri)));
+      EObject targetEObject =
+          targetResource == null ? null : targetResource.getEObject(idUri.fragment());
       checkState(
           targetEObject != null,
           "could not find object corresponding to %s in resource set %s",
@@ -339,4 +440,14 @@ class UuidResolverImpl implements UuidResolver {
       targetUuidResolver.registerEObject(uuid, targetEObject);
     }
   }
+
+  /**
+   * The file that {@link #storeAtUri} wrote last, and the paths of the IDs it wrote into it.
+   *
+   * @param uri the URI of the file
+   * @param size the size of the file after writing it
+   * @param lastModified the modification time of the file after writing it
+   * @param idPaths the paths of the IDs in the file
+   */
+  private record StoredMapping(URI uri, long size, FileTime lastModified, IdPathSnapshot idPaths) {}
 }

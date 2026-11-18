@@ -60,11 +60,12 @@ final class EChangeCreationUtil {
       final List<EChange<EObject>> result = new ArrayList<>();
       final EList<EObject> referenceValues =
           EChangeCreationUtil.getReferenceValueList(referencingEObject, reference);
-      for (final EObject referenceValue : referenceValues) {
-        final Object currentValues = referencingEObject.eGet(reference);
+      // Each value is inserted at its own position. Looking it up with indexOf would be quadratic
+      // and would give a value occurring more than once in a non-unique list its first position.
+      for (int index = 0; index < referenceValues.size(); index++) {
+        final EObject referenceValue = referenceValues.get(index);
         result.addAll(EChangeCreationUtil.createInsertReferenceChange(referencingEObject, reference,
-            ((EList<?>) currentValues).indexOf(referenceValue), referenceValue,
-            isCreate.apply(referenceValue).booleanValue()));
+            index, referenceValue, isCreate.apply(referenceValue).booleanValue()));
       }
       return result;
     }
