@@ -6,7 +6,7 @@ package tools.vitruv.change.atomic.uuid;
  * different resource sets will <b>not</b> have the same UUID.
  */
 public final class Uuid {
-  private String rawValue;
+  private final String rawValue;
 
   Uuid(String rawValue) {
     this.rawValue = rawValue;
