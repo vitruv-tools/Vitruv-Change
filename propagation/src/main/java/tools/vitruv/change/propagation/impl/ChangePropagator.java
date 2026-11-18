@@ -82,6 +82,7 @@ public class ChangePropagator {
             final ModelRepositorySnapshot previousState) {
       try (ModelRepositorySnapshot currentState =
                    this.outer.changePropagationMode == ChangePropagationMode.SINGLE_STEP
+                           || !this.outer.anySpecificationUsesPreviousState()
                            ? null : this.outer.modelRepository.createSnapshot()) {
         Preconditions.checkState(!change.getAffectedEObjects().isEmpty(),
                 "There are no objects affected by this change:%s%s",
@@ -375,12 +376,13 @@ public class ChangePropagator {
                 observers.forEach(spec::registerObserver));
 
     int maximumLevel = this.changePropagationProvider.getMaximumPropagationSpecificationLevel();
+    boolean previousStateNeeded = this.anySpecificationUsesPreviousState();
 
     List<PropagatedChange> result = new ArrayList<>();
 
     for (TransactionalChange<Uuid> transactionalChange : change.getTransactionalChangeSequence()) {
-      try (ModelRepositorySnapshot previousState = this.modelRepository
-              .createSnapshot()) {
+      try (ModelRepositorySnapshot previousState = previousStateNeeded
+              ? this.modelRepository.createSnapshot() : null) {
         TransactionalChange<EObject> resolvedChange =
                 (TransactionalChange<EObject>) this.modelRepository
                         .applyChange(transactionalChange);
@@ -431,6 +433,21 @@ public class ChangePropagator {
     return new PropagationResult(
             merge(lowerLevelResult.change(), propagatedChanges),
             allPropagatedChanges);
+  }
+
+  /**
+   * Checks whether any of the available specifications uses the state of the
+   * models before a change.
+   *
+   * @return {@code true} if at least one specification uses the previous state
+   */
+  private boolean anySpecificationUsesPreviousState() {
+    for (ChangePropagationSpecification specification : this.changePropagationProvider) {
+      if (specification.usesPreviousState()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static TransactionalChangeWithPreviousState merge(
