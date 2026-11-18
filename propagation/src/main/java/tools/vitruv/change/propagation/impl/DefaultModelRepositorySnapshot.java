@@ -83,7 +83,8 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
         = ResourceCopier.copyViewResources(originalResourceSet.getResources(), copiedResourceSet);
     resourceCopies.forEach((original, copy) -> copy.setModified(original.isModified()));
 
-    BiMap<EObject, EObject> mapping = createOriginalToCopyMapping(originalResourceSet, copiedResourceSet);
+    BiMap<EObject, EObject> mapping =
+            createOriginalToCopyMapping(originalResourceSet, copiedResourceSet);
 
     return new ResourceSetCopy(copiedResourceSet, mapping);
   }

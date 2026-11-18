@@ -73,7 +73,7 @@ public class DefaultChangeableModelRepository implements ChangeableModelReposito
 
   private void notifyChangePropagationStarted(VitruviusChange<Uuid> change) {
     if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Started synchronizing change: {}", change);
+      LOGGER.debug("Started synchronizing change: {}", change);
     }
     changePropagationListeners
         .forEach(listener -> listener.startedChangePropagation(change));
@@ -84,7 +84,7 @@ public class DefaultChangeableModelRepository implements ChangeableModelReposito
     changePropagationListeners
         .forEach(listener -> listener.finishedChangePropagation(generatedChanges));
     if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Finished synchronizing change: {}", inputChange);
+      LOGGER.debug("Finished synchronizing change: {}", inputChange);
     }
   }
 

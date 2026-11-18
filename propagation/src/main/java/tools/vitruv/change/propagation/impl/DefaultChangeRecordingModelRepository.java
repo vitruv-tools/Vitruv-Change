@@ -7,7 +7,10 @@ import static tools.vitruv.change.correspondence.model.CorrespondenceModelFactor
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
@@ -17,7 +20,10 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.atomic.uuid.UuidResolver;
-import tools.vitruv.change.composite.description.*;
+import tools.vitruv.change.composite.description.TransactionalChange;
+import tools.vitruv.change.composite.description.VitruviusChange;
+import tools.vitruv.change.composite.description.VitruviusChangeResolver;
+import tools.vitruv.change.composite.description.VitruviusChangeResolverFactory;
 import tools.vitruv.change.composite.recording.ChangeRecorder;
 import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.model.PersistableCorrespondenceModel;
