@@ -31,7 +31,8 @@ public class ChangeDescription2MoveEAttributeTest
     final Consumer<Root> _function_1 = (Root it) -> {
       it.getMultiValuedEAttribute().move(0, 1);
     };
-    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function_1);
+    final List<EChange<EObject>> result =
+            this.recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertInsertEAttribute(AtomicEChangeAssertHelper
                     .assertRemoveEAttribute(ChangeDescription2ChangeTransformationTest
@@ -58,7 +59,8 @@ public class ChangeDescription2MoveEAttributeTest
     final Consumer<Root> _function_1 = (Root it) -> {
       it.getMultiValuedUnsettableEAttribute().move(0, 1);
     };
-    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function_1);
+    final List<EChange<EObject>> result =
+            this.recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertInsertEAttribute(
                     AtomicEChangeAssertHelper.assertRemoveEAttribute(
@@ -87,7 +89,8 @@ public class ChangeDescription2MoveEAttributeTest
     final Consumer<Root> function1 = (Root it) -> {
       it.getMultiValuedUnorderedEAttribute().move(0, 1);
     };
-    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), function1);
+    final List<EChange<EObject>> result =
+            this.recordObject(this.getUniquePersistedRoot(), function1);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertInsertEAttribute(
                     AtomicEChangeAssertHelper.assertRemoveEAttribute(

@@ -31,7 +31,8 @@ public class ChangeDescription2InsertEAttributeValueTest extends
     final Consumer<Root> _function = (Root it) -> {
       it.getMultiValuedEAttribute().add(position, expectedValue);
     };
-    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function);
+    final List<EChange<EObject>> result =
+            this.recordObject(this.getUniquePersistedRoot(), _function);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertInsertEAttribute(ChangeDescription2ChangeTransformationTest
                             .assertChangeCount(result, 1),
@@ -45,7 +46,8 @@ public class ChangeDescription2InsertEAttributeValueTest extends
       EList<Integer> multiValuedEAttribute = it.getMultiValuedEAttribute();
       multiValuedEAttribute.add(expectedValue);
     };
-    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function);
+    final List<EChange<EObject>> result =
+            this.recordObject(this.getUniquePersistedRoot(), _function);
     int size = this.getUniquePersistedRoot().getMultiValuedEAttribute().size();
     final int index = (size - 1);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
@@ -83,7 +85,8 @@ public class ChangeDescription2InsertEAttributeValueTest extends
     final Consumer<Root> _function_1 = (Root it) -> {
       it.setRecursiveRoot(innerRoot);
     };
-    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function_1);
+    final List<EChange<EObject>> result =
+            this.recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper
             .assertEmpty(AtomicEChangeAssertHelper
             .assertInsertEAttribute(AtomicEChangeAssertHelper

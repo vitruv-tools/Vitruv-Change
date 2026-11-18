@@ -48,13 +48,17 @@ public class VitruviusChangeHierarchicalIdResolver
   }
 
   private void applyBackward(VitruviusChange<EObject> change) {
-      switch (change) {
-          case CompositeContainerChangeImpl<EObject> compositeChange ->
-                  compositeChange.getChanges().reversed().forEach(this::applyBackward);
-          case TransactionalChangeImpl<EObject> transactionalChange ->
-                  transactionalChange.getEChanges().reversed().forEach(atomicChangeResolver::applyBackward);
-          default -> throw new IllegalStateException(
-                  "trying to apply unknown change of class " + change.getClass().getSimpleName());
-      }
+    switch (change) {
+      case CompositeContainerChangeImpl<EObject> compositeChange:
+        compositeChange.getChanges().reversed().forEach(this::applyBackward);
+        break;
+      case TransactionalChangeImpl<EObject> transactionalChange:
+        transactionalChange.getEChanges().reversed()
+          .forEach(atomicChangeResolver::applyBackward);
+        break;
+      default:
+        throw new IllegalStateException(
+          "trying to apply unknown change of class " + change.getClass().getSimpleName());
+    }
   }
 }

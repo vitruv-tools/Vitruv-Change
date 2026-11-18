@@ -42,7 +42,8 @@ public class ChangeDescription2RemoveEAttributeValueTest
       it.getMultiValuedEAttribute().remove(0);
       it.getMultiValuedEAttribute().remove(0);
     };
-    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function_1);
+    final List<EChange<EObject>> result =
+            this.recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertRemoveEAttribute(AtomicEChangeAssertHelper
                     .assertRemoveEAttribute(AtomicEChangeAssertHelper
@@ -75,7 +76,8 @@ public class ChangeDescription2RemoveEAttributeValueTest
     final Consumer<Root> _function_1 = (Root it) -> {
       it.getMultiValuedEAttribute().clear();
     };
-    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function_1);
+    final List<EChange<EObject>> result =
+            this.recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertRemoveEAttribute(AtomicEChangeAssertHelper
                     .assertRemoveEAttribute(ChangeDescription2ChangeTransformationTest
@@ -106,7 +108,8 @@ public class ChangeDescription2RemoveEAttributeValueTest
     final Consumer<Root> _function_1 = (Root it) -> {
       it.getMultiValuedUnsettableEAttribute().removeFirst();
     };
-    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function_1);
+    final List<EChange<EObject>> result =
+            this.recordObject(this.getUniquePersistedRoot(), _function_1);
     Assertions.assertTrue(this.getUniquePersistedRoot()
             .eIsSet(AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_UNSETTABLE_EATTRIBUTE));
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
@@ -128,7 +131,8 @@ public class ChangeDescription2RemoveEAttributeValueTest
     final Consumer<Root> _function_1 = (Root it) -> {
       it.eUnset(AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_UNSETTABLE_EATTRIBUTE);
     };
-    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function_1);
+    final List<EChange<EObject>> result =
+            this.recordObject(this.getUniquePersistedRoot(), _function_1);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertUnsetFeature(AtomicEChangeAssertHelper
                     .assertRemoveEAttribute(ChangeDescription2ChangeTransformationTest
@@ -156,7 +160,8 @@ public class ChangeDescription2RemoveEAttributeValueTest
     final Consumer<Root> _function_1 = (Root it) -> {
       it.eUnset(AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_UNSETTABLE_EATTRIBUTE);
     };
-    final List<EChange<EObject>> result = this.recordObject(this.getUniquePersistedRoot(), _function_1);
+    final List<EChange<EObject>> result =
+            this.recordObject(this.getUniquePersistedRoot(), _function_1);
     Assertions.assertFalse(this.getUniquePersistedRoot().isSetMultiValuedUnsettableEAttribute());
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertUnsetFeature(AtomicEChangeAssertHelper
