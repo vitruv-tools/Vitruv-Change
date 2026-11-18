@@ -402,4 +402,24 @@ public class HierarchicalIdResolverTest {
     };
     Assertions.<IllegalStateException>assertThrows(IllegalStateException.class, _function_1);
   }
+
+  @Test
+  @DisplayName("cleanup resolver after removing an element with contents that were not touched")
+  public void cleanupAfterRemovingRootRemovesIdsOfItsContents() {
+    final Root root = AllElementTypesCreators.aet.Root();
+    final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+    root.setSingleValuedContainmentEReference(nonRoot);
+    final Resource resource = this.resourceSet.createResource(
+        URI.createFileURI(this.testProjectPath.resolve("root.aet").toString()));
+    resource.getContents().add(root);
+    this.idResolver.getAndUpdateId(root);
+    final HierarchicalId nonRootId = this.idResolver.getAndUpdateId(nonRoot);
+    this.idResolver.endTransaction();
+
+    resource.getContents().clear();
+    this.idResolver.endTransaction();
+
+    Assertions.assertThrows(
+        IllegalStateException.class, () -> this.idResolver.getEObject(nonRootId));
+  }
 }

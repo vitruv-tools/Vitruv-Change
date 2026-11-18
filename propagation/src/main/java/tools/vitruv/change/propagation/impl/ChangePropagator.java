@@ -449,6 +449,16 @@ public class ChangePropagator {
   }
 
   /**
+   * Creates a snapshot of the model repository if a specification uses the state before a change.
+   * Otherwise returns <code>null</code>, as creating a snapshot copies all models.
+   */
+  private ModelRepositorySnapshot createSnapshotIfUsed() {
+    boolean previousStateUsed = StreamSupport.stream(changePropagationProvider.spliterator(), false)
+        .anyMatch(ChangePropagationSpecification::usesPreviousState);
+    return previousStateUsed ? modelRepository.createSnapshot() : null;
+  }
+
+  /**
    * Copies the annotations of <code>source</code> to <code>target</code>,
    * unless <code>target</code> already has an annotation of the same type.
    */
