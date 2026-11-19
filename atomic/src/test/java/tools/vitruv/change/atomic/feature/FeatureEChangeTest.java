@@ -3,6 +3,7 @@ package tools.vitruv.change.atomic.feature;
 import allElementTypes.AllElementTypesPackage;
 import allElementTypes.Root;
 import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil;
+import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -10,7 +11,6 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import java.util.function.Consumer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,8 +22,9 @@ import tools.vitruv.change.atomic.uuid.UuidResolver;
 import tools.vitruv.change.testutils.metamodels.AllElementTypesCreators;
 
 /**
- * Test class for {@link FeatureEChange} which is used by every {@link EChange} which modifies {@link EStructuralFeature}s
- * (single- or multi-valued attributes or references) of a {@link EObject}.
+ * Test class for {@link FeatureEChange} which is used by every {@link EChange}
+ * which modifies {@link EStructuralFeature}s
+ * (single- or multivalued attributes or references) of a {@link EObject}.
  */
 public class FeatureEChangeTest extends EChangeTest {
   private Root affectedEObject;
@@ -34,6 +35,9 @@ public class FeatureEChangeTest extends EChangeTest {
 
   private Resource resource2;
 
+  /**
+   * Prepares the test state before each test.
+   */
   @BeforeEach
   public final void beforeTest() {
     this.affectedEObject = this.getRootObject();
@@ -41,10 +45,9 @@ public class FeatureEChangeTest extends EChangeTest {
     final ResourceSet resourceSet2 = ResourceSetUtil.withGlobalFactories(new ResourceSetImpl());
     this.resource2 = resourceSet2.getResource(this.getResource().getURI(), true);
     this.uuidResolver2 = UuidResolver.create(resourceSet2);
-    final Consumer<EObject> _function = (EObject it) -> {
-      this.uuidResolver2.registerEObject(it);
-    };
-    this.resource2.getAllContents().forEachRemaining(_function);
+    final Consumer<EObject> uuidResolverFunction = (EObject it) -> this
+            .uuidResolver2.registerEObject(it);
+    this.resource2.getAllContents().forEachRemaining(uuidResolverFunction);
   }
 
   /**
@@ -53,36 +56,32 @@ public class FeatureEChangeTest extends EChangeTest {
   @Test
   public void resolveEFeatureChangeFails() {
     this.affectedEObject = this.prepareSecondRoot();
-    Assertions.assertNull(this.resource2.getEObject(EcoreUtil.getURI(this.affectedEObject).fragment()));
+    Assertions.assertNull(this.resource2.getEObject(EcoreUtil.getURI(this.affectedEObject)
+            .fragment()));
     final EChange<Uuid> unresolvedChange = this.createUnresolvedChange();
-    final Executable _function = () -> {
-      this.applyForwardAndResolve(unresolvedChange);
-    };
-    Assertions.<IllegalStateException>assertThrows(IllegalStateException.class, _function);
+    final Executable applyForwardAndResolveFunction = () -> this
+            .applyForwardAndResolve(unresolvedChange);
+    Assertions.assertThrows(IllegalStateException.class, applyForwardAndResolveFunction);
   }
 
   /**
-   * Test whether resolving the EFeatureChange fails by giving a null EObject
+   * Test whether resolving the EFeatureChange fails by giving a null EObject.
    */
   @Test
   public void resolveEFeatureAffectedObjectNull() {
     this.affectedEObject = null;
-    final Executable _function = () -> {
-      this.createUnresolvedChange();
-    };
-    Assertions.<IllegalArgumentException>assertThrows(IllegalArgumentException.class, _function);
+    final Executable createUnresolvedChangeFunction = this::createUnresolvedChange;
+    Assertions.assertThrows(IllegalArgumentException.class, createUnresolvedChangeFunction);
   }
 
   /**
-   * Tests whether creating the EFeatureChange fails by giving a null EFeature
+   * Tests whether creating the EFeatureChange fails by giving a null EFeature.
    */
   @Test
   public void createEFeatureAffectedFeatureNull() {
     this.affectedFeature = null;
-    final Executable _function = () -> {
-      this.createUnresolvedChange();
-    };
-    Assertions.<IllegalArgumentException>assertThrows(IllegalArgumentException.class, _function);
+    final Executable createUnresolvedChangeFunction = this::createUnresolvedChange;
+    Assertions.assertThrows(IllegalArgumentException.class, createUnresolvedChangeFunction);
   }
 
   /**
@@ -98,6 +97,7 @@ public class FeatureEChangeTest extends EChangeTest {
    * Creates new unresolved change.
    */
   private EChange<Uuid> createUnresolvedChange() {
-    return this.unresolve(this.getAtomicFactory().<Root, Object>createReplaceSingleAttributeChange(this.affectedEObject, this.affectedFeature, null, null));
+    return this.unresolve(this.getAtomicFactory().createReplaceSingleAttributeChange(
+            this.affectedEObject, this.affectedFeature, null, null));
   }
 }
