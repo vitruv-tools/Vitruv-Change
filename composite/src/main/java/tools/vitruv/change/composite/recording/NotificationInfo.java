@@ -25,72 +25,59 @@ class NotificationInfo implements Notification {
     throw new IllegalArgumentException("Use eventTypeEnum for type-safe event types.");
   }
 
+  /**
+   * Returns the event type of the wrapped notification as an {@link EventType}.
+   *
+   * @return the event type
+   * @throws IllegalArgumentException if the event type is not supported
+   */
   public EventType getEventTypeEnum() {
     EventType switchResult = null;
     int eventType = this.notification.getEventType();
-    switch (eventType) {
-      case Notification.SET:
-        switchResult = EventType.SET;
-        break;
-      case Notification.UNSET:
-        switchResult = EventType.UNSET;
-        break;
-      case Notification.ADD:
-        switchResult = EventType.ADD;
-        break;
-      case Notification.REMOVE:
-        switchResult = EventType.REMOVE;
-        break;
-      case Notification.ADD_MANY:
-        switchResult = EventType.ADD_MANY;
-        break;
-      case Notification.REMOVE_MANY:
-        switchResult = EventType.REMOVE_MANY;
-        break;
-      case Notification.MOVE:
-        switchResult = EventType.MOVE;
-        break;
-      case Notification.REMOVING_ADAPTER:
-        switchResult = EventType.REMOVING_ADAPTER;
-        break;
-      case Notification.RESOLVE:
-        switchResult = EventType.RESOLVE;
-        break;
-      default:
-        throw new IllegalArgumentException("Unexpected eventType.");
-    }
+    switchResult = switch (eventType) {
+      case Notification.SET -> EventType.SET;
+      case Notification.UNSET -> EventType.UNSET;
+      case Notification.ADD -> EventType.ADD;
+      case Notification.REMOVE -> EventType.REMOVE;
+      case Notification.ADD_MANY -> EventType.ADD_MANY;
+      case Notification.REMOVE_MANY -> EventType.REMOVE_MANY;
+      case Notification.MOVE -> EventType.MOVE;
+      case Notification.REMOVING_ADAPTER -> EventType.REMOVING_ADAPTER;
+      case Notification.RESOLVE -> EventType.RESOLVE;
+      default -> throw new IllegalArgumentException("Unexpected eventType.");
+    };
     return switchResult;
   }
 
   /**
-   * @return the structural feature affected
+   * Returns the structural feature affected by this notification.
+   *
+   * @return the affected feature, or {@code null} if the feature is not an
+   *     {@link EStructuralFeature}
    */
   public EStructuralFeature getStructuralFeature() {
-    EStructuralFeature xblockexpression = null;
-    {
-      final Object feature = this.getFeature();
-      EStructuralFeature xifexpression = null;
-      if ((feature instanceof EStructuralFeature)) {
-        xifexpression = ((EStructuralFeature) feature);
-      } else {
-        xifexpression = null;
-      }
-      xblockexpression = xifexpression;
-    }
-    return xblockexpression;
+    final Object feature = getFeature();
+    return feature instanceof EStructuralFeature ? (EStructuralFeature) feature : null;
   }
 
   public boolean isStructuralFeatureNotification() {
     return (this.isAttributeNotification() || this.isReferenceNotification());
   }
 
+  /**
+   * Checks whether this notification signals a change of an attribute value.
+   *
+   * @return {@code true} if the affected feature is an {@link EAttribute}
+   */
   public boolean isAttributeNotification() {
     Object feature = this.getFeature();
     return (feature instanceof EAttribute);
   }
 
   /**
-   * @return whether this notification signals a change of a reference value
+   * Checks whether this notification signals a change of a reference value.
+   *
+   * @return {@code true} if the affected feature is an {@link EReference}
    */
   public boolean isReferenceNotification() {
     Object feature = this.getFeature();
@@ -98,50 +85,40 @@ class NotificationInfo implements Notification {
   }
 
   /**
-   * @return the EAttribute if the notification relates to an attribute, null otherwise
+   * Returns the attribute affected by this notification.
+   *
+   * @return the affected attribute, or {@code null} if the notification does not
+   *     relate to an attribute
    */
   public EAttribute getAttribute() {
-    EAttribute xblockexpression = null;
-    {
-      final Object feature = this.getFeature();
-      EAttribute xifexpression = null;
-      if ((feature instanceof EAttribute)) {
-        xifexpression = ((EAttribute) feature);
-      } else {
-        xifexpression = null;
-      }
-      xblockexpression = xifexpression;
-    }
-    return xblockexpression;
+    final Object feature = this.getFeature();
+    return feature instanceof  EAttribute ? (EAttribute) feature : null;
   }
 
   /**
-   * @return the EReference if the notification relates to a reference feature, null otherwise
+   * Returns the reference affected by this notification.
+   *
+   * @return the affected reference, or {@code null} if the notification does not
+   *     relate to a reference
    */
   public EReference getReference() {
-    EReference xblockexpression = null;
-    {
-      final Object feature = this.getFeature();
-      EReference xifexpression = null;
-      if ((feature instanceof EReference)) {
-        xifexpression = ((EReference) feature);
-      } else {
-        xifexpression = null;
-      }
-      xblockexpression = xifexpression;
-    }
-    return xblockexpression;
+    final Object feature = this.getFeature();
+    return feature instanceof EReference ? (EReference) feature : null;
   }
 
   /**
-   * @return true if the changed feature is marked transient, false otherwise
+   * Checks whether the affected feature is marked as transient.
+   *
+   * @return {@code true} if the changed feature is transient, {@code false} otherwise
    */
   public boolean isTransient() {
     return (this.isStructuralFeatureNotification() && this.getStructuralFeature().isTransient());
   }
 
   /**
-   * @return true if the event is of type Notification.ADD, false otherwise
+   * Checks whether this is an {@link Notification#ADD} event.
+   *
+   * @return {@code true} if the event is of type {@code ADD}, {@code false} otherwise
    */
   public boolean isAddEvent() {
     int eventType = this.notification.getEventType();
@@ -149,7 +126,9 @@ class NotificationInfo implements Notification {
   }
 
   /**
-   * @return true if the event is of type Notification.REMOVE, false otherwise
+   * Checks whether this is a {@link Notification#REMOVE} event.
+   *
+   * @return {@code true} if the event is of type {@code REMOVE}, {@code false} otherwise
    */
   public boolean isRemoveEvent() {
     int eventType = this.notification.getEventType();
@@ -157,7 +136,9 @@ class NotificationInfo implements Notification {
   }
 
   /**
-   * @return true if the event is of type Notification.SET, false otherwise
+   * Checks whether this is a {@link Notification#SET} event.
+   *
+   * @return {@code true} if the event is of type {@code SET}, {@code false} otherwise
    */
   public boolean isSetEvent() {
     int eventType = this.notification.getEventType();
@@ -165,7 +146,9 @@ class NotificationInfo implements Notification {
   }
 
   /**
-   * @return true if the event is of type Notification.ADDMANY, false otherwise
+   * Checks whether this is an {@link Notification#ADD_MANY} event.
+   *
+   * @return {@code true} if the event is of type {@code ADD_MANY}, {@code false} otherwise
    */
   public boolean isAddManyEvent() {
     int eventType = this.notification.getEventType();
@@ -173,7 +156,9 @@ class NotificationInfo implements Notification {
   }
 
   /**
-   * @return true if the event is of type Notification.REMOVEMANY, false otherwise
+   * Checks whether this is a {@link Notification#REMOVE_MANY} event.
+   *
+   * @return {@code true} if the event is of type {@code REMOVE_MANY}, {@code false} otherwise
    */
   public boolean isRemoveManyEvent() {
     int eventType = this.notification.getEventType();
@@ -181,7 +166,9 @@ class NotificationInfo implements Notification {
   }
 
   /**
-   * @return true if the event is of type Notification.MOVE, false otherwise
+   * Checks whether this is a {@link Notification#MOVE} event.
+   *
+   * @return {@code true} if the event is of type {@code MOVE}, {@code false} otherwise
    */
   public boolean isMoveEvent() {
     int eventType = this.notification.getEventType();
@@ -189,8 +176,12 @@ class NotificationInfo implements Notification {
   }
 
   /**
-   * @return true if this notification is followed by more notifications in a chain, false if this
-   *     is the last notification of a chain
+   * Checks whether this notification is followed by more notifications in a chain.
+   *
+   * <p>A following notification that changes a transient reference is ignored.
+   *
+   * @return {@code true} if this notification is followed by more notifications in
+   *     a chain, {@code false} if this is the last notification of a chain
    */
   public boolean hasNext() {
     if (!(this.notification instanceof NotificationImpl notificationImpl)) {
@@ -213,12 +204,21 @@ class NotificationInfo implements Notification {
     }
   }
 
+  /**
+   * Returns the notification that follows the given one in its chain.
+   *
+   * @param notification the notification to read from
+   * @return the next notification in the chain, or {@code null} if there is none
+   */
   private static NotificationChain getNextNotification(final NotificationImpl notification) {
     return (NotificationChain) NEXT_NOTIFICATION_HANDLE.get(notification);
   }
 
   /**
-   * @return @see Notification#getNewValue()
+   * Returns the new value of this notification as an {@link EObject}.
+   *
+   * @return the new value
+   * @see Notification#getNewValue()
    */
   public EObject getNewModelElementValue() {
     Object newValue = this.notification.getNewValue();
@@ -226,7 +226,10 @@ class NotificationInfo implements Notification {
   }
 
   /**
-   * @return @see Notification#getOldValue()
+   * Returns the old value of this notification as an {@link EObject}.
+   *
+   * @return the old value
+   * @see Notification#getOldValue()
    */
   public EObject getOldModelElementValue() {
     Object oldValue = this.notification.getOldValue();
@@ -234,7 +237,7 @@ class NotificationInfo implements Notification {
   }
 
   public int getInitialIndex() {
-    int xifexpression = (int) 0;
+    int xifexpression;
     int position = this.getPosition();
     boolean tripleEquals = (position == Notification.NO_INDEX);
     if (tripleEquals) {
@@ -246,7 +249,10 @@ class NotificationInfo implements Notification {
   }
 
   /**
-   * @return true if the feature is unsettable and was in the set state before this notification.
+   * Checks whether this notification unset an unsettable feature.
+   *
+   * @return {@code true} if the feature is unsettable, was set before this
+   *     notification and is no longer set afterwards
    */
   public boolean wasUnset() {
     return (((this.isStructuralFeatureNotification() && this.getStructuralFeature().isUnsettable())
@@ -255,7 +261,10 @@ class NotificationInfo implements Notification {
   }
 
   /**
-   * @return @see Notification#getNotifier()
+   * Returns the notifier of this notification as an {@link EObject}.
+   *
+   * @return the notifier
+   * @see Notification#getNotifier()
    */
   public EObject getNotifierModelElement() {
     Object notifier = this.notification.getNotifier();
@@ -263,7 +272,10 @@ class NotificationInfo implements Notification {
   }
 
   /**
-   * @return @see Notification#getNotifier()
+   * Returns the notifier of this notification as a {@link Resource}.
+   *
+   * @return the notifier
+   * @see Notification#getNotifier()
    */
   public Resource getNotifierResource() {
     Object notifier = this.notification.getNotifier();
@@ -271,6 +283,8 @@ class NotificationInfo implements Notification {
   }
 
   /**
+   * Returns a readable description of this notification.
+   *
    * @return a string useful for debugging only
    */
   public String getDebugString() {
@@ -288,22 +302,15 @@ class NotificationInfo implements Notification {
   }
 
   private String getEventTypeDebugName() {
-    switch (this.notification.getEventType()) {
-      case Notification.ADD:
-        return "ADD";
-      case Notification.SET:
-        return "SET";
-      case Notification.ADD_MANY:
-        return "ADDMANY";
-      case Notification.REMOVE:
-        return "REMOVE";
-      case Notification.REMOVE_MANY:
-        return "REMOVEMANY";
-      case Notification.MOVE:
-        return "MOVE";
-      default:
-        return String.valueOf(this.notification.getEventType());
-    }
+    return switch (this.notification.getEventType()) {
+      case Notification.ADD -> "ADD";
+      case Notification.SET -> "SET";
+      case Notification.ADD_MANY -> "ADDMANY";
+      case Notification.REMOVE -> "REMOVE";
+      case Notification.REMOVE_MANY -> "REMOVEMANY";
+      case Notification.MOVE -> "MOVE";
+      default -> String.valueOf(this.notification.getEventType());
+    };
   }
 
   private String getFeatureDebugName() {

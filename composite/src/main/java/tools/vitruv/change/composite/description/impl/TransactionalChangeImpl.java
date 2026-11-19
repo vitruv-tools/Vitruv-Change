@@ -38,18 +38,34 @@ import tools.vitruv.change.composite.MetamodelDescriptor;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.interaction.UserInteractionBase;
 
-public class TransactionalChangeImpl<Element extends Object> implements TransactionalChange<Element> {
-  private List<? extends EChange<Element>> eChanges;
+/**
+ * Default implementation of {@link TransactionalChange}, holding an ordered list
+ * of atomic {@link EChange}s together with the user interactions and annotations
+ * that belong to them.
+ *
+ * @param <Element> the type of elements referenced by the changes
+ */
+public class TransactionalChangeImpl<Element> implements TransactionalChange<Element> {
+  private final List<? extends EChange<Element>> eChanges;
 
   private final List<UserInteractionBase> userInteractions = new ArrayList<UserInteractionBase>();
 
   private final Map<Class<?>, Object> annotations = new HashMap<>();
 
+  /**
+   * Creates a transactional change containing the given atomic changes.
+   *
+   * <p>The changes are copied into a new list, so later modifications to the
+   * given iterable do not affect this change.
+   *
+   * @param eChanges the atomic changes, in order; must not be {@code null}
+   * @throws NullPointerException if {@code eChanges} is {@code null}
+   */
   public TransactionalChangeImpl(final Iterable<? extends EChange<Element>> eChanges) {
     Preconditions.checkNotNull(eChanges, "eChanges");
-    List<EChange<Element>> _list = new ArrayList<>();
-    eChanges.forEach(_list::add);
-    this.eChanges = _list;
+    List<EChange<Element>> list = new ArrayList<>();
+    eChanges.forEach(list::add);
+    this.eChanges = list;
   }
 
   @Override
@@ -59,40 +75,38 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
 
   @Override
   public boolean containsConcreteChange() {
-    boolean _isEmpty = this.eChanges.isEmpty();
-    return (!_isEmpty);
+    boolean isEmpty = this.eChanges.isEmpty();
+    return (!isEmpty);
   }
 
   private static URI getChangedURI(final EChange<?> eChange) {
-    URI _switchResult = null;
-    boolean _matched = false;
+    URI switchResult = null;
+    boolean matched = false;
     if (eChange instanceof FeatureEChange) {
-      _matched=true;
-      EObject _affectedElement = ((FeatureEChange<EObject, ?>)eChange).getAffectedElement();
-      URI _objectUri = null;
-      if (_affectedElement!=null) {
-        _objectUri=TransactionalChangeImpl.getObjectUri(_affectedElement);
+      matched = true;
+      EObject affectedElement = ((FeatureEChange<EObject, ?>) eChange).getAffectedElement();
+      URI objectUri = null;
+      if (affectedElement != null) {
+        objectUri = TransactionalChangeImpl.getObjectUri(affectedElement);
       }
-      _switchResult = _objectUri;
+      switchResult = objectUri;
     }
-    if (!_matched) {
-      if (eChange instanceof EObjectExistenceEChange) {
-        _matched=true;
-        EObject _affectedElement = ((EObjectExistenceEChange<EObject>)eChange).getAffectedElement();
-        URI _objectUri = null;
-        if (_affectedElement!=null) {
-          _objectUri=TransactionalChangeImpl.getObjectUri(_affectedElement);
-        }
-        _switchResult = _objectUri;
+
+    if (!matched && eChange instanceof EObjectExistenceEChange) {
+      matched = true;
+      EObject affectedElement = ((EObjectExistenceEChange<EObject>) eChange).getAffectedElement();
+      URI objectUri = null;
+      if (affectedElement != null) {
+        objectUri = TransactionalChangeImpl.getObjectUri(affectedElement);
       }
+      switchResult = objectUri;
     }
-    if (!_matched) {
-      if (eChange instanceof RootEChange) {
-        _matched=true;
-        _switchResult = URI.createURI(((RootEChange<?>)eChange).getUri());
-      }
+
+    if (!matched && eChange instanceof RootEChange) {
+      switchResult = URI.createURI(((RootEChange<?>) eChange).getUri());
     }
-    return _switchResult;
+
+    return switchResult;
   }
 
   @Override
@@ -111,11 +125,10 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
       while ((currentPackage.getESuperPackage() != null)) {
         currentPackage = currentPackage.getESuperPackage();
       }
-      if ((currentPackage != null)) {
-        changedPackages.add(currentPackage);
-      }
+      changedPackages.add(currentPackage);
     }
-    Preconditions.checkState(!changedPackages.isEmpty(), "Cannot identify the packages of this change:%s%s",
+    Preconditions.checkState(!changedPackages.isEmpty(),
+            "Cannot identify the packages of this change:%s%s",
         System.lineSeparator(), this);
     return MetamodelDescriptor.of(changedPackages);
   }
@@ -123,52 +136,49 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
   @Override
   public Set<EObject> getAffectedEObjects() {
     return this.eChanges.stream()
-        .flatMap(it -> TransactionalChangeImpl.getAffectedEObjects(it).stream())
-        .collect(Collectors.toSet());
+            .flatMap(it -> TransactionalChangeImpl
+                    .getAffectedEObjects(it).stream())
+            .collect(Collectors.toSet());
+  }
+
+  private static Set<EObject> getAffectedEObjects(final EChange<?> eChange) {
+    Set<EObject> switchResult = null;
+    boolean matched = false;
+    if (eChange instanceof FeatureEChange) {
+      matched = true;
+      switchResult = Set.of(((FeatureEChange<EObject, ?>) eChange).getAffectedElement());
+    }
+    if (!matched && eChange instanceof EObjectExistenceEChange) {
+      matched = true;
+      switchResult = Set.of(((EObjectExistenceEChange<EObject>) eChange).getAffectedElement());
+    }
+
+    if (!matched && eChange instanceof InsertRootEObject) {
+      matched = true;
+      switchResult = Set.of(((InsertRootEObject<EObject>) eChange).getNewValue());
+    }
+
+    if (!matched && eChange instanceof RemoveRootEObject) {
+      switchResult = Set.of(((RemoveRootEObject<EObject>) eChange).getOldValue());
+    }
+    return switchResult;
   }
 
   @Override
   public Set<EObject> getAffectedAndReferencedEObjects() {
     return this.eChanges.stream()
-        .flatMap(it -> TransactionalChangeImpl.getAffectedAndReferencedEObjects(it).stream())
-        .collect(Collectors.toSet());
-  }
-
-  private static Set<EObject> getAffectedEObjects(final EChange<?> eChange) {
-    Set<EObject> _switchResult = null;
-    boolean _matched = false;
-    if (eChange instanceof FeatureEChange) {
-      _matched=true;
-      _switchResult = Set.<EObject>of(((FeatureEChange<EObject, ?>)eChange).getAffectedElement());
-    }
-    if (!_matched) {
-      if (eChange instanceof EObjectExistenceEChange) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((EObjectExistenceEChange<EObject>)eChange).getAffectedElement());
-      }
-    }
-    if (!_matched) {
-      if (eChange instanceof InsertRootEObject) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((InsertRootEObject<EObject>)eChange).getNewValue());
-      }
-    }
-    if (!_matched) {
-      if (eChange instanceof RemoveRootEObject) {
-        _matched=true;
-        _switchResult = Set.<EObject>of(((RemoveRootEObject<EObject>)eChange).getOldValue());
-      }
-    }
-    return _switchResult;
+            .flatMap(it -> TransactionalChangeImpl
+                    .getAffectedAndReferencedEObjects(it).stream())
+            .collect(Collectors.toSet());
   }
 
   private static Set<EObject> getAffectedAndReferencedEObjects(final EChange<?> eChange) {
     if (eChange instanceof UpdateAttributeEChange) {
-      return Set.<EObject>of(((UpdateAttributeEChange<EObject>) eChange).getAffectedElement());
+      return Set.of(((UpdateAttributeEChange<EObject>) eChange).getAffectedElement());
     }
 
     if (eChange instanceof ReplaceSingleValuedEReference) {
-      return TransactionalChangeImpl.<EObject>setOfNotNull(
+      return TransactionalChangeImpl.setOfNotNull(
               ((ReplaceSingleValuedEReference<EObject>) eChange).getAffectedElement(),
               ((ReplaceSingleValuedEReference<EObject>) eChange).getOldValue(),
               ((ReplaceSingleValuedEReference<EObject>) eChange).getNewValue()
@@ -176,29 +186,29 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
     }
 
     if (eChange instanceof InsertEReference) {
-      return Set.<EObject>of(
+      return Set.of(
               ((InsertEReference<EObject>) eChange).getAffectedElement(),
               ((InsertEReference<EObject>) eChange).getNewValue()
       );
     }
 
     if (eChange instanceof RemoveEReference) {
-      return Set.<EObject>of(
+      return Set.of(
               ((RemoveEReference<EObject>) eChange).getAffectedElement(),
               ((RemoveEReference<EObject>) eChange).getOldValue()
       );
     }
 
     if (eChange instanceof EObjectExistenceEChange) {
-      return Set.<EObject>of(((EObjectExistenceEChange<EObject>) eChange).getAffectedElement());
+      return Set.of(((EObjectExistenceEChange<EObject>) eChange).getAffectedElement());
     }
 
     if (eChange instanceof InsertRootEObject) {
-      return Set.<EObject>of(((InsertRootEObject<EObject>) eChange).getNewValue());
+      return Set.of(((InsertRootEObject<EObject>) eChange).getNewValue());
     }
 
     if (eChange instanceof RemoveRootEObject) {
-      return Set.<EObject>of(((RemoveRootEObject<EObject>) eChange).getOldValue());
+      return Set.of(((RemoveRootEObject<EObject>) eChange).getOldValue());
     }
     return Set.of();
   }
@@ -210,7 +220,8 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
 
   @Override
   public void setUserInteractions(final Iterable<UserInteractionBase> userInteractions) {
-    Preconditions.<Iterable<UserInteractionBase>>checkNotNull(userInteractions, "Interactions must not be null");
+    Preconditions.<Iterable<UserInteractionBase>>checkNotNull(userInteractions,
+            "Interactions must not be null");
     this.userInteractions.clear();
     Iterables.<UserInteractionBase>addAll(this.userInteractions, userInteractions);
   }
@@ -231,13 +242,13 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
   }
 
   protected List<EChange<Element>> getClonedEChanges() {
-    return this.eChanges.stream().map(it -> EcoreUtil.<EChange<Element>>copy(it)).toList();
+    return this.eChanges.stream().map(EcoreUtil::<EChange<Element>>copy).toList();
   }
 
   @Override
   public TransactionalChangeImpl<Element> copy() {
-    List<EChange<Element>> _clonedEChanges = this.getClonedEChanges();
-    TransactionalChangeImpl<Element> copy = new TransactionalChangeImpl<Element>(_clonedEChanges);
+    List<EChange<Element>> clonedEChanges = this.getClonedEChanges();
+    TransactionalChangeImpl<Element> copy = new TransactionalChangeImpl<Element>(clonedEChanges);
     copy.annotations.putAll(this.annotations);
     return copy;
   }
@@ -249,26 +260,16 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
 
   @Override
   public boolean equals(final Object obj) {
-    boolean _xifexpression = false;
+
     if ((obj == this)) {
-      _xifexpression = true;
-    } else {
-      boolean _xifexpression_1 = false;
-      if ((obj == null)) {
-        _xifexpression_1 = false;
-      } else {
-        boolean _xifexpression_2 = false;
-        if ((obj instanceof TransactionalChange)) {
-          List _eChanges = ((TransactionalChange)obj).getEChanges();
-          _xifexpression_2 = Objects.equals(this.eChanges, _eChanges);
-        } else {
-          _xifexpression_2 = false;
-        }
-        _xifexpression_1 = _xifexpression_2;
-      }
-      _xifexpression = _xifexpression_1;
+      return true;
     }
-    return _xifexpression;
+
+    if (obj instanceof TransactionalChange transactionalChange) {
+      return Objects.equals(this.eChanges, transactionalChange.getEChanges());
+    }
+    return false;
+
   }
 
   @Override
@@ -277,84 +278,69 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
   }
 
   private static URI getObjectUri(final EObject object) {
-    URI _xblockexpression = null;
-    {
-      final Resource objectResource = object.eResource();
-      URI _xifexpression = null;
-      if ((objectResource != null)) {
-        _xifexpression = objectResource.getURI();
-      } else {
-        URI _xifexpression_1 = null;
-        boolean _eIsProxy = object.eIsProxy();
-        if (_eIsProxy) {
-          URI _xblockexpression_1 = null;
-          {
-            final URI proxyURI = ((InternalEObject) object).eProxyURI();
-            URI _xifexpression_2 = null;
-            if (((proxyURI != null) && (proxyURI.segmentCount() > 0))) {
-              _xifexpression_2 = proxyURI.trimFragment();
-            } else {
-              _xifexpression_2 = null;
-            }
-            _xblockexpression_1 = _xifexpression_2;
-          }
-          _xifexpression_1 = _xblockexpression_1;
-        } else {
-          _xifexpression_1 = null;
-        }
-        _xifexpression = _xifexpression_1;
-      }
-      _xblockexpression = _xifexpression;
+
+    final Resource resource = object.eResource();
+
+    if ((resource != null)) {
+      return resource.getURI();
     }
-    return _xblockexpression;
+
+    if (object.eIsProxy()) {
+      URI proxyURI = ((InternalEObject) object).eProxyURI();
+      if (proxyURI != null && proxyURI.segmentCount() > 0) {
+        return proxyURI.trimFragment();
+      }
+    }
+
+    return null;
   }
 
-  private static <T extends Object> Set<T> setOfNotNull(final T element) {
-    Set<T> _xifexpression = null;
+  private static <T> Set<T> setOfNotNull(final T element) {
+    Set<T> xifexpression = null;
     if ((element != null)) {
-      _xifexpression = Set.<T>of(element);
+      xifexpression = Set.<T>of(element);
     } else {
-      _xifexpression = Set.of();
+      xifexpression = Set.of();
     }
-    return _xifexpression;
+    return xifexpression;
   }
 
-  private static <T extends Object> Set<T> setOfNotNull(final T element1, final T element2) {
-    Set<T> _xifexpression = null;
+  private static <T> Set<T> setOfNotNull(final T element1, final T element2) {
+    Set<T> xifexpression = null;
     if ((element1 == null)) {
-      _xifexpression = TransactionalChangeImpl.<T>setOfNotNull(element2);
+      xifexpression = TransactionalChangeImpl.<T>setOfNotNull(element2);
     } else {
-      Set<T> _xifexpression_1 = null;
+      Set<T> xifexpression1 = null;
       if ((element2 == null)) {
-        _xifexpression_1 = Set.<T>of(element1);
+        xifexpression1 = Set.<T>of(element1);
       } else {
-        _xifexpression_1 = Set.<T>of(element1, element2);
+        xifexpression1 = Set.<T>of(element1, element2);
       }
-      _xifexpression = _xifexpression_1;
+      xifexpression = xifexpression1;
     }
-    return _xifexpression;
+    return xifexpression;
   }
 
-  private static <T extends Object> Set<T> setOfNotNull(final T element1, final T element2, final T element3) {
-    Set<T> _xifexpression = null;
+  private static <T> Set<T> setOfNotNull(final T element1, final T element2, final T element3) {
+    Set<T> xifexpression = null;
     if ((element1 == null)) {
-      _xifexpression = TransactionalChangeImpl.<T>setOfNotNull(element2, element3);
+      xifexpression = TransactionalChangeImpl.setOfNotNull(element2, element3);
     } else {
-      Set<T> _xifexpression_1 = null;
+      Set<T> xifexpression1 = null;
       if ((element2 == null)) {
-        _xifexpression_1 = TransactionalChangeImpl.<T>setOfNotNull(element1, element3);
+        xifexpression1 = TransactionalChangeImpl.setOfNotNull(element1, element3);
       } else {
-        Set<T> _xifexpression_2 = null;
+        Set<T> xifexpression2 = null;
         if ((element3 == null)) {
-          _xifexpression_2 = Set.<T>of(element1, element2);
+          xifexpression2 = Set.of(element1, element2);
         } else {
-          _xifexpression_2 = Set.<T>of(element1, element2, element3);
+          xifexpression2 = Set.of(element1, element2, element3);
         }
-        _xifexpression_1 = _xifexpression_2;
+        xifexpression1 = xifexpression2;
       }
-      _xifexpression = _xifexpression_1;
+      xifexpression = xifexpression1;
     }
-    return _xifexpression;
+    return xifexpression;
   }
 
   @Override
@@ -362,13 +348,15 @@ public class TransactionalChangeImpl<Element extends Object> implements Transact
     if (this.eChanges.isEmpty()) {
       return this.getClass().getSimpleName() + " (empty)";
     } else {
-      StringBuilder _builder = new StringBuilder();
-      _builder.append(this.getClass().getSimpleName()).append(": [").append(System.lineSeparator());
+      StringBuilder builder = new StringBuilder();
+      builder.append(this.getClass().getSimpleName())
+              .append(": [").append(System.lineSeparator());
       for (EChange<Element> eChange : this.eChanges) {
-        _builder.append("\t").append(this.getStringRepresentation(eChange)).append(System.lineSeparator());
+        builder.append("\t").append(this.getStringRepresentation(eChange))
+                .append(System.lineSeparator());
       }
-      _builder.append("]").append(System.lineSeparator());
-      return _builder.toString();
+      builder.append("]").append(System.lineSeparator());
+      return builder.toString();
     }
   }
 

@@ -8,7 +8,7 @@ import tools.vitruv.change.composite.description.VitruviusChange;
 
 /** Resolves and applies {@link VitruviusChange}s of {@link Uuid}s. */
 public class VitruviusChangeUuidResolver extends AbstractVitruviusChangeResolver<Uuid> {
-  private AtomicEChangeUuidResolver atomicChangeResolver;
+  private final AtomicEChangeUuidResolver atomicChangeResolver;
 
   /**
    * Creates a new {@link VitruviusChangeUuidResolver} with the given {@link

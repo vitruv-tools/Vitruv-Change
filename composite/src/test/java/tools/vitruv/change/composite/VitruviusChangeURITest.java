@@ -13,19 +13,23 @@ import org.junit.jupiter.api.Test;
 import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.testutils.metamodels.AllElementTypesCreators;
 
+/**
+ * Tests the changed URIs reported by recorded changes.
+ */
 public class VitruviusChangeURITest extends ChangeDescription2ChangeTransformationTest {
   @Test
   @DisplayName("create model elements and ensure their change URIs match resource URI")
-  public void createModelElements() {
+  void createModelElements() {
     final Resource resource = this.resourceAt("test");
     final Root root = AllElementTypesCreators.aet.Root();
     final Consumer<Resource> _function = (Resource it) -> {
-      EList<EObject> _contents = it.getContents();
-      NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-      _NonRoot.setId("NonRoot");
+      EList<EObject> contents;
+      contents = it.getContents();
+      NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+      nonRoot.setId("NonRoot");
       root.setId("Root");
-      root.setSingleValuedContainmentEReference(_NonRoot);
-      _contents.add(root);
+      root.setSingleValuedContainmentEReference(nonRoot);
+      contents.add(root);
     };
     final TransactionalChange<EObject> result = this.<Resource>recordComposite(resource, _function);
     final Consumer<URI> _function_1 = (URI it) -> {
@@ -36,26 +40,27 @@ public class VitruviusChangeURITest extends ChangeDescription2ChangeTransformati
 
   @Test
   @DisplayName("delete resource and ensure change URIs for proxy elements match resource URI")
-  public void deleteModel() {
+  void deleteModel() {
     final Resource resource = this.resourceAt("test");
     final Root root = AllElementTypesCreators.aet.Root();
     final Consumer<Resource> _function = (Resource it) -> {
-      EList<EObject> _contents = it.getContents();
-      NonRoot _NonRoot = AllElementTypesCreators.aet.NonRoot();
-      _NonRoot.setId("NonRoot");
+      EList<EObject> contents;
+      contents = it.getContents();
+      NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+      nonRoot.setId("NonRoot");
       root.setId("Root");
-      root.setSingleValuedContainmentEReference(_NonRoot);
-      _contents.add(root);
+      root.setSingleValuedContainmentEReference(nonRoot);
+      contents.add(root);
     };
     this.<Resource>recordComposite(resource, _function);
     final Consumer<Resource> _function_1 = (Resource it) -> {
       try {
         it.delete(null);
-      } catch (Throwable _e) {
-        throw new RuntimeException(_e);
+      } catch (Throwable e) {
+        throw new RuntimeException(e);
       }
     };
-    final TransactionalChange<EObject> result = this.<Resource>recordComposite(resource, _function_1);
+    final TransactionalChange<EObject> result = this.recordComposite(resource, _function_1);
     final Consumer<EObject> _function_2 = (EObject it) -> {
       Assertions.assertTrue(it.eIsProxy());
     };
