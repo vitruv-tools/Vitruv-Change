@@ -8,13 +8,16 @@ import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceCopie
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.URIConverter;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import tools.vitruv.change.correspondence.Correspondence;
@@ -94,35 +97,107 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
       copy.setModified(modified);
     });
 
-    BiMap<EObject, EObject> mapping = createOriginalToCopyMapping(originalResourceSet, copiedResourceSet);
+    BiMap<EObject, EObject> mapping =
+        createOriginalToCopyMapping(originalResourceSet, copiedResourceSet);
 
     return new ResourceSetCopy(copiedResourceSet, mapping);
   }
 
-  private static BiMap<EObject, EObject> createOriginalToCopyMapping(
-      ResourceSet originalResourceSet,
-      ResourceSet copiedResourceSet) {
-    BiMap<EObject, EObject> result = HashBiMap.create();
-
-    for (Resource originalResource : originalResourceSet.getResources()) {
-      for (EObject originalContent : originalResource.getContents()) {
-        addMapping(originalContent, copiedResourceSet, result);
-
-        var iterator = originalContent.eAllContents();
-        while (iterator.hasNext()) {
-          addMapping(iterator.next(), copiedResourceSet, result);
-        }
+  /**
+   * Maps the elements of each original resource to the elements of its copy: the resource in the
+   * copied resource set that the original resource's URI resolves to, as with {@link
+   * ResourceSet#getResource(URI, boolean)}. The copy has the same structure as the original, so
+   * walking both in the same order pairs each element with its copy in linear time. If the walk
+   * finds a difference, or the copy cannot find its elements by URI, the elements of that resource
+   * are mapped by resolving their URIs in the copied resource set instead.
+   */
+  static BiMap<EObject, EObject> createOriginalToCopyMapping(
+      ResourceSet originalResourceSet, ResourceSet copiedResourceSet) {
+    // A copied UML model loads the resources it references, which may then be copied once more;
+    // the URIs of copied elements resolve to the first resource with their resource's URI.
+    URIConverter uriConverter = copiedResourceSet.getURIConverter();
+    Map<URI, Resource> copiesByUri = new HashMap<>();
+    for (Resource copiedResource : copiedResourceSet.getResources()) {
+      if (copiedResource.getURI() != null) {
+        copiesByUri.putIfAbsent(uriConverter.normalize(copiedResource.getURI()), copiedResource);
       }
+    }
+
+    BiMap<EObject, EObject> result = HashBiMap.create();
+    for (Resource originalResource : originalResourceSet.getResources()) {
+      Resource copiedResource =
+          originalResource.getURI() == null
+              ? null
+              : copiesByUri.get(uriConverter.normalize(originalResource.getURI()));
+      Optional.ofNullable(copiedResource)
+          .filter(DefaultModelRepositorySnapshot::findsElementsByUri)
+          .flatMap(copy -> pairByStructure(originalResource, copy))
+          .ifPresentOrElse(
+              pairs -> pairs.forEach((original, copied) -> addMapping(original, copied, result)),
+              () -> addMappingsByUri(originalResource, copiedResourceSet, result));
     }
 
     return result;
   }
 
-  private static void addMapping(
-      EObject original, ResourceSet copiedResourceSet, BiMap<EObject, EObject> mapping) {
-    URI sourceUri = EcoreUtil.getURI(original);
-    EObject copied = copiedResourceSet.getEObject(sourceUri, false);
+  /**
+   * Pairs the elements of a resource with those of its copy by walking both in the same order.
+   *
+   * @return the pairs, or nothing if the elements differ in number, class or containing feature,
+   *     or a copy has another ID than its original
+   */
+  static Optional<Map<EObject, EObject>> pairByStructure(Resource original, Resource copy) {
+    Map<EObject, EObject> pairs = new HashMap<>();
+    Iterator<EObject> originals = original.getAllContents();
+    // the copy is not resolved: an unresolved proxy is copied as a proxy at the same position
+    Iterator<EObject> copies = EcoreUtil.getAllContents(copy, false);
+    while (originals.hasNext() && copies.hasNext()) {
+      EObject originalElement = originals.next();
+      EObject copiedElement = copies.next();
+      if (!isCopy(originalElement, copiedElement)) {
+        return Optional.empty();
+      }
+      pairs.put(originalElement, copiedElement);
+    }
+    return originals.hasNext() || copies.hasNext() ? Optional.empty() : Optional.of(pairs);
+  }
 
+  private static boolean isCopy(EObject original, EObject copy) {
+    if (original.eClass() != copy.eClass()
+        || original.eContainingFeature() != copy.eContainingFeature()) {
+      return false;
+    }
+    // a factory may give the copy of an element without ID an ID of its own
+    String id = EcoreUtil.getID(original);
+    return id == null || id.equals(EcoreUtil.getID(copy));
+  }
+
+  /**
+   * Whether the elements of a copied resource can be found by their URI, checked with its first
+   * root. Some cannot, e.g., the elements of UML profiles, which the copy of a UML model reloads
+   * instead of copying. Such a resource is left to the lookup by URI, so its elements stay
+   * unmapped.
+   */
+  private static boolean findsElementsByUri(Resource copy) {
+    if (copy.getContents().isEmpty()) {
+      return true;
+    }
+    EObject root = copy.getContents().get(0);
+    return copy.getEObject(copy.getURIFragment(root)) == root;
+  }
+
+  private static void addMappingsByUri(
+      Resource originalResource, ResourceSet copiedResourceSet, BiMap<EObject, EObject> mapping) {
+    Iterator<EObject> originals = originalResource.getAllContents();
+    while (originals.hasNext()) {
+      EObject original = originals.next();
+      URI sourceUri = EcoreUtil.getURI(original);
+      addMapping(original, copiedResourceSet.getEObject(sourceUri, false), mapping);
+    }
+  }
+
+  private static void addMapping(
+      EObject original, EObject copied, BiMap<EObject, EObject> mapping) {
     // Elements that cannot be found in the copy by their URI stay unmapped, e.g., the elements of
     // UML profiles, which the copy of a UML model reloads instead of copying. If several elements
     // resolve to the same copy, only the first one is mapped.
