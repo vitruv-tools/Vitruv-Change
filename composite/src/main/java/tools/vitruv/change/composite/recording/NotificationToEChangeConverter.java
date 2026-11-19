@@ -54,10 +54,27 @@ final class NotificationToEChangeConverter {
    * @return the change removing the element from its container
    */
   public EChange<EObject> createRemoveFromContainerChange(final EObject eObject) {
+    final EReference containmentFeature = eObject.eContainmentFeature();
+    final int index = containmentFeature.isMany()
+        ? ((List<?>) eObject.eContainer().eGet(containmentFeature)).indexOf(eObject)
+        : -1;
+    return createRemoveFromContainerChange(eObject, index);
+  }
+
+  /**
+   * Creates the change removing the given element from its current container, like
+   * {@link #createRemoveFromContainerChange(EObject)}, for an element whose index in its
+   * containment reference is already known.
+   *
+   * @param eObject the contained element, must have a container
+   * @param index the index of the element in its containment reference if that is many-valued,
+   *     ignored otherwise
+   * @return the change removing the element from its container
+   */
+  public EChange<EObject> createRemoveFromContainerChange(final EObject eObject, final int index) {
     final EObject container = eObject.eContainer();
     final EReference containmentFeature = eObject.eContainmentFeature();
     if (containmentFeature.isMany()) {
-      final int index = ((List<?>) container.eGet(containmentFeature)).indexOf(eObject);
       return this.changeFactory.<EObject>createRemoveReferenceChange(
           container, containmentFeature, eObject, index);
     }

@@ -8,6 +8,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import tools.vitruv.change.atomic.hid.HierarchicalId;
 
 /**
  * A UUID resolver manages the mapping of {@link org.eclipse.emf.ecore.EObject} to UUIDs within one
@@ -101,6 +102,12 @@ public interface UuidResolver {
    * Ends a transactions such that any registered {@link org.eclipse.emf.ecore.EObject} not being
    * contained in a resource throws an error.
    *
+   * <p>Only elements that may have left the resource set are checked, not all registered ones: the
+   * elements this resolver handled during the transaction, the roots removed from resources since
+   * the previous transaction ended, and everything contained in those that left the resource set.
+   * This covers all elements of changes resolved or assigned through this resolver. An element
+   * removed from deeper inside a resource without involving this resolver is not detected.
+   *
    * @throws IllegalStateException if an uncontained element is registered.
    */
   public void endTransaction() throws IllegalStateException;
@@ -162,6 +169,12 @@ public interface UuidResolver {
   /**
    * Stores the contents of this resolver at the given {@link URI}.
    *
+   * <p>The file is not written again if the last store of this resolver was to the same URI and
+   * nothing changed since then: no element was registered or unregistered, the IDs of the
+   * registered elements, which depend on their resources and their positions in them, are the same,
+   * and the file still has the size and modification time it had after storing. So the file must
+   * not be written by anything else.
+   *
    * @param uri is the {@link URI} to store the serialization at. Must not be <code>null</code> and
    *     must be a file URI.
    * @throws IOException if saving to file fails.
@@ -180,4 +193,24 @@ public interface UuidResolver {
    * @throws IllegalStateException if this resolver already has elements registered.
    */
   public void loadFromUri(URI uri) throws IOException, IllegalStateException;
+
+  /**
+   * Returns the hierarchical ID of every registered element, which is what {@link #storeAtUri}
+   * writes. Lets callers store the mapping in their own format, e.g. with relative URIs.
+   *
+   * @return a new map from the UUID of each registered element to its current hierarchical ID
+   * @throws IllegalStateException if a registered element is not contained in a resource
+   */
+  public Map<Uuid, HierarchicalId> getUuidToIdMapping() throws IllegalStateException;
+
+  /**
+   * Initializes this resolver with the given mapping, like {@link #loadFromUri} does with the
+   * mapping read from its file. Can only be called before any elements are registered with this
+   * resolver.
+   *
+   * @param uuidToIdMapping the hierarchical ID of the element of each UUID
+   * @throws IllegalStateException if this resolver already has elements registered
+   */
+  public void loadFromMapping(Map<Uuid, HierarchicalId> uuidToIdMapping)
+      throws IllegalStateException;
 }
