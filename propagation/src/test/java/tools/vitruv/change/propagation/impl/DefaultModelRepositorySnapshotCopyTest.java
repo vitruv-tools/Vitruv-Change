@@ -3,8 +3,8 @@ package tools.vitruv.change.propagation.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import allElementTypes.AllElementTypesFactory;
 import allElementTypes.NonRoot;
@@ -95,26 +95,25 @@ class DefaultModelRepositorySnapshotCopyTest {
     Resource sameCopy = resource(new ResourceSetImpl(), "original.xmi");
     sameCopy.getContents().addAll(EcoreUtil.copyAll(original.getContents()));
     Map<EObject, EObject> pairs =
-        DefaultModelRepositorySnapshot.pairByStructure(original, sameCopy);
-    assertNotNull(pairs);
+        DefaultModelRepositorySnapshot.pairByStructure(original, sameCopy).orElseThrow();
     assertSame(sameCopy.getContents().get(0), pairs.get(root));
 
     Resource missingElement = resource(new ResourceSetImpl(), "original.xmi");
     missingElement.getContents().addAll(EcoreUtil.copyAll(original.getContents()));
     ((Root) missingElement.getContents().get(0)).getMultiValuedContainmentEReference().remove(1);
-    assertNull(DefaultModelRepositorySnapshot.pairByStructure(original, missingElement));
+    assertTrue(DefaultModelRepositorySnapshot.pairByStructure(original, missingElement).isEmpty());
 
     Resource extraElement = resource(new ResourceSetImpl(), "original.xmi");
     extraElement.getContents().addAll(EcoreUtil.copyAll(original.getContents()));
     extraElement.getContents().add(root(null));
-    assertNull(DefaultModelRepositorySnapshot.pairByStructure(original, extraElement));
+    assertTrue(DefaultModelRepositorySnapshot.pairByStructure(original, extraElement).isEmpty());
 
     Resource otherFeature = resource(new ResourceSetImpl(), "original.xmi");
     Root otherRoot = root("root");
     otherRoot.getMultiValuedUnsettableContainmentEReference()
         .addAll(List.of(nonRoot("a"), nonRoot("b")));
     otherFeature.getContents().add(otherRoot);
-    assertNull(DefaultModelRepositorySnapshot.pairByStructure(original, otherFeature));
+    assertTrue(DefaultModelRepositorySnapshot.pairByStructure(original, otherFeature).isEmpty());
   }
 
   @Test
@@ -124,7 +123,7 @@ class DefaultModelRepositorySnapshotCopyTest {
     Resource otherClass = resource(new ResourceSetImpl(), "original.xmi");
     otherClass.getContents().add(FACTORY.createValueBased());
 
-    assertNull(DefaultModelRepositorySnapshot.pairByStructure(original, otherClass));
+    assertTrue(DefaultModelRepositorySnapshot.pairByStructure(original, otherClass).isEmpty());
   }
 
   @Test
@@ -205,8 +204,9 @@ class DefaultModelRepositorySnapshotCopyTest {
     for (Resource resource : resourceSet.getResources()) {
       Resource copiedResource = copy.resourceSet().getResource(resource.getURI(), false);
       Map<EObject, EObject> pairs =
-          DefaultModelRepositorySnapshot.pairByStructure(resource, copiedResource);
-      assertNotNull(pairs, () -> "copy of " + resource.getURI() + " not walkable");
+          DefaultModelRepositorySnapshot.pairByStructure(resource, copiedResource)
+              .orElseThrow(
+                  () -> new AssertionError("copy of " + resource.getURI() + " not walkable"));
       pairs.forEach((original, copied) -> assertSame(copied, copy.originalToCopy().get(original)));
     }
   }

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -118,13 +119,10 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
           originalResource.getURI() == null
               ? null
               : copiesByUri.get(uriConverter.normalize(originalResource.getURI()));
-      Map<EObject, EObject> pairs =
-          copiedResource == null ? null : pairByStructure(originalResource, copiedResource);
-      if (pairs != null) {
-        result.putAll(pairs);
-      } else {
-        addMappingsByUri(originalResource, copiedResourceSet, result);
-      }
+      Optional.ofNullable(copiedResource)
+          .flatMap(copy -> pairByStructure(originalResource, copy))
+          .ifPresentOrElse(
+              result::putAll, () -> addMappingsByUri(originalResource, copiedResourceSet, result));
     }
 
     return result;
@@ -133,10 +131,10 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
   /**
    * Pairs the elements of a resource with those of its copy by walking both in the same order.
    *
-   * @return the pairs, or {@code null} if the elements differ in number, class or containing
-   *     feature, or a copy has another ID than its original
+   * @return the pairs, or nothing if the elements differ in number, class or containing feature,
+   *     or a copy has another ID than its original
    */
-  static Map<EObject, EObject> pairByStructure(Resource original, Resource copy) {
+  static Optional<Map<EObject, EObject>> pairByStructure(Resource original, Resource copy) {
     Map<EObject, EObject> pairs = new HashMap<>();
     Iterator<EObject> originals = original.getAllContents();
     // the copy is not resolved: an unresolved proxy is copied as a proxy at the same position
@@ -145,11 +143,11 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
       EObject originalElement = originals.next();
       EObject copiedElement = copies.next();
       if (!isCopy(originalElement, copiedElement)) {
-        return null;
+        return Optional.empty();
       }
       pairs.put(originalElement, copiedElement);
     }
-    return originals.hasNext() || copies.hasNext() ? null : pairs;
+    return originals.hasNext() || copies.hasNext() ? Optional.empty() : Optional.of(pairs);
   }
 
   private static boolean isCopy(EObject original, EObject copy) {
