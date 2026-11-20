@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import tools.vitruv.change.atomic.hid.HierarchicalId;
 import tools.vitruv.change.testutils.RegisterMetamodelsInStandalone;
 import tools.vitruv.change.testutils.TestProject;
 import tools.vitruv.change.testutils.TestProjectManager;
@@ -295,8 +296,9 @@ class UuidSerializationTest {
     storeAndCheck();
 
     root.getMultiValuedContainmentEReference().remove(1);
+    URI serializationUri = getSerializationUri();
     assertThrows(
-        IllegalStateException.class, () -> storeUuidResolver.storeAtUri(getSerializationUri()));
+        IllegalStateException.class, () -> storeUuidResolver.storeAtUri(serializationUri));
   }
 
   @Test
@@ -306,8 +308,9 @@ class UuidSerializationTest {
     storeAndCheck();
 
     storeResourceSet.getResources().remove(root.eResource());
+    URI serializationUri = getSerializationUri();
     assertThrows(
-        IllegalStateException.class, () -> storeUuidResolver.storeAtUri(getSerializationUri()));
+        IllegalStateException.class, () -> storeUuidResolver.storeAtUri(serializationUri));
   }
 
   @Test
@@ -317,8 +320,9 @@ class UuidSerializationTest {
     storeAndCheck();
 
     root.eResource().unload();
+    URI serializationUri = getSerializationUri();
     assertThrows(
-        IllegalStateException.class, () -> storeUuidResolver.storeAtUri(getSerializationUri()));
+        IllegalStateException.class, () -> storeUuidResolver.storeAtUri(serializationUri));
   }
 
   /** Creates a resource with a root that contains the given number of children, all registered. */
@@ -373,8 +377,8 @@ class UuidSerializationTest {
   void storeDanglingElement() {
     var danglingElement = aet.Root();
     storeUuidResolver.registerEObject(danglingElement);
-    assertThrows(
-        IllegalStateException.class, () -> storeUuidResolver.storeAtUri(getSerializationUri()));
+    URI uri = getSerializationUri();
+    assertThrows(IllegalStateException.class, () -> storeUuidResolver.storeAtUri(uri));
   }
 
   @Test
@@ -390,5 +394,35 @@ class UuidSerializationTest {
 
     loadUuidResolver.registerEObject(aet.Root());
     assertThrows(IllegalStateException.class, () -> loadUuidResolver.loadFromUri(serializationUri));
+  }
+
+  @Test
+  @DisplayName("mapping round trip restores the UUIDs")
+  void mappingRoundTrip() {
+    URI uri = URI.createFileURI(testProjectPath.resolve("root.aet").toString());
+    Root storeRoot = aet.Root();
+    NonRoot storeChild = aet.NonRoot();
+    storeRoot.getMultiValuedContainmentEReference().add(storeChild);
+    storeResourceSet.createResource(uri).getContents().add(storeRoot);
+    Uuid rootUuid = storeUuidResolver.registerEObject(storeRoot);
+    Uuid childUuid = storeUuidResolver.registerEObject(storeChild);
+    Root loadRoot = aet.Root();
+    NonRoot loadChild = aet.NonRoot();
+    loadRoot.getMultiValuedContainmentEReference().add(loadChild);
+    loadResourceSet.createResource(uri).getContents().add(loadRoot);
+
+    Map<Uuid, HierarchicalId> mapping = storeUuidResolver.getUuidToIdMapping();
+    assertEquals(2, mapping.size());
+    loadUuidResolver.loadFromMapping(mapping);
+
+    assertEquals(rootUuid, loadUuidResolver.getUuid(loadRoot));
+    assertEquals(childUuid, loadUuidResolver.getUuid(loadChild));
+  }
+
+  @Test
+  @DisplayName("load mapping with non-empty resolver")
+  void loadMappingWithNonEmptyResolver() {
+    loadUuidResolver.registerEObject(aet.Root());
+    assertThrows(IllegalStateException.class, () -> loadUuidResolver.loadFromMapping(Map.of()));
   }
 }
