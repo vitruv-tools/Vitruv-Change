@@ -108,6 +108,9 @@ public interface UuidResolver {
    * This covers all elements of changes resolved or assigned through this resolver. An element
    * removed from deeper inside a resource without involving this resolver is not detected.
    *
+   * <p>Transactions are per thread: only the elements handled on the calling thread are checked
+   * and forgotten, and removed roots only while no other thread has an open transaction.
+   *
    * @throws IllegalStateException if an uncontained element is registered.
    */
   public void endTransaction() throws IllegalStateException;
