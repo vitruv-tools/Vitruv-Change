@@ -51,6 +51,18 @@ public class ChangePropagator {
 
     private final List<UserInteractionBase> userInteractions = new ArrayList<UserInteractionBase>();
 
+    /**
+     * The thread this propagation runs on. It is registered as observer and listener at the
+     * specifications and the user interactor, which are shared by all propagations of a virtual
+     * model, so it also receives the notifications of propagations on other threads and ignores
+     * them.
+     */
+    private final Thread propagationThread = Thread.currentThread();
+
+    private boolean isOwnNotification() {
+      return Thread.currentThread() == this.propagationThread;
+    }
+
     private List<PropagatedChange> propagateChange() {
       List<PropagatedChange> result = this.propagateSingleChange(this.sourceChange.change(), this.sourceChange.previousState());
       this.handleObjectsWithoutResource();
@@ -178,6 +190,9 @@ public class ChangePropagator {
 
     @Override
     public void objectCreated(final EObject createdObject) {
+      if (!isOwnNotification()) {
+        return;
+      }
       this.createdObjects.add(createdObject);
     }
 
@@ -193,6 +208,9 @@ public class ChangePropagator {
 
     @Override
     public void onUserInteractionReceived(final UserInteractionBase interaction) {
+      if (!isOwnNotification()) {
+        return;
+      }
       this.userInteractions.add(interaction);
     }
 
