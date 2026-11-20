@@ -9,6 +9,7 @@ import allElementTypes.AllElementTypesPackage;
 import allElementTypes.NonRoot;
 import allElementTypes.Root;
 import edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -212,6 +213,49 @@ class CorrespondenceSaveTest {
     // removing the first half of 70,000 one by one would move the others 35,000 times each, more
     // than rebuilding the list costs
     assertRemovesStaleCorrespondences(70_000, index -> index < 35_000, true);
+  }
+
+  @Test
+  void correspondenceListIsLiveAndInStorageOrder() {
+    NonRoot first = child(left, "first");
+    NonRoot second = child(right, "second");
+    Correspondence added = correspondences.addCorrespondenceBetween(first, second, "tag");
+    assertEquals(List.of(added), correspondenceModel.getCorrespondenceList());
+
+    correspondenceModel.getCorrespondenceList().remove(added);
+    assertTrue(correspondences.getCorrespondingEObjects(first).isEmpty());
+
+    correspondenceModel.getCorrespondenceList().add(added);
+    assertEquals(Set.of(second), correspondences.getCorrespondingEObjects(first));
+  }
+
+  @Test
+  void removesCorrespondencesOfRemovedElementsOnRequest() {
+    NonRoot first = child(left, "first");
+    NonRoot second = child(right, "second");
+    correspondences.addCorrespondenceBetween(first, second, "tag");
+    left.getMultiValuedContainmentEReference().remove(first);
+    right.getMultiValuedContainmentEReference().remove(second);
+
+    correspondenceModel.removeCorrespondencesForRemovedElements();
+
+    assertTrue(correspondenceModel.getCorrespondenceList().isEmpty());
+  }
+
+  @Test
+  void writeToWritesWhatSaveWritesAndKeepsSaveState() throws IOException {
+    NonRoot first = child(left, "first");
+    NonRoot second = child(right, "second");
+    correspondences.addCorrespondenceBetween(first, second, "tag");
+    ByteArrayOutputStream written = new ByteArrayOutputStream();
+
+    correspondenceModel.writeTo(written);
+
+    assertWrites();
+    assertEquals(Files.readString(correspondenceFile), written.toString());
+    assertDoesNotWrite();
+    correspondenceModel.writeTo(new ByteArrayOutputStream());
+    assertDoesNotWrite();
   }
 
   private void assertRemovesStaleCorrespondences(

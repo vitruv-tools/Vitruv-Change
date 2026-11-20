@@ -44,8 +44,11 @@ import tools.vitruv.change.atomic.feature.reference.RemoveEReference;
 import tools.vitruv.change.atomic.feature.reference.ReplaceSingleValuedEReference;
 import tools.vitruv.change.atomic.root.InsertRootEObject;
 import tools.vitruv.change.atomic.root.RemoveRootEObject;
+import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.atomic.uuid.UuidResolver;
 import tools.vitruv.change.composite.description.TransactionalChange;
+import tools.vitruv.change.composite.description.VitruviusChangeResolver;
+import tools.vitruv.change.composite.description.VitruviusChangeResolverFactory;
 import tools.vitruv.change.testutils.RegisterMetamodelsInStandalone;
 import tools.vitruv.change.testutils.TestProject;
 import tools.vitruv.change.testutils.TestProjectManager;
@@ -888,6 +891,94 @@ public class ChangeRecorderTest {
     Assertions.assertEquals(contained, removeContained.getOldValue());
     Assertions.assertEquals(container,
         ((DeleteEObject<EObject>) change.getEChanges().get(2)).getAffectedElement());
+  }
+
+  @ParameterizedTest(name = "while isRecording={0}")
+  @DisplayName("records an object added again after its removal as created, with its contents")
+  @ValueSource(booleans = { false, true })
+  void recordsObjectAddedAgainAfterRemovalAsCreated(final boolean isRecordingWhileRemovingObject) {
+    final Root root = wrapIntoRecordedResource(AllElementTypesCreators.aet.Root());
+    final Root inner = AllElementTypesCreators.aet.Root();
+    final NonRoot child = AllElementTypesCreators.aet.NonRoot();
+    inner.getMultiValuedContainmentEReference().add(child);
+    record(() -> root.setRecursiveRoot(inner));
+    recordIf(isRecordingWhileRemovingObject, () -> root.setRecursiveRoot(null));
+    final TransactionalChange<EObject> change = record(() -> root.setRecursiveRoot(inner));
+    final List<EObject> created = change.getEChanges().stream()
+        .filter(CreateEObject.class::isInstance)
+        .map(it -> ((CreateEObject<EObject>) it).getAffectedElement())
+        .toList();
+    Assertions.assertEquals(List.of(inner, child), created);
+  }
+
+  @ParameterizedTest(name = "while isRecording={0}")
+  @DisplayName("records an object added again after unsetting its containment as created")
+  @ValueSource(booleans = { false, true })
+  void recordsObjectAddedAgainAfterUnsetAsCreated(final boolean isRecordingWhileRemovingObject) {
+    final Root root = wrapIntoRecordedResource(AllElementTypesCreators.aet.Root());
+    final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+    record(() -> root.setSingleValuedUnsettableContainmentEReference(nonRoot));
+    recordIf(isRecordingWhileRemovingObject,
+        root::unsetSingleValuedUnsettableContainmentEReference);
+    final TransactionalChange<EObject> change =
+        record(() -> root.setSingleValuedUnsettableContainmentEReference(nonRoot));
+    MatcherAssert.assertThat(change, hasEChanges(CreateEObject.class,
+        ReplaceSingleValuedEReference.class, ReplaceSingleValuedEAttribute.class));
+  }
+
+  @Test
+  @DisplayName("records an object added again after its deletion such that ids can be assigned")
+  void assignsIdsToObjectAddedAgainAfterDeletion() {
+    final VitruviusChangeResolver<Uuid> changeResolver =
+        VitruviusChangeResolverFactory.forUuids(uuidResolver);
+    final Resource resource = resourceSet.createResource(URI.createURI("test://test.aet"));
+    changeRecorder.addToRecording(resource);
+    final Root root = AllElementTypesCreators.aet.Root();
+    final Root inner = AllElementTypesCreators.aet.Root();
+    inner.getMultiValuedContainmentEReference().add(AllElementTypesCreators.aet.NonRoot());
+    changeResolver.assignIds(record(() -> resource.getContents().add(root)));
+    changeResolver.assignIds(record(() -> root.setRecursiveRoot(inner)));
+    changeResolver.assignIds(record(() -> root.setRecursiveRoot(null)));
+    final TransactionalChange<EObject> addingAgain = record(() -> root.setRecursiveRoot(inner));
+    Assertions.assertDoesNotThrow(() -> changeResolver.assignIds(addingAgain));
+  }
+
+  @ParameterizedTest(name = "while isRecording={0}")
+  @DisplayName("keeps an object removed from a cross-resource container as existing")
+  @ValueSource(booleans = { false, true })
+  void keepsObjectRemovedFromCrossResourceContainer(final boolean isRecordingWhileRemovingObject) {
+    final Resource containerResource =
+        resourceSet.createResource(URI.createURI("test://container.aet"));
+    final Resource containedResource =
+        resourceSet.createResource(URI.createURI("test://contained.aet"));
+    final Root container = AllElementTypesCreators.aet.Root();
+    final Root contained = AllElementTypesCreators.aet.Root();
+    final NonRoot containedChild = AllElementTypesCreators.aet.NonRoot();
+    final Root referencing = AllElementTypesCreators.aet.Root();
+    contained.setSingleValuedContainmentEReference(containedChild);
+    container.setRecursiveRoot(contained);
+    containerResource.getContents().add(container);
+    // cross-resource containment: contained stays contained in container
+    containedResource.getContents().addAll(List.of(contained, referencing));
+    changeRecorder.addToRecording(resourceSet);
+    // contained stays a root of its resource and is not deleted
+    recordIf(isRecordingWhileRemovingObject, () -> container.setRecursiveRoot(null));
+    final TransactionalChange<EObject> change =
+        record(() -> referencing.setSingleValuedNonContainmentEReference(containedChild));
+    MatcherAssert.assertThat(change, hasEChanges(ReplaceSingleValuedEReference.class));
+  }
+
+  @Test
+  @DisplayName("does not record an object moved while not recording as created")
+  void doesNotRecordObjectMovedWhileNotRecordingAsCreated() {
+    final Root root = wrapIntoRecordedResource(AllElementTypesCreators.aet.Root());
+    final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
+    record(() -> root.setSingleValuedContainmentEReference(nonRoot));
+    root.getMultiValuedContainmentEReference().add(nonRoot);
+    final TransactionalChange<EObject> change =
+        record(() -> root.setSingleValuedContainmentEReference(nonRoot));
+    MatcherAssert.assertThat(change,
+        hasEChanges(RemoveEReference.class, ReplaceSingleValuedEReference.class));
   }
 
   @ParameterizedTest(name = "while isRecording={0}")

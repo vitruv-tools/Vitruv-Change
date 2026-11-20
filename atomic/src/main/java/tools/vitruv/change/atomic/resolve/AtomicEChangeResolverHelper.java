@@ -16,8 +16,8 @@ import tools.vitruv.change.atomic.root.RootEChange;
 
 /** Helper class for resolving {@link EChange}s. The class provides a method to resolve a given */
 public class AtomicEChangeResolverHelper<Source, Target> {
-  private Function<Source, Target> elementResolver;
-  private UnaryOperator<Resource> resourceResolver;
+  private final Function<Source, Target> elementResolver;
+  private final UnaryOperator<Resource> resourceResolver;
 
   private AtomicEChangeResolverHelper(
       Function<Source, Target> elementResolver, UnaryOperator<Resource> resourceResolver) {
