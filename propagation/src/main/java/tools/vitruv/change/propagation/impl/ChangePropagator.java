@@ -3,7 +3,6 @@ package tools.vitruv.change.propagation.impl;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import java.util.ArrayDeque;
@@ -21,6 +20,8 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.change.atomic.eobject.CreateEObject;
+import tools.vitruv.change.atomic.eobject.DeleteEObject;
 import tools.vitruv.change.atomic.uuid.Uuid;
 import tools.vitruv.change.composite.description.Annotatable;
 import tools.vitruv.change.composite.description.CompositeContainerChange;
@@ -132,13 +133,13 @@ public class ChangePropagator {
     private Iterable<PropagatedChange> propagateTransitiveChanges(final Iterable<TransactionalChangeWithPreviousState> transitiveChanges) {
       List<TransactionalChangeWithPreviousState> nonEmptyChanges = StreamSupport.stream(transitiveChanges.spliterator(), false)
           .filter(it -> it.change().containsConcreteChange())
-          .toList()
+          .toList();
       List<TransactionalChangeWithPreviousState> nonLeafChanges;
       if (Objects.equals(this.outer.changePropagationMode, ChangePropagationMode.TRANSITIVE_EXCEPT_LEAVES)) {
         nonLeafChanges = nonEmptyChanges.stream()
             .filter(it -> this.outer.changePropagationProvider.getChangePropagationSpecifications(
                 it.change().getAffectedEObjectsMetamodelDescriptor()).size() > 1)
-            .toList()
+            .toList();
       } else {
         nonLeafChanges = nonEmptyChanges;
       }
@@ -346,10 +347,21 @@ public class ChangePropagator {
 
   /**
    * Undoes all changes applied during the current propagation step, newest first.
+   *
+   * <p>Also updates the UUID mappings: For reverting the creation of {@link EObject}s,
+   * the mappings are deregistered; for deletion, they are regenerated.
    */
   private void undoAppliedChanges() {
     for (EChange<EObject> appliedChange : this.appliedChanges) {
       this.applicationController.undo(appliedChange);
+      if (appliedChange instanceof CreateEObject<EObject> createEObject) {
+        EObject objectToDelete = createEObject.getAffectedElement();
+        Uuid oldUUID = modelRepository.getUuidResolver().getUuid(objectToDelete);
+        modelRepository.getUuidResolver().unregisterEObject(oldUUID, objectToDelete);
+      }
+      if (appliedChange instanceof DeleteEObject<EObject> deleteEObject) {
+        modelRepository.getUuidResolver().registerEObject(deleteEObject.getAffectedElement());
+      }
     }
   }
 

@@ -11,7 +11,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
  * An adapter that reacts to additions of resources in a {@link ResourceSet} to call the
  * callback function for that resource given to the constructor.
  */
-@SuppressWarnings("all")
+
 public class ResourceRegistrationAdapter implements Adapter {
   private final Consumer<Resource> resourceRegistrationFunction;
 
@@ -31,22 +31,15 @@ public class ResourceRegistrationAdapter implements Adapter {
 
   @Override
   public void notifyChanged(final Notification notification) {
-    int _eventType = notification.getEventType();
-    boolean _equals = (_eventType == Notification.ADD);
-    if (_equals) {
-      Object _notifier = notification.getNotifier();
-      if ((_notifier instanceof ResourceSet)) {
-        Object _newValue = notification.getNewValue();
-        if ((_newValue instanceof Resource)) {
-          Object _newValue_1 = notification.getNewValue();
-          final Resource resource = ((Resource) _newValue_1);
-          this.resourceRegistrationFunction.accept(resource);
-        }
-      }
+    if (notification.getEventType() == Notification.ADD
+        && notification.getNotifier() instanceof ResourceSet
+        && (notification.getNewValue() instanceof Resource resource)) {
+      this.resourceRegistrationFunction.accept(resource);
     }
   }
 
   @Override
   public void setTarget(final Notifier newTarget) {
+    // ResourceRegistrationAdapter has no targets
   }
 }

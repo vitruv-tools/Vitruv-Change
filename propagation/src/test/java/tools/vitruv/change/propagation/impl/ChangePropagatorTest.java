@@ -208,6 +208,8 @@ class ChangePropagatorTest {
    *   This change should succeed.</li>
    *   <li>Creating a NonRoot element triggers an insertion into Root,
    *   which in turn leads to an exception.</li>
+   *   <li>Setting the recursive root of Root and triggering an exception
+   *   causes a reject of the first change.</li>
    * </ol>
    * After both changes, only the first should be accepted.
    */
@@ -224,13 +226,14 @@ class ChangePropagatorTest {
           }
         });
 
-    Predicate<EChange<EObject>> createNonRootTrigger = change ->
-        change instanceof CreateEObject<?> createEObject
-            && createEObject.getAffectedEObjectType().equals(
-            AllElementTypesPackage.eINSTANCE.getNonRoot());
+    Predicate<EChange<EObject>> insertNonRootIntoSingleContainmentTrigger = change ->
+        change instanceof ReplaceSingleValuedEReference<?> replaceReference
+            && replaceReference.getAffectedFeature().equals(
+                AllElementTypesPackage.eINSTANCE.getRoot_SingleValuedContainmentEReference()
+        );
     var specification2 = new RecordingSpecification("addNonRootToRoot", (changes, previousState) -> {
       Optional<EChange<EObject>> nonRootCreation =
-          changes.stream().filter(createNonRootTrigger).findFirst();
+          changes.stream().filter(insertNonRootIntoSingleContainmentTrigger).findFirst();
       if (nonRootCreation.isPresent()) {
         var nonRoot = (NonRoot)
             ((CreateEObject<EObject>) nonRootCreation.get()).getAffectedElement();
@@ -265,8 +268,8 @@ class ChangePropagatorTest {
     assertEquals("Foobar", repositoryRoot().getId());
 
     // Change 2 triggers an error
+    var nonRoot = AllElementTypesFactory.eINSTANCE.createNonRoot();
     assertThrows(RuntimeException.class, () -> propagateInView(propagator, () -> {
-      var nonRoot = AllElementTypesFactory.eINSTANCE.createNonRoot();
       nonRoot.setId("barbaz");
       root.setSingleValuedContainmentEReference(nonRoot);
     }));
@@ -276,6 +279,55 @@ class ChangePropagatorTest {
     // Change 1 effects are still there
     assertEquals(42, repositoryRoot().getSingleValuedEAttribute());
     assertEquals("Foobar", repositoryRoot().getId());
+
+    // Change 3: fail in user source change after modification
+    Runnable triggerException = () -> Optional.empty().get();
+    assertThrows(RuntimeException.class, () -> propagateInView(propagator, () -> {
+      root.setRecursiveRoot(AllElementTypesFactory.eINSTANCE.createRoot());
+      triggerException.run();
+    }));
+    // No recursive root should exist
+    assertNull(repositoryRoot().getRecursiveRoot());
+
+    // Change 4: Update Foobar -> bazbar, 42 -> 47
+    // Should still succeed, bazbar change is swallowed
+    propagateInView(propagator, () -> {
+      root.setId("Bazbarioewpksdkjföldsfj");
+      root.setSingleValuedEAttribute(47);
+    });
+    assertEquals(47, repositoryRoot().getSingleValuedEAttribute());
+    assertEquals("Foobar", repositoryRoot().getId());
+
+
+    // Change 5: Create a NonRoot object and insert it into a multi-valued reference
+    propagateInView(propagator, () -> {
+      var nonRootInMultiValued = AllElementTypesFactory.eINSTANCE.createNonRoot();
+      nonRootInMultiValued.setId("nonRoot2");
+      root.getMultiValuedContainmentEReference().add(nonRootInMultiValued);
+    });
+    var nonRootsInContainment = repositoryRoot().getMultiValuedContainmentEReference();
+    assertEquals(1, nonRootsInContainment.size());
+    assertEquals("nonRoot2", nonRootsInContainment.getFirst().getId());
+
+    // Change 6: Delete NonRoot and fail; NonRoot should still exist afterward
+    assertThrows(RuntimeException.class, () -> {
+      propagateInView(propagator, () -> {
+        root.getMultiValuedContainmentEReference().removeFirst();
+        triggerException.run();
+      });
+    });
+    nonRootsInContainment = repositoryRoot().getMultiValuedContainmentEReference();
+    assertEquals(1, nonRootsInContainment.size());
+    assertEquals("nonRoot2", nonRootsInContainment.getFirst().getId());
+
+    // Change 7: Modify NonRoot
+    propagateInView(propagator, () -> {
+      root.getMultiValuedContainmentEReference().getFirst()
+          .setValue("Yay!");
+    });
+    nonRootsInContainment = repositoryRoot().getMultiValuedContainmentEReference();
+    assertEquals(1, nonRootsInContainment.size());
+    assertEquals("Yay!", nonRootsInContainment.getFirst().getValue());
   }
 
   private record Author(String name) {}
@@ -299,12 +351,18 @@ class ChangePropagatorTest {
   private void propagateInView(ChangePropagator propagator, Author author,
       Runnable modification) {
     viewRecorder.beginRecording();
-    modification.run();
-    var change = viewChangeResolver.assignIds(viewRecorder.endRecording());
-    if (author != null) {
-      change.setAnnotation(Author.class, author);
+    try {
+      modification.run();
+      var change = viewChangeResolver.assignIds(viewRecorder.endRecording());
+      if (author != null) {
+        change.setAnnotation(Author.class, author);
+      }
+      propagator.propagateChange(change, List.of());
+    } finally {
+      if (viewRecorder.isRecording()) {
+        viewRecorder.endRecording();
+      }
     }
-    propagator.propagateChange(change, List.of());
   }
 
   private ChangePropagator createPropagator(Map<ChangePropagationSpecification, Integer> levels) {
