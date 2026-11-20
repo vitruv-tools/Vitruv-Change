@@ -277,12 +277,12 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   @Override
-  public List<Correspondence> getCorrespondenceList() {
+  public synchronized List<Correspondence> getCorrespondenceList() {
     return correspondences.getCorrespondences();
   }
 
   @Override
-  public void writeTo(OutputStream outputStream) throws IOException {
+  public synchronized void writeTo(OutputStream outputStream) throws IOException {
     checkState(
         correspondencesResource != null,
         "Correspondences resource must be specified to write the correspondences");
@@ -293,7 +293,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   @Override
-  public void removeCorrespondencesForRemovedElements() {
+  public synchronized void removeCorrespondencesForRemovedElements() {
     List<Correspondence> staleCorrespondences = new ArrayList<>();
     List<Integer> staleIndices = new ArrayList<>();
     List<Correspondence> list = correspondences.getCorrespondences();
