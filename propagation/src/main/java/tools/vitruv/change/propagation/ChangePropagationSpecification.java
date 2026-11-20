@@ -127,14 +127,13 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
       ModelRepositorySnapshot previousState) {
     List<ChangePropagationInvocation> invocations = new ArrayList<>();
     for (EChange<EObject> change : changes) {
-      if (!doesHandleChange(change, correspondenceModel)) {
-        continue;
-      }
-      ChangePropagationInvocation invocation =
-          propagateChange(change, changeAnnotations, correspondenceModel, resourceAccess);
-      invocations.add(invocation);
-      if (invocation.status() != ChangePropagationStatus.SUCCEEDED) {
-        break;
+      if (doesHandleChange(change, correspondenceModel)) {
+        ChangePropagationInvocation invocation =
+            propagateChange(change, changeAnnotations, correspondenceModel, resourceAccess);
+        invocations.add(invocation);
+        if (invocation.status() != ChangePropagationStatus.SUCCEEDED) {
+          break;
+        }
       }
     }
     return new ChangePropagationInvocation(this, changes, invocations);

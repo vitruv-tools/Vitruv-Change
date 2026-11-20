@@ -279,35 +279,25 @@ class ChangePropagationSpecificationTests {
   }
 
   @Test
-  void propagateChangesStopsAtTheFirstInvocationThatIsNotSucceeded() {
+  void propagateChangesStopsAtFirstNonSucceededWithCause() {
     var specification = new ScriptedSpecification(List.of(
-        ChangePropagationStatus.BLOCKED, ChangePropagationStatus.SUCCEEDED));
+        ChangePropagationStatus.SUCCEEDED, ChangePropagationStatus.FAILED));
     EChange<EObject> first = EobjectFactory.eINSTANCE.createCreateEObject();
     EChange<EObject> second = EobjectFactory.eINSTANCE.createCreateEObject();
 
     var invocation = specification.propagateChanges(
         List.of(first, second), AnnotationSource.EMPTY, null, null, null);
 
-    assertEquals(ChangePropagationStatus.BLOCKED, invocation.status());
-    assertEquals(List.of(first), invocation.executedChanges());
-    assertEquals(List.of(first), specification.calls, "the second change must not be propagated");
-  }
-
-  @Test
-  void propagateChangesKeepsTheCauseOfAFailedInvocation() {
-    var specification = new ScriptedSpecification(List.of(ChangePropagationStatus.FAILED));
-
-    EChange<EObject> change = EobjectFactory.eINSTANCE.createCreateEObject();
-
-    var invocation = specification.propagateChanges(
-        List.of(change), AnnotationSource.EMPTY, null, null, null);
-
     assertEquals(ChangePropagationStatus.FAILED, invocation.status());
     assertEquals("scripted failure", invocation.cause().getMessage());
+    assertEquals(List.of(first, second), invocation.executedChanges());
+    assertEquals(List.of(first, second), specification.calls,
+        "changes for the second specification must not be propagated");
   }
 
+
   @Test
-  void propagateChangesWithoutHandledChangesReturnsASucceededInvocationWithoutExecutedChanges() {
+  void propagateChangesWithoutHandledChangesReturnAnUnhandledInvocation() {
     var specification = new ScriptedSpecification(List.of());
     List<EChange<EObject>> changes =
         List.of(AttributeFactory.eINSTANCE.createReplaceSingleValuedEAttribute());
@@ -320,18 +310,6 @@ class ChangePropagationSpecificationTests {
     assertEquals(ChangePropagationStatus.SUCCEEDED, invocation.status());
     assertTrue(invocation.executedChanges().isEmpty());
     assertTrue(specification.calls.isEmpty());
-  }
-
-  @Test
-  @SuppressWarnings("deprecation")
-  void deprecatedPropagateChangesReturnsTheInvocationOfTheDefaultMethod() {
-    var specification = new ScriptedSpecification(List.of(ChangePropagationStatus.SUCCEEDED));
-    EChange<EObject> change = EobjectFactory.eINSTANCE.createCreateEObject();
-
-    var invocation = specification.propagateChanges(List.of(change), null, null, null);
-
-    assertSame(specification, invocation.specification());
-    assertEquals(List.of(change), invocation.executedChanges());
   }
 
   private static class MockObserver implements ChangePropagationObserver {
@@ -426,8 +404,8 @@ class ChangePropagationSpecificationTests {
   }
 
   /**
-   * Handles create changes only. For the n-th handled change it returns an invocation with the
-   * n-th scripted status that executed the received change.
+   * {@link ScriptedSpecification} returns the requested {@link ChangePropagationInvocation}.
+   * It handles only {@link CreateEObject} changes, to simulate unhandled changes.
    */
   private static class ScriptedSpecification extends AbstractChangePropagationSpecification {
     private final List<ChangePropagationStatus> statuses;

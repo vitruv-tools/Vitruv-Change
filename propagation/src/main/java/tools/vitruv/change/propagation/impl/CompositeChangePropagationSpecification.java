@@ -110,10 +110,11 @@ public class CompositeChangePropagationSpecification
   /**
    * {@inheritDoc}
    *
-   * <p>The preprocessors are called first, then the main processors. Propagation stops at the
+   * <p>The preprocessors are called before the main processors. Propagation stops at the
    * first processor whose invocation is not {@link ChangePropagationStatus#SUCCEEDED}; the
-   * processors after it are not called. The invocations of the processors are combined into the
-   * returned invocation of this specification and are not kept.
+   * processors after it are not called.
+   *
+   * <p>The invocations of all executed processors are combined into one invocation.
    */
   @Override
   public ChangePropagationInvocation propagateChange(
@@ -123,7 +124,7 @@ public class CompositeChangePropagationSpecification
       ResourceAccess resourceAccess) {
     List<ChangePropagationInvocation> invocations = new ArrayList<>();
     AtomicBoolean doContinue = new AtomicBoolean(true);
-    getAllProcessors().forEach((processor) -> {
+    getAllProcessors().forEach(processor -> {
       if (!doContinue.get()) {
         return;
       }

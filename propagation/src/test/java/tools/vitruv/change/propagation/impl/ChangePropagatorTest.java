@@ -314,14 +314,14 @@ class ChangePropagatorTest {
   @Test
   void transitiveChangesAreNotPropagatedAfterAHalt() {
     var succeeding = new StatusSpecification("spec", ChangePropagationStatus.SUCCEEDED,
-        changes -> setRepositoryRootAttributeOnInsert(changes));
+        this::setRepositoryRootAttributeOnInsert);
     createPropagatorAndPropagate(succeeding);
     assertEquals(List.of("spec", "spec"), invocations,
         "premise: the change made by the specification is propagated transitively");
 
     invocations.clear();
     var blocked = new StatusSpecification("spec", ChangePropagationStatus.BLOCKED,
-        changes -> setRepositoryRootAttributeOnInsert(changes));
+        this::setRepositoryRootAttributeOnInsert);
     var report = createPropagatorAndPropagate(blocked);
 
     assertEquals(List.of("spec"), invocations);
@@ -331,7 +331,7 @@ class ChangePropagatorTest {
   @Test
   void executedChangesStayAppliedAfterAHalt() {
     var blocked = new StatusSpecification("spec", ChangePropagationStatus.BLOCKED,
-        changes -> setRepositoryRootAttributeOnInsert(changes));
+        this::setRepositoryRootAttributeOnInsert);
 
     var report = createPropagatorAndPropagate(blocked);
 

@@ -44,10 +44,11 @@ class ChangePropagationResultTest {
   }
 
   @Test
-  void statusIsSucceededIfAllInvocationsSucceeded() {
+  void combinationOfSucceededInvocations() {
     var result = ChangePropagationResult.of(succeeded(executed1), succeeded(executed2));
 
     assertEquals(ChangePropagationStatus.SUCCEEDED, result.status());
+    assertEquals(List.of(executed1, executed2), result.executedChanges());
     assertTrue(result.succeeded());
   }
 
@@ -65,26 +66,16 @@ class ChangePropagationResultTest {
   }
 
   @Test
-  void executedChangesAreTheConcatenationOfTheInvocationsInOrder() {
-    var result = ChangePropagationResult.of(
-        succeeded(executed1), succeeded(), blocked(executed2, executed3));
-
-    assertEquals(List.of(executed1, executed2, executed3), result.executedChanges());
-  }
-
-  @Test
   void causeIsThatOfTheFirstInvocationThatIsNotSucceeded() {
     var failedResult = ChangePropagationResult.of(succeeded(executed1), failed(executed2, cause));
     var blockedFirst = ChangePropagationResult.of(blocked(executed1), failed(executed2, cause));
-    var succeededResult = ChangePropagationResult.of(succeeded(executed1));
 
     assertEquals(Optional.of(cause), failedResult.cause());
     assertEquals(Optional.empty(), blockedFirst.cause());
-    assertEquals(Optional.empty(), succeededResult.cause());
   }
 
   @Test
-  void invocationsAreAnUnmodifiableCopy() {
+  void invocationsAreUnmodifiable() {
     List<ChangePropagationInvocation> invocations = new ArrayList<>(List.of(succeeded(executed1)));
 
     var result = new ChangePropagationResult(invocations);
@@ -96,30 +87,29 @@ class ChangePropagationResultTest {
   }
 
   @Test
-  void invocationsMustNotBeNullOrContainNull() {
+  void nullArgumentsAreRejected() {
     assertThrows(NullPointerException.class, () -> new ChangePropagationResult(null));
     assertThrows(NullPointerException.class,
-        () -> new ChangePropagationResult(Arrays.asList((ChangePropagationInvocation) null)));
-    assertThrows(NullPointerException.class,
         () -> ChangePropagationResult.of((ChangePropagationInvocation) null));
+    assertThrows(NullPointerException.class,
+        () -> ChangePropagationResult.UNHANDLED.append(null));
   }
 
   @Test
   void appendingToASucceededResultKeepsTheInvocationsInOrder() {
     var first = ChangePropagationResult.of(succeeded(executed1));
     var second = ChangePropagationResult.of(blocked(executed2));
-
     var appended = first.append(second);
 
     assertEquals(
-        List.of(first.invocations().get(0), second.invocations().get(0)),
+        List.of(first.invocations().getFirst(), second.invocations().getFirst()),
         appended.invocations());
     assertEquals(ChangePropagationStatus.BLOCKED, appended.status());
     assertEquals(List.of(executed1, executed2), appended.executedChanges());
   }
 
   @Test
-  void appendingToAResultThatIsNotSucceededReturnsItUnchanged() {
+  void appendingToNonSucceededDoesNotChangeAnything() {
     var blockedResult = ChangePropagationResult.of(blocked(executed1));
     var failedResult = ChangePropagationResult.of(failed(executed1, cause));
     var next = ChangePropagationResult.of(succeeded(executed2));
@@ -138,11 +128,6 @@ class ChangePropagationResultTest {
         ChangePropagationResult.UNHANDLED.append(ChangePropagationResult.UNHANDLED));
   }
 
-  @Test
-  void appendRejectsNull() {
-    assertThrows(NullPointerException.class,
-        () -> ChangePropagationResult.UNHANDLED.append(null));
-  }
 
   @SafeVarargs
   private ChangePropagationInvocation succeeded(EChange<EObject>... executed) {

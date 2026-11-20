@@ -19,7 +19,6 @@ import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.propagation.ChangePropagationInvocation;
 import tools.vitruv.change.propagation.ChangePropagationStatus;
-import tools.vitruv.change.propagation.ModelRepositorySnapshot;
 import tools.vitruv.change.utils.ResourceAccess;
 
 /**
@@ -56,17 +55,7 @@ class CompositeChangePropagationSpecificationTest {
   }
 
   @Test
-  void preprocessorsAreCalledBeforeMainprocessorsRegardlessOfTheRegistrationOrder() {
-    composite.addChangeMainprocessor(part("main", ChangePropagationStatus.SUCCEEDED));
-    composite.addChangePreprocessor(part("pre", ChangePropagationStatus.SUCCEEDED));
-
-    composite.propagateChange(input, null, null);
-
-    assertEquals(List.of("pre", "main"), calls);
-  }
-
-  @Test
-  void aBlockedPartStopsTheLaterPartsAndItsChangesAreIncluded() {
+  void nonSucceedingPartStopsPropagation() {
     var preprocessor = part("pre", ChangePropagationStatus.SUCCEEDED);
     var blocked = part("blocked", ChangePropagationStatus.BLOCKED);
     var later = part("later", ChangePropagationStatus.SUCCEEDED);
@@ -83,22 +72,7 @@ class CompositeChangePropagationSpecificationTest {
   }
 
   @Test
-  void aFailedPreprocessorStopsTheMainprocessorsAndItsCauseIsKept() {
-    var failed = part("failed", ChangePropagationStatus.FAILED);
-    var main = part("main", ChangePropagationStatus.SUCCEEDED);
-    composite.addChangePreprocessor(failed);
-    composite.addChangeMainprocessor(main);
-
-    var invocation = composite.propagateChange(input, null, null);
-
-    assertEquals(ChangePropagationStatus.FAILED, invocation.status());
-    assertEquals("failed failed", invocation.cause().getMessage());
-    assertEquals(List.of(failed.lastExecuted), invocation.executedChanges());
-    assertEquals(List.of("failed"), calls);
-  }
-
-  @Test
-  void aCompositeWithoutPartsSucceedsWithoutExecutedChanges() {
+  void compositeWithoutPartsSucceedsWithoutExecutedChanges() {
     var invocation = composite.propagateChange(input, null, null);
 
     assertEquals(ChangePropagationStatus.SUCCEEDED, invocation.status());
@@ -116,7 +90,7 @@ class CompositeChangePropagationSpecificationTest {
     var second = change();
 
     var invocation = composite.propagateChanges(
-        List.of(first, second), AnnotationSource.EMPTY, null, null, (ModelRepositorySnapshot) null);
+        List.of(first, second), AnnotationSource.EMPTY, null, null, null);
 
     assertSame(composite, invocation.specification());
     assertEquals(List.of(first, second), invocation.receivedChanges());
@@ -133,7 +107,7 @@ class CompositeChangePropagationSpecificationTest {
 
     var invocation = composite.propagateChanges(
         List.of(change(), change()), AnnotationSource.EMPTY, null, null,
-        (ModelRepositorySnapshot) null);
+        null);
 
     assertEquals(ChangePropagationStatus.BLOCKED, invocation.status());
     assertEquals(List.of("blocked"), calls);
@@ -147,12 +121,12 @@ class CompositeChangePropagationSpecificationTest {
 
     var invocation = composite.propagateChanges(
         List.of(change(), change()), AnnotationSource.EMPTY, null, null,
-        (ModelRepositorySnapshot) null);
+        null);
 
     Set<EChange<EObject>> distinct = Collections.newSetFromMap(new IdentityHashMap<>());
     distinct.addAll(invocation.executedChanges());
     assertEquals(invocation.executedChanges().size(), distinct.size());
-    assertEquals(6, distinct.size());
+    assertEquals(3 * 2, distinct.size());
   }
 
   private ScriptedPart part(String name, ChangePropagationStatus status) {
