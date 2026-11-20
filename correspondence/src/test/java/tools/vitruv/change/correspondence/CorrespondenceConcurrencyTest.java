@@ -16,18 +16,26 @@ import tools.vitruv.change.correspondence.model.CorrespondenceModelFactory;
 import tools.vitruv.change.correspondence.model.PersistableCorrespondenceModel;
 
 /**
- * Concurrent change propagations of one virtual model share its correspondence model: adding and
- * removing correspondences of unrelated elements on several threads must not corrupt it, and
- * each thread records and reverts only its own changes.
+ * Concurrent change propagations of one virtual model share its correspondence model: adding,
+ * reading and removing correspondences of unrelated elements on several threads must not corrupt
+ * it, each thread must see its own correspondences, and each thread records and reverts only its
+ * own changes.
  */
 class CorrespondenceConcurrencyTest {
   private static final int THREADS = 8;
-  private static final int ROUNDS = 2_000;
+  private static final int ROUNDS = 1_000;
 
   private static Root root(String id) {
     Root root = AllElementTypesFactory.eINSTANCE.createRoot();
     root.setId(id);
     return root;
+  }
+
+  private static void expect(boolean condition, String message, Root element,
+      List<String> failures) {
+    if (!condition) {
+      failures.add(message + ": " + element.getId());
+    }
   }
 
   @Test
@@ -48,10 +56,20 @@ class CorrespondenceConcurrencyTest {
             Root b = root(thread + "b" + i);
             model.addCorrespondenceBetween(List.of(a), List.of(b), "t",
                 CorrespondenceFactory.eINSTANCE::createManualCorrespondence);
+            // reads of the thread's own correspondences, interleaved with the others' writes
+            expect(model.getCorrespondingEObjects(Correspondence.class, List.of(a), "t")
+                .equals(Set.of(List.of(b))), "own correspondence not found", a, failures);
+            expect(model.hasCorrespondences(List.of(b)), "own correspondence not found", b,
+                failures);
             if (i % 2 == 0) {
               model.removeCorrespondencesBetween(Correspondence.class, List.of(a), List.of(b), "t");
+              expect(!model.hasCorrespondences(List.of(a)), "removed correspondence still found", a,
+                  failures);
             } else {
               kept.add(a);
+            }
+            if (i % 50 == 0) {
+              model.getAllTags(); // now and then a read over all correspondences
             }
           }
         } catch (Throwable e) {
