@@ -16,7 +16,7 @@ public class RemoveAtCommand extends RemoveCommand {
   /**
    * Index at which the value is removed in the list.
    */
-  private int index;
+  private final int index;
 
   /**
    * Constructor for a RemoveAtCommand, which removes an entry of a EStructuralFeature

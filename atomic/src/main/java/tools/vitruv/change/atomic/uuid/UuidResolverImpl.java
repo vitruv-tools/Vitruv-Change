@@ -211,6 +211,19 @@ class UuidResolverImpl implements UuidResolver {
   }
 
   @Override
+  public synchronized Map<Uuid, HierarchicalId> getUuidToIdMapping() {
+    return generateUuidToIdMapping(null, new HierarchicalIdCalculator());
+  }
+
+  @Override
+  public synchronized void loadFromMapping(Map<Uuid, HierarchicalId> uuidToIdMapping) {
+    checkState(
+        eObjectToUuid.isEmpty(),
+        "trying to load a UUID mapping but the resolver contained already some UUIDs");
+    applyUuidToIdMapping(uuidToIdMapping, this, resourceSet, null);
+  }
+
+  @Override
   public synchronized void loadFromUri(URI uri) throws IOException {
     checkState(
         eObjectToUuid.isEmpty(),

@@ -97,16 +97,16 @@ public final class HierarchicalIdCalculator {
   }
 
   private String getFragmentSegment(EObject container, EObject child) {
-    if (!canContainOthers.computeIfAbsent(child.eClass(), HierarchicalIdCalculator::canContain)) {
+    if (!canContainOthers(child)) {
       // an element that cannot contain others is on the path of no other element
       return calculateFragmentSegment(container, child);
     }
-    String segment = calculatedSegments.get(child);
-    if (segment == null) {
-      segment = calculateFragmentSegment(container, child);
-      calculatedSegments.put(child, segment);
-    }
-    return segment;
+    return calculatedSegments.computeIfAbsent(
+        child, element -> calculateFragmentSegment(container, element));
+  }
+
+  private boolean canContainOthers(EObject element) {
+    return canContainOthers.computeIfAbsent(element.eClass(), HierarchicalIdCalculator::canContain);
   }
 
   /**
