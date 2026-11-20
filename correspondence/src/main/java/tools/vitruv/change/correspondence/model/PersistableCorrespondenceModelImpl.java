@@ -5,6 +5,7 @@ import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.Resour
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -275,7 +276,24 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
     return correspondence;
   }
 
-  private void removeCorrespondencesForRemovedElements() {
+  @Override
+  public List<Correspondence> getCorrespondenceList() {
+    return correspondences.getCorrespondences();
+  }
+
+  @Override
+  public void writeTo(OutputStream outputStream) throws IOException {
+    checkState(
+        correspondencesResource != null,
+        "Correspondences resource must be specified to write the correspondences");
+    boolean modified = correspondencesResource.isModified();
+    correspondencesResource.save(outputStream, null);
+    // what save() considers written stays as it was
+    correspondencesResource.setModified(modified);
+  }
+
+  @Override
+  public void removeCorrespondencesForRemovedElements() {
     List<Correspondence> staleCorrespondences = new ArrayList<>();
     List<Integer> staleIndices = new ArrayList<>();
     List<Correspondence> list = correspondences.getCorrespondences();

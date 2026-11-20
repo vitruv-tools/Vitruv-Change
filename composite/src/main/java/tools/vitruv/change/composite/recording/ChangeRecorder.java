@@ -99,7 +99,9 @@ public class ChangeRecorder implements AutoCloseable {
 
       switch (eventType) {
         case Notification.SET:
+        case Notification.UNSET:
         case Notification.REMOVE:
+          // the old value of unsetting a list is whether it was set, which desinfect ignores
           this.desinfect(notification.getOldValue());
           break;
         case Notification.REMOVE_MANY:
@@ -378,21 +380,29 @@ public class ChangeRecorder implements AutoCloseable {
 
   /**
    * Starts recording changes on the registered elements.
+   * Elements that were removed from the recorded models since the last recording started, also
+   * while not recording, are treated as deleted if they were not added again and are not in any
+   * resource anymore. The recorder stops recording and forgets them, and if one of them is added
+   * again later, it is recorded as created. This does not apply to elements passed to
+   * {@link #addToRecording} and their contents, which stay recorded until
+   * {@link #removeFromRecording} is called.
    */
   public List<EChange<EObject>> beginRecording() {
     List<EChange<EObject>> _xblockexpression = null;
     {
       this.checkNotDisposed();
       Preconditions.checkState((!this.isRecording()), "This recorder is already recording!");
-      final Consumer<Notifier> _function = (Notifier it) -> {
-        final Function<Notifier, Boolean> _function_1 = (Notifier it_1) -> {
-          return Boolean.valueOf(this.removeAdapter(it_1));
-        };
-        ChangeRecorder.recursively(it, _function_1);
-      };
       Set<Notifier> detached = this.toDesinfect.get();
-      // another thread may have attached an element again after this thread detached it
-      detached.stream().filter(this::isStillDetached).forEach(_function);
+      for (final Notifier removed : detached) {
+        // another thread may have attached an element again after this thread detached it
+        if (!this.isStillDetached(removed)) {
+          continue;
+        }
+        // The contents walked with an element are in a resource exactly if the element is.
+        final boolean deleted = removed instanceof EObject eObject && eObject.eResource() == null;
+        ChangeRecorder.recursively(removed,
+            deleted ? this::stopRecordingDeleted : this::removeAdapter);
+      }
       detached.clear();
       ArrayList<EChange<EObject>> _arrayList = new ArrayList<EChange<EObject>>();
       this.activeRecording.set(_arrayList);
@@ -619,6 +629,23 @@ public class ChangeRecorder implements AutoCloseable {
 
   private boolean removeAdapter(final Notifier notifier) {
     return ((!this.rootObjects.contains(notifier)) && notifier.eAdapters().remove(this.recordingAdapter));
+  }
+
+  /**
+   * Stops recording a deleted element and forgets it, so that it can be garbage collected.
+   * Elements added to the recording explicitly stay recorded.
+   *
+   * @return whether recording the element was stopped, i.e., whether its contents have to be
+   *     handled too
+   */
+  private boolean stopRecordingDeleted(final Notifier notifier) {
+    if (!this.removeAdapter(notifier)) {
+      return false;
+    }
+    if (notifier instanceof EObject) {
+      this.existingObjects.remove(notifier);
+    }
+    return true;
   }
 
   private boolean addAdapter(final Notifier notifier) {
