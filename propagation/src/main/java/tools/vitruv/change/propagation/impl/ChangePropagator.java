@@ -202,15 +202,14 @@ public class ChangePropagator {
             final ModelRepositorySnapshot previousState,
             final ModelRepositorySnapshot currentState,
             final ChangePropagationSpecification propagationSpecification) {
-      final Runnable _function = () ->
-              propagationSpecification.propagateChanges(
-                      change.getEChanges(),
-                      change,
-                      this.outer.modelRepository.getCorrespondenceModel(),
-                      this.outer.modelRepository,
-                      previousState);
       final Iterable<TransactionalChange<EObject>> transitiveChanges =
-              this.outer.modelRepository.recordChanges(_function);
+              this.outer.modelRepository.recordChanges(() ->
+                      propagationSpecification.propagateChanges(
+                              change.getEChanges(),
+                              change,
+                              this.outer.modelRepository.getCorrespondenceModel(),
+                              this.outer.modelRepository,
+                              previousState));
       // consequential changes keep the annotations of the change that caused them
       transitiveChanges.forEach(it -> inheritAnnotations(change, it));
       StreamSupport.stream(transitiveChanges.spliterator(), false)
