@@ -160,6 +160,13 @@ class UuidResolverImpl implements UuidResolver {
     return getOrCreateResource(resourceSet, uri);
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Transactions are per thread: only the elements handled on the calling thread are checked
+   * and forgotten, and removed roots only while no other thread has an open transaction (see
+   * {@link ElementRemovalTracker}).
+   */
   @Override
   public synchronized void endTransaction() {
     // Only elements that may have left the resource set can have become dangling.

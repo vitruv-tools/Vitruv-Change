@@ -11,7 +11,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -53,13 +52,13 @@ class UuidResolverTransactionConcurrencyTest {
     onOtherThread(
         () -> {
           resource.getContents().add(otherRoot);
-          register(otherRoot);
+          resolver.registerEObject(otherRoot);
           resource.getContents().remove(otherRoot);
         });
 
     Root root = aet.Root();
     resource.getContents().add(root);
-    register(root);
+    resolver.registerEObject(root);
     assertDoesNotThrow(resolver::endTransaction);
 
     onOtherThread(
@@ -74,14 +73,14 @@ class UuidResolverTransactionConcurrencyTest {
   void endTransactionKeepsElementsOfOtherThreads() throws Exception {
     Root root = aet.Root();
     resource.getContents().add(root);
-    register(root);
+    resolver.registerEObject(root);
     resolver.endTransaction();
 
     NonRoot nonRoot = aet.NonRoot();
     onOtherThread(
         () -> {
           root.getMultiValuedContainmentEReference().add(nonRoot);
-          register(nonRoot);
+          resolver.registerEObject(nonRoot);
         });
 
     resolver.endTransaction();
@@ -94,10 +93,6 @@ class UuidResolverTransactionConcurrencyTest {
     assertThrows(IllegalStateException.class, () -> {
       throw failure.getCause();
     });
-  }
-
-  private void register(EObject element) {
-    resolver.registerEObject(resolver.generateUuid(element), element);
   }
 
   private void onOtherThread(Runnable action) throws Exception {

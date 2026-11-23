@@ -26,10 +26,11 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
  * without being handled themselves. An element that is removed from deeper inside a resource
  * without it or its container being touched is not found.
  *
- * <p>Each thread has its own transaction: it consists of the elements touched on that thread, and
- * ending it forgets only those. Roots removed since the previous end of any transaction are added
- * only while no other thread has touched elements in an open transaction, because such a root may
- * be in the middle of a change of that thread, which checks it when it touches it and ends its
+ * <p>Transactions are kept per thread. An element touched by a thread belongs to the transaction of
+ * that thread, and ending the transaction on a thread checks and forgets only the elements touched
+ * on it. Roots removed since the previous end of any transaction are only added while no other
+ * thread has an open transaction with touched elements, because such a root may be in the middle
+ * of a change of that other thread, which checks it itself when it touches the root and ends its
  * transaction. With a single thread, this is the same as one transaction for all.
  */
 public final class ElementRemovalTracker {

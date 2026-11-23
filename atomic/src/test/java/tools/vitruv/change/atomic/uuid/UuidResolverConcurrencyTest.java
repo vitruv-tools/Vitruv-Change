@@ -1,11 +1,11 @@
 package tools.vitruv.change.atomic.uuid;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static tools.vitruv.change.testutils.metamodels.AllElementTypesCreators.aet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -71,6 +71,7 @@ class UuidResolverConcurrencyTest {
     }
 
     assertEquals(List.of(), failures.stream().distinct().limit(10).toList());
-    assertFalse(resolver.hasEObject(new Uuid("ord_unknown")));
+    // every thread unregistered all its elements again
+    assertEquals(Map.of(), resolver.getUuidToIdMapping());
   }
 }
