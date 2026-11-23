@@ -1,12 +1,13 @@
 package tools.vitruv.change.propagation.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.IdentityHashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.emf.ecore.EObject;
@@ -19,11 +20,13 @@ import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.propagation.ChangePropagationInvocation;
 import tools.vitruv.change.propagation.ChangePropagationStatus;
+import tools.vitruv.change.propagation.EChangeApplicationController;
 import tools.vitruv.change.utils.ResourceAccess;
 
 /**
- * Tests that {@link CompositeChangePropagationSpecification} calls its parts in order, stops at the
- * first part that does not succeed, and combines the invocations of its parts into one invocation.
+ * Tests that {@link CompositeChangePropagationSpecification} calls its processors in order,
+ * stops at the first part that does not succeed,
+ * and combines the invocations of its parts into one invocation.
  */
 class CompositeChangePropagationSpecificationTest {
   private static final MetamodelDescriptor SOURCE = MetamodelDescriptor.with("modelsA");
@@ -86,18 +89,16 @@ class CompositeChangePropagationSpecificationTest {
     var main = part("main", ChangePropagationStatus.SUCCEEDED);
     composite.addChangePreprocessor(preprocessor);
     composite.addChangeMainprocessor(main);
-    var first = change();
-    var second = change();
+    var changes = List.of(change(), change());
 
-    var invocation = composite.propagateChanges(
-        List.of(first, second), AnnotationSource.EMPTY, null, null, null);
+    var invocation = composite.propagateChanges(changes, AnnotationSource.EMPTY, null, null, null);
 
     assertSame(composite, invocation.specification());
-    assertEquals(List.of(first, second), invocation.receivedChanges());
+    assertEquals(changes, invocation.receivedChanges());
     assertEquals(ChangePropagationStatus.SUCCEEDED, invocation.status());
     assertEquals(List.of("pre", "main", "pre", "main"), calls);
     assertEquals(4, invocation.executedChanges().size());
-    assertEquals(preprocessor.executedByCall.get(0), invocation.executedChanges().get(0));
+    assertEquals(preprocessor.executedByCall.getFirst(), invocation.executedChanges().get(0));
     assertEquals(main.executedByCall.get(1), invocation.executedChanges().get(3));
   }
 
@@ -123,11 +124,35 @@ class CompositeChangePropagationSpecificationTest {
         List.of(change(), change()), AnnotationSource.EMPTY, null, null,
         null);
 
-    Set<EChange<EObject>> distinct = Collections.newSetFromMap(new IdentityHashMap<>());
-    distinct.addAll(invocation.executedChanges());
+    Set<EChange<EObject>> distinct = new HashSet<>(invocation.executedChanges());
     assertEquals(invocation.executedChanges().size(), distinct.size());
     assertEquals(3 * 2, distinct.size());
   }
+
+  @Test
+  void applicationControllerIsForwardedToProcessorsAddedBeforeAndAfter() {
+    var before = part("before", ChangePropagationStatus.SUCCEEDED);
+    composite.addChangeMainprocessor(before);
+    assertNull(before.applicationController);
+    var preBefore = part("preBefore", ChangePropagationStatus.SUCCEEDED);
+    composite.addChangePreprocessor(preBefore);
+    assertNull(preBefore.applicationController);
+
+    EChangeApplicationController<EObject> controller = new DefaultEChangeApplicationController();
+    composite.setEChangeApplicationController(controller);
+    assertNotNull(before.applicationController);
+    assertNotNull(preBefore.applicationController);
+
+    var after = part("after", ChangePropagationStatus.SUCCEEDED);
+    composite.addChangeMainprocessor(after);
+    var preAfter = part("preAfter", ChangePropagationStatus.SUCCEEDED);
+    composite.addChangePreprocessor(preAfter);
+
+    for (var part : List.of(before, preBefore, after, preAfter)) {
+      assertSame(controller, part.applicationController, part.name);
+    }
+  }
+
 
   private ScriptedPart part(String name, ChangePropagationStatus status) {
     return new ScriptedPart(name, status);
@@ -146,11 +171,18 @@ class CompositeChangePropagationSpecificationTest {
     private final ChangePropagationStatus status;
     private final List<EChange<EObject>> executedByCall = new ArrayList<>();
     private EChange<EObject> lastExecuted;
+    private EChangeApplicationController<EObject> applicationController;
 
     ScriptedPart(String name, ChangePropagationStatus status) {
       super(SOURCE, TARGET);
       this.name = name;
       this.status = status;
+    }
+
+    @Override
+    public void setEChangeApplicationController(
+        EChangeApplicationController<EObject> applicationController) {
+      this.applicationController = applicationController;
     }
 
     @Override

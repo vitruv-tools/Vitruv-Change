@@ -29,6 +29,18 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
   void setUserInteractor(final UserInteractor userInteractor);
 
   /**
+   * Sets the {@link EChangeApplicationController} that this specification uses to apply
+   * {@link EChange}s it issues itself, for example when needing to check that the issued
+   * check can be applied.
+   * Must be set before calling
+   * {@link #propagateChange(EChange, EditableCorrespondenceModelView, ResourceAccess)}.
+   *
+   * @param applicationController {@link EChangeApplicationController}
+   */
+  void setEChangeApplicationController(
+      EChangeApplicationController<EObject> applicationController);
+
+  /**
    * Returns the descriptor for the metamodel containing the namespace URIs of the root packages
    * of the metamodel of elements whose changes are handled by this 
    * <code>ChangePropagationSpecification</code>.

@@ -33,12 +33,15 @@ import tools.vitruv.change.interaction.UserInteractionListener;
 import tools.vitruv.change.propagation.*;
 
 public class ChangePropagator {
+
   /**
    * Collects the invocations of the specifications during one run of the propagation. The run is
    * halted as soon as an invocation is not {@link ChangePropagationStatus#SUCCEEDED}.
    */
   private static final class PropagationRun {
     private ChangePropagationResult result = ChangePropagationResult.UNHANDLED;
+
+    private PropagationRun() {}
 
     private void add(ChangePropagationInvocation invocation) {
       result = result.append(ChangePropagationResult.of(invocation));
@@ -92,7 +95,10 @@ public class ChangePropagator {
           Set<ChangePropagationSpecification> allSpecs = change.getAffectedEObjectsMetamodelDescriptors().stream()
               .flatMap(it -> {
                 List<ChangePropagationSpecification> specs = this.outer.changePropagationProvider.getChangePropagationSpecifications(it);
-                specs.forEach(s -> s.setUserInteractor(this.outer.userInteractor));
+                specs.forEach(s -> {
+                  s.setUserInteractor(this.outer.userInteractor);
+                  s.setEChangeApplicationController(this.outer.applicationController);
+                });
                 return specs.stream();
               })
               .filter(it -> this.outer.changePropagationProvider.getChangePropagationSpecificationLevel(it) == this.level)
@@ -176,7 +182,7 @@ public class ChangePropagator {
 
     private Iterable<TransactionalChangeWithPreviousState> propagateChangeForChangePropagationSpecification(final TransactionalChange<EObject> change, final ModelRepositorySnapshot previousState, final ModelRepositorySnapshot currentState, final ChangePropagationSpecification propagationSpecification) {
       final ChangePropagationInvocation[] invocation = new ChangePropagationInvocation[1];
-      final Runnable _function = () -> {
+      final Runnable tryPropagation = () -> {
         try {
           invocation[0] = propagationSpecification.propagateChanges(
               change.getEChanges(), change, this.outer.modelRepository.getCorrespondenceModel(),
@@ -186,7 +192,8 @@ public class ChangePropagator {
               propagationSpecification, change.getEChanges(), List.of(), e);
         }
       };
-      final Iterable<TransactionalChange<EObject>> transitiveChanges = this.outer.modelRepository.recordChanges(_function);
+      final Iterable<TransactionalChange<EObject>> transitiveChanges =
+          this.outer.modelRepository.recordChanges(tryPropagation);
       this.run.add(invocation[0]);
       // consequential changes keep the annotations of the change that caused them
       transitiveChanges.forEach(it -> inheritAnnotations(change, it));
@@ -218,7 +225,8 @@ public class ChangePropagator {
             !this.outer.modelRepository.getCorrespondenceModel().hasCorrespondences(createdObjectWithoutResource),
             "The object %s is part of a correspondence to %s but not in any resource", createdObjectWithoutResource,
             this.outer.modelRepository.getCorrespondenceModel().getCorrespondingEObjects(createdObjectWithoutResource));
-        ChangePropagator.logger.warn("Object was created but has no correspondence and is thus lost: " + createdObjectWithoutResource);
+        ChangePropagator.logger.warn("Object was created but has no correspondence and is thus lost: "
+            + createdObjectWithoutResource);
       }
     }
 
@@ -277,6 +285,8 @@ public class ChangePropagator {
 
   private final ChangePropagationMode changePropagationMode;
 
+  private final EChangeApplicationController<EObject> applicationController;
+
   /**
    * Creates a change propagator to which changes can be passed, which are
    * propagated using the given <code>changePropagationProvider</code> and
@@ -297,10 +307,28 @@ public class ChangePropagator {
    * propagated using the given <code>mode</code>.
    */
   public ChangePropagator(final ChangeRecordingModelRepository modelRepository, final ChangePropagationSpecificationProvider changePropagationProvider, final InternalUserInteractor userInteractor, final ChangePropagationMode mode) {
+    this(modelRepository, changePropagationProvider, userInteractor, mode,
+        new DefaultEChangeApplicationController());
+  }
+
+  /**
+   * Creates a change propagator to which changes can be passed, which are
+   * propagated using the given <code>changePropagationProvider</code> and
+   * <code>userInteractor</code>.
+   * Changes are recorded in the given <code>modelRepository</code> and
+   * propagated using the given <code>mode</code>.
+   * The change propagation specifications apply the changes they issue themselves through the
+   * given <code>applicationController</code>.
+   */
+  public ChangePropagator(final ChangeRecordingModelRepository modelRepository,
+      final ChangePropagationSpecificationProvider changePropagationProvider,
+      final InternalUserInteractor userInteractor, final ChangePropagationMode mode,
+      final EChangeApplicationController<EObject> applicationController) {
     this.modelRepository = modelRepository;
     this.changePropagationProvider = changePropagationProvider;
     this.userInteractor = userInteractor;
     this.changePropagationMode = mode;
+    this.applicationController = applicationController;
   }
 
   /**
@@ -330,14 +358,16 @@ public class ChangePropagator {
     List<PropagatedChange> result = new ArrayList<>();
     final PropagationRun run = new PropagationRun();
 
-    for (TransactionalChange<Uuid> transactionalChange : change.getTransactionalChangeSequence()) {
+    for (TransactionalChange<Uuid> transactionalChange :
+        change.getTransactionalChangeSequence()) {
       if (run.halted()) {
         break;
       }
       try (ModelRepositorySnapshot previousState = createSnapshotIfUsed()) {
         TransactionalChange<EObject> resolvedChange =
             (TransactionalChange<EObject>) this.modelRepository.applyChange(transactionalChange);
-        // a transactional change inside a composite change also carries the composite's annotations
+        // a transactional change inside a composite change also carries the composite's
+        // annotations
         inheritAnnotations(change, resolvedChange);
 
         resolvedChange.getAffectedEObjects().stream()
@@ -346,7 +376,8 @@ public class ChangePropagator {
                        .forEach(it -> it.setModified(true));
 
         if (ChangePropagator.logger.isTraceEnabled()) {
-          ChangePropagator.logger.trace("Will now propagate this input change:\n\t" + resolvedChange);
+          ChangePropagator.logger.trace(
+              "Will now propagate this input change:\n\t" + resolvedChange);
         }
 
         TransactionalChangeWithPreviousState changeWithPreviousState
@@ -357,7 +388,6 @@ public class ChangePropagator {
     }
 
     this.changePropagationProvider.forEach(spec -> observers.forEach(spec::deregisterObserver));
-
     return new PropagationReport(result, run.result);
   }
 
@@ -403,7 +433,7 @@ public class ChangePropagator {
     }
 
     Function<TransactionalChangeWithPreviousState, PropagationResult> lowerLevelPropagation
-        = (lowerLevelChange) -> propagateChange(lowerLevelChange, level - 1, run);
+        = lowerLevelChange -> propagateChange(lowerLevelChange, level - 1, run);
 
     ChangePropagation propagation = new ChangePropagation(
         this, lowerLevelResult.change(), level, lowerLevelPropagation, null, run);

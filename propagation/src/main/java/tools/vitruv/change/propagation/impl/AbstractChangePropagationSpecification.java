@@ -8,6 +8,7 @@ import tools.vitruv.change.composite.MetamodelDescriptor;
 import tools.vitruv.change.interaction.UserInteractor;
 import tools.vitruv.change.propagation.ChangePropagationObserver;
 import tools.vitruv.change.propagation.ChangePropagationSpecification;
+import tools.vitruv.change.propagation.EChangeApplicationController;
 
 /**
  * An extensible implementation of a {@link ChangePropagationSpecification}.
@@ -15,6 +16,7 @@ import tools.vitruv.change.propagation.ChangePropagationSpecification;
 public abstract class AbstractChangePropagationSpecification 
     implements ChangePropagationSpecification {
   private final List<ChangePropagationObserver> propagationObservers;
+  protected EChangeApplicationController<EObject> applicationController;
   private UserInteractor userInteractor;
   private MetamodelDescriptor sourceMetamodelDescriptor;
   private MetamodelDescriptor targetMetamodelDescriptor;
@@ -45,6 +47,12 @@ public abstract class AbstractChangePropagationSpecification
   @Override
   public MetamodelDescriptor getTargetMetamodelDescriptor() {
     return targetMetamodelDescriptor;
+  }
+
+  @Override
+  public void setEChangeApplicationController(
+      EChangeApplicationController<EObject> applicationController) {
+    this.applicationController = applicationController;
   }
 
   @Override

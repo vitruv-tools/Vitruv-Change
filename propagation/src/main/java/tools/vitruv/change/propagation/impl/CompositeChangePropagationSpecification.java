@@ -20,6 +20,7 @@ import tools.vitruv.change.propagation.ChangePropagationInvocation;
 import tools.vitruv.change.propagation.ChangePropagationObserver;
 import tools.vitruv.change.propagation.ChangePropagationSpecification;
 import tools.vitruv.change.propagation.ChangePropagationStatus;
+import tools.vitruv.change.propagation.EChangeApplicationController;
 import tools.vitruv.change.utils.ResourceAccess;
 
 /**
@@ -69,6 +70,7 @@ public class CompositeChangePropagationSpecification
     assertMetamodelsCompatible(changePreprocessor);
     changePreprocessors.add(changePreprocessor);
     changePreprocessor.setUserInteractor(this.getUserInteractor());
+    changePreprocessor.setEChangeApplicationController(applicationController);
     changePreprocessor.registerObserver(this);
   }
 
@@ -85,6 +87,7 @@ public class CompositeChangePropagationSpecification
     assertMetamodelsCompatible(changeMainProcessor);
     changeMainprocessors.add(changeMainProcessor);
     changeMainProcessor.setUserInteractor(this.getUserInteractor());
+    changeMainProcessor.setEChangeApplicationController(applicationController);
     changeMainProcessor.registerObserver(this);
   }
 
@@ -97,6 +100,18 @@ public class CompositeChangePropagationSpecification
         .equals(potentialChangeProcessor.getTargetMetamodelDescriptor())) {
       throw new IllegalArgumentException("ChangeProcessor metamodels are not compatible");
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Also passes {@code controller} on to all pre- and main processors.
+   */
+  @Override
+  public void setEChangeApplicationController(EChangeApplicationController<EObject> controller) {
+    super.setEChangeApplicationController(controller);
+    getAllProcessors().forEach(
+        processor -> processor.setEChangeApplicationController(applicationController));
   }
 
   @Override

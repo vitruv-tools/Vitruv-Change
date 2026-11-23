@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.apache.logging.log4j.Level;
@@ -52,9 +53,11 @@ import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.interaction.UserInteractionFactory;
 import tools.vitruv.change.interaction.impl.PredefinedInteractionResultProviderImpl;
 import tools.vitruv.change.propagation.ChangePropagationInvocation;
+import tools.vitruv.change.propagation.ChangePropagationMode;
 import tools.vitruv.change.propagation.ChangePropagationSpecification;
 import tools.vitruv.change.propagation.ChangePropagationSpecificationRepository;
 import tools.vitruv.change.propagation.ChangePropagationStatus;
+import tools.vitruv.change.propagation.EChangeApplicationController;
 import tools.vitruv.change.propagation.ModelRepositorySnapshot;
 import tools.vitruv.change.propagation.PropagationReport;
 import tools.vitruv.change.testutils.RegisterMetamodelsInStandalone;
@@ -114,7 +117,7 @@ class ChangePropagatorTest {
         repositoryRoot().setSingleValuedEAttribute(42);
       }
     });
-    var higherLevel = new RecordingSpecification("higher", (changes, previousState) -> { });
+    var higherLevel = new RecordingSpecification("higher", (changes, previousState) -> {});
     var propagator = createPropagator(Map.of(lowerLevel, 0, higherLevel, 1));
 
     propagateInView(propagator, this::createRootInView);
@@ -141,7 +144,7 @@ class ChangePropagatorTest {
     List<Root> viewRoot = new ArrayList<>();
     propagateInView(propagator, () -> viewRoot.add(createRootInView()));
 
-    propagateInView(propagator, () -> viewRoot.get(0).setSingleValuedEAttribute(2));
+    propagateInView(propagator, () -> viewRoot.getFirst().setSingleValuedEAttribute(2));
 
     assertEquals(List.of(1), previousValues);
     assertEquals(2, repositoryRoot().getSingleValuedEAttribute());
@@ -158,7 +161,7 @@ class ChangePropagatorTest {
     List<Root> viewRoot = new ArrayList<>();
     propagateInView(propagator, () -> viewRoot.add(createRootInView()));
 
-    propagateInView(propagator, () -> viewRoot.get(0).setSingleValuedEAttribute(2));
+    propagateInView(propagator, () -> viewRoot.getFirst().setSingleValuedEAttribute(2));
 
     assertFalse(specification.usesPreviousState());
     assertEquals(0, createdSnapshots);
@@ -205,7 +208,7 @@ class ChangePropagatorTest {
 
   @Test
   void specificationReceivesAnnotationsOfTheChange() {
-    var specification = new RecordingSpecification("spec", (changes, previousState) -> { });
+    var specification = new RecordingSpecification("spec", (changes, previousState) -> {});
     var propagator = createPropagator(Map.of(specification, 0));
     var author = new Author("alice");
 
@@ -216,7 +219,7 @@ class ChangePropagatorTest {
 
   @Test
   void specificationReceivesEmptyAnnotationsForChangeWithoutAnnotations() {
-    var specification = new RecordingSpecification("spec", (changes, previousState) -> { });
+    var specification = new RecordingSpecification("spec", (changes, previousState) -> {});
     var propagator = createPropagator(Map.of(specification, 0));
 
     propagateInView(propagator, null, this::createRootInView);
@@ -243,8 +246,8 @@ class ChangePropagatorTest {
 
   @Test
   void higherLevelReceivesTheAnnotations() {
-    var lowerLevel = new RecordingSpecification("lower", (changes, previousState) -> { });
-    var higherLevel = new RecordingSpecification("higher", (changes, previousState) -> { });
+    var lowerLevel = new RecordingSpecification("lower", (changes, previousState) -> {});
+    var higherLevel = new RecordingSpecification("higher", (changes, previousState) -> {});
     var propagator = createPropagator(Map.of(lowerLevel, 0, higherLevel, 1));
     var author = new Author("alice");
 
@@ -256,8 +259,8 @@ class ChangePropagatorTest {
 
   @Test
   void transactionalChangesReceiveTheAnnotationsOfTheirCompositeChange() {
-    var specification = new RecordingSpecification("spec", (changes, previousState) -> { });
-    var propagator = createPropagator(Map.of(specification, 0));
+    var specification = new RecordingSpecification("spec", (changes, previousState) -> {});
+    final ChangePropagator propagator = createPropagator(Map.of(specification, 0));
     var author = new Author("alice");
     viewRecorder.beginRecording();
     createRootInView();
@@ -283,7 +286,7 @@ class ChangePropagatorTest {
     assertEquals(List.of("blocked"), invocations);
     assertEquals(ChangePropagationStatus.BLOCKED, report.result().status());
     assertEquals(1, report.result().invocations().size());
-    assertSame(blocked, report.result().invocations().get(0).specification());
+    assertSame(blocked, report.result().invocations().getFirst().specification());
   }
 
   @Test
@@ -352,7 +355,7 @@ class ChangePropagatorTest {
 
     assertEquals(ChangePropagationStatus.FAILED, report.result().status());
     assertSame(boom, report.result().cause().orElseThrow());
-    var invocation = report.result().invocations().get(0);
+    var invocation = report.result().invocations().getFirst();
     assertSame(throwing, invocation.specification());
     assertFalse(invocation.receivedChanges().isEmpty());
     assertTrue(invocation.executedChanges().isEmpty());
@@ -391,7 +394,7 @@ class ChangePropagatorTest {
       var report = createPropagatorAndPropagate(blocked);
 
       assertEquals(ChangePropagationStatus.BLOCKED, report.result().status());
-      var invocation = report.result().invocations().get(0);
+      var invocation = report.result().invocations().getFirst();
       assertSame(blocked, invocation.specification());
       assertEquals(1, invocation.executedChanges().size());
       assertFalse(report.propagatedChanges().isEmpty());
@@ -475,8 +478,62 @@ class ChangePropagatorTest {
 
     assertEquals(List.of(lower, higher),
         report.result().invocations().stream()
-            .map(invocation -> invocation.specification()).toList());
+            .map(ChangePropagationInvocation::specification).toList());
     assertEquals(List.of("lower", "higher"), invocations);
+  }
+
+  @Test
+  void testThatAppliedChangesAreMarkedAsSuch() {
+    var controller = new RecordingController();
+    var prepared = new ArrayList<EChange<EObject>>();
+    var specification = new ControllerUsingSpecification("spec",
+        ChangePropagationStatus.SUCCEEDED, received -> {
+          for (int i = 0; i < 2; i++) {
+            EChange<EObject> change = change();
+            prepared.add(change);
+            received.prepare(change);
+            received.apply(change);
+          }
+        });
+    var propagator = createPropagator(Map.of(specification, 0), controller);
+    propagateInViewWithResult(propagator, this::createRootInView);
+
+    assertEquals(controller, specification.receivedController);
+
+    assertEquals(prepared, controller.prepared);
+    assertEquals(prepared, controller.applied);
+  }
+
+  @Test
+  void testThatRefusedChangesAreNotAccepted() {
+    var controller = new RecordingController();
+    EChange<EObject> accepted = change();
+    EChange<EObject> refused = change();
+    controller.refusedChanges.add(refused);
+    var specification = new ControllerUsingSpecification("spec",
+        ChangePropagationStatus.BLOCKED, received -> {
+          received.prepare(accepted);
+          received.prepare(refused);
+        });
+    var propagator = createPropagator(Map.of(specification, 0), controller);
+
+    propagateInViewWithResult(propagator, this::createRootInView);
+
+    assertEquals(List.of(accepted, refused), controller.prepared);
+  }
+
+  @Test
+  void preparedChangesRemainPreparedIfTheSpecificationFails() {
+    var controller = new RecordingController();
+    EChange<EObject> prepared = change();
+    var specification = new ControllerUsingSpecification("spec",
+        ChangePropagationStatus.FAILED, received -> received.prepare(prepared));
+    var propagator = createPropagator(Map.of(specification, 0), controller);
+
+    var report = propagateInViewWithResult(propagator, this::createRootInView);
+
+    assertEquals(ChangePropagationStatus.FAILED, report.result().status());
+    assertEquals(List.of(prepared), controller.prepared);
   }
 
   private record Author(String name) {}
@@ -490,7 +547,7 @@ class ChangePropagatorTest {
   }
 
   private Root repositoryRoot() {
-    return (Root) modelRepository.getModelResource(modelUri).getContents().get(0);
+    return (Root) modelRepository.getModelResource(modelUri).getContents().getFirst();
   }
 
   private void propagateInView(ChangePropagator propagator, Runnable modification) {
@@ -544,6 +601,19 @@ class ChangePropagatorTest {
   private PropagationReport propagateInViewWithResult(
       ChangePropagator propagator, Runnable modification) {
     return propagator.propagateChangeWithResult(recordViewChange(modification), List.of());
+  }
+
+  private static EChange<EObject> change() {
+    return EobjectFactory.eINSTANCE.createCreateEObject();
+  }
+
+  private ChangePropagator createPropagator(Map<ChangePropagationSpecification, Integer> levels,
+      EChangeApplicationController<EObject> controller) {
+    return new ChangePropagator(modelRepository,
+        new ChangePropagationSpecificationRepository(levels.keySet(), levels),
+        UserInteractionFactory.instance.createUserInteractor(
+            new PredefinedInteractionResultProviderImpl(null)),
+        ChangePropagationMode.TRANSITIVE_CYCLIC, controller);
   }
 
   private ChangePropagator createPropagator(Map<ChangePropagationSpecification, Integer> levels) {
@@ -634,7 +704,7 @@ class ChangePropagatorTest {
     private final Consumer<List<EChange<EObject>>> action;
 
     StatusSpecification(String name, ChangePropagationStatus status) {
-      this(name, status, changes -> { });
+      this(name, status, changes -> {});
     }
 
     StatusSpecification(String name, ChangePropagationStatus status,
@@ -659,7 +729,7 @@ class ChangePropagatorTest {
         ResourceAccess resourceAccess, ModelRepositorySnapshot previousState) {
       invocations.add(name);
       action.accept(changes);
-      List<EChange<EObject>> executed = List.of(changes.get(0));
+      List<EChange<EObject>> executed = List.of(changes.getFirst());
       return switch (status) {
         case SUCCEEDED -> ChangePropagationInvocation.succeeded(this, changes, executed);
         case BLOCKED -> ChangePropagationInvocation.blocked(this, changes, executed);
@@ -791,6 +861,90 @@ class ChangePropagatorTest {
       }
       executedChanges.addAll(executed);
       return ChangePropagationInvocation.succeeded(this, changes, executed);
+    }
+
+    @Override
+    public ChangePropagationInvocation propagateChange(EChange<EObject> change,
+        EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+        ResourceAccess resourceAccess) {
+      throw new UnsupportedOperationException("changes are propagated as a whole");
+    }
+  }
+
+  /** Delegates to a {@link DefaultEChangeApplicationController} and records the calls. */
+  private static class RecordingController implements EChangeApplicationController<EObject> {
+    private final DefaultEChangeApplicationController delegate =
+        new DefaultEChangeApplicationController();
+    private final Set<EChange<EObject>> refusedChanges = new java.util.HashSet<>();
+    private final List<EChange<EObject>> prepared = new ArrayList<>();
+    private final List<EChange<EObject>> applied = new ArrayList<>();
+
+    @Override
+    public boolean prepare(EChange<EObject> change) {
+      prepared.add(change);
+      return !refusedChanges.contains(change) && delegate.prepare(change);
+    }
+
+    @Override
+    public boolean apply(EChange<EObject> change) {
+      applied.add(change);
+      return true;
+    }
+
+    @Override
+    public void finish(EChange<EObject> change) {
+      delegate.finish(change);
+    }
+
+    @Override
+    public void undo(EChange<EObject> change) {
+      delegate.undo(change);
+    }
+  }
+
+  /**
+   * Keeps the controller it receives, runs an action with it, and returns an invocation with the
+   * given status.
+   */
+  private class ControllerUsingSpecification extends AbstractChangePropagationSpecification {
+    private final String name;
+    private final ChangePropagationStatus status;
+    private final Consumer<EChangeApplicationController<EObject>> action;
+    private EChangeApplicationController<EObject> receivedController;
+
+    ControllerUsingSpecification(String name, ChangePropagationStatus status,
+        Consumer<EChangeApplicationController<EObject>> action) {
+      super(MetamodelDescriptor.with(AllElementTypesPackage.eNS_URI),
+          MetamodelDescriptor.with(AllElementTypesPackage.eNS_URI));
+      this.name = name;
+      this.status = status;
+      this.action = action;
+    }
+
+    @Override
+    public void setEChangeApplicationController(
+        EChangeApplicationController<EObject> applicationController) {
+      this.receivedController = applicationController;
+    }
+
+    @Override
+    public boolean doesHandleChange(EChange<EObject> change,
+        EditableCorrespondenceModelView<Correspondence> correspondenceModel) {
+      return true;
+    }
+
+    @Override
+    public ChangePropagationInvocation propagateChanges(List<EChange<EObject>> changes,
+        AnnotationSource changeAnnotations,
+        EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+        ResourceAccess resourceAccess, ModelRepositorySnapshot previousState) {
+      invocations.add(name);
+      action.accept(receivedController);
+      return switch (status) {
+        case SUCCEEDED -> ChangePropagationInvocation.succeeded(this, changes, List.of());
+        case BLOCKED -> ChangePropagationInvocation.blocked(this, changes, List.of());
+        case FAILED -> ChangePropagationInvocation.failed(this, changes, List.of(), null);
+      };
     }
 
     @Override
