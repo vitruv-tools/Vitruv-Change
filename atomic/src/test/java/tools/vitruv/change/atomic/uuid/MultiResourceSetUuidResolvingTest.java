@@ -158,7 +158,7 @@ class MultiResourceSetUuidResolvingTest {
     URI notResolvedUri = URI.createFileURI(testProjectPath.resolve("root2.aet").toString());
     List.of(resolveUri, notResolvedUri)
         .forEach(
-            (uri) -> {
+            uri -> {
               Resource sourceResource = sourceResourceSet.createResource(uri);
               Resource targetResource = targetResourceSet.createResource(uri);
               var sourceRoot = aet.Root();
@@ -171,8 +171,10 @@ class MultiResourceSetUuidResolvingTest {
         sourceResourceSet.getResource(resolveUri, false),
         targetResourceSet.getResource(resolveUri, false),
         targetUuidResolver);
-    var resolvedRoot = targetResourceSet.getResource(resolveUri, false).getContents().get(0);
-    var notResolvedRoot = targetResourceSet.getResource(notResolvedUri, false).getContents().get(0);
+    var resolvedRoot = targetResourceSet.getResource(resolveUri, false)
+            .getContents().getFirst();
+    var notResolvedRoot = targetResourceSet.getResource(notResolvedUri, false)
+            .getContents().getFirst();
     assertDoesNotThrow(
         () -> targetUuidResolver.getUuid(resolvedRoot), "element missing in target UUID resolver");
     assertThrows(

@@ -101,7 +101,9 @@ public class ChangeRecorder implements AutoCloseable {
 
       switch (eventType) {
         case Notification.SET:
+        case Notification.UNSET:
         case Notification.REMOVE:
+          // the old value of unsetting a list is whether it was set, which desinfect ignores
           this.desinfect(notification.getOldValue());
           break;
         case Notification.REMOVE_MANY:
@@ -358,6 +360,12 @@ public class ChangeRecorder implements AutoCloseable {
 
   /**
    * Starts recording changes on the registered elements.
+   * Elements that were removed from the recorded models since the last recording started, also
+   * while not recording, are treated as deleted if they were not added again and are not in any
+   * resource anymore. The recorder stops recording and forgets them, and if one of them is added
+   * again later, it is recorded as created. This does not apply to elements passed to
+   * {@link #addToRecording} and their contents, which stay recorded until
+   * {@link #removeFromRecording} is called.
    */
   public List<EChange<EObject>> beginRecording() {
     this.checkNotDisposed();
@@ -576,6 +584,23 @@ public class ChangeRecorder implements AutoCloseable {
   private boolean removeAdapter(final Notifier notifier) {
     return ((!this.rootObjects.contains(notifier))
             && notifier.eAdapters().remove(this.recordingAdapter));
+  }
+
+  /**
+   * Stops recording a deleted element and forgets it, so that it can be garbage collected.
+   * Elements added to the recording explicitly stay recorded.
+   *
+   * @return whether recording the element was stopped, i.e., whether its contents have to be
+   *     handled too
+   */
+  private boolean stopRecordingDeleted(final Notifier notifier) {
+    if (!this.removeAdapter(notifier)) {
+      return false;
+    }
+    if (notifier instanceof EObject) {
+      this.existingObjects.remove(notifier);
+    }
+    return true;
   }
 
   private boolean addAdapter(final Notifier notifier) {

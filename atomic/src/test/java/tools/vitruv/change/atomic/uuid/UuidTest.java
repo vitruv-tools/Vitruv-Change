@@ -2,6 +2,7 @@ package tools.vitruv.change.atomic.uuid;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,5 +24,13 @@ class UuidTest {
     assertEquals(new Uuid("a"), new Uuid("a"));
     assertEquals(new Uuid("a").hashCode(), new Uuid("a").hashCode());
     assertNotEquals(new Uuid("a"), new Uuid("b"));
+  }
+
+  @Test
+  @DisplayName("of restores the UUID with a raw value")
+  void ofRestoresRawValue() {
+    assertEquals(new Uuid("a"), Uuid.of("a"));
+    assertEquals("a", Uuid.of("a").getRawValue());
+    assertThrows(IllegalArgumentException.class, () -> Uuid.of(null));
   }
 }
