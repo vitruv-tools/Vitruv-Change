@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.lang.reflect.RecordComponent;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.eclipse.emf.ecore.EObject;
 import org.junit.jupiter.api.Test;
@@ -69,9 +70,10 @@ class ChangePropagationInvocationTest {
       if (status == ChangePropagationStatus.FAILED) {
         continue;
       }
+      List<EChange<EObject>> receivedChanges = List.of(received);
       assertThrows(IllegalArgumentException.class,
           () -> new ChangePropagationInvocation(
-              specification, List.of(received), status, List.of(), cause),
+              specification, receivedChanges, status, List.of(), cause),
           "a cause must be rejected for " + status);
     }
 
@@ -102,12 +104,14 @@ class ChangePropagationInvocationTest {
     receivedList.add(executed2);
     executedList.add(executed2);
 
-    assertEquals(List.of(received), invocation.receivedChanges());
-    assertEquals(List.of(executed1), invocation.executedChanges());
+    List<EChange<EObject>> receivedChanges = invocation.receivedChanges();
+    assertEquals(List.of(received), receivedChanges);
+    List<EChange<EObject>> executedChanges = invocation.executedChanges();
+    assertEquals(List.of(executed1), executedChanges);
     assertThrows(UnsupportedOperationException.class,
-        () -> invocation.receivedChanges().add(executed2));
+        () -> receivedChanges.add(executed2));
     assertThrows(UnsupportedOperationException.class,
-        () -> invocation.executedChanges().add(executed2));
+        () -> executedChanges.add(executed2));
   }
 
 
@@ -140,7 +144,8 @@ class ChangePropagationInvocationTest {
     assertEquals(List.of(executed1, executed2, executed3),
         combineAndFailOnSecond.executedChanges());
 
-    var combineFailedToBlocked = new ChangePropagationInvocation(specification, List.of(received), List.of(
+    var combineFailedToBlocked = new ChangePropagationInvocation(specification, List.of(received),
+        List.of(
         ChangePropagationInvocation.blocked(
             specification, List.of(received), List.of(executed1)),
         ChangePropagationInvocation.failed(
@@ -154,7 +159,7 @@ class ChangePropagationInvocationTest {
         () -> new ChangePropagationInvocation(specification, List.of(), null));
     assertThrows(NullPointerException.class,
         () -> new ChangePropagationInvocation(
-            specification, List.of(), Arrays.asList((ChangePropagationInvocation) null)));
+            specification, List.of(), Collections.singletonList(null)));
   }
 
   private static EChange<EObject> change() {
