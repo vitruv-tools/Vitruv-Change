@@ -147,8 +147,8 @@ public final class CompoundEChangeAssertHelper {
             = Lists.newArrayList(expectedOldValue.eAllContents());
     Collections.reverse(deletedContainedElements);
     int size = deletedContainedElements.size();
-    int plus = (1 + 2 * size);
-    ChangeAssertHelper.assertSizeGreaterEquals(changes, plus);
+    int doubledSizePlusOne = (1 + 2 * size);
+    ChangeAssertHelper.assertSizeGreaterEquals(changes, doubledSizePlusOne);
     Iterable<? extends EChange<EObject>> filteredChanges = changes;
     for (final EObject deletedContainedElement : deletedContainedElements) {
       filteredChanges = CompoundEChangeAssertHelper.assertRemoveFromContainer(filteredChanges,

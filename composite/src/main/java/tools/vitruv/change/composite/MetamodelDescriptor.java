@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.eclipse.emf.ecore.EPackage;
 
@@ -16,11 +15,10 @@ public final class MetamodelDescriptor {
   private final Set<String> nsUris;
 
   private MetamodelDescriptor(final Set<String> nsUris) {
-    final Consumer<String> _function = (String it) -> Preconditions.checkArgument((it != null),
+    nsUris.forEach((String it) -> Preconditions.checkArgument((it != null),
             "metamodel descriptor to be instantiated for namespace URIs"
-              + " %s must not contain a null URI", nsUris);
-    nsUris.forEach(_function);
-    this.nsUris = new HashSet<String>(nsUris);
+                    + " %s must not contain a null URI", nsUris));
+    this.nsUris = new HashSet<>(nsUris);
   }
 
   /**
@@ -33,13 +31,9 @@ public final class MetamodelDescriptor {
    * @return whether the metamodel of the given descriptor is contained in this one
    */
   public boolean contains(final MetamodelDescriptor descriptorForPotentiallyContainedMetamodel) {
-    boolean xblockexpression = false;
-
     Preconditions.checkArgument((descriptorForPotentiallyContainedMetamodel != null),
             "metamodel descriptor to check for containment in %s must not be null", this);
-    xblockexpression = this.nsUris.containsAll(descriptorForPotentiallyContainedMetamodel.nsUris);
-
-    return xblockexpression;
+    return this.nsUris.containsAll(descriptorForPotentiallyContainedMetamodel.nsUris);
   }
 
   /**
@@ -56,13 +50,10 @@ public final class MetamodelDescriptor {
 
   @Override
   public boolean equals(final Object obj) {
-    boolean xblockexpression = false;
-
-    if ((obj instanceof MetamodelDescriptor)) {
-      return Objects.equals(this.nsUris, ((MetamodelDescriptor) obj).nsUris);
+    if ((obj instanceof MetamodelDescriptor metamodeldescriptor)) {
+      return Objects.equals(this.nsUris, (metamodeldescriptor).nsUris);
     }
-
-    return xblockexpression;
+    return false;
   }
 
   @Override

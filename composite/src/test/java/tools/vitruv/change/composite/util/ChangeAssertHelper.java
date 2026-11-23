@@ -104,9 +104,8 @@ public final class ChangeAssertHelper {
   public static void assertAffectedEObject(
           final EChange<EObject> eChange,
           final EObject expectedAffectedEObject) {
-    boolean matched = false;
     if (eChange instanceof FeatureEChange) {
-      matched = true;
+
       MatcherAssert.<EObject>assertThat(
           "The actual affected EObject is a different one "
                   + "than the expected affected EObject or its copy",
@@ -114,16 +113,14 @@ public final class ChangeAssertHelper {
           ModelMatchers
                   .<EObject>equalsDeeply(((FeatureEChange<EObject, ?>) eChange)
                           .getAffectedElement()));
-    }
-    if (!matched && eChange instanceof EObjectExistenceEChange) {
-      matched = true;
+    } else if (eChange instanceof EObjectExistenceEChange) {
+
       MatcherAssert.<EObject>assertThat("The actual affected EObject is a different one "
                       + "than the expected affected EObject or its copy",
               expectedAffectedEObject, ModelMatchers
                       .<EObject>equalsDeeply(((EObjectExistenceEChange<EObject>) eChange)
                               .getAffectedElement()));
-    }
-    if (!matched) {
+    } else {
       throw new IllegalArgumentException();
     }
   }
@@ -216,9 +213,7 @@ public final class ChangeAssertHelper {
    * @param size the minimum expected number of elements
    */
   public static void assertSizeGreaterEquals(final Iterable<?> iterable, final int size) {
-    int sizeTemp = Iterables.size(iterable);
-    boolean greaterEqualsThan = (sizeTemp >= size);
-    Assertions.assertTrue(greaterEqualsThan);
+    Assertions.assertTrue(Iterables.size(iterable) >= size);
   }
 
   private ChangeAssertHelper() {

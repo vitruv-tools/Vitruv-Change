@@ -31,24 +31,24 @@ public class VitruviusChangeFactory {
   /**
    * Creates a transactional change containing the given atomic changes.
    *
-   * @param <Element> the type of elements referenced by the changes
+   * @param <E> the type of Elements referenced by the changes
    * @param changes the atomic changes, in order; must not be {@code null}
    * @return a new transactional change
    */
-  public <Element> TransactionalChange<Element> createTransactionalChange(
-          final Iterable<? extends EChange<Element>> changes) {
+  public <E> TransactionalChange<E> createTransactionalChange(
+          final Iterable<? extends EChange<E>> changes) {
     return new TransactionalChangeImpl<>(changes);
   }
 
   /**
    * Creates a composite change containing the given changes.
    *
-   * @param <Element> the type of elements referenced by the changes
+   * @param <E> the type of Elements referenced by the changes
    * @param innerChanges the changes to contain, in order
    * @return a new composite change
    */
-  public <Element> CompositeContainerChange<Element> createCompositeChange(
-          final Iterable<? extends VitruviusChange<Element>> innerChanges) {
+  public <E> CompositeContainerChange<E> createCompositeChange(
+          final Iterable<? extends VitruviusChange<E>> innerChanges) {
     return new CompositeContainerChangeImpl<>(Lists.newArrayList(innerChanges));
   }
 }

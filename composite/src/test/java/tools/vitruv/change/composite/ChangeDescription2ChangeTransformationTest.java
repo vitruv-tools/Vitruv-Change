@@ -112,7 +112,7 @@ public abstract class ChangeDescription2ChangeTransformationTest {
       final T objectToRecord, final Consumer<T> operationToRecord) {
     this.stopRecording(this.resourceSet);
     this.changeResolver.assignIds(this.changeRecorder.getChange());
-    final Function<Consumer<VitruviusChange<Uuid>>, TransactionalChange<EObject>> _function =
+    final Function<Consumer<VitruviusChange<Uuid>>, TransactionalChange<EObject>> function =
         (Consumer<VitruviusChange<Uuid>> validationCallback) -> {
           TransactionalChange<EObject> xblockexpression = null;
           {
@@ -128,7 +128,7 @@ public abstract class ChangeDescription2ChangeTransformationTest {
           return xblockexpression;
         };
     final TransactionalChange<EObject> recordedChange =
-        this.validateChange(_function);
+        this.validateChange(function);
     this.startRecording(this.resourceSet);
     return recordedChange;
   }
@@ -183,13 +183,9 @@ public abstract class ChangeDescription2ChangeTransformationTest {
    * @throws IllegalStateException if the recorder is already recording
    */
   private List<EChange<EObject>> startRecording(final Notifier notifier) {
-    List<EChange<EObject>> xblockexpression;
-    boolean isRecording = this.changeRecorder.isRecording();
-    boolean not = (!isRecording);
-    Preconditions.checkState(not);
+    Preconditions.checkState(!this.changeRecorder.isRecording());
     this.changeRecorder.addToRecording(notifier);
-    xblockexpression = this.changeRecorder.beginRecording();
-    return xblockexpression;
+    return this.changeRecorder.beginRecording();
   }
 
   private void stopRecording(final Notifier notifier) {
@@ -206,31 +202,27 @@ public abstract class ChangeDescription2ChangeTransformationTest {
    * operation.
    */
   private <T> T validateChange(
-      final Function<Consumer<VitruviusChange<Uuid>>, T> operationToValidate) {
-    T xblockexpression = null;
-    {
-      final ResourceSet comparisonResourceSet =
-          ResourceSetUtil.withGlobalFactories(new ResourceSetImpl());
-      final HashMap<Resource, Resource> originalToComparisonResourceMapping =
-          ChangeDescription2ChangeTransformationTest.copyTo(
+          final Function<Consumer<VitruviusChange<Uuid>>,
+                  T> operationToValidate) {
+    final ResourceSet comparisonResourceSet =
+            ResourceSetUtil.withGlobalFactories(new ResourceSetImpl());
+    final HashMap<Resource, Resource> originalToComparisonResourceMapping =
+            ChangeDescription2ChangeTransformationTest.copyTo(
+            this.resourceSet, comparisonResourceSet);
+    final UuidResolver comparisonUuidResolver = UuidResolver.create(comparisonResourceSet);
+    final VitruviusChangeResolver<Uuid> comparisonChangeResolver =
+            VitruviusChangeResolverFactory.forUuids(comparisonUuidResolver);
+    this.uuidResolver.resolveResources(originalToComparisonResourceMapping, comparisonUuidResolver);
+    final Consumer<VitruviusChange<Uuid>> _function = (VitruviusChange<Uuid> unresolvedChange) -> {
+      comparisonChangeResolver.resolveAndApply(unresolvedChange);
+      ChangeDescription2ChangeTransformationTest.assertContains(
               this.resourceSet, comparisonResourceSet);
-      final UuidResolver comparisonUuidResolver = UuidResolver.create(comparisonResourceSet);
-      final VitruviusChangeResolver<Uuid> comparisonChangeResolver =
-          VitruviusChangeResolverFactory.forUuids(comparisonUuidResolver);
-      this.uuidResolver.resolveResources(
-          originalToComparisonResourceMapping, comparisonUuidResolver);
-      final Consumer<VitruviusChange<Uuid>> _function =
-          (VitruviusChange<Uuid> unresolvedChange) -> {
-            comparisonChangeResolver.resolveAndApply(unresolvedChange);
-            ChangeDescription2ChangeTransformationTest.assertContains(
-                this.resourceSet, comparisonResourceSet);
-            ChangeDescription2ChangeTransformationTest.assertContains(
-                comparisonResourceSet, this.resourceSet);
-          };
-      xblockexpression = operationToValidate.apply(_function);
-    }
-    return xblockexpression;
+      ChangeDescription2ChangeTransformationTest.assertContains(
+              comparisonResourceSet, this.resourceSet);
+    };
+    return operationToValidate.apply(_function);
   }
+
 
   private static HashMap<Resource, Resource> copyTo(
       final ResourceSet original, final ResourceSet target) {
