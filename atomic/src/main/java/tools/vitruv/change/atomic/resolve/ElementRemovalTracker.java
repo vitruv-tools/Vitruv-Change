@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,10 +25,17 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
  * anymore. The last case also covers elements that were removed together with their container
  * without being handled themselves. An element that is removed from deeper inside a resource
  * without it or its container being touched is not found.
+ *
+ * <p>Transactions are kept per thread. An element touched by a thread belongs to the transaction of
+ * that thread, and ending the transaction on a thread checks and forgets only the elements touched
+ * on it. Roots removed since the previous end of any transaction are only added while no other
+ * thread has an open transaction with touched elements, because such a root may be in the middle
+ * of a change of that other thread, which checks it itself when it touches the root and ends its
+ * transaction. With a single thread, this is the same as one transaction for all.
  */
 public final class ElementRemovalTracker {
   private final ResourceSet resourceSet;
-  private final Set<EObject> touchedElements = Collections.newSetFromMap(new IdentityHashMap<>());
+  private final Map<Thread, Set<EObject>> touchedElementsByThread = new IdentityHashMap<>();
   private final Map<Resource, List<EObject>> rootsAtTransactionEnd = new IdentityHashMap<>();
 
   /**
@@ -41,28 +49,34 @@ public final class ElementRemovalTracker {
   }
 
   /**
-   * Remembers that the given element was handled during the current transaction.
+   * Remembers that the given element was handled during the current transaction of the calling
+   * thread.
    *
    * @param element the handled element; {@code null} is ignored
    */
-  public void touch(EObject element) {
+  public synchronized void touch(EObject element) {
     if (element != null) {
-      touchedElements.add(element);
+      touchedElementsByThread
+          .computeIfAbsent(
+              Thread.currentThread(), thread -> Collections.newSetFromMap(new IdentityHashMap<>()))
+          .add(element);
     }
   }
 
   /**
-   * Returns the elements that may have left the resource set during the current transaction: the
-   * touched elements, the roots removed from resources since the previous transaction ended, and
-   * the contents of those that are not in the resource set anymore. Some of them may still be in
-   * the resource set.
+   * Returns the elements that may have left the resource set during the current transaction of the
+   * calling thread: the elements it touched, the roots removed from resources since the previous
+   * transaction ended (unless another thread has an open transaction), and the contents of those
+   * that are not in the resource set anymore. Some of them may still be in the resource set.
    *
    * @return the elements to check, compared by identity
    */
-  public Set<EObject> getElementsThatMayHaveLeft() {
+  public synchronized Set<EObject> getElementsThatMayHaveLeft() {
     Set<EObject> candidates = Collections.newSetFromMap(new IdentityHashMap<>());
-    candidates.addAll(touchedElements);
-    addRootsRemovedSinceTransactionEnd(candidates);
+    candidates.addAll(touchedElementsByThread.getOrDefault(Thread.currentThread(), Set.of()));
+    if (!hasOpenTransactionOnOtherThread()) {
+      addRootsRemovedSinceTransactionEnd(candidates);
+    }
     List<EObject> outsideResourceSet =
         candidates.stream().filter(element -> !isInResourceSet(element)).toList();
     for (EObject element : outsideResourceSet) {
@@ -72,15 +86,33 @@ public final class ElementRemovalTracker {
     return candidates;
   }
 
-  /** Ends the current transaction: forgets the touched elements and remembers the current roots. */
-  public void endTransaction() {
-    touchedElements.clear();
+  /**
+   * Ends the current transaction of the calling thread: forgets the elements it touched and
+   * remembers the current roots.
+   */
+  public synchronized void endTransaction() {
+    touchedElementsByThread.remove(Thread.currentThread());
     rootsAtTransactionEnd.clear();
     for (Resource resource : resourceSet.getResources()) {
       if (!resource.getContents().isEmpty()) {
         rootsAtTransactionEnd.put(resource, new ArrayList<>(resource.getContents()));
       }
     }
+  }
+
+  private boolean hasOpenTransactionOnOtherThread() {
+    Thread currentThread = Thread.currentThread();
+    Iterator<Thread> threads = touchedElementsByThread.keySet().iterator();
+    while (threads.hasNext()) {
+      Thread thread = threads.next();
+      if (!thread.isAlive()) {
+        // a thread that ended without ending its transaction does not hold back the others
+        threads.remove();
+      } else if (thread != currentThread) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private void addRootsRemovedSinceTransactionEnd(Set<EObject> candidates) {
