@@ -8,6 +8,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import tools.vitruv.change.atomic.hid.HierarchicalId;
 
 /**
  * A UUID resolver manages the mapping of {@link org.eclipse.emf.ecore.EObject} to UUIDs within one
@@ -192,4 +193,24 @@ public interface UuidResolver {
    * @throws IllegalStateException if this resolver already has elements registered.
    */
   public void loadFromUri(URI uri) throws IOException, IllegalStateException;
+
+  /**
+   * Returns the hierarchical ID of every registered element, which is what {@link #storeAtUri}
+   * writes. Lets callers store the mapping in their own format, e.g. with relative URIs.
+   *
+   * @return a new map from the UUID of each registered element to its current hierarchical ID
+   * @throws IllegalStateException if a registered element is not contained in a resource
+   */
+  public Map<Uuid, HierarchicalId> getUuidToIdMapping() throws IllegalStateException;
+
+  /**
+   * Initializes this resolver with the given mapping, like {@link #loadFromUri} does with the
+   * mapping read from its file. Can only be called before any elements are registered with this
+   * resolver.
+   *
+   * @param uuidToIdMapping the hierarchical ID of the element of each UUID
+   * @throws IllegalStateException if this resolver already has elements registered
+   */
+  public void loadFromMapping(Map<Uuid, HierarchicalId> uuidToIdMapping)
+      throws IllegalStateException;
 }
