@@ -38,6 +38,10 @@ import tools.vitruv.change.atomic.resolve.ElementRemovalTracker;
  * A UUID resolver manages the mapping of {@link org.eclipse.emf.ecore.EObject} to UUIDs within one
  * resource set. UUIDs are used to uniquely identify an element in changes, independent of the
  * location within a resource set and the actual resource set instance.
+ *
+ * <p>The resolver can be used from several threads: its operations synchronize on the resolver,
+ * and each thread has its own transaction (see {@link #endTransaction()} and {@link
+ * ElementRemovalTracker}).
  */
 class UuidResolverImpl implements UuidResolver {
   private static final Logger LOGGER = LogManager.getLogger(UuidResolverImpl.class);
@@ -62,32 +66,33 @@ class UuidResolverImpl implements UuidResolver {
   }
 
   @Override
-  public boolean hasUuid(EObject eObject) {
+  public synchronized boolean hasUuid(EObject eObject) {
     // like getUuid, elements of read-only resources have a UUID without being registered
     return getUuidOrNull(eObject) != null;
   }
 
   @Override
-  public Uuid getUuid(EObject eObject) throws IllegalStateException {
+  public synchronized Uuid getUuid(EObject eObject) throws IllegalStateException {
     Uuid uuid = getUuidOrNull(eObject);
     checkState(uuid != null, "no UUID could be found for EObject: %s", eObject);
     return uuid;
   }
 
   @Override
-  public boolean hasEObject(Uuid uuid) {
+  public synchronized boolean hasEObject(Uuid uuid) {
     return getEObjectOrNull(uuid) != null;
   }
 
   @Override
-  public EObject getEObject(Uuid uuid) throws IllegalStateException {
+  public synchronized EObject getEObject(Uuid uuid) throws IllegalStateException {
     EObject eObject = getEObjectOrNull(uuid);
     checkState(eObject != null, "no EObject could be found for UUID: %s", uuid);
     return eObject;
   }
 
   @Override
-  public void registerEObject(Uuid uuid, EObject eObject) throws IllegalStateException {
+  public synchronized void registerEObject(Uuid uuid, EObject eObject)
+      throws IllegalStateException {
     checkState(uuid != null, "uuid must not be null");
     checkState(eObject != null, "object must not be null");
     if (eObject.eResource() != null && eObject.eResource().getResourceSet() != null) {
@@ -126,7 +131,8 @@ class UuidResolverImpl implements UuidResolver {
   }
 
   @Override
-  public void unregisterEObject(Uuid uuid, EObject eObject) throws IllegalStateException {
+  public synchronized void unregisterEObject(Uuid uuid, EObject eObject)
+      throws IllegalStateException {
     checkState(uuid != null, "uuid must not be null");
     checkState(eObject != null, "object must not be null");
     checkState(
@@ -154,8 +160,15 @@ class UuidResolverImpl implements UuidResolver {
     return getOrCreateResource(resourceSet, uri);
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Transactions are per thread: only the elements handled on the calling thread are checked
+   * and forgotten, and removed roots only while no other thread has an open transaction (see
+   * {@link ElementRemovalTracker}).
+   */
   @Override
-  public void endTransaction() {
+  public synchronized void endTransaction() {
     // Only elements that may have left the resource set can have become dangling.
     for (EObject object : removalTracker.getElementsThatMayHaveLeft()) {
       if (eObjectToUuid.containsKey(object)) {
@@ -170,7 +183,7 @@ class UuidResolverImpl implements UuidResolver {
   }
 
   @Override
-  public void resolveResources(
+  public synchronized void resolveResources(
       Map<Resource, Resource> sourceToTargetResourceMapping, UuidResolver targetUuidResolver) {
     checkState(
         sourceToTargetResourceMapping != null,
@@ -205,12 +218,12 @@ class UuidResolverImpl implements UuidResolver {
   }
 
   @Override
-  public Map<Uuid, HierarchicalId> getUuidToIdMapping() {
+  public synchronized Map<Uuid, HierarchicalId> getUuidToIdMapping() {
     return generateUuidToIdMapping(null, new HierarchicalIdCalculator());
   }
 
   @Override
-  public void loadFromMapping(Map<Uuid, HierarchicalId> uuidToIdMapping) {
+  public synchronized void loadFromMapping(Map<Uuid, HierarchicalId> uuidToIdMapping) {
     checkState(
         eObjectToUuid.isEmpty(),
         "trying to load a UUID mapping but the resolver contained already some UUIDs");
@@ -218,7 +231,7 @@ class UuidResolverImpl implements UuidResolver {
   }
 
   @Override
-  public void loadFromUri(URI uri) throws IOException {
+  public synchronized void loadFromUri(URI uri) throws IOException {
     checkState(
         eObjectToUuid.isEmpty(),
         "trying to load stored UUID resolver configuration but contained already some UUIDs");
@@ -245,7 +258,7 @@ class UuidResolverImpl implements UuidResolver {
   }
 
   @Override
-  public void storeAtUri(URI uri) throws IOException {
+  public synchronized void storeAtUri(URI uri) throws IOException {
     checkState(uri.isFile(), "Storing UUID resolver requires a file uri but was %s", uri);
     File file = new File(uri.toFileString());
     if (isStoredAsIs(uri, file)) {
