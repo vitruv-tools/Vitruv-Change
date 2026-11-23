@@ -46,16 +46,11 @@ public class ChangePropagationSpecificationRepository
           final Map<ChangePropagationSpecification,
                   Integer> changePropagationSpecificationToLevel) {
     this.sourceMetamodelToPropagationSpecifications = new HashMap<>();
-    final Consumer<ChangePropagationSpecification> function =
-            (ChangePropagationSpecification specification) -> {
-              final Function<MetamodelDescriptor,
-                      List<ChangePropagationSpecification>> function1 =
-                          (MetamodelDescriptor it) ->
-                                  new ArrayList<ChangePropagationSpecification>();
-              this.sourceMetamodelToPropagationSpecifications.computeIfAbsent(
-                      specification.getSourceMetamodelDescriptor(),
-                      function1).add(specification);
-            };
+    final Consumer<ChangePropagationSpecification> function = specification ->
+            this.sourceMetamodelToPropagationSpecifications
+                    .computeIfAbsent(specification.getSourceMetamodelDescriptor(),
+                            it -> new ArrayList<>())
+                    .add(specification);
     specifications.forEach(function);
     this.changePropagationSpecificationToLevel =
             new HashMap<>(changePropagationSpecificationToLevel);

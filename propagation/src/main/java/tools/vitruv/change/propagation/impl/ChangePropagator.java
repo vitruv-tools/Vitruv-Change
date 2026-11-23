@@ -61,7 +61,7 @@ public class ChangePropagator {
 
     private final ChangePropagator.ChangePropagation previous;
 
-    private final Set<Resource> changedResources = new HashSet<Resource>();
+    private final Set<Resource> changedResources = new HashSet<>();
 
     private final List<EObject> createdObjects = new ArrayList<EObject>();
 
@@ -463,6 +463,16 @@ public class ChangePropagator {
             VitruviusChangeFactory.getInstance().createTransactionalChange(eChanges);
     inheritAnnotations(change.change(), mergedChange);
     return new TransactionalChangeWithPreviousState(mergedChange, change.previousState());
+  }
+
+  /**
+   * Creates a snapshot of the model repository if a specification uses the state before a change.
+   * Otherwise returns <code>null</code>, as creating a snapshot copies all models.
+   */
+  private ModelRepositorySnapshot createSnapshotIfUsed() {
+    boolean previousStateUsed = StreamSupport.stream(changePropagationProvider.spliterator(), false)
+            .anyMatch(ChangePropagationSpecification::usesPreviousState);
+    return previousStateUsed ? modelRepository.createSnapshot() : null;
   }
 
   /**
