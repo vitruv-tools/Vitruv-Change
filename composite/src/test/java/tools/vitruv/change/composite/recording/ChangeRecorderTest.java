@@ -119,7 +119,7 @@ public class ChangeRecorderTest {
   }
 
   private TransactionalChange<EObject> recordChanges(final Runnable changes) {
-    TransactionalChange<EObject> xblockexpression = null;
+    TransactionalChange<EObject> xblockexpression;
     {
       this.changeRecorder.beginRecording();
       changes.run();
@@ -218,10 +218,10 @@ public class ChangeRecorderTest {
     Root wrapIntoRecordedResource
             = this.wrapIntoRecordedResource(AllElementTypesCreators.aet.Root());
     final Consumer<Root> _function = (Root it) -> {
-      final Runnable _function_1 = () -> {
+      final Runnable function1 = () -> {
         NonRootObjectContainerHelper nonRootObjectContainerHelper
                 = AllElementTypesCreators.aet.NonRootObjectContainerHelper();
-        final Consumer<NonRootObjectContainerHelper> _function_2
+        final Consumer<NonRootObjectContainerHelper> function2
                 = (NonRootObjectContainerHelper it1) -> {
                   EList<NonRoot> nonRootObjectsContainment = it1.getNonRootObjectsContainment();
                   NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
@@ -230,16 +230,16 @@ public class ChangeRecorderTest {
                   nonRootObjectsContainment1.add(inner);
                 };
         NonRootObjectContainerHelper doubleArrow
-                = initWith(nonRootObjectContainerHelper, _function_2);
+                = initWith(nonRootObjectContainerHelper, function2);
         it.setNonRootObjectContainerHelper(doubleArrow);
       };
-      this.recordChanges(_function_1);
+      this.recordChanges(function1);
     };
     initWith(wrapIntoRecordedResource, _function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       inner.setId("test");
     };
-    this.recordChanges(_function_1);
+    this.recordChanges(function1);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
   }
@@ -251,13 +251,13 @@ public class ChangeRecorderTest {
     Resource createResource = this.resourceSet.createResource(URI.createURI("test://test.aet"));
     final Consumer<Resource> _function = (Resource it) -> {
       this.changeRecorder.addToRecording(it);
-      final Runnable _function_1 = () -> {
+      final Runnable function1 = () -> {
         EList<EObject> contents = it.getContents();
         Root root = AllElementTypesCreators.aet.Root();
-        final Consumer<Root> _function_2 = (Root it1) -> {
+        final Consumer<Root> function2 = (Root it1) -> {
           NonRootObjectContainerHelper nonRootObjectContainerHelper
                   = AllElementTypesCreators.aet.NonRootObjectContainerHelper();
-          final Consumer<NonRootObjectContainerHelper> _function_3
+          final Consumer<NonRootObjectContainerHelper> function3
                   = (NonRootObjectContainerHelper it2) -> {
                     EList<NonRoot> nonRootObjectsContainment = it2.getNonRootObjectsContainment();
                     NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
@@ -266,19 +266,19 @@ public class ChangeRecorderTest {
                     nonRootObjectsContainment1.add(inner);
                   };
           NonRootObjectContainerHelper doubleArrow
-                  = initWith(nonRootObjectContainerHelper, _function_3);
+                  = initWith(nonRootObjectContainerHelper, function3);
           it1.setNonRootObjectContainerHelper(doubleArrow);
         };
-        Root doubleArrow = initWith(root, _function_2);
+        Root doubleArrow = initWith(root, function2);
         contents.add(doubleArrow);
       };
-      this.recordChanges(_function_1);
+      this.recordChanges(function1);
     };
     initWith(createResource, _function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       inner.setId("test");
     };
-    this.recordChanges(_function_1);
+    this.recordChanges(function1);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
   }
@@ -290,13 +290,13 @@ public class ChangeRecorderTest {
     this.changeRecorder.addToRecording(this.resourceSet);
     Resource createResource = this.resourceSet.createResource(URI.createURI("test://test.aet"));
     final Consumer<Resource> _function = (Resource it) -> {
-      final Runnable _function_1 = () -> {
+      final Runnable function1 = () -> {
         EList<EObject> contents = it.getContents();
         Root root = AllElementTypesCreators.aet.Root();
-        final Consumer<Root> _function_2 = (Root it1) -> {
+        final Consumer<Root> function2 = (Root it1) -> {
           NonRootObjectContainerHelper nonRootObjectContainerHelper
                   = AllElementTypesCreators.aet.NonRootObjectContainerHelper();
-          final Consumer<NonRootObjectContainerHelper> _function_3
+          final Consumer<NonRootObjectContainerHelper> function3
                   = (NonRootObjectContainerHelper it2) -> {
                     EList<NonRoot> nonRootObjectsContainment = it2.getNonRootObjectsContainment();
                     NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
@@ -305,25 +305,25 @@ public class ChangeRecorderTest {
                     nonRootObjectsContainment1.add(inner);
                   };
           NonRootObjectContainerHelper doubleArrow
-                  = initWith(nonRootObjectContainerHelper, _function_3);
+                  = initWith(nonRootObjectContainerHelper, function3);
           it1.setNonRootObjectContainerHelper(doubleArrow);
         };
-        Root doubleArrow = initWith(root, _function_2);
+        Root doubleArrow = initWith(root, function2);
         contents.add(doubleArrow);
       };
-      this.recordChanges(_function_1);
+      this.recordChanges(function1);
     };
     final Resource resource = initWith(createResource, _function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       inner.setId("test");
     };
-    this.recordChanges(_function_1);
+    this.recordChanges(function1);
     MatcherAssert.assertThat(this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
-    final Runnable _function_2 = () -> {
+    final Runnable function2 = () -> {
       resource.getContents().clear();
     };
-    this.recordChanges(_function_2);
+    this.recordChanges(function2);
     MatcherAssert.assertThat(this.changeRecorder.getChange(),
         ChangeRecorderTest.hasEChanges(RemoveRootEObject.class,
             RemoveEReference.class, DeleteEObject.class,
@@ -340,10 +340,10 @@ public class ChangeRecorderTest {
       root.setSingleValuedContainmentEReference(nonRoot);
     };
     this.recordChanges(_function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       nonRoot.setId("foobar");
     };
-    this.recordChanges(_function_1);
+    this.recordChanges(function1);
     MatcherAssert.assertThat(this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
   }
@@ -358,10 +358,10 @@ public class ChangeRecorderTest {
       multiValuedContainmentEReference.add(nonRoot);
     };
     this.recordChanges(_function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       nonRoot.setId("foobar");
     };
-    this.recordChanges(_function_1);
+    this.recordChanges(function1);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
   }
@@ -376,10 +376,10 @@ public class ChangeRecorderTest {
       try {
         EList<EObject> contents = it.getContents();
         Root root = AllElementTypesCreators.aet.Root();
-        final Consumer<Root> _function_1 = (Root it1) -> {
+        final Consumer<Root> function1 = (Root it1) -> {
           it1.setSingleValuedContainmentEReference(savedNonRoot);
         };
-        Root doubleArrow = initWith(root, _function_1);
+        Root doubleArrow = initWith(root, function1);
         contents.add(doubleArrow);
         it.save(Map.of());
       } catch (Throwable e) {
@@ -388,28 +388,28 @@ public class ChangeRecorderTest {
     };
     initWith(createResource, _function);
     Root tempRoot = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function_1 = (Root it) -> {
+    final Consumer<Root> function1 = (Root it) -> {
       NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
-      final Consumer<NonRoot> _function_2 = (NonRoot it1) -> {
+      final Consumer<NonRoot> function2 = (NonRoot it1) -> {
         ((InternalEObject) it1).eSetProxyURI(EcoreUtil.getURI(savedNonRoot));
       };
-      NonRoot doubleArrow = initWith(nonRoot, _function_2);
+      NonRoot doubleArrow = initWith(nonRoot, function2);
       it.setSingleValuedContainmentEReference(doubleArrow);
     };
-    final Root root = initWith(tempRoot, _function_1);
+    final Root root = initWith(tempRoot, function1);
     Resource createResource1 = this.resourceSet
             .createResource(URI.createURI("test://test2.aet"));
-    final Consumer<Resource> _function_2 = (Resource it) -> {
+    final Consumer<Resource> function2 = (Resource it) -> {
       this.changeRecorder.addToRecording(it);
       EList<EObject> contents = it.getContents();
       contents.add(root);
     };
-    initWith(createResource1, _function_2);
+    initWith(createResource1, function2);
     final NonRoot nonRoot = root.getSingleValuedContainmentEReference();
-    final Runnable _function_3 = () -> {
+    final Runnable function3 = () -> {
       nonRoot.setId("foobar");
     };
-    this.recordChanges(_function_3);
+    this.recordChanges(function3);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
   }
@@ -426,11 +426,11 @@ public class ChangeRecorderTest {
       Iterables.<NonRoot>addAll(multiValuedContainmentEReference, of);
     };
     this.recordChanges(_function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       nonRoot1.setId("foobar1");
       nonRoot2.setId("foobar2");
     };
-    this.recordChanges(_function_1);
+    this.recordChanges(function1);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(
                     ReplaceSingleValuedEAttribute.class,
@@ -448,10 +448,10 @@ public class ChangeRecorderTest {
       contents.add(root);
     };
     this.recordChanges(_function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       root.setId("foobar");
     };
-    this.recordChanges(_function_1);
+    this.recordChanges(function1);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
   }
@@ -487,11 +487,11 @@ public class ChangeRecorderTest {
       Iterables.<EObject>addAll(contents, of);
     };
     this.recordChanges(_function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       root1.setId("foobar1");
       root2.setId("foobar2");
     };
-    this.recordChanges(_function_1);
+    this.recordChanges(function1);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(
                     ReplaceSingleValuedEAttribute.class,
@@ -507,10 +507,10 @@ public class ChangeRecorderTest {
       try {
         EList<EObject> contents = it.getContents();
         Root root = AllElementTypesCreators.aet.Root();
-        final Consumer<Root> _function_1 = (Root it1) -> {
+        final Consumer<Root> function1 = (Root it1) -> {
           it1.setSingleValuedContainmentEReference(AllElementTypesCreators.aet.NonRoot());
         };
-        Root doubleArrow = initWith(root, _function_1);
+        Root doubleArrow = initWith(root, function1);
         contents.add(doubleArrow);
         it.save(Map.of());
       } catch (Throwable e) {
@@ -521,21 +521,21 @@ public class ChangeRecorderTest {
     this.resourceSet.getResources().clear();
     final Resource resource = this.resourceSet.createResource(resourceUri);
     this.changeRecorder.addToRecording(resource);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       try {
         resource.load(Map.of());
       } catch (Throwable e) {
         throw new RuntimeException(e);
       }
     };
-    this.recordChanges(_function_1);
-    final Runnable _function_2 = () -> {
+    this.recordChanges(function1);
+    final Runnable function2 = () -> {
       EObject get = resource.getContents().getFirst();
       NonRoot singleValuedContainmentEReference
               = ((Root) get).getSingleValuedContainmentEReference();
       singleValuedContainmentEReference.setId("test");
     };
-    this.recordChanges(_function_2);
+    this.recordChanges(function2);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
   }
@@ -576,22 +576,22 @@ public class ChangeRecorderTest {
     final Consumer<Resource> _function = (Resource it) -> {
       EList<EObject> contents = it.getContents();
       Root withUuid = this.<Root>withUuid(AllElementTypesCreators.aet.Root());
-      final Consumer<Root> _function_1 = (Root it1) -> {
+      final Consumer<Root> function1 = (Root it1) -> {
         it1.setSingleValuedContainmentEReference(
                 this.<NonRoot>withUuid(AllElementTypesCreators.aet.NonRoot()));
       };
-      Root doubleArrow = initWith(withUuid, _function_1);
+      Root doubleArrow = initWith(withUuid, function1);
       contents.add(doubleArrow);
     };
     final Resource resource = initWith(createResource, _function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       try {
         resource.delete(Map.of());
       } catch (Throwable e) {
         throw new RuntimeException(e);
       }
     };
-    this.recordChanges(_function_1);
+    this.recordChanges(function1);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(this.changeRecorder.getChange(),
         ChangeRecorderTest.hasEChanges(
                 RemoveRootEObject.class,
@@ -615,7 +615,7 @@ public class ChangeRecorderTest {
       Iterables.<Resource>addAll(resources, of);
     };
     this.recordIf(isRecordingWhileAddingObject, _function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       EList<EObject> contents = resource1.getContents();
       Root root = AllElementTypesCreators.aet.Root();
       contents.add(root);
@@ -623,7 +623,7 @@ public class ChangeRecorderTest {
       Root root1 = AllElementTypesCreators.aet.Root();
       contents1.add(root1);
     };
-    this.recordChanges(_function_1);
+    this.recordChanges(function1);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(
             this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(
@@ -648,20 +648,20 @@ public class ChangeRecorderTest {
       try {
         EList<EObject> contents = it.getContents();
         Root root = AllElementTypesCreators.aet.Root();
-        final Consumer<Root> _function_1 = (Root it1) -> {
+        final Consumer<Root> function1 = (Root it1) -> {
           NonRootObjectContainerHelper nonRootObjectContainerHelper
                   = AllElementTypesCreators.aet.NonRootObjectContainerHelper();
-          final Consumer<NonRootObjectContainerHelper> _function_2
+          final Consumer<NonRootObjectContainerHelper> function2
                   = (NonRootObjectContainerHelper it2) -> {
                     EList<NonRoot> nonRootObjectsContainment = it2.getNonRootObjectsContainment();
                     NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
                     nonRootObjectsContainment.add(nonRoot);
                   };
           NonRootObjectContainerHelper doubleArrow
-                  = initWith(nonRootObjectContainerHelper, _function_2);
+                  = initWith(nonRootObjectContainerHelper, function2);
           it1.setNonRootObjectContainerHelper(doubleArrow);
         };
-        Root doubleArrow = initWith(root, _function_1);
+        Root doubleArrow = initWith(root, function1);
         contents.add(doubleArrow);
         it.save(Map.of());
       } catch (Throwable e) {
@@ -670,10 +670,10 @@ public class ChangeRecorderTest {
     };
     final Resource originalResource = initWith(createResource, _function);
     this.changeRecorder.addToRecording(this.resourceSet);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       this.resourceSet.getResource(resourceUri, true);
     };
-    this.recordIf(isRecordingLoadingResource, _function_1);
+    this.recordIf(isRecordingLoadingResource, function1);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(
             this.changeRecorder.getChange(),
             ChangeRecorderTest.hasNoChanges());
@@ -697,20 +697,20 @@ public class ChangeRecorderTest {
       try {
         EList<EObject> contents = it.getContents();
         Root root = AllElementTypesCreators.aet.Root();
-        final Consumer<Root> _function_1 = (Root it1) -> {
+        final Consumer<Root> function1 = (Root it1) -> {
           NonRootObjectContainerHelper nonRootObjectContainerHelper
                   = AllElementTypesCreators.aet.NonRootObjectContainerHelper();
-          final Consumer<NonRootObjectContainerHelper> _function_2
+          final Consumer<NonRootObjectContainerHelper> function2
                   = (NonRootObjectContainerHelper it2) -> {
                     EList<NonRoot> nonRootObjectsContainment = it2.getNonRootObjectsContainment();
                     NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
                     nonRootObjectsContainment.add(nonRoot);
                   };
           NonRootObjectContainerHelper doubleArrow
-                  = initWith(nonRootObjectContainerHelper, _function_2);
+                  = initWith(nonRootObjectContainerHelper, function2);
           it1.setNonRootObjectContainerHelper(doubleArrow);
         };
-        Root doubleArrow = initWith(root, _function_1);
+        Root doubleArrow = initWith(root, function1);
         contents.add(doubleArrow);
         it.save(Map.of());
       } catch (Throwable e) {
@@ -720,7 +720,7 @@ public class ChangeRecorderTest {
     final Resource originalResource = initWith(createResource, _function);
     this.changeRecorder.addToRecording(this.resourceSet);
     final Resource loadedResource = this.resourceSet.createResource(resourceUri);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       try {
         loadedResource.load(Map.of());
       } catch (Throwable
@@ -729,7 +729,7 @@ public class ChangeRecorderTest {
                 e);
       }
     };
-    this.recordIf(isRecordingLoadingResource, _function_1);
+    this.recordIf(isRecordingLoadingResource, function1);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(
             this.changeRecorder.getChange(),
             ChangeRecorderTest.hasNoChanges());
@@ -750,20 +750,20 @@ public class ChangeRecorderTest {
       try {
         EList<EObject> contents = it.getContents();
         Root root = AllElementTypesCreators.aet.Root();
-        final Consumer<Root> _function_1 = (Root it1) -> {
+        final Consumer<Root> function1 = (Root it1) -> {
           NonRootObjectContainerHelper nonRootObjectContainerHelper
                   = AllElementTypesCreators.aet.NonRootObjectContainerHelper();
-          final Consumer<NonRootObjectContainerHelper> _function_2
+          final Consumer<NonRootObjectContainerHelper> function2
                   = (NonRootObjectContainerHelper it2) -> {
                     EList<NonRoot> nonRootObjectsContainment = it2.getNonRootObjectsContainment();
                     NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
                     nonRootObjectsContainment.add(nonRoot);
                   };
           NonRootObjectContainerHelper doubleArrow
-                  = initWith(nonRootObjectContainerHelper, _function_2);
+                  = initWith(nonRootObjectContainerHelper, function2);
           it1.setNonRootObjectContainerHelper(doubleArrow);
         };
-        Root doubleArrow = initWith(root, _function_1);
+        Root doubleArrow = initWith(root, function1);
         contents.add(doubleArrow);
         it.save(Map.of());
       } catch (Throwable e) {
@@ -779,10 +779,10 @@ public class ChangeRecorderTest {
             URI.createFileURI(plus));
     final URI pathmapResourceURI = pathmapResourcesUri.appendSegment("test.aet");
     this.changeRecorder.addToRecording(this.resourceSet);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       this.resourceSet.getResource(pathmapResourceURI, true);
     };
-    this.recordIf(isRecordingLoadingResource, _function_1);
+    this.recordIf(isRecordingLoadingResource, function1);
     MatcherAssert.assertThat(this.changeRecorder.getChange(), ChangeRecorderTest.hasNoChanges());
     final Resource pathmapResource = this.resourceSet.getResource(pathmapResourceURI, false);
     MatcherAssert.assertThat("resource should be loaded via pathmap instead of resolving it",
@@ -805,20 +805,20 @@ public class ChangeRecorderTest {
       try {
         EList<EObject> contents = it.getContents();
         Root root = AllElementTypesCreators.aet.Root();
-        final Consumer<Root> _function_1 = (Root it1) -> {
+        final Consumer<Root> function1 = (Root it1) -> {
           NonRootObjectContainerHelper nonRootObjectContainerHelper
                   = AllElementTypesCreators.aet.NonRootObjectContainerHelper();
-          final Consumer<NonRootObjectContainerHelper> _function_2
+          final Consumer<NonRootObjectContainerHelper> function2
                   = (NonRootObjectContainerHelper it2) -> {
                     EList<NonRoot> nonRootObjectsContainment = it2.getNonRootObjectsContainment();
                     NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
                     nonRootObjectsContainment.add(nonRoot);
                   };
           NonRootObjectContainerHelper doubleArrow
-                  = initWith(nonRootObjectContainerHelper, _function_2);
+                  = initWith(nonRootObjectContainerHelper, function2);
           it1.setNonRootObjectContainerHelper(doubleArrow);
         };
-        Root doubleArrow = initWith(root, _function_1);
+        Root doubleArrow = initWith(root, function1);
         contents.add(doubleArrow);
         it.save(Map.of());
       } catch (Throwable e) {
@@ -826,8 +826,8 @@ public class ChangeRecorderTest {
       }
     };
     final Resource resource = initWith(createResource, _function);
-    final Runnable _function_1 = resource::unload;
-    this.recordIf(isRecordingUnloadingResource, _function_1);
+    final Runnable function1 = resource::unload;
+    this.recordIf(isRecordingUnloadingResource, function1);
     MatcherAssert.assertThat(this.changeRecorder.getChange(), ChangeRecorderTest.hasNoChanges());
   }
 
@@ -839,20 +839,20 @@ public class ChangeRecorderTest {
     Root wrapIntoRecordedResource
             = this.wrapIntoRecordedResource(AllElementTypesCreators.aet.Root());
     final Consumer<Root> _function = (Root it) -> {
-      final Runnable _function_1 = () -> {
+      final Runnable function1 = () -> {
         it.setSingleValuedContainmentEReference(nonRoot);
       };
-      this.recordChanges(_function_1);
+      this.recordChanges(function1);
     };
     final Root root = initWith(wrapIntoRecordedResource, _function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       root.setSingleValuedContainmentEReference(null);
     };
-    this.recordIf(isRecordingWhileRemovingObject, _function_1);
-    final Runnable _function_2 = () -> {
+    this.recordIf(isRecordingWhileRemovingObject, function1);
+    final Runnable function2 = () -> {
       nonRoot.setId("foobar");
     };
-    this.recordChanges(_function_2);
+    this.recordChanges(function2);
     MatcherAssert.assertThat(this.changeRecorder.getChange(), ChangeRecorderTest.hasNoChanges());
   }
 
@@ -864,21 +864,21 @@ public class ChangeRecorderTest {
     Root wrapIntoRecordedResource
             = this.<Root>wrapIntoRecordedResource(AllElementTypesCreators.aet.Root());
     final Consumer<Root> _function = (Root it) -> {
-      final Runnable _function_1 = () -> {
+      final Runnable function1 = () -> {
         EList<NonRoot> multiValuedContainmentEReference = it.getMultiValuedContainmentEReference();
         multiValuedContainmentEReference.add(nonRoot);
       };
-      this.recordChanges(_function_1);
+      this.recordChanges(function1);
     };
     final Root root = initWith(wrapIntoRecordedResource, _function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       root.getMultiValuedContainmentEReference().clear();
     };
-    this.recordIf(isRecordingWhileRemovingObject, _function_1);
-    final Runnable _function_2 = () -> {
+    this.recordIf(isRecordingWhileRemovingObject, function1);
+    final Runnable function2 = () -> {
       nonRoot.setId("foobar");
     };
-    this.recordChanges(_function_2);
+    this.recordChanges(function2);
     MatcherAssert.assertThat(this.changeRecorder.getChange(), ChangeRecorderTest.hasNoChanges());
   }
 
@@ -892,26 +892,26 @@ public class ChangeRecorderTest {
     Root wrapIntoRecordedResource
             = this.wrapIntoRecordedResource(AllElementTypesCreators.aet.Root());
     final Consumer<Root> _function = (Root it) -> {
-      final Runnable _function_1 = () -> {
+      final Runnable function1 = () -> {
         EList<NonRoot> multiValuedContainmentEReference = it.getMultiValuedContainmentEReference();
         List<NonRoot> of = List.<NonRoot>of(nonRoot1, nonRoot2, nonRoot3);
         Iterables.<NonRoot>addAll(multiValuedContainmentEReference, of);
       };
-      this.recordChanges(_function_1);
+      this.recordChanges(function1);
     };
     final Root root = initWith(wrapIntoRecordedResource, _function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       EList<NonRoot> multiValuedContainmentEReference = root.getMultiValuedContainmentEReference();
       List<NonRoot> of = List.<NonRoot>of(nonRoot1, nonRoot3);
       Iterables.removeAll(multiValuedContainmentEReference, of);
     };
-    this.recordIf(isRecordingWhileRemovingObject, _function_1);
-    final Runnable _function_2 = () -> {
+    this.recordIf(isRecordingWhileRemovingObject, function1);
+    final Runnable function2 = () -> {
       nonRoot1.setId("foobar1");
       nonRoot2.setId("foobar2");
       nonRoot3.setId("foobar3");
     };
-    this.recordChanges(_function_2);
+    this.recordChanges(function2);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(
             this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
@@ -1004,9 +1004,9 @@ public class ChangeRecorderTest {
     final Root inner = AllElementTypesCreators.aet.Root();
     final NonRoot child = AllElementTypesCreators.aet.NonRoot();
     inner.getMultiValuedContainmentEReference().add(child);
-    record(() -> root.setRecursiveRoot(inner));
+    recordChanges(() -> root.setRecursiveRoot(inner));
     recordIf(isRecordingWhileRemovingObject, () -> root.setRecursiveRoot(null));
-    final TransactionalChange<EObject> change = record(() -> root.setRecursiveRoot(inner));
+    final TransactionalChange<EObject> change = recordChanges(() -> root.setRecursiveRoot(inner));
     final List<EObject> created = change.getEChanges().stream()
         .filter(CreateEObject.class::isInstance)
         .map(it -> ((CreateEObject<EObject>) it).getAffectedElement())
@@ -1020,11 +1020,11 @@ public class ChangeRecorderTest {
   void recordsObjectAddedAgainAfterUnsetAsCreated(final boolean isRecordingWhileRemovingObject) {
     final Root root = wrapIntoRecordedResource(AllElementTypesCreators.aet.Root());
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
-    record(() -> root.setSingleValuedUnsettableContainmentEReference(nonRoot));
+    recordChanges(() -> root.setSingleValuedUnsettableContainmentEReference(nonRoot));
     recordIf(isRecordingWhileRemovingObject,
         root::unsetSingleValuedUnsettableContainmentEReference);
     final TransactionalChange<EObject> change =
-        record(() -> root.setSingleValuedUnsettableContainmentEReference(nonRoot));
+            recordChanges(() -> root.setSingleValuedUnsettableContainmentEReference(nonRoot));
     MatcherAssert.assertThat(change, hasEChanges(CreateEObject.class,
         ReplaceSingleValuedEReference.class, ReplaceSingleValuedEAttribute.class));
   }
@@ -1039,10 +1039,11 @@ public class ChangeRecorderTest {
     final Root root = AllElementTypesCreators.aet.Root();
     final Root inner = AllElementTypesCreators.aet.Root();
     inner.getMultiValuedContainmentEReference().add(AllElementTypesCreators.aet.NonRoot());
-    changeResolver.assignIds(record(() -> resource.getContents().add(root)));
-    changeResolver.assignIds(record(() -> root.setRecursiveRoot(inner)));
-    changeResolver.assignIds(record(() -> root.setRecursiveRoot(null)));
-    final TransactionalChange<EObject> addingAgain = record(() -> root.setRecursiveRoot(inner));
+    changeResolver.assignIds(recordChanges(() -> resource.getContents().add(root)));
+    changeResolver.assignIds(recordChanges(() -> root.setRecursiveRoot(inner)));
+    changeResolver.assignIds(recordChanges(() -> root.setRecursiveRoot(null)));
+    final TransactionalChange<EObject> addingAgain = recordChanges(() ->
+            root.setRecursiveRoot(inner));
     Assertions.assertDoesNotThrow(() -> changeResolver.assignIds(addingAgain));
   }
 
@@ -1067,7 +1068,8 @@ public class ChangeRecorderTest {
     // contained stays a root of its resource and is not deleted
     recordIf(isRecordingWhileRemovingObject, () -> container.setRecursiveRoot(null));
     final TransactionalChange<EObject> change =
-        record(() -> referencing.setSingleValuedNonContainmentEReference(containedChild));
+            recordChanges(() ->
+                    referencing.setSingleValuedNonContainmentEReference(containedChild));
     MatcherAssert.assertThat(change, hasEChanges(ReplaceSingleValuedEReference.class));
   }
 
@@ -1076,10 +1078,10 @@ public class ChangeRecorderTest {
   void doesNotRecordObjectMovedWhileNotRecordingAsCreated() {
     final Root root = wrapIntoRecordedResource(AllElementTypesCreators.aet.Root());
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
-    record(() -> root.setSingleValuedContainmentEReference(nonRoot));
+    recordChanges(() -> root.setSingleValuedContainmentEReference(nonRoot));
     root.getMultiValuedContainmentEReference().add(nonRoot);
     final TransactionalChange<EObject> change =
-        record(() -> root.setSingleValuedContainmentEReference(nonRoot));
+            recordChanges(() -> root.setSingleValuedContainmentEReference(nonRoot));
     MatcherAssert.assertThat(change,
         hasEChanges(RemoveEReference.class, ReplaceSingleValuedEReference.class));
   }
@@ -1094,12 +1096,12 @@ public class ChangeRecorderTest {
       this.resourceSet.getResources().clear();
     };
     this.recordIf(isRecordingWhileRemovingObject, _function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       EList<EObject> contents = resource.getContents();
       Root root = AllElementTypesCreators.aet.Root();
       contents.add(root);
     };
-    this.recordChanges(_function_1);
+    this.recordChanges(function1);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(
             this.changeRecorder.getChange(),
             ChangeRecorderTest.hasNoChanges());
@@ -1119,7 +1121,7 @@ public class ChangeRecorderTest {
       Iterables.removeAll(resources, of);
     };
     this.recordIf(isRecordingWhileRemovingObject, _function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       EList<EObject> contents = resource1.getContents();
       Root root = AllElementTypesCreators.aet.Root();
       contents.add(root);
@@ -1130,7 +1132,7 @@ public class ChangeRecorderTest {
       Root root2 = AllElementTypesCreators.aet.Root();
       contents2.add(root2);
     };
-    this.recordChanges(_function_1);
+    this.recordChanges(function1);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(
             this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(
@@ -1147,24 +1149,24 @@ public class ChangeRecorderTest {
     Resource createResource = this.resourceSet.createResource(URI.createURI("test://test1.aet"));
     final Consumer<Resource> _function = (Resource it) -> {
       this.changeRecorder.addToRecording(it);
-      final Runnable _function_1 = () -> {
+      final Runnable function1 = () -> {
         EList<EObject> contents = it.getContents();
         Root root = AllElementTypesCreators.aet.Root();
-        final Consumer<Root> _function_2 = (Root it1) -> {
+        final Consumer<Root> function2 = (Root it1) -> {
           it1.setSingleValuedContainmentEReference(nonRoot);
         };
-        Root doubleArrow = initWith(root, _function_2);
+        Root doubleArrow = initWith(root, function2);
         contents.add(doubleArrow);
       };
-      this.recordChanges(_function_1);
+      this.recordChanges(function1);
     };
     final Resource resource = initWith(createResource, _function);
-    final Runnable _function_1 = resource::unload;
-    this.recordIf(isRecordingWhileRemovingObject, _function_1);
-    final Runnable _function_2 = () -> {
+    final Runnable function1 = resource::unload;
+    this.recordIf(isRecordingWhileRemovingObject, function1);
+    final Runnable function2 = () -> {
       nonRoot.setId("test");
     };
-    this.recordChanges(_function_2);
+    this.recordChanges(function2);
     MatcherAssert.assertThat(
             this.changeRecorder.getChange(),
             ChangeRecorderTest.hasNoChanges());
@@ -1178,21 +1180,21 @@ public class ChangeRecorderTest {
     Resource createResource = this.resourceSet.createResource(URI.createURI("test://test.aet"));
     final Consumer<Resource> _function = (Resource it) -> {
       this.changeRecorder.addToRecording(it);
-      final Runnable _function_1 = () -> {
+      final Runnable function1 = () -> {
         EList<EObject> contents = it.getContents();
         contents.add(root);
       };
-      this.recordChanges(_function_1);
+      this.recordChanges(function1);
     };
     final Resource resource = initWith(createResource, _function);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       resource.getContents().clear();
     };
-    this.recordIf(isRecordingWhileRemovingObject, _function_1);
-    final Runnable _function_2 = () -> {
+    this.recordIf(isRecordingWhileRemovingObject, function1);
+    final Runnable function2 = () -> {
       root.setId("foobar");
     };
-    this.recordChanges(_function_2);
+    this.recordChanges(function2);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(
             this.changeRecorder.getChange(),
             ChangeRecorderTest.hasNoChanges());
@@ -1208,12 +1210,12 @@ public class ChangeRecorderTest {
     Resource createResource = this.resourceSet.createResource(URI.createURI("test://test.aet"));
     final Consumer<Resource> _function = (Resource it) -> {
       this.changeRecorder.addToRecording(it);
-      final Runnable _function_1 = () -> {
+      final Runnable function1 = () -> {
         EList<EObject> contents = it.getContents();
         List<EObject> of = List.<EObject>of(root1, root2, root3);
         Iterables.<EObject>addAll(contents, of);
       };
-      this.recordChanges(_function_1);
+      this.recordChanges(function1);
     };
     final Resource resource = initWith(createResource, _function);
     if (isRecordingWhileAddingObject) {
@@ -1225,12 +1227,12 @@ public class ChangeRecorderTest {
     if (isRecordingWhileAddingObject) {
       this.changeRecorder.endRecording();
     }
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       root1.setId("foobar1");
       root2.setId("foobar2");
       root3.setId("foobar3");
     };
-    this.recordChanges(_function_1);
+    this.recordChanges(function1);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(
             this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
@@ -1243,18 +1245,18 @@ public class ChangeRecorderTest {
     Root wrapIntoRecordedResource
             = this.wrapIntoRecordedResource(AllElementTypesCreators.aet.Root());
     final Consumer<Root> _function = (Root it) -> {
-      final Runnable _function_1 = () -> {
+      final Runnable function1 = () -> {
         it.setSingleValuedContainmentEReference(nonRoot);
       };
-      this.recordChanges(_function_1);
+      this.recordChanges(function1);
     };
     final Root root = initWith(wrapIntoRecordedResource, _function);
     this.changeRecorder.addToRecording(nonRoot);
     root.setSingleValuedContainmentEReference(null);
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
       nonRoot.setId("testid");
     };
-    this.recordChanges(_function_1);
+    this.recordChanges(function1);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(
             this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
@@ -1270,22 +1272,22 @@ public class ChangeRecorderTest {
     };
     final Root root = initWith(rootTemp, _function);
     Resource createResource = this.resourceSet.createResource(URI.createURI("test://test.aet"));
-    final Consumer<Resource> _function_1 = (Resource it) -> {
+    final Consumer<Resource> function1 = (Resource it) -> {
       this.changeRecorder.addToRecording(it);
-      final Runnable _function_2 = () -> {
+      final Runnable function2 = () -> {
         EList<EObject> contents = it.getContents();
         contents.add(root);
       };
-      this.recordChanges(_function_2);
+      this.recordChanges(function2);
     };
-    final Resource resource = initWith(createResource, _function_1);
+    final Resource resource = initWith(createResource, function1);
     this.changeRecorder.addToRecording(root);
     resource.getContents().clear();
-    final Runnable _function_2 = () -> {
+    final Runnable function2 = () -> {
       root.setId("rootid");
       nonRoot.setId("testid");
     };
-    this.recordChanges(_function_2);
+    this.recordChanges(function2);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(
             this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(
@@ -1306,21 +1308,21 @@ public class ChangeRecorderTest {
     };
     final Root root = initWith(rootTemp, _function);
     Resource createResource = this.resourceSet.createResource(URI.createURI("test://test.aet"));
-    final Consumer<Resource> _function_1 = (Resource it) -> {
+    final Consumer<Resource> function1 = (Resource it) -> {
       this.changeRecorder.addToRecording(it);
-      final Runnable _function_2 = () -> {
+      final Runnable function2 = () -> {
         EList<EObject> contents = it.getContents();
         contents.add(root);
       };
-      this.recordChanges(_function_2);
+      this.recordChanges(function2);
     };
-    final Resource resource = initWith(createResource, _function_1);
+    final Resource resource = initWith(createResource, function1);
     this.changeRecorder.addToRecording(root);
     resource.getContents().clear();
-    final Runnable _function_2 = () -> {
+    final Runnable function2 = () -> {
       root.setSingleValuedContainmentEReference(nonRootToMove);
     };
-    this.recordChanges(_function_2);
+    this.recordChanges(function2);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(
             this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(
@@ -1340,19 +1342,19 @@ public class ChangeRecorderTest {
     MatcherAssert.<TransactionalChange<EObject>>assertThat(
             this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(ReplaceSingleValuedEAttribute.class));
-    final Runnable _function_1 = () -> {
+    final Runnable function1 = () -> {
     };
-    this.recordChanges(_function_1);
+    this.recordChanges(function1);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(
             this.changeRecorder.getChange(),
             ChangeRecorderTest.hasNoChanges());
-    final Runnable _function_2 = () -> {
+    final Runnable function2 = () -> {
       EList<NonRoot> multiValuedNonContainmentEReference
               = root.getMultiValuedNonContainmentEReference();
       NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
       multiValuedNonContainmentEReference.add(nonRoot);
     };
-    this.recordChanges(_function_2);
+    this.recordChanges(function2);
     MatcherAssert.<TransactionalChange<EObject>>assertThat(
             this.changeRecorder.getChange(),
             ChangeRecorderTest.hasEChanges(
@@ -1398,10 +1400,10 @@ public class ChangeRecorderTest {
       contents.add(root);
     };
     final Resource foreignResource = initWith(createResource, _function);
-    final Executable _function_1 = () -> {
+    final Executable function1 = () -> {
       this.changeRecorder.addToRecording(foreignResource);
     };
-    Assertions.<IllegalArgumentException>assertThrows(IllegalArgumentException.class, _function_1);
+    Assertions.<IllegalArgumentException>assertThrows(IllegalArgumentException.class, function1);
   }
 
   @Test
@@ -1427,18 +1429,18 @@ public class ChangeRecorderTest {
             CoreMatchers.<Boolean>is(Boolean.FALSE));
     final Executable _function = this.changeRecorder::beginRecording;
     Assertions.<IllegalStateException>assertThrows(IllegalStateException.class, _function);
-    final Executable _function_1 = this.changeRecorder::endRecording;
-    Assertions.<IllegalStateException>assertThrows(IllegalStateException.class, _function_1);
-    final Executable _function_2 = this.changeRecorder::getChange;
-    Assertions.<IllegalStateException>assertThrows(IllegalStateException.class, _function_2);
-    final Executable _function_3 = () -> {
+    final Executable function1 = this.changeRecorder::endRecording;
+    Assertions.<IllegalStateException>assertThrows(IllegalStateException.class, function1);
+    final Executable function2 = this.changeRecorder::getChange;
+    Assertions.<IllegalStateException>assertThrows(IllegalStateException.class, function2);
+    final Executable function3 = () -> {
       this.changeRecorder.addToRecording(AllElementTypesCreators.aet.Root());
     };
-    Assertions.<IllegalStateException>assertThrows(IllegalStateException.class, _function_3);
-    final Executable _function_4 = () -> {
+    Assertions.<IllegalStateException>assertThrows(IllegalStateException.class, function3);
+    final Executable function4 = () -> {
       this.changeRecorder.removeFromRecording(AllElementTypesCreators.aet.Root());
     };
-    Assertions.<IllegalStateException>assertThrows(IllegalStateException.class, _function_4);
+    Assertions.<IllegalStateException>assertThrows(IllegalStateException.class, function4);
   }
 
   @Test

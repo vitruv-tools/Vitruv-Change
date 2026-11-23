@@ -369,16 +369,18 @@ public class ChangeRecorder implements AutoCloseable {
    */
   public List<EChange<EObject>> beginRecording() {
     this.checkNotDisposed();
-    Preconditions.checkState((!this.isRecording), "This recorder is already recording!");
-    final Consumer<Notifier> function = (Notifier it) -> {
-      final Function<Notifier, Boolean> function1 = this::removeAdapter;
-      ChangeRecorder.recursively(it, function1);
-    };
-    this.toDesinfect.forEach(function);
+    Preconditions.checkState(!this.isRecording, "This recorder is already recording!");
+    for (final Notifier removed : this.toDesinfect) {
+      if (removed instanceof EObject eObject && eObject.eResource() == null) {
+        ChangeRecorder.recursively(removed, this::stopRecordingDeleted);
+      } else {
+        ChangeRecorder.recursively(removed, this::removeAdapter);
+      }
+    }
     this.toDesinfect.clear();
     this.isRecording = true;
-    ArrayList<EChange<EObject>> arrayList = new ArrayList<EChange<EObject>>();
-    return this.resultChanges = arrayList;
+    this.resultChanges = new ArrayList<>();
+    return this.resultChanges;
   }
 
   @Override
