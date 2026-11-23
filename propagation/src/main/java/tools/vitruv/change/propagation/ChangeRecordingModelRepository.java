@@ -62,9 +62,9 @@ public interface ChangeRecordingModelRepository extends ResourceAccess, AutoClos
   ModelRepositorySnapshot createSnapshot();
 
   /**
-   * Called on the propagating thread when an attempt of a change propagation starts. A repository
-   * may start recording the correspondence changes of this thread, so that {@link #revertChanges}
-   * can undo them.
+   * Called on the propagating thread when an attempt of a change propagation starts (each
+   * resubmission of a change is a new attempt). A repository may start recording the
+   * correspondence changes of this thread, so that {@link #revertChanges} can undo them.
    */
   default void beginPropagationAttempt() {}
 
@@ -81,10 +81,8 @@ public interface ChangeRecordingModelRepository extends ResourceAccess, AutoClos
    */
   default void revertChanges(List<TransactionalChange<EObject>> appliedChanges) {
     List<EObject> createdObjects = new ArrayList<>();
-    for (int i = appliedChanges.size() - 1; i >= 0; i--) {
-      List<EChange<EObject>> eChanges = appliedChanges.get(i).getEChanges();
-      for (int j = eChanges.size() - 1; j >= 0; j--) {
-        EChange<EObject> eChange = eChanges.get(j);
+    for (TransactionalChange<EObject> appliedChange : appliedChanges.reversed()) {
+      for (EChange<EObject> eChange : appliedChange.getEChanges().reversed()) {
         ApplyEChangeSwitch.applyEChange(eChange, false);
         if (eChange instanceof CreateEObject<EObject> create) {
           createdObjects.add(create.getAffectedElement());

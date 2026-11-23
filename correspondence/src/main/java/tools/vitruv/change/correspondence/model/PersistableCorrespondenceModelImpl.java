@@ -407,8 +407,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
     }
     recordedChanges.remove(); // the undo is not recorded
     List<Correspondence> list = correspondences.getCorrespondences();
-    for (int i = changes.size() - 1; i >= 0; i--) {
-      CorrespondenceChange change = changes.get(i);
+    for (CorrespondenceChange change : changes.reversed()) {
       switch (change.kind()) {
         case ADDED -> list.remove(change.correspondence());
         case REMOVED -> list.add(Math.min(change.index(), list.size()), change.correspondence());

@@ -2,8 +2,9 @@ package tools.vitruv.change.propagation.impl;
 
 import static edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceSetUtil.withGlobalFactories;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import allElementTypes.AllElementTypesFactory;
 import allElementTypes.AllElementTypesPackage;
@@ -13,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -40,9 +40,13 @@ import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.interaction.InteractionResultProvider;
 import tools.vitruv.change.interaction.UserInteractionFactory;
 import tools.vitruv.change.interaction.UserInteractionOptions;
+import tools.vitruv.change.interaction.UserInteractor;
+import tools.vitruv.change.propagation.ChangePropagationInvocation;
 import tools.vitruv.change.propagation.ChangePropagationSpecification;
 import tools.vitruv.change.propagation.ChangePropagationSpecificationRepository;
+import tools.vitruv.change.propagation.ChangePropagationStatus;
 import tools.vitruv.change.propagation.PropagationAbortedException;
+import tools.vitruv.change.propagation.PropagationReport;
 import tools.vitruv.change.propagation.PropagationStepGuard;
 import tools.vitruv.change.testutils.RegisterMetamodelsInStandalone;
 import tools.vitruv.change.testutils.TestLogging;
@@ -52,8 +56,8 @@ import tools.vitruv.change.utils.ResourceAccess;
 
 /**
  * Tests the {@link PropagationStepGuard} hook of the {@link ChangePropagator}: call order,
- * reverting and retrying an aborted propagation, replaying user interactions, reverting the
- * correspondence changes of an aborted attempt, committing inside the guard.
+ * reverting an aborted, blocked or failed propagation (including its correspondence changes),
+ * resubmitting it with the user interactions of the halted run, committing inside the guard.
  */
 @ExtendWith({TestProjectManager.class, TestLogging.class, RegisterMetamodelsInStandalone.class})
 class ChangePropagatorStepGuardTest {
@@ -64,6 +68,9 @@ class ChangePropagatorStepGuardTest {
   private URI modelUri;
   private Root viewRoot;
   private int confirmations;
+
+  /** The correspondence model the specification of the running step got. */
+  private EditableCorrespondenceModelView<Correspondence> currentCorrespondences;
 
   @BeforeAll
   static void registerResourceFactory() {
@@ -88,23 +95,230 @@ class ChangePropagatorStepGuardTest {
     modelRepository.close();
   }
 
-  /** On a change of {@code singleValuedEAttribute} to n, sets the primitive attribute to 10 n. */
-  private static final BiConsumer<Root, EChange<EObject>> COPY_TO_PRIMITIVE = (root, change) -> {
-    if (change instanceof ReplaceSingleValuedEAttribute<EObject, ?> replace
+  /** What a test specification does with a change it receives. */
+  @FunctionalInterface
+  private interface Reaction {
+    void react(Root root, EChange<EObject> change, UserInteractor userInteractor);
+  }
+
+  private static boolean setsSingleValuedAttribute(EChange<EObject> change, Integer value) {
+    return change instanceof ReplaceSingleValuedEAttribute<EObject, ?> replace
         && replace.getAffectedFeature()
             == AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_EATTRIBUTE
-        && replace.getNewValue() instanceof Integer value) {
+        && (value == null || value.equals(replace.getNewValue()));
+  }
+
+  /** On a change of {@code singleValuedEAttribute} to n, sets the primitive attribute to 10 n. */
+  private static final Reaction COPY_TO_PRIMITIVE = (root, change, userInteractor) -> {
+    if (setsSingleValuedAttribute(change, null)
+        && ((ReplaceSingleValuedEAttribute<EObject, ?>) change).getNewValue()
+            instanceof Integer value) {
       root.setSingleValuedPrimitiveTypeEAttribute(10 * value);
     }
   };
 
   @Test
   void guardIsCalledAroundApplyAndEachStep() {
-    var specification = new Specification(COPY_TO_PRIMITIVE);
-    var propagator = createPropagator(specification);
+    var propagator = createPropagator(new Specification(COPY_TO_PRIMITIVE));
     createRoot(propagator);
     List<String> calls = new ArrayList<>();
+    propagator.setStepGuard(recordingGuard(calls));
+
+    propagateInView(propagator, () -> viewRoot.setSingleValuedEAttribute(2));
+
+    // user change, then the specification's change propagated again (transitive)
+    assertEquals(List.of("begin", "apply", "step", "step", "end:true"), calls);
+  }
+
+  @Test
+  void abortedPropagationIsRevertedAndReportedAsBlocked() {
+    var propagator = createPropagator(new Specification(COPY_TO_PRIMITIVE));
+    createRoot(propagator);
+    // abort before the second step: the user change and the first consequential change are
+    // applied by then
+    var guard = new AbortingGuard(2);
+    propagator.setStepGuard(guard);
+
+    var change = recordInView(() -> viewRoot.setSingleValuedEAttribute(2));
+    PropagationReport report = propagator.propagateChangeWithResult(change, List.of());
+
+    assertEquals(ChangePropagationStatus.BLOCKED, report.status());
+    assertNotNull(report.abort());
+    assertEquals(List.of("false:1,10"), guard.stateAtEnd,
+        "the propagation is reverted before the guard ends it, and not retried");
+    assertEquals(1, repositoryRoot().getSingleValuedEAttribute());
+    assertEquals(10, repositoryRoot().getSingleValuedPrimitiveTypeEAttribute());
+  }
+
+  @Test
+  void abortBeforeApplyAppliesNothing() {
+    var propagator = createPropagator(new Specification(COPY_TO_PRIMITIVE));
+    createRoot(propagator);
+    List<String> calls = new ArrayList<>();
+    var abort = new PropagationAbortedException("locks not available");
     propagator.setStepGuard(new PropagationStepGuard() {
+      @Override
+      public void beforeApply(TransactionalChange<Uuid> change) {
+        throw abort;
+      }
+
+      @Override
+      public void beforeStep(TransactionalChange<EObject> change,
+          ChangePropagationSpecification specification) {
+        calls.add("step");
+      }
+
+      @Override
+      public void endPropagation(VitruviusChange<Uuid> change, boolean committed) {
+        calls.add("end:" + committed);
+      }
+    });
+
+    var thrown = assertThrows(PropagationAbortedException.class,
+        () -> propagateInView(propagator, () -> viewRoot.setSingleValuedEAttribute(2)));
+
+    assertSame(abort, thrown);
+    assertEquals(List.of("end:false"), calls);
+    assertEquals(1, repositoryRoot().getSingleValuedEAttribute());
+  }
+
+  @Test
+  void abortFromWithinASpecificationBlocksTheInvocation() {
+    var propagator = createPropagator(new Specification((root, change, userInteractor) -> {
+      if (setsSingleValuedAttribute(change, 2)) {
+        root.setSingleValuedPrimitiveTypeEAttribute(7);
+        throw new PropagationAbortedException("lock request of the specification aborted");
+      }
+    }));
+    createRoot(propagator);
+    var guard = new AbortingGuard(0);
+    propagator.setStepGuard(guard);
+
+    var change = recordInView(() -> viewRoot.setSingleValuedEAttribute(2));
+    PropagationReport report = propagator.propagateChangeWithResult(change, List.of());
+
+    assertEquals(ChangePropagationStatus.BLOCKED, report.result().status());
+    assertEquals(List.of("false:1,0"), guard.stateAtEnd);
+  }
+
+  @Test
+  void listApiThrowsTheAbortOfAGuardedPropagation() {
+    var propagator = createPropagator(new Specification(COPY_TO_PRIMITIVE));
+    createRoot(propagator);
+    var guard = new AbortingGuard(1);
+    propagator.setStepGuard(guard);
+
+    assertThrows(PropagationAbortedException.class,
+        () -> propagateInView(propagator, () -> viewRoot.setSingleValuedEAttribute(2)));
+    assertEquals(List.of("false:1,10"), guard.stateAtEnd, "the user change is reverted");
+  }
+
+  @Test
+  void resubmissionWithTheReportedInteractionsDoesNotAskAgain() {
+    List<Boolean> answers = new ArrayList<>();
+    var propagator = createPropagator(new Specification((root, change, userInteractor) -> {
+      if (setsSingleValuedAttribute(change, 2)) {
+        answers.add(userInteractor.getConfirmationDialogBuilder().message("copy?")
+            .startInteraction());
+        root.setSingleValuedPrimitiveTypeEAttribute(7);
+      }
+    }));
+    createRoot(propagator);
+    var guard = new AbortingGuard(2);
+    propagator.setStepGuard(guard);
+    var change = recordInView(() -> viewRoot.setSingleValuedEAttribute(2));
+
+    PropagationReport blocked = propagator.propagateChangeWithResult(change, List.of());
+    PropagationReport resubmitted = propagator.propagateChangeWithResult(change, List.of(),
+        blocked.userInteractions(), propagatedChanges -> { });
+
+    assertEquals(ChangePropagationStatus.BLOCKED, blocked.status());
+    assertEquals(ChangePropagationStatus.SUCCEEDED, resubmitted.status());
+    assertEquals(1, confirmations, "the user must be asked only once");
+    assertEquals(List.of(true, true), answers, "the resubmission gets the recorded answer");
+    assertEquals(7, repositoryRoot().getSingleValuedPrimitiveTypeEAttribute());
+  }
+
+  @Test
+  void failedPropagationIsRevertedUnderAGuard() {
+    var propagator = createPropagator(new Specification((root, change, userInteractor) -> {
+      if (setsSingleValuedAttribute(change, 2)) {
+        root.setSingleValuedPrimitiveTypeEAttribute(7);
+        throw new IllegalStateException("broken specification");
+      }
+    }));
+    createRoot(propagator);
+    var guard = new AbortingGuard(0);
+    propagator.setStepGuard(guard);
+
+    assertThrows(IllegalStateException.class,
+        () -> propagateInView(propagator, () -> viewRoot.setSingleValuedEAttribute(2)));
+    assertEquals(List.of("false:1,0"), guard.stateAtEnd);
+  }
+
+  @Test
+  void commitRunsAfterTheLastStepBeforeTheGuardEnds() {
+    var propagator = createPropagator(new Specification(COPY_TO_PRIMITIVE));
+    createRoot(propagator);
+    List<String> calls = new ArrayList<>();
+    propagator.setStepGuard(recordingGuard(calls));
+
+    var change = recordInView(() -> viewRoot.setSingleValuedEAttribute(2));
+    propagator.propagateChangeWithResult(change, List.of(), List.of(), result -> calls.add(
+        "commit:" + repositoryRoot().getSingleValuedPrimitiveTypeEAttribute() + "/"
+            + !result.isEmpty()));
+
+    assertEquals(List.of("begin", "apply", "step", "step", "commit:20/true", "end:true"), calls);
+  }
+
+  @Test
+  void failedCommitIsRevertedAndPassedOn() {
+    var propagator = createPropagator(new Specification(COPY_TO_PRIMITIVE));
+    createRoot(propagator);
+    List<String> calls = new ArrayList<>();
+    propagator.setStepGuard(recordingGuard(calls));
+
+    var change = recordInView(() -> viewRoot.setSingleValuedEAttribute(2));
+    var failure = assertThrows(IllegalStateException.class,
+        () -> propagator.propagateChangeWithResult(change, List.of(), List.of(), result -> {
+          throw new IllegalStateException("disk full");
+        }));
+
+    assertEquals("disk full", failure.getMessage());
+    assertEquals(List.of("begin", "apply", "step", "step", "end:false"), calls);
+    assertEquals(1, repositoryRoot().getSingleValuedEAttribute(), "the user change is reverted");
+    assertEquals(10, repositoryRoot().getSingleValuedPrimitiveTypeEAttribute());
+  }
+
+  @Test
+  void abortedPropagationRevertsItsCorrespondences() {
+    int[] runs = new int[1];
+    var propagator = createPropagator(new Specification((root, change, userInteractor) -> {
+      if (setsSingleValuedAttribute(change, 2)) {
+        currentCorrespondences.addCorrespondenceBetween(root, root, "run" + ++runs[0]);
+        // a model change, so that there is a second step (where the first run is aborted)
+        root.setSingleValuedPrimitiveTypeEAttribute(7);
+      }
+    }));
+    createRoot(propagator);
+    propagator.setStepGuard(new AbortingGuard(2));
+    var change = recordInView(() -> viewRoot.setSingleValuedEAttribute(2));
+
+    propagator.propagateChangeWithResult(change, List.of());
+    propagator.propagateChangeWithResult(change, List.of());
+
+    assertEquals(2, runs[0]);
+    var correspondences = modelRepository.getCorrespondenceModel();
+    assertEquals(Set.of(), correspondences.getCorrespondingEObjects(repositoryRoot(), "run1"),
+        "the correspondence of the aborted run is reverted");
+    assertEquals(Set.of(repositoryRoot()),
+        correspondences.getCorrespondingEObjects(repositoryRoot(), "run2"));
+  }
+
+  // ------------------------------------------------------------------ guards
+
+  private static PropagationStepGuard recordingGuard(List<String> calls) {
+    return new PropagationStepGuard() {
       @Override
       public void beginPropagation(VitruviusChange<Uuid> change) {
         calls.add("begin");
@@ -117,185 +331,7 @@ class ChangePropagatorStepGuardTest {
 
       @Override
       public void beforeStep(TransactionalChange<EObject> change,
-          ChangePropagationSpecification spec) {
-        calls.add("step");
-      }
-
-      @Override
-      public void endPropagation(VitruviusChange<Uuid> change, boolean committed) {
-        calls.add("end:" + committed);
-      }
-    });
-
-    propagateInView(propagator, () -> viewRoot.setSingleValuedEAttribute(2));
-
-    // user change, then the specification's change propagated again (transitive)
-    assertEquals(List.of("begin", "apply", "step", "step", "end:true"), calls);
-  }
-
-  @Test
-  void abortedPropagationIsRevertedAndRetried() {
-    var specification = new Specification(COPY_TO_PRIMITIVE);
-    var propagator = createPropagator(specification);
-    createRoot(propagator);
-    List<String> stateAtEnd = new ArrayList<>();
-    propagator.setStepGuard(new PropagationStepGuard() {
-      int attempt;
-      int step;
-
-      @Override
-      public void beginPropagation(VitruviusChange<Uuid> change) {
-        attempt++;
-        step = 0;
-      }
-
-      @Override
-      public void beforeStep(TransactionalChange<EObject> change,
-          ChangePropagationSpecification spec) {
-        // abort the first attempt before its second step: the user change and the first
-        // consequential change are applied by then
-        if (attempt == 1 && ++step == 2) {
-          throw new PropagationAbortedException("deadlock victim");
-        }
-      }
-
-      @Override
-      public void endPropagation(VitruviusChange<Uuid> change, boolean committed) {
-        stateAtEnd.add(committed + ":" + repositoryRoot().getSingleValuedEAttribute() + ","
-            + repositoryRoot().getSingleValuedPrimitiveTypeEAttribute());
-      }
-    });
-
-    propagateInView(propagator, () -> viewRoot.setSingleValuedEAttribute(2));
-
-    assertEquals(List.of("false:1,10", "true:2,20"), stateAtEnd,
-        "the aborted attempt must be reverted before it ends, the retry must complete");
-    assertEquals(2, repositoryRoot().getSingleValuedEAttribute());
-    assertEquals(20, repositoryRoot().getSingleValuedPrimitiveTypeEAttribute());
-  }
-
-  @Test
-  void retryReplaysTheUserInteractionsOfTheAbortedAttempt() {
-    List<Boolean> answers = new ArrayList<>();
-    var specification = new Specification((root, change) -> {
-      if (change instanceof ReplaceSingleValuedEAttribute<EObject, ?> replace
-          && replace.getAffectedFeature()
-              == AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_EATTRIBUTE
-          && Integer.valueOf(2).equals(replace.getNewValue())) {
-        answers.add(specificationInteractor.get().getConfirmationDialogBuilder()
-            .message("copy?").startInteraction());
-        root.setSingleValuedPrimitiveTypeEAttribute(7);
-      }
-    });
-    specificationInteractor.add(specification);
-    var propagator = createPropagator(specification);
-    createRoot(propagator);
-    propagator.setStepGuard(abortFirstAttemptAtStep(2));
-
-    propagateInView(propagator, () -> viewRoot.setSingleValuedEAttribute(2));
-
-    assertEquals(1, confirmations, "the user must be asked only once");
-    assertEquals(List.of(true, true), answers, "the retry gets the recorded answer");
-    assertEquals(7, repositoryRoot().getSingleValuedPrimitiveTypeEAttribute());
-  }
-
-  @Test
-  void abortIsPassedOnWhenAttemptsAreExhausted() {
-    var specification = new Specification(COPY_TO_PRIMITIVE);
-    var propagator = createPropagator(specification);
-    createRoot(propagator);
-    int[] ends = new int[1];
-    propagator.setMaximumAttempts(3);
-    propagator.setStepGuard(new PropagationStepGuard() {
-      @Override
-      public void beforeStep(TransactionalChange<EObject> change,
-          ChangePropagationSpecification spec) {
-        throw new PropagationAbortedException("always");
-      }
-
-      @Override
-      public void endPropagation(VitruviusChange<Uuid> change, boolean committed) {
-        ends[0]++;
-      }
-    });
-
-    assertThrows(PropagationAbortedException.class,
-        () -> propagateInView(propagator, () -> viewRoot.setSingleValuedEAttribute(2)));
-    assertEquals(3, ends[0]);
-    assertEquals(1, repositoryRoot().getSingleValuedEAttribute(), "the user change is reverted");
-  }
-
-  @Test
-  void failedPropagationEndsTheAttemptWithoutRetry() {
-    var specification = new Specification((root, change) -> {
-      if (change instanceof ReplaceSingleValuedEAttribute<EObject, ?> replace
-          && Integer.valueOf(2).equals(replace.getNewValue())) {
-        throw new IllegalStateException("broken specification");
-      }
-    });
-    var propagator = createPropagator(specification);
-    createRoot(propagator);
-    List<Boolean> ends = new ArrayList<>();
-    propagator.setStepGuard(new PropagationStepGuard() {
-      @Override
-      public void endPropagation(VitruviusChange<Uuid> change, boolean committed) {
-        ends.add(committed);
-      }
-    });
-
-    var failure = assertThrows(RuntimeException.class,
-        () -> propagateInView(propagator, () -> viewRoot.setSingleValuedEAttribute(2)));
-    assertTrue(hasCause(failure, IllegalStateException.class));
-    assertEquals(List.of(false), ends);
-  }
-
-  @Test
-  void commitRunsAfterTheLastStepBeforeTheGuardEnds() {
-    var specification = new Specification(COPY_TO_PRIMITIVE);
-    var propagator = createPropagator(specification);
-    createRoot(propagator);
-    List<String> calls = new ArrayList<>();
-    propagator.setStepGuard(recordingGuard(calls));
-
-    var change = recordInView(() -> viewRoot.setSingleValuedEAttribute(2));
-    propagator.propagateChange(change, List.of(), result -> calls.add(
-        "commit:" + repositoryRoot().getSingleValuedPrimitiveTypeEAttribute() + "/"
-            + !result.isEmpty()));
-
-    assertEquals(List.of("begin", "step", "step", "commit:20/true", "end:true"), calls);
-  }
-
-  @Test
-  void failedCommitIsRevertedAndNotRetried() {
-    var specification = new Specification(COPY_TO_PRIMITIVE);
-    var propagator = createPropagator(specification);
-    createRoot(propagator);
-    List<String> calls = new ArrayList<>();
-    propagator.setStepGuard(recordingGuard(calls));
-
-    var change = recordInView(() -> viewRoot.setSingleValuedEAttribute(2));
-    var failure = assertThrows(IllegalStateException.class,
-        () -> propagator.propagateChange(change, List.of(), result -> {
-          // an abort here must not lead to a retry either
-          throw new IllegalStateException("disk full", new PropagationAbortedException("x"));
-        }));
-
-    assertEquals("disk full", failure.getMessage());
-    assertEquals(List.of("begin", "step", "step", "end:false"), calls);
-    assertEquals(1, repositoryRoot().getSingleValuedEAttribute(), "the user change is reverted");
-    assertEquals(10, repositoryRoot().getSingleValuedPrimitiveTypeEAttribute());
-  }
-
-  private static PropagationStepGuard recordingGuard(List<String> calls) {
-    return new PropagationStepGuard() {
-      @Override
-      public void beginPropagation(VitruviusChange<Uuid> change) {
-        calls.add("begin");
-      }
-
-      @Override
-      public void beforeStep(TransactionalChange<EObject> change,
-          ChangePropagationSpecification spec) {
+          ChangePropagationSpecification specification) {
         calls.add("step");
       }
 
@@ -305,6 +341,43 @@ class ChangePropagatorStepGuardTest {
       }
     };
   }
+
+  /**
+   * Aborts the first propagation before the given step (0: never) and records, at the end of each
+   * propagation, whether it committed and the repository root's two attributes.
+   */
+  private class AbortingGuard implements PropagationStepGuard {
+    private final int abortedStep;
+    private final List<String> stateAtEnd = new ArrayList<>();
+    private int propagations;
+    private int step;
+
+    AbortingGuard(int abortedStep) {
+      this.abortedStep = abortedStep;
+    }
+
+    @Override
+    public void beginPropagation(VitruviusChange<Uuid> change) {
+      propagations++;
+      step = 0;
+    }
+
+    @Override
+    public void beforeStep(TransactionalChange<EObject> change,
+        ChangePropagationSpecification specification) {
+      if (propagations == 1 && ++step == abortedStep) {
+        throw new PropagationAbortedException("deadlock victim");
+      }
+    }
+
+    @Override
+    public void endPropagation(VitruviusChange<Uuid> change, boolean committed) {
+      stateAtEnd.add(committed + ":" + repositoryRoot().getSingleValuedEAttribute() + ","
+          + repositoryRoot().getSingleValuedPrimitiveTypeEAttribute());
+    }
+  }
+
+  // ------------------------------------------------------------------ setup helpers
 
   private VitruviusChange<Uuid> recordInView(Runnable modification) {
     viewRecorder.beginRecording();
@@ -312,81 +385,8 @@ class ChangePropagatorStepGuardTest {
     return viewChangeResolver.assignIds(viewRecorder.endRecording());
   }
 
-  /** The correspondence model the specification of the running step got. */
-  private EditableCorrespondenceModelView<Correspondence> currentCorrespondences;
-
-  @Test
-  void abortedPropagationRevertsItsCorrespondences() {
-    int[] attempts = new int[1];
-    var specification = new Specification((root, change) -> {
-      if (change instanceof ReplaceSingleValuedEAttribute<EObject, ?> replace
-          && replace.getAffectedFeature()
-              == AllElementTypesPackage.Literals.ROOT__SINGLE_VALUED_EATTRIBUTE
-          && Integer.valueOf(2).equals(replace.getNewValue())) {
-        currentCorrespondences.addCorrespondenceBetween(root, root, "attempt" + ++attempts[0]);
-        // a model change, so that there is a second step (where the first attempt is aborted)
-        root.setSingleValuedPrimitiveTypeEAttribute(7);
-      }
-    });
-    var propagator = createPropagator(specification);
-    createRoot(propagator);
-    propagator.setStepGuard(abortFirstAttemptAtStep(2));
-
-    propagateInView(propagator, () -> viewRoot.setSingleValuedEAttribute(2));
-
-    assertEquals(2, attempts[0]);
-    var correspondences = modelRepository.getCorrespondenceModel();
-    assertEquals(Set.of(), correspondences.getCorrespondingEObjects(repositoryRoot(), "attempt1"),
-        "the correspondence of the aborted attempt is reverted");
-    assertEquals(Set.of(repositoryRoot()),
-        correspondences.getCorrespondingEObjects(repositoryRoot(), "attempt2"));
-  }
-
-  private static boolean hasCause(Throwable throwable, Class<?> type) {
-    for (Throwable t = throwable; t != null; t = t.getCause()) {
-      if (type.isInstance(t)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private static PropagationStepGuard abortFirstAttemptAtStep(int abortedStep) {
-    return new PropagationStepGuard() {
-      int attempt;
-      int step;
-
-      @Override
-      public void beginPropagation(VitruviusChange<Uuid> change) {
-        attempt++;
-        step = 0;
-      }
-
-      @Override
-      public void beforeStep(TransactionalChange<EObject> change,
-          ChangePropagationSpecification spec) {
-        if (attempt == 1 && ++step == abortedStep) {
-          throw new PropagationAbortedException("deadlock victim");
-        }
-      }
-    };
-  }
-
-  // ------------------------------------------------------------------ setup helpers
-
-  /** Gives the specification of the interaction test access to its user interactor. */
-  private final SpecificationInteractor specificationInteractor = new SpecificationInteractor();
-
-  private static final class SpecificationInteractor {
-    private Specification specification;
-
-    void add(Specification specification) {
-      this.specification = specification;
-    }
-
-    tools.vitruv.change.interaction.UserInteractor get() {
-      return specification.interactor();
-    }
+  private void propagateInView(ChangePropagator propagator, Runnable modification) {
+    propagator.propagateChange(recordInView(modification), List.of());
   }
 
   private void createRoot(ChangePropagator propagator) {
@@ -400,13 +400,6 @@ class ChangePropagatorStepGuardTest {
 
   private Root repositoryRoot() {
     return (Root) modelRepository.getModelResource(modelUri).getContents().get(0);
-  }
-
-  private void propagateInView(ChangePropagator propagator, Runnable modification) {
-    viewRecorder.beginRecording();
-    modification.run();
-    var change = viewChangeResolver.assignIds(viewRecorder.endRecording());
-    propagator.propagateChange(change, List.of());
   }
 
   private ChangePropagator createPropagator(ChangePropagationSpecification specification) {
@@ -456,16 +449,12 @@ class ChangePropagatorStepGuardTest {
 
   /** Receives changes one by one and applies the given reaction to the repository's root. */
   private class Specification extends AbstractChangePropagationSpecification {
-    private final BiConsumer<Root, EChange<EObject>> reaction;
+    private final Reaction reaction;
 
-    Specification(BiConsumer<Root, EChange<EObject>> reaction) {
+    Specification(Reaction reaction) {
       super(MetamodelDescriptor.with(AllElementTypesPackage.eNS_URI),
           MetamodelDescriptor.with(AllElementTypesPackage.eNS_URI));
       this.reaction = reaction;
-    }
-
-    tools.vitruv.change.interaction.UserInteractor interactor() {
-      return getUserInteractor();
     }
 
     @Override
@@ -475,14 +464,14 @@ class ChangePropagatorStepGuardTest {
     }
 
     @Override
-    public void propagateChange(EChange<EObject> change,
+    public ChangePropagationInvocation propagateChange(EChange<EObject> change,
         EditableCorrespondenceModelView<Correspondence> correspondenceModel,
         ResourceAccess resourceAccess) {
-      if (modelRepository.getModelResource(modelUri).getContents().isEmpty()) {
-        return;
+      if (!modelRepository.getModelResource(modelUri).getContents().isEmpty()) {
+        currentCorrespondences = correspondenceModel;
+        reaction.react(repositoryRoot(), change, getUserInteractor());
       }
-      currentCorrespondences = correspondenceModel;
-      reaction.accept(repositoryRoot(), change);
+      return ChangePropagationInvocation.succeeded(this, List.of(change), List.of());
     }
   }
 }

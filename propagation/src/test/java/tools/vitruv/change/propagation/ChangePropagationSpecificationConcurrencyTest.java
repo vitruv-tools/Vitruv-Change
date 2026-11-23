@@ -38,10 +38,10 @@ class ChangePropagationSpecificationConcurrencyTest {
     }
 
     @Override
-    public void propagateChange(EChange<EObject> change,
+    public ChangePropagationInvocation propagateChange(EChange<EObject> change,
         EditableCorrespondenceModelView<Correspondence> correspondenceModel,
         ResourceAccess resourceAccess) {
-      // nothing to do
+      return ChangePropagationInvocation.succeeded(this, List.of(change), List.of());
     }
   }
 

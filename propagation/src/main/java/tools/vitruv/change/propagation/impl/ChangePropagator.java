@@ -9,12 +9,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import com.google.common.collect.Streams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.emf.ecore.EObject;
@@ -35,6 +33,45 @@ import tools.vitruv.change.interaction.UserInteractionListener;
 import tools.vitruv.change.propagation.*;
 
 public class ChangePropagator {
+
+  /**
+   * Collects the invocations of the specifications during one run of the propagation. The run is
+   * halted as soon as an invocation is not {@link ChangePropagationStatus#SUCCEEDED}, or when the
+   * {@link PropagationStepGuard} aborts it.
+   */
+  private static final class PropagationRun {
+    private final PropagationStepGuard guard;
+
+    private ChangePropagationResult result = ChangePropagationResult.UNHANDLED;
+
+    /** The changes applied in this run, in order, to revert them when it halts under a guard. */
+    private final List<TransactionalChange<EObject>> appliedChanges = new ArrayList<>();
+
+    /** The user interactions of this run, to answer them alike when it is resubmitted. */
+    private final List<UserInteractionBase> userInteractions = new ArrayList<>();
+
+    /** The abort that halted this run, if any. */
+    private PropagationAbortedException abort;
+
+    private PropagationRun(PropagationStepGuard guard) {
+      this.guard = guard;
+    }
+
+    private void add(ChangePropagationInvocation invocation) {
+      result = result.append(ChangePropagationResult.of(invocation));
+    }
+
+    private void abort(PropagationAbortedException abort) {
+      if (this.abort == null) {
+        this.abort = abort;
+      }
+    }
+
+    private boolean halted() {
+      return abort != null || !result.succeeded();
+    }
+  }
+
   private static class ChangePropagation implements ChangePropagationObserver, UserInteractionListener {
     private final ChangePropagator outer;
 
@@ -45,6 +82,8 @@ public class ChangePropagator {
     private final Function<TransactionalChangeWithPreviousState, PropagationResult> lowerLevelPropagation;
 
     private final ChangePropagator.ChangePropagation previous;
+
+    private final PropagationRun run;
 
     private final Set<Resource> changedResources = new HashSet<Resource>();
 
@@ -66,7 +105,9 @@ public class ChangePropagator {
 
     private List<PropagatedChange> propagateChange() {
       List<PropagatedChange> result = this.propagateSingleChange(this.sourceChange.change(), this.sourceChange.previousState());
-      this.handleObjectsWithoutResource();
+      if (!this.run.halted()) {
+        this.handleObjectsWithoutResource();
+      }
       this.changedResources.forEach(it -> it.setModified(true));
       return result;
     }
@@ -86,14 +127,23 @@ public class ChangePropagator {
           Set<ChangePropagationSpecification> allSpecs = change.getAffectedEObjectsMetamodelDescriptors().stream()
               .flatMap(it -> {
                 List<ChangePropagationSpecification> specs = this.outer.changePropagationProvider.getChangePropagationSpecifications(it);
-                specs.forEach(s -> s.setUserInteractor(this.outer.userInteractor));
+                specs.forEach(s -> {
+                  s.setUserInteractor(this.outer.userInteractor);
+                  s.setEChangeApplicationController(this.outer.applicationController);
+                });
                 return specs.stream();
               })
               .filter(it -> this.outer.changePropagationProvider.getChangePropagationSpecificationLevel(it) == this.level)
               .collect(Collectors.toCollection(LinkedHashSet::new));
-          propagatedChanges = allSpecs.stream()
-              .flatMap(it -> StreamSupport.stream(this.propagateChangeForChangePropagationSpecification(change, previousState, currentState, it).spliterator(), false))
-              .toList();
+          propagatedChanges = new ArrayList<>();
+          for (ChangePropagationSpecification specification : allSpecs) {
+            Iterables.addAll(propagatedChanges,
+                this.propagateChangeForChangePropagationSpecification(
+                    change, previousState, currentState, specification));
+            if (this.run.halted()) {
+              break;
+            }
+          }
         } catch (Exception e) {
           throw new RuntimeException(e);
         } finally {
@@ -120,7 +170,8 @@ public class ChangePropagator {
         final PropagatedChange propagatedChange = new PropagatedChange(change, _createCompositeChange);
         final ArrayList<PropagatedChange> resultingChanges = new ArrayList<PropagatedChange>();
         resultingChanges.add(propagatedChange);
-        if (!Objects.equals(this.outer.changePropagationMode, ChangePropagationMode.SINGLE_STEP)) {
+        if (!Objects.equals(this.outer.changePropagationMode, ChangePropagationMode.SINGLE_STEP)
+            && !this.run.halted()) {
           Iterable<PropagatedChange> _propagateTransitiveChanges = this.propagateTransitiveChanges(
               propagationResultChanges.stream().filter(it -> it.change().containsConcreteChange()).collect(Collectors.toList()));
           Iterables.<PropagatedChange>addAll(resultingChanges, _propagateTransitiveChanges);
@@ -144,19 +195,53 @@ public class ChangePropagator {
       } else {
         nonLeafChanges = nonEmptyChanges;
       }
-      return nonLeafChanges.stream()
-                    .map(lowerLevelPropagation)
-                    .flatMap(it -> Streams.concat(
-                            it.propagatedChanges().stream(),
-                            new ChangePropagator.ChangePropagation(this.outer, it.change(), this.level, this.lowerLevelPropagation, this).propagateChange().stream()))
-                    .toList();
+      List<PropagatedChange> result = new ArrayList<>();
+      for (TransactionalChangeWithPreviousState nonLeafChange : nonLeafChanges) {
+        if (this.run.halted()) {
+          break;
+        }
+        PropagationResult lowerLevelResult = this.lowerLevelPropagation.apply(nonLeafChange);
+        result.addAll(lowerLevelResult.propagatedChanges());
+        if (this.run.halted()) {
+          break;
+        }
+        result.addAll(new ChangePropagator.ChangePropagation(
+            this.outer, lowerLevelResult.change(), this.level, this.lowerLevelPropagation, this,
+            this.run).propagateChange());
+      }
+      return result;
     }
 
     private Iterable<TransactionalChangeWithPreviousState> propagateChangeForChangePropagationSpecification(final TransactionalChange<EObject> change, final ModelRepositorySnapshot previousState, final ModelRepositorySnapshot currentState, final ChangePropagationSpecification propagationSpecification) {
-      this.outer.stepGuard.beforeStep(change, propagationSpecification);
-      final Runnable _function = () -> propagationSpecification.propagateChanges(change.getEChanges(), change, this.outer.modelRepository.getCorrespondenceModel(), this.outer.modelRepository, previousState);
-      final Iterable<TransactionalChange<EObject>> transitiveChanges = this.outer.modelRepository.recordChanges(_function);
-      transitiveChanges.forEach(this.outer.currentAttempt.get().appliedChanges::add);
+      try {
+        this.run.guard.beforeStep(change, propagationSpecification);
+      } catch (PropagationAbortedException abort) {
+        this.run.abort(abort);
+        return List.of();
+      }
+      final ChangePropagationInvocation[] invocation = new ChangePropagationInvocation[1];
+      final Runnable tryPropagation = () -> {
+        try {
+          invocation[0] = propagationSpecification.propagateChanges(
+              change.getEChanges(), change, this.outer.modelRepository.getCorrespondenceModel(),
+              this.outer.modelRepository, previousState);
+        } catch (RuntimeException e) {
+          PropagationAbortedException abort = findAbort(e);
+          if (abort != null) {
+            // aborted from within the specification, e.g. while acquiring a lock
+            this.run.abort(abort);
+            invocation[0] = ChangePropagationInvocation.blocked(
+                propagationSpecification, change.getEChanges(), List.of());
+          } else {
+            invocation[0] = ChangePropagationInvocation.failed(
+                propagationSpecification, change.getEChanges(), List.of(), e);
+          }
+        }
+      };
+      final Iterable<TransactionalChange<EObject>> transitiveChanges =
+          this.outer.modelRepository.recordChanges(tryPropagation);
+      transitiveChanges.forEach(this.run.appliedChanges::add);
+      this.run.add(invocation[0]);
       // consequential changes keep the annotations of the change that caused them
       transitiveChanges.forEach(it -> inheritAnnotations(change, it));
       StreamSupport.stream(transitiveChanges.spliterator(), false)
@@ -187,7 +272,9 @@ public class ChangePropagator {
             !this.outer.modelRepository.getCorrespondenceModel().hasCorrespondences(createdObjectWithoutResource),
             "The object %s is part of a correspondence to %s but not in any resource", createdObjectWithoutResource,
             this.outer.modelRepository.getCorrespondenceModel().getCorrespondingEObjects(createdObjectWithoutResource));
-        ChangePropagator.logger.warn("Object was created but has no correspondence and is thus lost: " + createdObjectWithoutResource);
+        ChangePropagator.logger.warn(
+            "Object was created but has no correspondence and is thus lost: {}",
+            createdObjectWithoutResource);
       }
     }
 
@@ -215,7 +302,7 @@ public class ChangePropagator {
         return;
       }
       this.userInteractions.add(interaction);
-      this.outer.currentAttempt.get().userInteractions.add(interaction);
+      this.run.userInteractions.add(interaction);
     }
 
     @Override
@@ -232,13 +319,21 @@ public class ChangePropagator {
       }
     }
 
-    public ChangePropagation(final ChangePropagator outer, final TransactionalChangeWithPreviousState sourceChange, final int level, final Function<TransactionalChangeWithPreviousState, PropagationResult> lowerLevelPropagation, final ChangePropagator.ChangePropagation previous) {
+    public ChangePropagation(
+        final ChangePropagator outer,
+        final TransactionalChangeWithPreviousState sourceChange,
+        final int level,
+        final Function<TransactionalChangeWithPreviousState, PropagationResult>
+            lowerLevelPropagation,
+        final ChangePropagator.ChangePropagation previous,
+        final PropagationRun run) {
       super();
       this.outer = outer;
       this.sourceChange = sourceChange;
       this.level = level;
       this.lowerLevelPropagation = lowerLevelPropagation;
       this.previous = previous;
+      this.run = run;
     }
   }
 
@@ -252,31 +347,18 @@ public class ChangePropagator {
 
   private final ChangePropagationMode changePropagationMode;
 
-  /** What one attempt to propagate a change has applied and asked, to revert and replay it. */
-  private static final class Attempt {
-    private final List<TransactionalChange<EObject>> appliedChanges = new ArrayList<>();
-    private final List<UserInteractionBase> userInteractions = new ArrayList<>();
-  }
-
-  /** The attempt running on the current thread (propagations are confined to their thread). */
-  private final ThreadLocal<Attempt> currentAttempt = new ThreadLocal<>();
+  private final EChangeApplicationController<EObject> applicationController;
 
   private volatile PropagationStepGuard stepGuard = PropagationStepGuard.NONE;
-
-  private volatile int maximumAttempts = 10;
 
   /**
    * Sets the guard that is called before the user's change is applied and before each propagation
    * step, e.g. to acquire locks. See {@link PropagationStepGuard}.
+   *
+   * @param stepGuard the guard, {@link PropagationStepGuard#NONE} for none
    */
   public void setStepGuard(PropagationStepGuard stepGuard) {
     this.stepGuard = Objects.requireNonNull(stepGuard);
-  }
-
-  /** How often a propagation is attempted before an abort is passed to the caller (default 10). */
-  public void setMaximumAttempts(int maximumAttempts) {
-    Preconditions.checkArgument(maximumAttempts > 0, "at least one attempt is required");
-    this.maximumAttempts = maximumAttempts;
   }
 
   /**
@@ -287,7 +369,10 @@ public class ChangePropagator {
    * propagated transitively and cyclic, i.e. with
    * {@link ChangePropagationMode#TRANSITIVE_CYCLIC}.
    */
-  public ChangePropagator(final ChangeRecordingModelRepository modelRepository, final ChangePropagationSpecificationProvider changePropagationProvider, final InternalUserInteractor userInteractor) {
+  public ChangePropagator(
+      final ChangeRecordingModelRepository modelRepository,
+      final ChangePropagationSpecificationProvider changePropagationProvider,
+      final InternalUserInteractor userInteractor) {
     this(modelRepository, changePropagationProvider, userInteractor, ChangePropagationMode.TRANSITIVE_CYCLIC);
   }
 
@@ -298,103 +383,166 @@ public class ChangePropagator {
    * Changes are recorded in the given <code>modelRepository</code> and
    * propagated using the given <code>mode</code>.
    */
-  public ChangePropagator(final ChangeRecordingModelRepository modelRepository, final ChangePropagationSpecificationProvider changePropagationProvider, final InternalUserInteractor userInteractor, final ChangePropagationMode mode) {
+  public ChangePropagator(
+      final ChangeRecordingModelRepository modelRepository,
+      final ChangePropagationSpecificationProvider changePropagationProvider,
+      final InternalUserInteractor userInteractor,
+      final ChangePropagationMode mode) {
+    this(modelRepository, changePropagationProvider, userInteractor, mode,
+        new DefaultEChangeApplicationController());
+  }
+
+  /**
+   * Creates a change propagator to which changes can be passed, which are
+   * propagated using the given <code>changePropagationProvider</code> and
+   * <code>userInteractor</code>.
+   * Changes are recorded in the given <code>modelRepository</code> and
+   * propagated using the given <code>mode</code>.
+   * The change propagation specifications apply the changes they issue themselves through the
+   * given <code>applicationController</code>.
+   */
+  public ChangePropagator(final ChangeRecordingModelRepository modelRepository,
+      final ChangePropagationSpecificationProvider changePropagationProvider,
+      final InternalUserInteractor userInteractor, final ChangePropagationMode mode,
+      final EChangeApplicationController<EObject> applicationController) {
     this.modelRepository = modelRepository;
     this.changePropagationProvider = changePropagationProvider;
     this.userInteractor = userInteractor;
     this.changePropagationMode = mode;
+    this.applicationController = applicationController;
   }
 
   /**
    * Applies, then propagates <code>change</code>
    * through the models in <code>modelRepository</code>.
    *
-   * @param change - {@link VitruviusChange}
-   * @param observers - {@link Iterable} of {@link ChangePropagationObserver}
-   * @return - {@link List} of {@link PropagatedChange}
-   */
-  public List<PropagatedChange> propagateChange(final VitruviusChange<Uuid> change, final Iterable<ChangePropagationObserver> observers) {
-    return propagateChange(change, observers, result -> { });
-  }
-
-  /**
-   * Applies, then propagates <code>change</code> through the models in
-   * <code>modelRepository</code>, and runs <code>commit</code> on the result before the step guard
-   * ends the propagation. With a locking step guard, <code>commit</code> thus runs while the
-   * propagation still holds its locks: what it persists (saved resources, a change log record)
-   * contains no changes of concurrent propagations to the locked elements, and commits happen in
-   * the serialisation order. If <code>commit</code> throws, the changes of the propagation are
-   * reverted in memory (not what <code>commit</code> may already have written), the guard ends the
-   * propagation as not committed and the exception reaches the caller; it is not retried.
+   * <p>If a specification returns an invocation that is not
+   * {@link ChangePropagationStatus#SUCCEEDED}, the propagation halts: no further specification,
+   * level, transitive change or transactional change of <code>change</code> is processed. Without
+   * a {@link PropagationStepGuard}, the changes that were already executed stay applied, and
+   * nothing is undone; with a guard, they are reverted (see {@link PropagationStepGuard}). No
+   * exception is thrown for this; the {@link PropagationReport} contains the result.
    *
    * @param change - {@link VitruviusChange}
    * @param observers - {@link Iterable} of {@link ChangePropagationObserver}
-   * @param commit - persists the propagated changes
-   * @return - {@link List} of {@link PropagatedChange}
+   * @return - the {@link PropagationReport} with the propagated changes and the
+   *     {@link ChangePropagationResult} of the run
    */
-  public List<PropagatedChange> propagateChange(final VitruviusChange<Uuid> change,
+  public PropagationReport propagateChangeWithResult(
+      final VitruviusChange<Uuid> change,
+      final Iterable<ChangePropagationObserver> observers) {
+    return propagateChangeWithResult(change, observers, List.of(), propagatedChanges -> { });
+  }
+
+  /**
+   * Applies, then propagates <code>change</code> like
+   * {@link #propagateChangeWithResult(VitruviusChange, Iterable)}, answers the first user
+   * interactions with <code>answers</code>, and runs <code>commit</code> on the propagated changes
+   * if the propagation succeeded, before the {@link PropagationStepGuard} ends it. With a locking
+   * guard, <code>commit</code> thus runs while the propagation still holds its locks: what it
+   * persists (saved resources, a change log record) contains no changes of concurrent propagations
+   * to the locked elements, and commits happen in the serialization order.
+   *
+   * <p>If the propagation halts or <code>commit</code> throws, and a guard is set, the changes of
+   * the propagation are reverted in memory before the guard ends it (not what <code>commit</code>
+   * may already have written). An exception of <code>commit</code> reaches the caller.
+   *
+   * @param change - {@link VitruviusChange}
+   * @param observers - {@link Iterable} of {@link ChangePropagationObserver}
+   * @param answers - the answers to the first user interactions, e.g. the
+   *     {@link PropagationReport#userInteractions()} of a halted propagation of the same change
+   *     that is resubmitted
+   * @param commit - persists the propagated changes
+   * @return - the {@link PropagationReport} with the propagated changes and the
+   *     {@link ChangePropagationResult} of the run
+   */
+  public PropagationReport propagateChangeWithResult(
+      final VitruviusChange<Uuid> change,
       final Iterable<ChangePropagationObserver> observers,
+      final List<UserInteractionBase> answers,
       final Consumer<List<PropagatedChange>> commit) {
     if (ChangePropagator.logger.isTraceEnabled()) {
-      ChangePropagator.logger.trace("Will begin propagation of change :\n\t" + change);
+      ChangePropagator.logger.trace("Will begin propagation of change :\n\t {}", change);
     }
-    Preconditions.checkState(currentAttempt.get() == null,
-        "A propagation is already running on this thread");
-    List<UserInteractionBase> answersToReplay = List.of();
-    for (int attemptNumber = 1; ; attemptNumber++) {
-      Attempt attempt = new Attempt();
-      currentAttempt.set(attempt);
-      modelRepository.beginPropagationAttempt();
-      boolean committed = false;
-      try (AutoCloseable replay = replayUserInteractions(answersToReplay)) {
-        stepGuard.beginPropagation(change);
-        List<PropagatedChange> result = propagateChangeOnce(change, observers, attempt);
-        try {
-          commit.accept(result);
-        } catch (RuntimeException e) {
-          logger.debug("Commit failed, reverting {} changes", attempt.appliedChanges.size());
-          modelRepository.revertChanges(attempt.appliedChanges);
-          throw new CommitFailedException(e);
-        }
+    final PropagationRun run = new PropagationRun(this.stepGuard);
+    boolean committed = false;
+    this.modelRepository.beginPropagationAttempt();
+    try (AutoCloseable replay = replayUserInteractions(answers)) {
+      List<PropagatedChange> result = propagateRun(change, observers, run);
+      if (!run.halted()) {
+        commit.accept(result);
         committed = true;
-        return result;
-      } catch (CommitFailedException e) {
-        throw e.getCause();
-      } catch (Exception e) {
-        PropagationAbortedException abort = findAbort(e);
-        if (abort == null) {
-          throw e instanceof RuntimeException runtimeException
-              ? runtimeException : new RuntimeException(e);
-        }
-        logger.debug("Propagation aborted (attempt {}), reverting {} changes: {}", attemptNumber,
-            attempt.appliedChanges.size(), abort.getMessage());
-        modelRepository.revertChanges(attempt.appliedChanges);
-        if (!attempt.userInteractions.isEmpty()) {
-          answersToReplay = List.copyOf(attempt.userInteractions);
-        }
-        if (attemptNumber >= maximumAttempts) {
-          throw abort;
-        }
-      } finally {
-        currentAttempt.remove();
-        modelRepository.endPropagationAttempt();
-        stepGuard.endPropagation(change, committed);
       }
+      return new PropagationReport(result, run.result, run.userInteractions, run.abort);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      // only closing the replay of user interactions throws checked exceptions
+      throw new IllegalStateException(e);
+    } finally {
+      if (!committed && run.guard != PropagationStepGuard.NONE) {
+        ChangePropagator.logger.debug("Propagation did not complete, reverting {} changes",
+            run.appliedChanges.size());
+        this.modelRepository.revertChanges(run.appliedChanges);
+      }
+      this.modelRepository.endPropagationAttempt();
+      run.guard.endPropagation(change, committed);
     }
   }
 
-  /** Carries a failure of the commit past the abort handling (an abort in it is not retried). */
-  private static final class CommitFailedException extends RuntimeException {
-    private static final long serialVersionUID = 1L;
-
-    CommitFailedException(RuntimeException cause) {
-      super(cause);
+  private List<PropagatedChange> propagateRun(final VitruviusChange<Uuid> change,
+      final Iterable<ChangePropagationObserver> observers, final PropagationRun run) {
+    List<PropagatedChange> result = new ArrayList<>();
+    try {
+      run.guard.beginPropagation(change);
+    } catch (PropagationAbortedException abort) {
+      run.abort(abort);
+      return result;
     }
 
-    @Override
-    public synchronized RuntimeException getCause() {
-      return (RuntimeException) super.getCause();
+    this.changePropagationProvider.forEach(spec -> observers.forEach(spec::registerObserver));
+    try {
+      int maximumLevel = this.changePropagationProvider.getMaximumPropagationSpecificationLevel();
+
+      for (TransactionalChange<Uuid> transactionalChange :
+          change.getTransactionalChangeSequence()) {
+        if (run.halted()) {
+          break;
+        }
+        try {
+          run.guard.beforeApply(transactionalChange);
+        } catch (PropagationAbortedException abort) {
+          run.abort(abort);
+          break;
+        }
+        try (ModelRepositorySnapshot previousState = createSnapshotIfUsed()) {
+          TransactionalChange<EObject> resolvedChange =
+              (TransactionalChange<EObject>) this.modelRepository.applyChange(transactionalChange);
+          run.appliedChanges.add(resolvedChange);
+          // a transactional change inside a composite change also carries the composite's
+          // annotations
+          inheritAnnotations(change, resolvedChange);
+
+          resolvedChange.getAffectedEObjects().stream()
+                         .map(EObject::eResource)
+                         .filter(Objects::nonNull)
+                         .forEach(it -> it.setModified(true));
+
+          if (ChangePropagator.logger.isTraceEnabled()) {
+            ChangePropagator.logger.trace(
+                "Will now propagate this input change:\n\t" + resolvedChange);
+          }
+
+          TransactionalChangeWithPreviousState changeWithPreviousState
+              = new TransactionalChangeWithPreviousState(resolvedChange, previousState);
+          result.addAll(
+              this.propagateChange(changeWithPreviousState, maximumLevel, run).propagatedChanges());
+        }
+      }
+    } finally {
+      this.changePropagationProvider.forEach(spec -> observers.forEach(spec::deregisterObserver));
     }
+    return result;
   }
 
   private static PropagationAbortedException findAbort(Throwable throwable) {
@@ -406,7 +554,7 @@ public class ChangePropagator {
     return null;
   }
 
-  /** Answers the interactions of a retried propagation with those of the aborted attempt. */
+  /** Answers the first user interactions of a propagation with the given answers. */
   private AutoCloseable replayUserInteractions(List<UserInteractionBase> answers) {
     if (answers.isEmpty()) {
       return () -> { };
@@ -416,62 +564,59 @@ public class ChangePropagator {
             answers.toArray(UserInteractionBase[]::new)));
   }
 
-  private List<PropagatedChange> propagateChangeOnce(final VitruviusChange<Uuid> change,
-      final Iterable<ChangePropagationObserver> observers, final Attempt attempt) {
-    this.changePropagationProvider.forEach(spec -> observers.forEach(spec::registerObserver));
-    try {
-      return propagateTransactionalChanges(change, attempt);
-    } finally {
-      this.changePropagationProvider.forEach(spec -> observers.forEach(spec::deregisterObserver));
+  /**
+   * Applies, then propagates <code>change</code>
+   * through the models in <code>modelRepository</code>.
+   *
+   * <p>This is {@link #propagateChangeWithResult} without the report: if a specification failed
+   * with an error, the error is rethrown after the propagation halted; a blocked specification
+   * only halts the propagation. If a {@link PropagationStepGuard} is set, a blocked or aborted
+   * propagation has been reverted, and a {@link PropagationAbortedException} is thrown, so that
+   * the caller can resubmit the change.
+   *
+   * @param change - {@link VitruviusChange}
+   * @param observers - {@link Iterable} of {@link ChangePropagationObserver}
+   * @return - {@link List} of {@link PropagatedChange}
+   */
+  public List<PropagatedChange> propagateChange(final VitruviusChange<Uuid> change, final Iterable<ChangePropagationObserver> observers) {
+    boolean guarded = this.stepGuard != PropagationStepGuard.NONE;
+    PropagationReport report = propagateChangeWithResult(change, observers);
+    if (guarded && report.status() == ChangePropagationStatus.BLOCKED) {
+      throw report.abort() != null ? report.abort()
+          : new PropagationAbortedException("The propagation was blocked and has been reverted");
     }
-  }
-
-  private List<PropagatedChange> propagateTransactionalChanges(final VitruviusChange<Uuid> change,
-      final Attempt attempt) {
-    int maximumLevel = this.changePropagationProvider.getMaximumPropagationSpecificationLevel();
-
-    List<PropagatedChange> result = new ArrayList<>();
-
-    for (TransactionalChange<Uuid> transactionalChange : change.getTransactionalChangeSequence()) {
-      try (ModelRepositorySnapshot previousState = createSnapshotIfUsed()) {
-        stepGuard.beforeApply(transactionalChange);
-        TransactionalChange<EObject> resolvedChange =
-            (TransactionalChange<EObject>) this.modelRepository.applyChange(transactionalChange);
-        attempt.appliedChanges.add(resolvedChange);
-        // a transactional change inside a composite change also carries the composite's annotations
-        inheritAnnotations(change, resolvedChange);
-
-        resolvedChange.getAffectedEObjects().stream()
-                       .map(EObject::eResource)
-                       .filter(Objects::nonNull)
-                       .forEach(it -> it.setModified(true));
-
-        if (ChangePropagator.logger.isTraceEnabled()) {
-          ChangePropagator.logger.trace("Will now propagate this input change:\n\t" + resolvedChange);
-        }
-
-        TransactionalChangeWithPreviousState changeWithPreviousState
-            = new TransactionalChangeWithPreviousState(resolvedChange, previousState);
-        result.addAll(
-            this.propagateChange(changeWithPreviousState, maximumLevel).propagatedChanges());
+    if (report.result().status() == ChangePropagationStatus.FAILED) {
+      Throwable cause = report.result().cause().orElse(null);
+      if (cause instanceof RuntimeException runtimeException) {
+        throw runtimeException;
+      }
+      if (cause instanceof Error error) {
+        throw error;
+      }
+      if (cause != null) {
+        throw new RuntimeException(cause);
       }
     }
-    return result;
+    return report.propagatedChanges();
   }
 
   private PropagationResult propagateChange(
-      final TransactionalChangeWithPreviousState change, final int level) {
+      final TransactionalChangeWithPreviousState change, final int level,
+      final PropagationRun run) {
     if (level < 0) {
       return new PropagationResult(change, List.of());
     }
 
-    PropagationResult lowerLevelResult = this.propagateChange(change, level - 1);
+    PropagationResult lowerLevelResult = this.propagateChange(change, level - 1, run);
+    if (run.halted()) {
+      return lowerLevelResult;
+    }
 
     Function<TransactionalChangeWithPreviousState, PropagationResult> lowerLevelPropagation
-        = (lowerLevelChange) -> propagateChange(lowerLevelChange, level - 1);
+        = lowerLevelChange -> propagateChange(lowerLevelChange, level - 1, run);
 
     ChangePropagation propagation = new ChangePropagation(
-        this, lowerLevelResult.change(), level, lowerLevelPropagation, null);
+        this, lowerLevelResult.change(), level, lowerLevelPropagation, null, run);
     List<PropagatedChange> propagatedChanges = propagation.propagateChange();
 
     List<PropagatedChange> allPropagatedChanges
