@@ -15,6 +15,30 @@ import tools.vitruv.change.correspondence.Correspondence;
  */
 public interface PersistableCorrespondenceModel extends CorrespondenceModel {
   /**
+   * Starts recording the correspondence changes made on the calling thread, for example during
+   * one attempt of a change propagation. A recording already running on this thread is discarded.
+   * Changes of other threads are not recorded.
+   */
+  void startRecording();
+
+  /**
+   * Returns the correspondence changes recorded on the calling thread since {@link
+   * #startRecording()}, in the order they were made.
+   *
+   * @return the recorded changes, empty if this thread does not record
+   */
+  List<CorrespondenceChange> getRecordedChanges();
+
+  /**
+   * Undoes the correspondence changes recorded on the calling thread, the last one first, and
+   * starts recording afresh. Does nothing if this thread does not record.
+   */
+  void revertRecordedChanges();
+
+  /** Stops recording the correspondence changes of the calling thread. */
+  void stopRecording();
+
+  /**
    * Loads the correspondence model from its persistence if existing.
    *
    * @param resolveIn the {@link ResourceSet} to resolve the corresponding objects in
@@ -36,7 +60,9 @@ public interface PersistableCorrespondenceModel extends CorrespondenceModel {
   /**
    * Returns the correspondences of this model in the order in which they are stored. The list is
    * live: adding or removing correspondences in it adds or removes them in this model. This allows
-   * persisting the model as a sequence of changes to the list and replaying them.
+   * persisting the model as a sequence of changes to the list and replaying them. The model's
+   * operations synchronize on the model; while other threads may use it, iterate or change the
+   * list only while holding the model's monitor ({@code synchronized (model) { ... }}).
    *
    * @return the modifiable list of correspondences
    */

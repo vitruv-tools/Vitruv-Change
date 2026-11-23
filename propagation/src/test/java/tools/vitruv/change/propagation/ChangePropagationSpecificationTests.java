@@ -233,11 +233,12 @@ class ChangePropagationSpecificationTests {
     var specification = new MockChangePropagationSpecification(
         AttributePackage.eINSTANCE.getReplaceSingleValuedEAttribute(), descriptorA, descriptorB) {
       @Override
-      public void propagateChanges(List<EChange<EObject>> changes,
+      public ChangePropagationInvocation propagateChanges(List<EChange<EObject>> changes,
           AnnotationSource changeAnnotations,
           EditableCorrespondenceModelView<Correspondence> correspondenceModel,
           ResourceAccess resourceAccess, ModelRepositorySnapshot previousState) {
         // uses the previous state
+        return ChangePropagationInvocation.succeeded(this, changes, List.of());
       }
     };
     assertTrue(specification.usesPreviousState());
@@ -256,6 +257,59 @@ class ChangePropagationSpecificationTests {
 
     assertEquals(2, mockObserver.cpsStarts);
     assertEquals(2, mockObserver.cpsEnds);
+  }
+
+  @Test
+  void propagateChangesCombinesTheInvocationsOfTheHandledChangesInOrder() {
+    var specification = new ScriptedSpecification(List.of(
+        ChangePropagationStatus.SUCCEEDED, ChangePropagationStatus.SUCCEEDED));
+    EChange<EObject> first = EobjectFactory.eINSTANCE.createCreateEObject();
+    EChange<EObject> unhandled = AttributeFactory.eINSTANCE.createReplaceSingleValuedEAttribute();
+    EChange<EObject> second = EobjectFactory.eINSTANCE.createCreateEObject();
+    List<EChange<EObject>> changes = List.of(first, unhandled, second);
+
+    var invocation = specification.propagateChanges(
+        changes, AnnotationSource.EMPTY, null, null, null);
+
+    assertSame(specification, invocation.specification());
+    assertEquals(changes, invocation.receivedChanges());
+    assertEquals(ChangePropagationStatus.SUCCEEDED, invocation.status());
+    assertEquals(List.of(first, second), invocation.executedChanges());
+    assertEquals(List.of(first, second), specification.calls);
+  }
+
+  @Test
+  void propagateChangesStopsAtFirstNonSucceededWithCause() {
+    var specification = new ScriptedSpecification(List.of(
+        ChangePropagationStatus.SUCCEEDED, ChangePropagationStatus.FAILED));
+    EChange<EObject> first = EobjectFactory.eINSTANCE.createCreateEObject();
+    EChange<EObject> second = EobjectFactory.eINSTANCE.createCreateEObject();
+
+    var invocation = specification.propagateChanges(
+        List.of(first, second), AnnotationSource.EMPTY, null, null, null);
+
+    assertEquals(ChangePropagationStatus.FAILED, invocation.status());
+    assertEquals("scripted failure", invocation.cause().getMessage());
+    assertEquals(List.of(first, second), invocation.executedChanges());
+    assertEquals(List.of(first, second), specification.calls,
+        "changes for the second specification must not be propagated");
+  }
+
+
+  @Test
+  void propagateChangesWithoutHandledChangesReturnAnUnhandledInvocation() {
+    var specification = new ScriptedSpecification(List.of());
+    List<EChange<EObject>> changes =
+        List.of(AttributeFactory.eINSTANCE.createReplaceSingleValuedEAttribute());
+
+    var invocation = specification.propagateChanges(
+        changes, AnnotationSource.EMPTY, null, null, null);
+
+    assertSame(specification, invocation.specification());
+    assertEquals(changes, invocation.receivedChanges());
+    assertEquals(ChangePropagationStatus.SUCCEEDED, invocation.status());
+    assertTrue(invocation.executedChanges().isEmpty());
+    assertTrue(specification.calls.isEmpty());
   }
 
   private static class MockObserver implements ChangePropagationObserver {
@@ -297,18 +351,20 @@ class ChangePropagationSpecificationTests {
     }
 
     @Override
-    public void propagateChange(EChange<EObject> change,
+    public ChangePropagationInvocation propagateChange(EChange<EObject> change,
         EditableCorrespondenceModelView<Correspondence> correspondenceModel,
         ResourceAccess resourceAccess) {
       lastAnnotations = AnnotationSource.EMPTY;
+      return ChangePropagationInvocation.succeeded(this, List.of(change), List.of());
     }
 
     @Override
-    public void propagateChange(EChange<EObject> change,
+    public ChangePropagationInvocation propagateChange(EChange<EObject> change,
         AnnotationSource changeAnnotations,
         EditableCorrespondenceModelView<Correspondence> correspondenceModel,
         ResourceAccess resourceAccess) {
       lastAnnotations = changeAnnotations;
+      return ChangePropagationInvocation.succeeded(this, List.of(change), List.of());
     }
   }
 
@@ -337,13 +393,49 @@ class ChangePropagationSpecificationTests {
     }
 
     @Override
-    public void propagateChange(EChange<EObject> change,
+    public ChangePropagationInvocation propagateChange(EChange<EObject> change,
         EditableCorrespondenceModelView<Correspondence> correspondenceModel,
         ResourceAccess resourceAccess) {
       notifyChangePropagationStarted(this, change);
       notifyObjectCreated(change);
       notifyChangePropagationStopped(this, change);
-      return;
+      return ChangePropagationInvocation.succeeded(this, List.of(change), List.of());
+    }
+  }
+
+  /**
+   * {@link ScriptedSpecification} returns the requested {@link ChangePropagationInvocation}.
+   * It handles only {@link CreateEObject} changes, to simulate unhandled changes.
+   */
+  private static class ScriptedSpecification extends AbstractChangePropagationSpecification {
+    private final List<ChangePropagationStatus> statuses;
+    private final List<EChange<EObject>> calls = new ArrayList<>();
+
+    private ScriptedSpecification(List<ChangePropagationStatus> statuses) {
+      super(MetamodelDescriptor.with("modelsA"), MetamodelDescriptor.with("modelsB"));
+      this.statuses = statuses;
+    }
+
+    @Override
+    public boolean doesHandleChange(EChange<EObject> change,
+        EditableCorrespondenceModelView<Correspondence> correspondenceModel) {
+      return change.eClass().equals(EobjectPackage.eINSTANCE.getCreateEObject());
+    }
+
+    @Override
+    public ChangePropagationInvocation propagateChange(EChange<EObject> change,
+        EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+        ResourceAccess resourceAccess) {
+      ChangePropagationStatus status = statuses.get(calls.size());
+      calls.add(change);
+      return switch (status) {
+        case SUCCEEDED -> ChangePropagationInvocation.succeeded(
+            this, List.of(change), List.of(change));
+        case BLOCKED -> ChangePropagationInvocation.blocked(
+            this, List.of(change), List.of(change));
+        case FAILED -> ChangePropagationInvocation.failed(
+            this, List.of(change), List.of(change), new IllegalStateException("scripted failure"));
+      };
     }
   }
 }

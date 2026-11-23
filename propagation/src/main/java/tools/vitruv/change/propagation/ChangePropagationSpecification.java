@@ -1,5 +1,6 @@
 package tools.vitruv.change.propagation;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.atomic.EChange;
@@ -26,6 +27,18 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
    *      if it is accessed within {@link #propagateChange}.
    */
   void setUserInteractor(final UserInteractor userInteractor);
+
+  /**
+   * Sets the {@link EChangeApplicationController} that this specification uses to apply
+   * {@link EChange}s it issues itself, for example when needing to check that the issued
+   * check can be applied.
+   * Must be set before calling
+   * {@link #propagateChange(EChange, EditableCorrespondenceModelView, ResourceAccess)}.
+   *
+   * @param applicationController {@link EChangeApplicationController}
+   */
+  void setEChangeApplicationController(
+      EChangeApplicationController<EObject> applicationController);
 
   /**
    * Returns the descriptor for the metamodel containing the namespace URIs of the root packages
@@ -72,6 +85,9 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
    * @param resourceAccess - an object for resource access,
    *     in particular to create new model files. Must not be <code>null</code>.
    * @param previousState the state of the models before the changes were applied
+   * @return the invocation of this call, see
+   *     {@link #propagateChanges(List, AnnotationSource, EditableCorrespondenceModelView,
+   *     ResourceAccess, ModelRepositorySnapshot)}
    * @deprecated The change propagation calls
    *     {@link #propagateChanges(List, AnnotationSource, EditableCorrespondenceModelView,
    *     ResourceAccess, ModelRepositorySnapshot)}, which also provides the annotations of the
@@ -79,11 +95,12 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
    */
   @Deprecated(since = "4.0.2")
   @SuppressWarnings("java:S1133")
-  default void propagateChanges(List<EChange<EObject>> changes,
-                                EditableCorrespondenceModelView<Correspondence> correspondenceModel,
-                                ResourceAccess resourceAccess,
-                                ModelRepositorySnapshot previousState) {
-    propagateChanges(changes, AnnotationSource.EMPTY, correspondenceModel, resourceAccess,
+  default ChangePropagationInvocation propagateChanges(
+      List<EChange<EObject>> changes,
+      EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+      ResourceAccess resourceAccess,
+      ModelRepositorySnapshot previousState) {
+    return propagateChanges(changes, AnnotationSource.EMPTY, correspondenceModel, resourceAccess,
         previousState);
   }
 
@@ -93,7 +110,9 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
    * in order to reflect the changes in the target model.
    * By default, every handled change is passed to
    * {@link #propagateChange(EChange, AnnotationSource, EditableCorrespondenceModelView,
-   * ResourceAccess)}.
+   * ResourceAccess)}, in order. The invocations it returns are combined into the returned
+   * invocation, and propagation stops at the first invocation that is not
+   * {@link ChangePropagationStatus#SUCCEEDED}; the changes after it are not propagated.
    *
    * @param changes - the atomic changes which shall be propagated.
    *     Should affect only elements in an instance of a source metamodel of this specification
@@ -106,17 +125,30 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
    *     in particular to create new model files. Must not be <code>null</code>.
    * @param previousState the state of the models before the changes were applied, or
    *     <code>null</code> if no specification uses it (see {@link #usesPreviousState()})
+   * @return the {@link ChangePropagationInvocation} of this call: this specification, the
+   *     <code>changes</code>, and the status, cause and executed changes combined from the
+   *     invocations for the handled changes, up to and including the first invocation that is not
+   *     {@link ChangePropagationStatus#SUCCEEDED}. If no change is handled, it is a succeeded
+   *     invocation without executed changes.
    */
-  default void propagateChanges(List<EChange<EObject>> changes,
-                                AnnotationSource changeAnnotations,
-                                EditableCorrespondenceModelView<Correspondence> correspondenceModel,
-                                ResourceAccess resourceAccess,
-                                ModelRepositorySnapshot previousState) {
-    changes
-        .stream()
-        .filter(change -> doesHandleChange(change, correspondenceModel))
-        .forEach(change ->
-            propagateChange(change, changeAnnotations, correspondenceModel, resourceAccess));
+  default ChangePropagationInvocation propagateChanges(
+      List<EChange<EObject>> changes,
+      AnnotationSource changeAnnotations,
+      EditableCorrespondenceModelView<Correspondence> correspondenceModel,
+      ResourceAccess resourceAccess,
+      ModelRepositorySnapshot previousState) {
+    List<ChangePropagationInvocation> invocations = new ArrayList<>();
+    for (EChange<EObject> change : changes) {
+      if (doesHandleChange(change, correspondenceModel)) {
+        ChangePropagationInvocation invocation =
+            propagateChange(change, changeAnnotations, correspondenceModel, resourceAccess);
+        invocations.add(invocation);
+        if (invocation.status() != ChangePropagationStatus.SUCCEEDED) {
+          break;
+        }
+      }
+    }
+    return new ChangePropagationInvocation(this, changes, invocations);
   }
 
   /**
@@ -154,10 +186,14 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
    *     (see {@link #getSourceMetamodelDescriptor}). Must not be <code>null</code>.
    * @param correspondenceModel - the correspondence model to retrieve information about the target
    *     model from. Must not be <code>null</code>.
-   * @param resourceAccess - an object for resource access, 
+   * @param resourceAccess - an object for resource access,
    *     in particular to create new model files. Must not be <code>null</code>.
+   * @return the {@link ChangePropagationInvocation} of this call: this specification, the received
+   *     change, the status and the changes it executed on target models, in execution order, up
+   *     to the point it stopped. A specification that does not handle the change still returns a
+   *     succeeded invocation without executed changes.
    */
-  void propagateChange(EChange<EObject> change,
+  ChangePropagationInvocation propagateChange(EChange<EObject> change,
       EditableCorrespondenceModelView<Correspondence> correspondenceModel,
       ResourceAccess resourceAccess);
 
@@ -170,11 +206,13 @@ public interface ChangePropagationSpecification extends ChangePropagationObserva
    *     Must not be <code>null</code>.
    * @param correspondenceModel - the correspondence model. Must not be <code>null</code>.
    * @param resourceAccess - resource access object. Must not be <code>null</code>.
+   * @return the invocation of this call, see
+   *     {@link #propagateChange(EChange, EditableCorrespondenceModelView, ResourceAccess)}
    */
-  default void propagateChange(EChange<EObject> change,
+  default ChangePropagationInvocation propagateChange(EChange<EObject> change,
       AnnotationSource changeAnnotations,
       EditableCorrespondenceModelView<Correspondence> correspondenceModel,
       ResourceAccess resourceAccess) {
-    propagateChange(change, correspondenceModel, resourceAccess);
+    return propagateChange(change, correspondenceModel, resourceAccess);
   }
 }
