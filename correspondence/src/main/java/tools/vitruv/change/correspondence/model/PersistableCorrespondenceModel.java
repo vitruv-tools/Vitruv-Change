@@ -36,7 +36,9 @@ public interface PersistableCorrespondenceModel extends CorrespondenceModel {
   /**
    * Returns the correspondences of this model in the order in which they are stored. The list is
    * live: adding or removing correspondences in it adds or removes them in this model. This allows
-   * persisting the model as a sequence of changes to the list and replaying them.
+   * persisting the model as a sequence of changes to the list and replaying them. The model's
+   * operations synchronize on the model; while other threads may use it, iterate or change the
+   * list only while holding the model's monitor ({@code synchronized (model) { ... }}).
    *
    * @return the modifiable list of correspondences
    */
