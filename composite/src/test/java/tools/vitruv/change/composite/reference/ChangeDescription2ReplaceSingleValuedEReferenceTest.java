@@ -33,11 +33,11 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest
   void testReplaceSingleValuedEReferenceContainment() {
     this.getUniquePersistedRoot();
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
-    final Consumer<Root> _function = (Root it) -> {
+    final Consumer<Root> function = (Root it) -> {
       it.setSingleValuedContainmentEReference(nonRoot);
     };
     final List<EChange<EObject>> result
-            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), function);
     AtomicEChangeAssertHelper.assertEmpty(
             AtomicEChangeAssertHelper.assertReplaceSingleValuedEAttribute(
                     AtomicEChangeAssertHelper.assertSetSingleValuedEReference(
@@ -59,15 +59,15 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     final NonRoot replaceNonRoot = AllElementTypesCreators.aet.NonRoot();
     Root uniquePersistedRoot = this.getUniquePersistedRoot();
-    final Consumer<Root> _function = (Root it) -> {
+    final Consumer<Root> function = (Root it) -> {
       it.setSingleValuedContainmentEReference(nonRoot);
     };
-    _function.accept(uniquePersistedRoot);
-    final Consumer<Root> _function_1 = (Root it) -> {
+    function.accept(uniquePersistedRoot);
+    final Consumer<Root> function1 = (Root it) -> {
       it.setSingleValuedContainmentEReference(replaceNonRoot);
     };
     final List<EChange<EObject>> result
-            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), function1);
     AtomicEChangeAssertHelper.assertEmpty(
             CompoundEChangeAssertHelper.assertDeleteEObjectAndContainedElements(
                     AtomicEChangeAssertHelper.assertReplaceSingleValuedEAttribute(
@@ -91,15 +91,15 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest
   void testReplaceExistingSingleValuedEReferenceContainmentWithDefault() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root uniquePersistedRoot = this.getUniquePersistedRoot();
-    final Consumer<Root> _function = (Root it) -> {
+    final Consumer<Root> function = (Root it) -> {
       it.setSingleValuedContainmentEReference(nonRoot);
     };
-    _function.accept(uniquePersistedRoot);
-    final Consumer<Root> _function_1 = (Root it) -> {
+    function.accept(uniquePersistedRoot);
+    final Consumer<Root> function1 = (Root it) -> {
       it.setSingleValuedContainmentEReference(null);
     };
     final List<EChange<EObject>> result
-            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), function1);
     AtomicEChangeAssertHelper.assertEmpty(
             AtomicEChangeAssertHelper.assertUnsetSingleValuedEReference(
                     ChangeDescription2ChangeTransformationTest
@@ -115,15 +115,15 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest
   void testRemoveContainmentReferenceWithDelete() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root uniquePersistedRoot = this.getUniquePersistedRoot();
-    final Consumer<Root> _function = (Root it) -> {
+    final Consumer<Root> function = (Root it) -> {
       it.setSingleValuedContainmentEReference(nonRoot);
     };
-    _function.accept(uniquePersistedRoot);
-    final Consumer<Root> _function_1 = (Root it) -> {
+    function.accept(uniquePersistedRoot);
+    final Consumer<Root> function1 = (Root it) -> {
       EcoreUtil.delete(nonRoot);
     };
     final List<EChange<EObject>> result
-            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), function1);
     AtomicEChangeAssertHelper.assertEmpty(
             AtomicEChangeAssertHelper.assertUnsetSingleValuedEReference(
                     ChangeDescription2ChangeTransformationTest
@@ -139,15 +139,15 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest
   void testSetSingleValuedEReferenceNonContainment() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root uniquePersistedRoot = this.getUniquePersistedRoot();
-    final Consumer<Root> _function = (Root it) -> {
+    final Consumer<Root> function = (Root it) -> {
       it.setSingleValuedContainmentEReference(nonRoot);
     };
-    _function.accept(uniquePersistedRoot);
-    final Consumer<Root> _function_1 = (Root it) -> {
+    function.accept(uniquePersistedRoot);
+    final Consumer<Root> function1 = (Root it) -> {
       it.setSingleValuedNonContainmentEReference(nonRoot);
     };
     final List<EChange<EObject>> result
-            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), function1);
     AtomicEChangeAssertHelper.assertEmpty(
             AtomicEChangeAssertHelper.assertSetSingleValuedEReference(
                     ChangeDescription2ChangeTransformationTest
@@ -164,25 +164,25 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     final NonRoot replaceNonRoot = AllElementTypesCreators.aet.NonRoot();
     Root uniquePersistedRoot = this.getUniquePersistedRoot();
-    final Consumer<Root> _function = (Root it) -> {
+    final Consumer<Root> function = (Root it) -> {
       it.setSingleValuedContainmentEReference(nonRoot);
       it.setSingleValuedNonContainmentEReference(nonRoot);
       NonRootObjectContainerHelper nonRootObjectContainerHelper
               = AllElementTypesCreators.aet.NonRootObjectContainerHelper();
-      final Consumer<NonRootObjectContainerHelper> _function_1
+      final Consumer<NonRootObjectContainerHelper> function1
               = (NonRootObjectContainerHelper it1) -> {
                 EList<NonRoot> nonRootObjectsContainment = it1.getNonRootObjectsContainment();
                 nonRootObjectsContainment.add(replaceNonRoot);
               };
-      _function_1.accept(nonRootObjectContainerHelper);
+      function1.accept(nonRootObjectContainerHelper);
       it.setNonRootObjectContainerHelper(nonRootObjectContainerHelper);
     };
-    _function.accept(uniquePersistedRoot);
-    final Consumer<Root> _function_1 = (Root it) -> {
+    function.accept(uniquePersistedRoot);
+    final Consumer<Root> function1 = (Root it) -> {
       it.setSingleValuedNonContainmentEReference(replaceNonRoot);
     };
     final List<EChange<EObject>> result
-            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), function1);
     AtomicEChangeAssertHelper.assertEmpty(
             AtomicEChangeAssertHelper.assertReplaceSingleValuedEReference(
                     ChangeDescription2ChangeTransformationTest
@@ -199,16 +199,16 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest
   void testRemoveNonContainmentReferenceWithDelete() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root uniquePersistedRoot = this.getUniquePersistedRoot();
-    final Consumer<Root> _function = (Root it) -> {
+    final Consumer<Root> function = (Root it) -> {
       it.setSingleValuedContainmentEReference(nonRoot);
       it.setSingleValuedNonContainmentEReference(nonRoot);
     };
-    _function.accept(uniquePersistedRoot);
-    final Consumer<Root> _function_1 = (Root it) -> {
+    function.accept(uniquePersistedRoot);
+    final Consumer<Root> function1 = (Root it) -> {
       EcoreUtil.delete(nonRoot);
     };
     final List<EChange<EObject>> result
-            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), function1);
     AtomicEChangeAssertHelper.assertEmpty(
             AtomicEChangeAssertHelper.assertUnsetSingleValuedEReference(
                     AtomicEChangeAssertHelper.assertUnsetSingleValuedEReference(
@@ -230,16 +230,16 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest
   void testReplaceExistingSingleValuedEReferenceNonContainmentWithDefault() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root uniquePersistedRoot = this.getUniquePersistedRoot();
-    final Consumer<Root> _function = (Root it) -> {
+    final Consumer<Root> function = (Root it) -> {
       it.setSingleValuedContainmentEReference(nonRoot);
       it.setSingleValuedNonContainmentEReference(nonRoot);
     };
-    _function.accept(uniquePersistedRoot);
-    final Consumer<Root> _function_1 = (Root it) -> {
+    function.accept(uniquePersistedRoot);
+    final Consumer<Root> function1 = (Root it) -> {
       it.setSingleValuedNonContainmentEReference(null);
     };
     final List<EChange<EObject>> result
-            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), function1);
     AtomicEChangeAssertHelper.assertEmpty(
             AtomicEChangeAssertHelper.assertUnsetSingleValuedEReference(
                     ChangeDescription2ChangeTransformationTest
@@ -255,16 +255,16 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest
   void testUnsetExistingSingleValuedEReferenceContainment() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root uniquePersistedRoot = this.getUniquePersistedRoot();
-    final Consumer<Root> _function = (Root it) -> {
+    final Consumer<Root> function = (Root it) -> {
       it.setSingleValuedUnsettableContainmentEReference(nonRoot);
     };
-    _function.accept(uniquePersistedRoot);
-    final Consumer<Root> _function_1 = (Root it) -> {
+    function.accept(uniquePersistedRoot);
+    final Consumer<Root> function1 = (Root it) -> {
       it.eUnset(AllElementTypesPackage
               .Literals.ROOT__SINGLE_VALUED_UNSETTABLE_CONTAINMENT_EREFERENCE);
     };
     final List<EChange<EObject>> result
-            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), function1);
     AtomicEChangeAssertHelper.assertEmpty(
             CompoundEChangeAssertHelper.assertReplaceAndDeleteNonRoot(
                     ChangeDescription2ChangeTransformationTest
@@ -279,25 +279,25 @@ public class ChangeDescription2ReplaceSingleValuedEReferenceTest
   void testUnsetReplaceExistingSingleValuedEReferenceNonContainment() {
     final NonRoot nonRoot = AllElementTypesCreators.aet.NonRoot();
     Root uniquePersistedRoot = this.getUniquePersistedRoot();
-    final Consumer<Root> _function = (Root it) -> {
+    final Consumer<Root> function = (Root it) -> {
       NonRootObjectContainerHelper nonRootObjectContainerHelper
               = AllElementTypesCreators.aet.NonRootObjectContainerHelper();
-      final Consumer<NonRootObjectContainerHelper> _function_1
+      final Consumer<NonRootObjectContainerHelper> function1
               = (NonRootObjectContainerHelper it1) -> {
                 EList<NonRoot> nonRootObjectsContainment = it1.getNonRootObjectsContainment();
                 nonRootObjectsContainment.add(nonRoot);
               };
-      _function_1.accept(nonRootObjectContainerHelper);
+      function1.accept(nonRootObjectContainerHelper);
       it.setNonRootObjectContainerHelper(nonRootObjectContainerHelper);
       it.setSingleValuedUnsettableNonContainmentEReference(nonRoot);
     };
-    _function.accept(uniquePersistedRoot);
-    final Consumer<Root> _function_1 = (Root it) -> {
+    function.accept(uniquePersistedRoot);
+    final Consumer<Root> function1 = (Root it) -> {
       it.eUnset(AllElementTypesPackage
               .Literals.ROOT__SINGLE_VALUED_UNSETTABLE_NON_CONTAINMENT_EREFERENCE);
     };
     final List<EChange<EObject>> result
-            = this.<Root>recordObject(this.getUniquePersistedRoot(), _function_1);
+            = this.<Root>recordObject(this.getUniquePersistedRoot(), function1);
     AtomicEChangeAssertHelper.assertEmpty(
             AtomicEChangeAssertHelper.assertReplaceSingleValuedEReference(
                     ChangeDescription2ChangeTransformationTest

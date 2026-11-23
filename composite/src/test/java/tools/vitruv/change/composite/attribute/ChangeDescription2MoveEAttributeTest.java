@@ -17,7 +17,7 @@ import tools.vitruv.change.composite.util.AtomicEChangeAssertHelper;
 public class ChangeDescription2MoveEAttributeTest
         extends ChangeDescription2ChangeTransformationTest {
   @Test
-  public void moveMultiValuedEAttribute() {
+  void moveMultiValuedEAttribute() {
     Root uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> function = (Root it) -> {
       EList<Integer> multiValuedEAttribute = it.getMultiValuedEAttribute();
@@ -28,11 +28,11 @@ public class ChangeDescription2MoveEAttributeTest
       multiValuedEAttribute2.add(66);
     };
     function.accept(uniquePersistedRoot);
-    final Consumer<Root> _function_1 = (Root it) -> {
+    final Consumer<Root> function1 = (Root it) -> {
       it.getMultiValuedEAttribute().move(0, 1);
     };
     final List<EChange<EObject>> result =
-            this.recordObject(this.getUniquePersistedRoot(), _function_1);
+            this.recordObject(this.getUniquePersistedRoot(), function1);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertInsertEAttribute(AtomicEChangeAssertHelper
                     .assertRemoveEAttribute(ChangeDescription2ChangeTransformationTest
@@ -45,7 +45,7 @@ public class ChangeDescription2MoveEAttributeTest
   }
 
   @Test
-  public void moveMultiValuedUnsettableEAttribute() {
+  void moveMultiValuedUnsettableEAttribute() {
     Root uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> function = (Root it) -> {
       EList<Integer> multiValuedUnsettableEAttribute = it.getMultiValuedUnsettableEAttribute();
@@ -56,11 +56,11 @@ public class ChangeDescription2MoveEAttributeTest
       multiValuedUnsettableEAttribute2.add(66);
     };
     function.accept(uniquePersistedRoot);
-    final Consumer<Root> _function_1 = (Root it) -> {
+    final Consumer<Root> function1 = (Root it) -> {
       it.getMultiValuedUnsettableEAttribute().move(0, 1);
     };
     final List<EChange<EObject>> result =
-            this.recordObject(this.getUniquePersistedRoot(), _function_1);
+            this.recordObject(this.getUniquePersistedRoot(), function1);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertInsertEAttribute(
                     AtomicEChangeAssertHelper.assertRemoveEAttribute(
@@ -75,7 +75,7 @@ public class ChangeDescription2MoveEAttributeTest
   }
 
   @Test
-  public void moveMultiValuedUnorderedEAttribute() {
+  void moveMultiValuedUnorderedEAttribute() {
     Root uniquePersistedRoot = this.getUniquePersistedRoot();
     final Consumer<Root> function = (Root it) -> {
       EList<Integer> multiValuedUnorderedEAttribute = it.getMultiValuedUnorderedEAttribute();

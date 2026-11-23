@@ -20,7 +20,7 @@ public class ChangeDescription2InsertEAttributeValueTest extends
         ChangeDescription2ChangeTransformationTest {
 
   @Test
-  public void testInsertEAttributeValue() {
+  void testInsertEAttributeValue() {
     this.testInsertEAttributeValue(42);
   }
 
@@ -28,11 +28,11 @@ public class ChangeDescription2InsertEAttributeValueTest extends
                                  final int expectedValue,
                                  final int position) {
     this.getUniquePersistedRoot();
-    final Consumer<Root> _function = (Root it) -> {
+    final Consumer<Root> function = (Root it) -> {
       it.getMultiValuedEAttribute().add(position, expectedValue);
     };
     final List<EChange<EObject>> result =
-            this.recordObject(this.getUniquePersistedRoot(), _function);
+            this.recordObject(this.getUniquePersistedRoot(), function);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
             .assertInsertEAttribute(ChangeDescription2ChangeTransformationTest
                             .assertChangeCount(result, 1),
@@ -42,12 +42,12 @@ public class ChangeDescription2InsertEAttributeValueTest extends
 
   void testInsertEAttributeValue(final int expectedValue) {
     this.getUniquePersistedRoot();
-    final Consumer<Root> _function = (Root it) -> {
+    final Consumer<Root> function = (Root it) -> {
       EList<Integer> multiValuedEAttribute = it.getMultiValuedEAttribute();
       multiValuedEAttribute.add(expectedValue);
     };
     final List<EChange<EObject>> result =
-            this.recordObject(this.getUniquePersistedRoot(), _function);
+            this.recordObject(this.getUniquePersistedRoot(), function);
     int size = this.getUniquePersistedRoot().getMultiValuedEAttribute().size();
     final int index = (size - 1);
     AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
@@ -75,18 +75,18 @@ public class ChangeDescription2InsertEAttributeValueTest extends
   void testTreeInsertMultiValuedEAttribute() {
     this.getUniquePersistedRoot();
     final Root innerRoot = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function = (Root it) -> {
+    final Consumer<Root> function = (Root it) -> {
       EList<Integer> multiValuedEAttribute = it.getMultiValuedEAttribute();
       multiValuedEAttribute.add(1);
       EList<Integer> multiValuedEAttribute1 = it.getMultiValuedEAttribute();
       multiValuedEAttribute1.add(2);
     };
-    _function.accept(innerRoot);
-    final Consumer<Root> _function_1 = (Root it) -> {
+    function.accept(innerRoot);
+    final Consumer<Root> function1 = (Root it) -> {
       it.setRecursiveRoot(innerRoot);
     };
     final List<EChange<EObject>> result =
-            this.recordObject(this.getUniquePersistedRoot(), _function_1);
+            this.recordObject(this.getUniquePersistedRoot(), function1);
     AtomicEChangeAssertHelper
             .assertEmpty(AtomicEChangeAssertHelper
             .assertInsertEAttribute(AtomicEChangeAssertHelper
@@ -109,7 +109,7 @@ public class ChangeDescription2InsertEAttributeValueTest extends
   @Test
   void testInsertEAttributeValueSequence() {
     this.getUniquePersistedRoot();
-    final Consumer<Root> _function = (Root it) -> {
+    final Consumer<Root> function = (Root it) -> {
       EList<Integer> multiValuedEAttribute = it.getMultiValuedEAttribute();
       multiValuedEAttribute.add(42);
       EList<Integer> multiValuedEAttribute1 = it.getMultiValuedEAttribute();
@@ -118,7 +118,7 @@ public class ChangeDescription2InsertEAttributeValueTest extends
       multiValuedEAttribute2.add(66);
     };
     final List<EChange<EObject>> result = this.recordObject(
-            this.getUniquePersistedRoot(), _function);
+            this.getUniquePersistedRoot(), function);
     AtomicEChangeAssertHelper
             .assertEmpty(AtomicEChangeAssertHelper
             .assertInsertEAttribute(AtomicEChangeAssertHelper

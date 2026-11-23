@@ -26,11 +26,11 @@ public class ChangeDescription2MoveRootTest extends ChangeDescription2ChangeTran
     EList<EObject> contents = resource1.getContents();
     contents.add(root);
     final Consumer<ResourceSet> _function = (ResourceSet it) -> {
-      final Consumer<Resource> _function_1 = (Resource it1) -> {
+      final Consumer<Resource> function1 = (Resource it1) -> {
         EList<EObject> contents1 = it1.getContents();
         contents1.add(root);
       };
-      _function_1.accept(resource2);
+      function1.accept(resource2);
     };
     final List<EChange<EObject>> result
             = this.recordObject(resource1.getResourceSet(), _function);
@@ -56,9 +56,9 @@ public class ChangeDescription2MoveRootTest extends ChangeDescription2ChangeTran
     };
     _function.accept(resource);
     final URI originalUri = resource.getURI();
-    final Consumer<Resource> _function_1
+    final Consumer<Resource> function1
             = (Resource it) -> it.setURI(this.getUri(changedResourceName + ".xmi"));
-    final List<EChange<EObject>> result = this.recordObject(resource, _function_1);
+    final List<EChange<EObject>> result = this.recordObject(resource, function1);
     final boolean isDelete = false;
     final boolean isCreate = false;
     AtomicEChangeAssertHelper.assertEmpty(

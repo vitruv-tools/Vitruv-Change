@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
@@ -40,7 +41,7 @@ final class NotificationToEChangeConverter {
   private final TypeInferringAtomicEChangeFactory changeFactory =
           TypeInferringAtomicEChangeFactory.getInstance();
 
-  private final BiFunction<EObject, EObject, Boolean> isCreateChange;
+  private final BiPredicate<EObject, EObject> isCreateChange;
 
   public EChange<EObject> createDeleteChange(final EObject eObject) {
     return this.changeFactory.createDeleteEObjectChange(eObject);
@@ -594,36 +595,36 @@ final class NotificationToEChangeConverter {
 
   private Iterable<? extends EChange<EObject>> allAdditiveChangesForChangeRelevantFeatures(
       final EObjectAddedEChange<EObject> change) {
-    final BiFunction<EObject, EAttribute, Iterable<? extends EChange<EObject>>> _function =
+    final BiFunction<EObject, EAttribute, Iterable<? extends EChange<EObject>>> function =
             EChangeCreationUtil::createAdditiveEChangeForAttribute;
-    final BiFunction<EObject, EReference, Iterable<? extends EChange<EObject>>> _function_1 =
+    final BiFunction<EObject, EReference, Iterable<? extends EChange<EObject>>> function1 =
             (EObject object, EReference reference) -> {
               List<? extends EChange<EObject>> xifexpression = null;
               boolean isContainment = reference.isContainment();
               if (isContainment) {
-                final Predicate<EObject> _function_2 = (EObject referencedObject) ->
-                        this.isCreateChange.apply(object, referencedObject);
+                final Predicate<EObject> function2 = (EObject referencedObject) ->
+                        this.isCreateChange.test(object, referencedObject);
                 xifexpression = EChangeCreationUtil
-                        .createAdditiveEChangeForReferencedObject(object, reference, _function_2);
+                        .createAdditiveEChangeForReferencedObject(object, reference, function2);
               }
               return xifexpression;
             };
     Iterable<? extends EChange<EObject>> walkChangeRelevantFeatures = NotificationToEChangeConverter
-        .walkChangeRelevantFeatures(change.getNewValue(), _function, _function_1);
-    final BiFunction<EObject, EReference, Iterable<? extends EChange<EObject>>> _function_2 =
+        .walkChangeRelevantFeatures(change.getNewValue(), function, function1);
+    final BiFunction<EObject, EReference, Iterable<? extends EChange<EObject>>> function2 =
             (EObject object, EReference reference) -> {
               List<? extends EChange<EObject>> xifexpression = null;
               boolean isContainment = reference.isContainment();
               if (!isContainment) {
-                final Predicate<EObject> _function_3 = (EObject it) -> Boolean.FALSE;
+                final Predicate<EObject> function3 = (EObject it) -> Boolean.FALSE;
                 xifexpression = EChangeCreationUtil
-                        .createAdditiveEChangeForReferencedObject(object, reference, _function_3);
+                        .createAdditiveEChangeForReferencedObject(object, reference, function3);
               }
               return xifexpression;
             };
     Iterable<? extends EChange<EObject>> walkChangeRelevantFeatures1 =
             NotificationToEChangeConverter
-                    .walkChangeRelevantFeatures(change.getNewValue(), null, _function_2);
+                    .walkChangeRelevantFeatures(change.getNewValue(), null, function2);
     return Iterables.concat(walkChangeRelevantFeatures, walkChangeRelevantFeatures1);
   }
 
@@ -693,45 +694,36 @@ final class NotificationToEChangeConverter {
 
   private List<UnsetFeature<EObject, EStructuralFeature>> unsetChangeOrEmpty(
           final NotificationInfo notification) {
-    List<UnsetFeature<EObject, EStructuralFeature>> xifexpression = null;
     if (notification.wasUnset()) {
-      xifexpression = List.of(
+      return List.of(
           this.changeFactory.createUnsetFeatureChange(
               notification.getNotifierModelElement(), notification.getStructuralFeature()));
-    } else {
-      xifexpression = List.of();
     }
-    return xifexpression;
+    return List.of();
   }
 
   private <T extends EChange<EObject>> Iterable<?
           extends EChange<EObject>> addUnsetChangeIfNecessary(
       final Iterable<T> changes,
       final NotificationInfo notification) {
-    Iterable<? extends EChange<EObject>> xifexpression;
     if (notification.wasUnset()) {
       List<UnsetFeature<EObject, EStructuralFeature>> of = List.of(
           this.changeFactory.<EObject, EStructuralFeature>createUnsetFeatureChange(
               notification.getNotifierModelElement(), notification.getStructuralFeature()));
-      xifexpression = Iterables.<EChange<EObject>>concat(changes, of);
-    } else {
-      xifexpression = changes;
+      return Iterables.<EChange<EObject>>concat(changes, of);
     }
-    return xifexpression;
+    return changes;
   }
 
   private List<EChange<EObject>> addUnsetChangeIfNecessary(
           final EChange<EObject> change,
       final NotificationInfo notification) {
-    List<EChange<EObject>> xifexpression;
     if (notification.wasUnset()) {
-      xifexpression = List.of(change,
+      return List.of(change,
           this.changeFactory.createUnsetFeatureChange(
               notification.getNotifierModelElement(), notification.getStructuralFeature()));
-    } else {
-      xifexpression = List.of(change);
     }
-    return xifexpression;
+    return List.of(change);
   }
 
   private Iterable<? extends EChange<EObject>> surroundWithCreateAndFeatureChangesIfNecessary(
@@ -741,28 +733,19 @@ final class NotificationToEChangeConverter {
       switchResult = ((UpdateReferenceEChange<EObject>) change).getAffectedElement();
     }
     final EObject affectedElement = switchResult;
-    Iterable<? extends EChange<EObject>> xifexpression;
-    Boolean apply = this.isCreateChange.apply(affectedElement, change.getNewValue());
-    if (apply) {
-      Iterable<EChange<EObject>> xblockexpression;
+    if (Boolean.TRUE.equals(this.isCreateChange.test(affectedElement, change.getNewValue()))) {
       final CreateEObject<EObject> createChange = this.changeFactory
               .createCreateEObjectChange(change.getNewValue());
       List<EChange<EObject>> of = List.of(createChange, change);
       Iterable<? extends EChange<EObject>> allAdditiveChangesForChangeRelevantFeatures =
               this.allAdditiveChangesForChangeRelevantFeatures(change);
-      xblockexpression = Iterables.concat(
-              of,
-              allAdditiveChangesForChangeRelevantFeatures);
-
-      xifexpression = xblockexpression;
-    } else {
-      xifexpression = List.<EObjectAddedEChange<EObject>>of(change);
+      return Iterables.concat(of, allAdditiveChangesForChangeRelevantFeatures);
     }
-    return xifexpression;
+    return List.<EObjectAddedEChange<EObject>>of(change);
   }
 
   public NotificationToEChangeConverter(
-          final BiFunction<EObject, EObject, Boolean> isCreateChange) {
+          final BiPredicate<EObject, EObject> isCreateChange) {
     super();
     this.isCreateChange = isCreateChange;
   }

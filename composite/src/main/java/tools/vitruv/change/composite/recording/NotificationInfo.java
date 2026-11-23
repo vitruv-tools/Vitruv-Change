@@ -57,7 +57,7 @@ class NotificationInfo implements Notification {
    */
   public EStructuralFeature getStructuralFeature() {
     final Object feature = getFeature();
-    return feature instanceof EStructuralFeature ? (EStructuralFeature) feature : null;
+    return feature instanceof EStructuralFeature eStructuralFeature ? eStructuralFeature : null;
   }
 
   public boolean isStructuralFeatureNotification() {
@@ -92,7 +92,7 @@ class NotificationInfo implements Notification {
    */
   public EAttribute getAttribute() {
     final Object feature = this.getFeature();
-    return feature instanceof  EAttribute ? (EAttribute) feature : null;
+    return feature instanceof  EAttribute eAttribute ? eAttribute : null;
   }
 
   /**
@@ -103,7 +103,7 @@ class NotificationInfo implements Notification {
    */
   public EReference getReference() {
     final Object feature = this.getFeature();
-    return feature instanceof EReference ? (EReference) feature : null;
+    return feature instanceof EReference eReference ? eReference : null;
   }
 
   /**
@@ -221,8 +221,7 @@ class NotificationInfo implements Notification {
    * @see Notification#getNewValue()
    */
   public EObject getNewModelElementValue() {
-    Object newValue = this.notification.getNewValue();
-    return ((EObject) newValue);
+    return ((EObject) this.notification.getNewValue());
   }
 
   /**
@@ -237,15 +236,11 @@ class NotificationInfo implements Notification {
   }
 
   public int getInitialIndex() {
-    int xifexpression;
     int position = this.getPosition();
-    boolean tripleEquals = (position == Notification.NO_INDEX);
-    if (tripleEquals) {
-      xifexpression = 0;
-    } else {
-      xifexpression = this.getPosition();
+    if (position == Notification.NO_INDEX) {
+      return 0;
     }
-    return xifexpression;
+    return position;
   }
 
   /**

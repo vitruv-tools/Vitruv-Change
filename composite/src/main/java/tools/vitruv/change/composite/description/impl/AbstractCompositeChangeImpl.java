@@ -29,13 +29,13 @@ import tools.vitruv.change.interaction.UserInteractionBase;
  * changes in order. Annotations are stored per composite change and are not
  * passed on to the contained changes.
  *
- * @param <Element> the type of elements referenced by the changes
- * @param <ContainedChange> the type of changes contained in this composite change
+ * @param <E> the type of elements referenced by the changes
+ * @param <C> the type of changes contained in this composite change
  */
-public abstract class AbstractCompositeChangeImpl<Element,
-        ContainedChange extends VitruviusChange<Element>> implements CompositeChange<Element,
-        ContainedChange> {
-  private final List<ContainedChange> changes;
+public abstract class AbstractCompositeChangeImpl<E,
+        C extends VitruviusChange<E>> implements CompositeChange<E,
+        C> {
+  private final List<C> changes;
   protected final Map<Class<?>, Object> annotations = new HashMap<>();
 
   /**
@@ -46,12 +46,12 @@ public abstract class AbstractCompositeChangeImpl<Element,
    * @param changes the changes to contain, in order; must not be {@code null}
    *     and must not contain {@code null} elements
    */
-  protected AbstractCompositeChangeImpl(final List<? extends ContainedChange> changes) {
+  protected AbstractCompositeChangeImpl(final List<? extends C> changes) {
     this.changes = List.copyOf(changes);
   }
 
   @Override
-  public List<ContainedChange> getChanges() {
+  public List<C> getChanges() {
     return this.changes;
   }
 
@@ -63,7 +63,7 @@ public abstract class AbstractCompositeChangeImpl<Element,
   @Override
   public Set<URI> getChangedURIs() {
     LinkedHashSet<URI> result = new LinkedHashSet<>();
-    for (ContainedChange it : this.changes) {
+    for (C it : this.changes) {
       result.addAll(it.getChangedURIs());
     }
     return result;
@@ -72,16 +72,16 @@ public abstract class AbstractCompositeChangeImpl<Element,
   @Override
   public Set<MetamodelDescriptor> getAffectedEObjectsMetamodelDescriptors() {
     HashSet<MetamodelDescriptor> result = new HashSet<>();
-    for (ContainedChange it : this.changes) {
+    for (C it : this.changes) {
       result.addAll(it.getAffectedEObjectsMetamodelDescriptors());
     }
     return result;
   }
 
   @Override
-  public List<EChange<Element>> getEChanges() {
-    List<EChange<Element>> result = new ArrayList<>();
-    for (ContainedChange it : this.changes) {
+  public List<EChange<E>> getEChanges() {
+    List<EChange<E>> result = new ArrayList<>();
+    for (C it : this.changes) {
       result.addAll(it.getEChanges());
     }
     return result;
@@ -90,7 +90,7 @@ public abstract class AbstractCompositeChangeImpl<Element,
   @Override
   public Set<EObject> getAffectedEObjects() {
     LinkedHashSet<EObject> result = new LinkedHashSet<>();
-    for (ContainedChange it : this.changes) {
+    for (C it : this.changes) {
       result.addAll(it.getAffectedEObjects());
     }
     return result;
@@ -99,7 +99,7 @@ public abstract class AbstractCompositeChangeImpl<Element,
   @Override
   public Set<EObject> getAffectedAndReferencedEObjects() {
     LinkedHashSet<EObject> result = new LinkedHashSet<>();
-    for (ContainedChange it : this.changes) {
+    for (C it : this.changes) {
       result.addAll(it.getAffectedAndReferencedEObjects());
     }
     return result;
@@ -108,7 +108,7 @@ public abstract class AbstractCompositeChangeImpl<Element,
   @Override
   public Iterable<UserInteractionBase> getUserInteractions() {
     List<UserInteractionBase> result = new ArrayList<>();
-    for (ContainedChange it : this.changes) {
+    for (C it : this.changes) {
       it.getUserInteractions().forEach(result::add);
     }
     return result;
@@ -130,7 +130,7 @@ public abstract class AbstractCompositeChangeImpl<Element,
   }
 
   @Override
-  public Iterable<TransactionalChange<Element>> getTransactionalChangeSequence() {
+  public Iterable<TransactionalChange<E>> getTransactionalChangeSequence() {
     return changes.stream()
             .flatMap(it ->
                     StreamSupport.stream(it.getTransactionalChangeSequence().spliterator(), false))
@@ -144,7 +144,7 @@ public abstract class AbstractCompositeChangeImpl<Element,
     } else {
       StringBuilder builder = new StringBuilder();
       builder.append(this.getClass().getSimpleName()).append(": [").append(System.lineSeparator());
-      for (ContainedChange change : this.changes) {
+      for (C change : this.changes) {
         builder.append("\t").append(change).append(System.lineSeparator());
       }
       builder.append("]").append(System.lineSeparator());
@@ -170,8 +170,9 @@ public abstract class AbstractCompositeChangeImpl<Element,
       return false;
     }
     if (other instanceof CompositeChange<?, ?>) {
-      List<? extends VitruviusChange<?>> changes = ((CompositeChange<?, ?>) other).getChanges();
-      return Objects.equals(this.changes, changes);
+      List<? extends VitruviusChange<?>> vitruviusChanges =
+              ((CompositeChange<?, ?>) other).getChanges();
+      return Objects.equals(this.changes, vitruviusChanges);
     }
     return false;
   }
