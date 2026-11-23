@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
+
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.Notifier;
@@ -189,17 +191,12 @@ public class ChangeRecorder implements AutoCloseable {
 
     private void finishLoadingResource(final Resource resource) {
       this.currentlyLoadingResources.remove(resource);
-      final Function<Notifier, Boolean> _function = (Notifier it) -> {
-        boolean xblockexpression = false;
-        {
-          if ((it instanceof EObject)) {
-            this.outer.existingObjects.add(((EObject) it));
-          }
-          xblockexpression = this.outer.addAdapter(it);
+      ChangeRecorder.recursively(resource, it -> {
+        if (it instanceof EObject eObject) {
+          this.outer.existingObjects.add(eObject);
         }
-        return xblockexpression;
-      };
-      ChangeRecorder.recursively(resource, _function);
+        return this.outer.addAdapter(it);
+      });
     }
 
     private boolean affectsLoadingResource(final Notification notification) {
@@ -238,7 +235,7 @@ public class ChangeRecorder implements AutoCloseable {
 
     private void infect(final Object newValue) {
       if (newValue != null) {
-        final Function<Notifier, Boolean> _function = (Notifier it) -> {
+        final Predicate<Notifier> _function = (Notifier it) -> {
           boolean xblockexpression = false;
           this.outer.toDesinfect.remove(it);
           xblockexpression = this.outer.addAdapter(it);
@@ -248,12 +245,10 @@ public class ChangeRecorder implements AutoCloseable {
       }
     }
 
-    private boolean desinfect(final Object oldValue) {
-      boolean xifexpression = false;
-      if ((oldValue instanceof Notifier)) {
-        xifexpression = this.outer.toDesinfect.add(((Notifier) oldValue));
+    private void desinfect(final Object oldValue) {
+      if (oldValue instanceof Notifier notifier) {
+        this.outer.toDesinfect.add(notifier);
       }
-      return xifexpression;
     }
 
     @Override
@@ -304,8 +299,7 @@ public class ChangeRecorder implements AutoCloseable {
 
   public ChangeRecorder(final ResourceSet resourceSet) {
     this.resourceSet = resourceSet;
-    final BiFunction<EObject, EObject, Boolean> _function = this::isCreateChange;
-    this.converter = new NotificationToEChangeConverter(_function);
+    this.converter = new NotificationToEChangeConverter(this::isCreateChange);
   }
 
   private boolean isCreateChange(final EObject affectedObject, final EObject addedObject) {
@@ -332,15 +326,12 @@ public class ChangeRecorder implements AutoCloseable {
             "cannot record changes in a different resource set!");
     boolean add = this.rootObjects.add(notifier);
     if (add) {
-      final Function<Notifier, Boolean> _function = (Notifier it) -> {
-        boolean xblockexpression = false;
-        if ((it instanceof EObject)) {
-          this.existingObjects.add(((EObject) it));
+      ChangeRecorder.recursively(notifier, it -> {
+        if (it instanceof EObject eObject) {
+          this.existingObjects.add(eObject);
         }
-        xblockexpression = this.addAdapter(it);
-        return xblockexpression;
-      };
-      ChangeRecorder.recursively(notifier, _function);
+        return this.addAdapter(it);
+      });
     }
   }
 
@@ -354,7 +345,7 @@ public class ChangeRecorder implements AutoCloseable {
     this.checkNotDisposed();
     Preconditions.<Notifier>checkNotNull(notifier, "notifier");
     this.rootObjects.remove(notifier);
-    final Function<Notifier, Boolean> _function = this::removeAdapter;
+    final Predicate<Notifier> _function = this::removeAdapter;
     ChangeRecorder.recursively(notifier, _function);
   }
 
@@ -391,8 +382,8 @@ public class ChangeRecorder implements AutoCloseable {
     this.rootObjects.clear();
     this.existingObjects.clear();
     final Consumer<Notifier> _function = (Notifier it) -> {
-      final Function<Notifier, Boolean> _function_1 = this::removeAdapter;
-      ChangeRecorder.recursively(it, _function_1);
+      final Predicate<Notifier> function1 = this::removeAdapter;
+      ChangeRecorder.recursively(it, function1);
     };
     rootCopy.forEach(_function);
   }
@@ -548,35 +539,25 @@ public class ChangeRecorder implements AutoCloseable {
   }
 
   private static void recursivelyAction(final ResourceSet resourceSet,
-                                        final Function<Notifier, Boolean> action) {
-    Boolean apply = action.apply(resourceSet);
-    if (apply) {
-      final Consumer<Resource> _function = (Resource it) -> {
-        ChangeRecorder.recursively(it, action);
-      };
-      resourceSet.getResources().forEach(_function);
+                                        final Predicate<Notifier> action) {
+    if (action.test(resourceSet)) {
+      resourceSet.getResources().forEach(resource -> ChangeRecorder.recursively(resource, action));
     }
   }
 
   private static void recursivelyAction(final Resource resource,
-                                        final Function<Notifier, Boolean> action) {
-    Boolean apply = action.apply(resource);
-    if (apply) {
-      final Consumer<EObject> _function = (EObject it) -> {
-        ChangeRecorder.recursively(it, action);
-      };
-      resource.getContents().forEach(_function);
+                                        final Predicate<Notifier> action) {
+    if (action.test(resource)) {
+      resource.getContents().forEach(eObject -> ChangeRecorder.recursively(eObject, action));
     }
   }
 
   private static void recursivelyAction(final EObject object,
-                                        final Function<Notifier, Boolean> action) {
-    Boolean apply = action.apply(object);
-    if (apply) {
-      for (final TreeIterator<Notifier> properContents = EcoreUtil
-              .getAllProperContents(object, true); properContents.hasNext();) {
-        Boolean apply1 = action.apply(properContents.next());
-        if (!apply1) {
+                                        final Predicate<Notifier> action) {
+    if (action.test(object)) {
+      for (final TreeIterator<Notifier> properContents =
+           EcoreUtil.getAllProperContents(object, true); properContents.hasNext();) {
+        if (!action.test(properContents.next())) {
           properContents.prune();
         }
       }
@@ -630,6 +611,7 @@ public class ChangeRecorder implements AutoCloseable {
         return Objects.equals(notifier, this.resourceSet);
       }
       default -> {
+        //default
       }
     }
     String simpleName = notifier.getClass().getSimpleName();
@@ -637,7 +619,7 @@ public class ChangeRecorder implements AutoCloseable {
     throw new IllegalStateException(message);
   }
 
-  private static void recursively(final Notifier object, final Function<Notifier, Boolean> action) {
+  private static void recursively(final Notifier object, final Predicate<Notifier> action) {
     switch (object) {
       case EObject eObject when action != null -> recursivelyAction(eObject, action);
       case Resource resource when action != null -> recursivelyAction(resource, action);
