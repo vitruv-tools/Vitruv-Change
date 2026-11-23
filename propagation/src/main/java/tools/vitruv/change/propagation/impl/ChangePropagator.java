@@ -9,7 +9,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -225,8 +224,9 @@ public class ChangePropagator {
             !this.outer.modelRepository.getCorrespondenceModel().hasCorrespondences(createdObjectWithoutResource),
             "The object %s is part of a correspondence to %s but not in any resource", createdObjectWithoutResource,
             this.outer.modelRepository.getCorrespondenceModel().getCorrespondingEObjects(createdObjectWithoutResource));
-        ChangePropagator.logger.warn("Object was created but has no correspondence and is thus lost: "
-            + createdObjectWithoutResource);
+        ChangePropagator.logger.warn(
+            "Object was created but has no correspondence and is thus lost: {}",
+            createdObjectWithoutResource);
       }
     }
 
@@ -264,7 +264,14 @@ public class ChangePropagator {
       }
     }
 
-    public ChangePropagation(final ChangePropagator outer, final TransactionalChangeWithPreviousState sourceChange, final int level, final Function<TransactionalChangeWithPreviousState, PropagationResult> lowerLevelPropagation, final ChangePropagator.ChangePropagation previous, final PropagationRun run) {
+    public ChangePropagation(
+        final ChangePropagator outer,
+        final TransactionalChangeWithPreviousState sourceChange,
+        final int level,
+        final Function<TransactionalChangeWithPreviousState, PropagationResult>
+            lowerLevelPropagation,
+        final ChangePropagator.ChangePropagation previous,
+        final PropagationRun run) {
       super();
       this.outer = outer;
       this.sourceChange = sourceChange;
@@ -295,7 +302,10 @@ public class ChangePropagator {
    * propagated transitively and cyclic, i.e. with
    * {@link ChangePropagationMode#TRANSITIVE_CYCLIC}.
    */
-  public ChangePropagator(final ChangeRecordingModelRepository modelRepository, final ChangePropagationSpecificationProvider changePropagationProvider, final InternalUserInteractor userInteractor) {
+  public ChangePropagator(
+      final ChangeRecordingModelRepository modelRepository,
+      final ChangePropagationSpecificationProvider changePropagationProvider,
+      final InternalUserInteractor userInteractor) {
     this(modelRepository, changePropagationProvider, userInteractor, ChangePropagationMode.TRANSITIVE_CYCLIC);
   }
 
@@ -306,7 +316,11 @@ public class ChangePropagator {
    * Changes are recorded in the given <code>modelRepository</code> and
    * propagated using the given <code>mode</code>.
    */
-  public ChangePropagator(final ChangeRecordingModelRepository modelRepository, final ChangePropagationSpecificationProvider changePropagationProvider, final InternalUserInteractor userInteractor, final ChangePropagationMode mode) {
+  public ChangePropagator(
+      final ChangeRecordingModelRepository modelRepository,
+      final ChangePropagationSpecificationProvider changePropagationProvider,
+      final InternalUserInteractor userInteractor,
+      final ChangePropagationMode mode) {
     this(modelRepository, changePropagationProvider, userInteractor, mode,
         new DefaultEChangeApplicationController());
   }
@@ -346,9 +360,11 @@ public class ChangePropagator {
    * @return - the {@link PropagationReport} with the propagated changes and the
    *     {@link ChangePropagationResult} of the run
    */
-  public PropagationReport propagateChangeWithResult(final VitruviusChange<Uuid> change, final Iterable<ChangePropagationObserver> observers) {
+  public PropagationReport propagateChangeWithResult(
+      final VitruviusChange<Uuid> change,
+      final Iterable<ChangePropagationObserver> observers) {
     if (ChangePropagator.logger.isTraceEnabled()) {
-      ChangePropagator.logger.trace("Will begin propagation of change :\n\t" + change);
+      ChangePropagator.logger.trace("Will begin propagation of change :\n\t {}", change);
     }
 
     this.changePropagationProvider.forEach(spec -> observers.forEach(spec::registerObserver));

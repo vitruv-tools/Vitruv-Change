@@ -79,11 +79,13 @@ class ChangePropagationResultTest {
     List<ChangePropagationInvocation> invocations = new ArrayList<>(List.of(succeeded(executed1)));
 
     var result = new ChangePropagationResult(invocations);
-    invocations.add(succeeded(executed2));
+    ChangePropagationInvocation asSucceeded = succeeded(executed2);
+    invocations.add(asSucceeded);
 
-    assertEquals(1, result.invocations().size());
+    List<ChangePropagationInvocation> actualInvocations = result.invocations();
+    assertEquals(1, actualInvocations.size());
     assertThrows(UnsupportedOperationException.class,
-        () -> result.invocations().add(succeeded(executed2)));
+        () -> actualInvocations.add(asSucceeded));
   }
 
   @Test
