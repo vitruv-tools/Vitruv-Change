@@ -33,7 +33,14 @@ import tools.vitruv.change.correspondence.CorrespondenceFactory;
 import tools.vitruv.change.correspondence.Correspondences;
 import tools.vitruv.change.utils.StreamUtils;
 
-/** A persistable representation of a {@link CorrespondenceModel}. */
+/**
+ * A persistable representation of a {@link CorrespondenceModel}.
+ *
+ * <p>The model can be used by several threads at once, for example by concurrent change
+ * propagations of one virtual model: all operations are synchronized on the model, as the
+ * correspondences are kept in one list and indexed in shared maps, which even changes of unrelated
+ * correspondences modify.
+ */
 class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceModel {
   private static final Logger logger =
       LogManager.getLogger(PersistableCorrespondenceModelImpl.class);
@@ -79,7 +86,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   @Override
-  public void loadSerializedCorrespondences(ResourceSet resolveIn) {
+  public synchronized void loadSerializedCorrespondences(ResourceSet resolveIn) {
     checkState(
         correspondencesResource != null,
         "Correspondences resource must be specified to load existing correspondences");
@@ -123,7 +130,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
    * not be written by anything else, such as a {@link #copy copy} of this model.
    */
   @Override
-  public void save() {
+  public synchronized void save() {
     removeCorrespondencesForRemovedElements();
     if (this.correspondencesResource == null || isWrittenAsIs()) {
       return;
@@ -224,7 +231,8 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   @Override
-  public PersistableCorrespondenceModel copy(Map<EObject, EObject> originalToCopyMapping) {
+  public synchronized PersistableCorrespondenceModel copy(
+      Map<EObject, EObject> originalToCopyMapping) {
     Correspondences copiedCorrespondences = EcoreUtil.copy(this.correspondences);
 
     for (int index = 0; index < copiedCorrespondences.getCorrespondences().size(); index++) {
@@ -250,7 +258,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   @Override
-  public <C extends Correspondence> C addCorrespondenceBetween(
+  public synchronized <C extends Correspondence> C addCorrespondenceBetween(
       List<EObject> firstEObjects,
       List<EObject> secondEObjects,
       String tag,
@@ -264,12 +272,12 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   @Override
-  public List<Correspondence> getCorrespondenceList() {
+  public synchronized List<Correspondence> getCorrespondenceList() {
     return correspondences.getCorrespondences();
   }
 
   @Override
-  public void writeTo(OutputStream outputStream) throws IOException {
+  public synchronized void writeTo(OutputStream outputStream) throws IOException {
     checkState(
         correspondencesResource != null,
         "Correspondences resource must be specified to write the correspondences");
@@ -280,7 +288,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   @Override
-  public void removeCorrespondencesForRemovedElements() {
+  public synchronized void removeCorrespondencesForRemovedElements() {
     List<Correspondence> staleCorrespondences = new ArrayList<>();
     List<Integer> staleIndices = new ArrayList<>();
     List<Correspondence> list = correspondences.getCorrespondences();
@@ -361,7 +369,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   @Override
-  public <C extends Correspondence> Set<C> removeCorrespondencesBetween(
+  public synchronized <C extends Correspondence> Set<C> removeCorrespondencesBetween(
       Class<C> correspondenceType, List<EObject> aEObjects, List<EObject> bEObjects, String tag) {
     Set<Correspondence> correspondencesBetween = getCorrespondencesBetween(aEObjects, bEObjects);
     Set<C> correspondencesToRemove =
@@ -421,7 +429,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   @Override
-  public Set<List<EObject>> getCorrespondingEObjects(
+  public synchronized Set<List<EObject>> getCorrespondingEObjects(
       Class<? extends Correspondence> correspondenceType, List<EObject> eObjects, String tag) {
     Set<Correspondence> objectsCorrespondences = getCorrespondences(eObjects);
     Set<? extends Correspondence> properlyTaggedAndTypedCorrespondences =
@@ -430,12 +438,12 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   @Override
-  public boolean hasCorrespondences(List<EObject> eObjects) {
+  public synchronized boolean hasCorrespondences(List<EObject> eObjects) {
     return !this.getCorrespondences(eObjects).isEmpty();
   }
 
   @Override
-  public Set<EObject> getAllEObjectsInACorrespondence() {
+  public synchronized Set<EObject> getAllEObjectsInACorrespondence() {
     Set<EObject> allCorrespondences = HashSet.newHashSet(
         correspondences.getCorrespondences().size());
     for (var correspondence : correspondences.getCorrespondences()) {
@@ -446,7 +454,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   @Override
-  public Set<String> getAllTags() {
+  public synchronized Set<String> getAllTags() {
     return this.correspondences.getCorrespondences()
         .stream()
         .map(Correspondence::getTag)
@@ -455,7 +463,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   @Override
-  public Map<String, Set<EObject>> getCorrespondingEObjectsWithTag(
+  public synchronized Map<String, Set<EObject>> getCorrespondingEObjectsWithTag(
       List<EObject> sourceEObjects, Class<? extends Correspondence> correspondenceType) {
     // Extract correspondences
     Set<Correspondence> correspondencesForSource = getCorrespondences(sourceEObjects);
@@ -480,7 +488,7 @@ class PersistableCorrespondenceModelImpl implements PersistableCorrespondenceMod
   }
 
   @Override
-  public void close() throws Exception {
+  public synchronized void close() throws Exception {
     if (correspondencesResource != null) {
       correspondencesResource.unload();
     }
