@@ -1,7 +1,10 @@
 package tools.vitruv.change.propagation.impl;
 
+import com.google.common.collect.Streams;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
@@ -13,8 +16,11 @@ import tools.vitruv.change.composite.description.AnnotationSource;
 import tools.vitruv.change.correspondence.Correspondence;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.change.interaction.UserInteractor;
+import tools.vitruv.change.propagation.ChangePropagationInvocation;
 import tools.vitruv.change.propagation.ChangePropagationObserver;
 import tools.vitruv.change.propagation.ChangePropagationSpecification;
+import tools.vitruv.change.propagation.ChangePropagationStatus;
+import tools.vitruv.change.propagation.EChangeApplicationController;
 import tools.vitruv.change.utils.ResourceAccess;
 
 /**
@@ -64,6 +70,7 @@ public class CompositeChangePropagationSpecification
     assertMetamodelsCompatible(changePreprocessor);
     changePreprocessors.add(changePreprocessor);
     changePreprocessor.setUserInteractor(this.getUserInteractor());
+    changePreprocessor.setEChangeApplicationController(applicationController);
     changePreprocessor.registerObserver(this);
   }
 
@@ -80,6 +87,7 @@ public class CompositeChangePropagationSpecification
     assertMetamodelsCompatible(changeMainProcessor);
     changeMainprocessors.add(changeMainProcessor);
     changeMainProcessor.setUserInteractor(this.getUserInteractor());
+    changeMainProcessor.setEChangeApplicationController(applicationController);
     changeMainProcessor.registerObserver(this);
   }
 
@@ -94,64 +102,58 @@ public class CompositeChangePropagationSpecification
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Also passes {@code controller} on to all pre- and main processors.
+   */
   @Override
-  public void propagateChange(
-      EChange<EObject> change,
-      EditableCorrespondenceModelView<Correspondence> correspondenceModel,
-      ResourceAccess resourceAccess) {
-    propagateChange(change, AnnotationSource.EMPTY, correspondenceModel, resourceAccess);
+  public void setEChangeApplicationController(EChangeApplicationController<EObject> controller) {
+    super.setEChangeApplicationController(controller);
+    getAllProcessors().forEach(
+        processor -> processor.setEChangeApplicationController(applicationController));
   }
 
   @Override
-  public void propagateChange(
+  public ChangePropagationInvocation propagateChange(
       EChange<EObject> change,
-      AnnotationSource changeAnnotations,
       EditableCorrespondenceModelView<Correspondence> correspondenceModel,
       ResourceAccess resourceAccess) {
-    this.propagateChangeViaPreprocessors(
-        change, changeAnnotations, correspondenceModel, resourceAccess);
-    this.propagateChangeViaMainprocessors(
-        change, changeAnnotations, correspondenceModel, resourceAccess);
+    return propagateChange(change, AnnotationSource.EMPTY, correspondenceModel, resourceAccess);
   }
 
   /**
-   * Propagates <code>change</code> via the preprocessors.
+   * {@inheritDoc}
    *
-   * @param change - {@link EChange}
-   * @param changeAnnotations - {@link AnnotationSource}
-   * @param correspondenceModel - {@link EditableCorrespondenceModelView}
-   * @param resourceAccess - {@link ResourceAccess}
+   * <p>The preprocessors are called before the main processors. Propagation stops at the
+   * first processor whose invocation is not {@link ChangePropagationStatus#SUCCEEDED}; the
+   * processors after it are not called.
+   *
+   * <p>The invocations of all executed processors are combined into one invocation.
    */
-  protected void propagateChangeViaPreprocessors(
+  @Override
+  public ChangePropagationInvocation propagateChange(
       EChange<EObject> change,
       AnnotationSource changeAnnotations,
       EditableCorrespondenceModelView<Correspondence> correspondenceModel,
       ResourceAccess resourceAccess) {
-    for (var changeProcessor : changePreprocessors) {
-      logger.trace("Calling change preprocessor %s for change event %s", changeProcessor, change);
-      changeProcessor.propagateChange(
-          change, changeAnnotations, correspondenceModel, resourceAccess);
-    }
-  }
+    List<ChangePropagationInvocation> invocations = new ArrayList<>();
+    AtomicBoolean doContinue = new AtomicBoolean(true);
+    getAllProcessors().forEach(processor -> {
+      if (!doContinue.get()) {
+        return;
+      }
 
-  /**
-   * Propagates <code>change</code> via the main processors.
-   *
-   * @param change - {@link EChange}
-   * @param changeAnnotations - {@link AnnotationSource}
-   * @param correspondenceModel - {@link EditableCorrespondenceModelView}
-   * @param resourceAccess - {@link ResourceAccess}
-   */
-  protected void propagateChangeViaMainprocessors(
-      EChange<EObject> change,
-      AnnotationSource changeAnnotations,
-      EditableCorrespondenceModelView<Correspondence> correspondenceModel,
-      ResourceAccess resourceAccess) {
-    for (var changeProcessor : this.changeMainprocessors) {
-      logger.trace("Calling change main processor %s for change event %s", changeProcessor, change);
-      changeProcessor.propagateChange(
+      logger.trace("Calling change processor {} for change event {}", processor, change);
+      ChangePropagationInvocation invocation = processor.propagateChange(
           change, changeAnnotations, correspondenceModel, resourceAccess);
-    }
+      invocations.add(invocation);
+
+      if (invocation.status() != ChangePropagationStatus.SUCCEEDED) {
+        doContinue.set(false);
+      }
+    });
+    return new ChangePropagationInvocation(this, List.of(change), invocations);
   }
 
   @Override
@@ -159,7 +161,6 @@ public class CompositeChangePropagationSpecification
       EChange<EObject> change, 
       EditableCorrespondenceModelView<Correspondence> correspondenceModel) {
     return getAllProcessors()
-        .stream()
         .anyMatch(processor -> processor.doesHandleChange(change, correspondenceModel));
   }
 
@@ -169,11 +170,8 @@ public class CompositeChangePropagationSpecification
     getAllProcessors().forEach(processor -> processor.setUserInteractor(userInteractor));
   }
 
-  private ArrayList<ChangePropagationSpecification> getAllProcessors() {
-    var processors = new ArrayList<ChangePropagationSpecification>();
-    processors.addAll(changePreprocessors);
-    processors.addAll(changeMainprocessors);
-    return processors;
+  private Stream<ChangePropagationSpecification> getAllProcessors() {
+    return Streams.concat(changePreprocessors.stream(), changeMainprocessors.stream());
   }
 
   @Override
