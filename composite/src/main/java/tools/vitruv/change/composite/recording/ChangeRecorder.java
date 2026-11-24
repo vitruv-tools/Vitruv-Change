@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notification;
@@ -50,14 +51,15 @@ public class ChangeRecorder implements AutoCloseable {
   private static class NotificationRecorder implements Adapter {
     private final ChangeRecorder outer;
 
-    private final Set<Resource> currentlyLoadingResources = new HashSet<Resource>();
+    private final Set<Resource> currentlyLoadingResources = ConcurrentHashMap.newKeySet();
 
     @Override
     public void notifyChanged(final Notification notification) {
       this.handleAdaptersForResourceAndResourceSetChanges(notification);
       final Iterable<? extends EChange<EObject>> newChanges = this.extractRelevantChanges(notification);
-      if (this.outer.isRecording) {
-        Iterables.<EChange<EObject>>addAll(this.outer.resultChanges, newChanges);
+      List<EChange<EObject>> recording = this.outer.activeRecording.get();
+      if (recording != null) {
+        Iterables.<EChange<EObject>>addAll(recording, newChanges);
       }
     }
 
@@ -166,12 +168,16 @@ public class ChangeRecorder implements AutoCloseable {
           if (it instanceof EObjectAddedEChange) {
             _matched=true;
             EObject _newValue = ((EObjectAddedEChange<EObject>)it).getNewValue();
-            this.outer.existingObjects.add(_newValue);
+            if (_newValue != null) {
+              this.outer.existingObjects.add(_newValue);
+            }
             boolean _matched_1 = false;
             if (it instanceof UpdateReferenceEChange) {
               _matched_1=true;
               EObject _affectedElement = ((UpdateReferenceEChange<EObject>)it).getAffectedElement();
-              this.outer.existingObjects.add(_affectedElement);
+              if (_affectedElement != null) {
+                this.outer.existingObjects.add(_affectedElement);
+              }
             }
           }
         };
@@ -242,7 +248,7 @@ public class ChangeRecorder implements AutoCloseable {
         final Function<Notifier, Boolean> _function = (Notifier it) -> {
           boolean _xblockexpression = false;
           {
-            this.outer.toDesinfect.remove(it);
+            this.outer.toDesinfect.get().remove(it);
             _xblockexpression = this.outer.addAdapter(it);
           }
           return Boolean.valueOf(_xblockexpression);
@@ -254,7 +260,7 @@ public class ChangeRecorder implements AutoCloseable {
     private boolean desinfect(final Object oldValue) {
       boolean _xifexpression = false;
       if ((oldValue instanceof Notifier)) {
-        _xifexpression = this.outer.toDesinfect.add(((Notifier)oldValue));
+        _xifexpression = this.outer.toDesinfect.get().add(((Notifier)oldValue));
       }
       return _xifexpression;
     }
@@ -284,17 +290,31 @@ public class ChangeRecorder implements AutoCloseable {
 
   private final ChangeRecorder.NotificationRecorder recordingAdapter = new ChangeRecorder.NotificationRecorder(this);
 
-  private final Set<Notifier> rootObjects = new HashSet<Notifier>();
+  /*
+   * Recording is per thread: EMF delivers notifications synchronously on the thread that changes
+   * the model, so the changes of concurrent change propagations, each confined to one thread, are
+   * recorded separately. The sets of registered and existing objects are shared.
+   */
+  private final Set<Notifier> rootObjects = ConcurrentHashMap.newKeySet();
 
-  private boolean isRecording = false;
+  /** The changes recorded so far on the current thread, or {@code null} if it does not record. */
+  private final ThreadLocal<List<EChange<EObject>>> activeRecording = new ThreadLocal<>();
 
-  private List<EChange<EObject>> resultChanges = List.of();
+  /** The changes of the last recording finished on the current thread. */
+  private final ThreadLocal<List<EChange<EObject>>> lastRecordedChanges =
+      ThreadLocal.withInitial(List::of);
+
+  private volatile boolean disposed = false;
 
   private final NotificationToEChangeConverter converter;
 
-  private final Set<EObject> existingObjects = new HashSet<EObject>();
+  private final Set<EObject> existingObjects = ConcurrentHashMap.newKeySet();
 
-  private final Set<Notifier> toDesinfect = new HashSet<Notifier>();
+  /**
+   * The elements detached on the current thread, whose adapters are removed when the thread starts
+   * its next recording, so that no thread walks a subtree another thread is changing.
+   */
+  private final ThreadLocal<Set<Notifier>> toDesinfect = ThreadLocal.withInitial(HashSet::new);
 
   private final ResourceSet resourceSet;
 
@@ -371,26 +391,32 @@ public class ChangeRecorder implements AutoCloseable {
     List<EChange<EObject>> _xblockexpression = null;
     {
       this.checkNotDisposed();
-      Preconditions.checkState((!this.isRecording), "This recorder is already recording!");
-      for (final Notifier removed : this.toDesinfect) {
-        // An element only removed from a cross-resource container is still in its own resource.
+      Preconditions.checkState((!this.isRecording()), "This recorder is already recording!");
+      Set<Notifier> detached = this.toDesinfect.get();
+      for (final Notifier removed : detached) {
+        // another thread may have attached an element again after this thread detached it
+        if (!this.isStillDetached(removed)) {
+          continue;
+        }
         // The contents walked with an element are in a resource exactly if the element is.
         final boolean deleted = removed instanceof EObject eObject && eObject.eResource() == null;
         ChangeRecorder.recursively(removed,
             deleted ? this::stopRecordingDeleted : this::removeAdapter);
       }
-      this.toDesinfect.clear();
-      this.isRecording = true;
+      detached.clear();
       ArrayList<EChange<EObject>> _arrayList = new ArrayList<EChange<EObject>>();
-      _xblockexpression = this.resultChanges = _arrayList;
+      this.activeRecording.set(_arrayList);
+      _xblockexpression = _arrayList;
     }
     return _xblockexpression;
   }
 
   @Override
   public void close() {
-    this.isRecording = false;
-    this.resultChanges = null;
+    this.disposed = true;
+    this.activeRecording.remove();
+    this.lastRecordedChanges.remove();
+    this.toDesinfect.remove();
     final Set<Notifier> rootCopy = Set.<Notifier>copyOf(this.rootObjects);
     this.rootObjects.clear();
     this.existingObjects.clear();
@@ -404,7 +430,7 @@ public class ChangeRecorder implements AutoCloseable {
   }
 
   private void checkNotDisposed() {
-    Preconditions.checkState((this.resultChanges != null), "This recorder has already been disposed!");
+    Preconditions.checkState((!this.disposed), "This recorder has already been disposed!");
   }
 
   /**
@@ -415,9 +441,11 @@ public class ChangeRecorder implements AutoCloseable {
    */
   public TransactionalChange<EObject> endRecording() {
     this.checkNotDisposed();
-    Preconditions.checkState(this.isRecording, "This recorder is not recording");
-    this.isRecording = false;
-    this.resultChanges = List.<EChange<EObject>>copyOf(this.postprocessRemovals(this.resultChanges));
+    List<EChange<EObject>> recordedChanges = this.activeRecording.get();
+    Preconditions.checkState(recordedChanges != null, "This recorder is not recording");
+    this.activeRecording.remove();
+    this.lastRecordedChanges.set(
+        List.<EChange<EObject>>copyOf(this.postprocessRemovals(recordedChanges)));
     return this.getChange();
   }
 
@@ -531,6 +559,18 @@ public class ChangeRecorder implements AutoCloseable {
     return containedElements;
   }
 
+  /** Returns whether the given detached element is still outside the recorded resource set. */
+  private boolean isStillDetached(final Notifier notifier) {
+    if (notifier instanceof EObject element) {
+      return element.eResource() == null
+          || !Objects.equals(element.eResource().getResourceSet(), this.resourceSet);
+    }
+    if (notifier instanceof Resource resource) {
+      return !Objects.equals(resource.getResourceSet(), this.resourceSet);
+    }
+    return true;
+  }
+
   private static boolean isRootOfOwnResource(final EObject element) {
     return ((InternalEObject) element).eDirectResource() != null;
   }
@@ -539,14 +579,19 @@ public class ChangeRecorder implements AutoCloseable {
     TransactionalChange<EObject> _xblockexpression = null;
     {
       this.checkNotDisposed();
-      Preconditions.checkState((!this.isRecording), "This recorder is still recording!");
-      _xblockexpression = VitruviusChangeFactory.getInstance().<EObject>createTransactionalChange(this.resultChanges);
+      Preconditions.checkState((!this.isRecording()), "This recorder is still recording!");
+      _xblockexpression = VitruviusChangeFactory.getInstance().<EObject>createTransactionalChange(this.lastRecordedChanges.get());
     }
     return _xblockexpression;
   }
 
+  /**
+   * Returns whether this recorder records on the current thread. Recordings of different threads
+   * are independent: each thread gets the changes it made between its calls of
+   * {@link #beginRecording()} and {@link #endRecording()}.
+   */
   public boolean isRecording() {
-    return this.isRecording;
+    return this.activeRecording.get() != null;
   }
 
   private static void _recursively(final ResourceSet resourceSet, final Function<Notifier, Boolean> action) {
