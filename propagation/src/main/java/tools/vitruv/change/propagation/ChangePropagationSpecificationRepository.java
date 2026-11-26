@@ -7,37 +7,62 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import tools.vitruv.change.composite.MetamodelDescriptor;
 
-public class ChangePropagationSpecificationRepository implements ChangePropagationSpecificationProvider {
-  private final Map<MetamodelDescriptor, List<ChangePropagationSpecification>> sourceMetamodelToPropagationSpecifications;
-  private final Map<ChangePropagationSpecification, Integer> changePropagationSpecificationToLevel;
+/**
+ * Default {@link ChangePropagationSpecificationProvider} that holds a fixed set of
+ * change propagation specifications, grouped by their source metamodel.
+ *
+ * <p>Each specification can be assigned a level. Specifications without an
+ * assigned level have level {@code 0}.
+ */
+public class ChangePropagationSpecificationRepository
+        implements ChangePropagationSpecificationProvider {
+  private final Map<MetamodelDescriptor,
+          List<ChangePropagationSpecification>> sourceMetamodelToPropagationSpecifications;
+  private final Map<ChangePropagationSpecification,
+          Integer> changePropagationSpecificationToLevel;
 
-  public ChangePropagationSpecificationRepository(final Iterable<ChangePropagationSpecification> specifications) {
+  /**
+   * Creates a repository with the given specifications, all at level {@code 0}.
+   *
+   * @param specifications the change propagation specifications to provide
+   */
+  public ChangePropagationSpecificationRepository(
+          final Iterable<ChangePropagationSpecification> specifications) {
     this(specifications, Map.of());
   }
 
-  public ChangePropagationSpecificationRepository(final Iterable<ChangePropagationSpecification> specifications, final Map<ChangePropagationSpecification, Integer> changePropagationSpecificationToLevel) {
-    HashMap<MetamodelDescriptor, List<ChangePropagationSpecification>> _hashMap = new HashMap<MetamodelDescriptor, List<ChangePropagationSpecification>>();
-    this.sourceMetamodelToPropagationSpecifications = _hashMap;
-    final Consumer<ChangePropagationSpecification> _function = (ChangePropagationSpecification specification) -> {
-      final Function<MetamodelDescriptor, List<ChangePropagationSpecification>> _function_1 = (MetamodelDescriptor it) -> {
-        return new ArrayList<ChangePropagationSpecification>();
-      };
-      this.sourceMetamodelToPropagationSpecifications.computeIfAbsent(specification.getSourceMetamodelDescriptor(), _function_1).add(specification);
-    };
-    specifications.forEach(_function);
-    this.changePropagationSpecificationToLevel = new HashMap<>(changePropagationSpecificationToLevel);
+  /**
+   * Creates a repository with the given specifications and their levels.
+   *
+   * @param specifications the change propagation specifications to provide
+   * @param changePropagationSpecificationToLevel the level of each specification;
+   *     specifications without an entry have level {@code 0}
+   */
+  public ChangePropagationSpecificationRepository(
+          final Iterable<ChangePropagationSpecification> specifications,
+          final Map<ChangePropagationSpecification,
+                  Integer> changePropagationSpecificationToLevel) {
+    this.sourceMetamodelToPropagationSpecifications = new HashMap<>();
+    final Consumer<ChangePropagationSpecification> function = specification ->
+            this.sourceMetamodelToPropagationSpecifications
+                    .computeIfAbsent(specification.getSourceMetamodelDescriptor(),
+                            it -> new ArrayList<>())
+                    .add(specification);
+    specifications.forEach(function);
+    this.changePropagationSpecificationToLevel =
+            new HashMap<>(changePropagationSpecificationToLevel);
   }
 
   @Override
-  public List<ChangePropagationSpecification> getChangePropagationSpecifications(final MetamodelDescriptor sourceMetamodelDescriptor) {
+  public List<ChangePropagationSpecification> getChangePropagationSpecifications(
+          final MetamodelDescriptor sourceMetamodelDescriptor) {
     return this.sourceMetamodelToPropagationSpecifications.keySet().stream()
         .filter(it -> it.overlaps(sourceMetamodelDescriptor))
-        .flatMap(it -> this.sourceMetamodelToPropagationSpecifications.get(it).stream())
-        .collect(Collectors.toList());
+        .flatMap(it ->
+                this.sourceMetamodelToPropagationSpecifications.get(it).stream())
+        .toList();
   }
 
   @Override
@@ -47,7 +72,8 @@ public class ChangePropagationSpecificationRepository implements ChangePropagati
 
   @Override
   public int getMaximumPropagationSpecificationLevel() {
-    return this.changePropagationSpecificationToLevel.values().stream().max(Integer::compareTo).orElse(0);
+    return this.changePropagationSpecificationToLevel
+            .values().stream().max(Integer::compareTo).orElse(0);
   }
 
   @Override
