@@ -28,7 +28,8 @@ import tools.vitruv.change.testutils.TestLogging;
 import tools.vitruv.change.testutils.TestProject;
 import tools.vitruv.change.testutils.TestProjectManager;
 
-/** Tests the snapshots created by {@link DefaultChangeRecordingModelRepository#createSnapshot()}. */
+/** Tests the snapshots created by
+ * {@link DefaultChangeRecordingModelRepository#createSnapshot()}. */
 @ExtendWith({TestProjectManager.class, TestLogging.class, RegisterMetamodelsInStandalone.class})
 class DefaultModelRepositorySnapshotTest {
   private static final String TAG = "tag";
@@ -116,7 +117,7 @@ class DefaultModelRepositorySnapshotTest {
       Root otherRoot = AllElementTypesFactory.eINSTANCE.createRoot();
       snapshot.persistAsRoot(otherRoot, otherModelUri);
 
-      assertSame(otherRoot, snapshot.getModelResource(otherModelUri).getContents().get(0));
+      assertSame(otherRoot, snapshot.getModelResource(otherModelUri).getContents().getFirst());
       assertEquals(2, snapshot.getModelResources().size());
       assertEquals(1, modelRepository.getModelResources().size());
     }
@@ -130,7 +131,7 @@ class DefaultModelRepositorySnapshotTest {
 
     assertTrue(snapshot.getModelResources().isEmpty());
     assertEquals(1, root.getSingleValuedEAttribute());
-    assertSame(root, modelRepository.getModelResource(modelUri).getContents().get(0));
+    assertSame(root, modelRepository.getModelResource(modelUri).getContents().getFirst());
   }
 
   @Test

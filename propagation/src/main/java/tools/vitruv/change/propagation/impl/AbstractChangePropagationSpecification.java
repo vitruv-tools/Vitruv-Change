@@ -16,8 +16,8 @@ public abstract class AbstractChangePropagationSpecification
     implements ChangePropagationSpecification {
   private final List<ChangePropagationObserver> propagationObservers;
   private UserInteractor userInteractor;
-  private MetamodelDescriptor sourceMetamodelDescriptor;
-  private MetamodelDescriptor targetMetamodelDescriptor;
+  private final MetamodelDescriptor sourceMetamodelDescriptor;
+  private final MetamodelDescriptor targetMetamodelDescriptor;
 
   /**
    * Creates a new AbstractChangePropagationSpecification.

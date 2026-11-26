@@ -99,12 +99,14 @@ class ChangePropagatorTest {
 
   @Test
   void higherLevelIsPropagatedAfterLowerLevelAndSeesItsChanges() {
-    var lowerLevel = new RecordingSpecification("lower", (changes, previousState) -> {
+    var lowerLevel = new RecordingSpecification("lower", (changes,
+                                                          previousState) -> {
       if (changes.stream().anyMatch(InsertRootEObject.class::isInstance)) {
         repositoryRoot().setSingleValuedEAttribute(42);
       }
     });
-    var higherLevel = new RecordingSpecification("higher", (changes, previousState) -> { });
+    var higherLevel = new RecordingSpecification("higher", (changes,
+                                                            previousState) -> {});
     var propagator = createPropagator(Map.of(lowerLevel, 0, higherLevel, 1));
 
     propagateInView(propagator, this::createRootInView);
@@ -120,7 +122,8 @@ class ChangePropagatorTest {
   @Test
   void specificationReceivesStateBeforeTheChange() {
     List<Integer> previousValues = new ArrayList<>();
-    var specification = new RecordingSpecification("spec", (changes, previousState) -> {
+    var specification = new RecordingSpecification("spec", (changes,
+                                                            previousState) -> {
       var previousRoot =
           (Root) previousState.getRepositoryToSnapshotMap().get(repositoryRoot());
       if (previousRoot != null) {
@@ -131,7 +134,7 @@ class ChangePropagatorTest {
     List<Root> viewRoot = new ArrayList<>();
     propagateInView(propagator, () -> viewRoot.add(createRootInView()));
 
-    propagateInView(propagator, () -> viewRoot.get(0).setSingleValuedEAttribute(2));
+    propagateInView(propagator, () -> viewRoot.getFirst().setSingleValuedEAttribute(2));
 
     assertEquals(List.of(1), previousValues);
     assertEquals(2, repositoryRoot().getSingleValuedEAttribute());
@@ -195,7 +198,8 @@ class ChangePropagatorTest {
 
   @Test
   void specificationReceivesAnnotationsOfTheChange() {
-    var specification = new RecordingSpecification("spec", (changes, previousState) -> { });
+    var specification = new RecordingSpecification("spec", (changes,
+                                                            previousState) -> {});
     var propagator = createPropagator(Map.of(specification, 0));
     var author = new Author("alice");
 
@@ -206,7 +210,8 @@ class ChangePropagatorTest {
 
   @Test
   void specificationReceivesEmptyAnnotationsForChangeWithoutAnnotations() {
-    var specification = new RecordingSpecification("spec", (changes, previousState) -> { });
+    var specification = new RecordingSpecification("spec", (changes,
+                                                            previousState) -> {});
     var propagator = createPropagator(Map.of(specification, 0));
 
     propagateInView(propagator, null, this::createRootInView);
@@ -216,7 +221,8 @@ class ChangePropagatorTest {
 
   @Test
   void transitivelyPropagatedChangesKeepTheAnnotations() {
-    var specification = new RecordingSpecification("spec", (changes, previousState) -> {
+    var specification = new RecordingSpecification("spec", (changes,
+                                                            previousState) -> {
       if (changes.stream().anyMatch(InsertRootEObject.class::isInstance)) {
         repositoryRoot().setSingleValuedEAttribute(42);
       }
@@ -233,8 +239,10 @@ class ChangePropagatorTest {
 
   @Test
   void higherLevelReceivesTheAnnotations() {
-    var lowerLevel = new RecordingSpecification("lower", (changes, previousState) -> { });
-    var higherLevel = new RecordingSpecification("higher", (changes, previousState) -> { });
+    var lowerLevel = new RecordingSpecification("lower", (changes,
+                                                          previousState) -> {});
+    var higherLevel = new RecordingSpecification("higher", (changes,
+                                                            previousState) -> {});
     var propagator = createPropagator(Map.of(lowerLevel, 0, higherLevel, 1));
     var author = new Author("alice");
 
@@ -246,8 +254,10 @@ class ChangePropagatorTest {
 
   @Test
   void transactionalChangesReceiveTheAnnotationsOfTheirCompositeChange() {
-    var specification = new RecordingSpecification("spec", (changes, previousState) -> { });
-    var propagator = createPropagator(Map.of(specification, 0));
+    var specification = new RecordingSpecification("spec", (changes,
+                                                            previousState) -> {});
+    ChangePropagator propagator;
+    propagator = createPropagator(Map.of(specification, 0));
     var author = new Author("alice");
     viewRecorder.beginRecording();
     createRootInView();
@@ -304,7 +314,7 @@ class ChangePropagatorTest {
   }
 
   private Root repositoryRoot() {
-    return (Root) modelRepository.getModelResource(modelUri).getContents().get(0);
+    return (Root) modelRepository.getModelResource(modelUri).getContents().getFirst();
   }
 
   private void propagateInView(ChangePropagator propagator, Runnable modification) {
