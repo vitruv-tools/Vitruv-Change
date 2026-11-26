@@ -123,7 +123,11 @@ public class ChangePropagator {
                           .toList()));
         }
         return resultingChanges;
+      } catch (RuntimeException e) {
+        // keep exceptions of change propagation specifications as they are
+        throw e;
       } catch (Exception e) {
+        // only closing the snapshot or the user interactor change throws checked exceptions
         throw new RuntimeException(e);
       }
     }
