@@ -94,7 +94,8 @@ public class DefaultModelRepositorySnapshot implements ModelRepositorySnapshot {
       copy.setModified(modified);
     });
 
-    BiMap<EObject, EObject> mapping = createOriginalToCopyMapping(originalResourceSet, copiedResourceSet);
+    BiMap<EObject, EObject> mapping =
+            createOriginalToCopyMapping(originalResourceSet, copiedResourceSet);
 
     return new ResourceSetCopy(copiedResourceSet, mapping);
   }
