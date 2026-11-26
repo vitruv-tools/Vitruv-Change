@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -21,16 +20,38 @@ import tools.vitruv.change.composite.description.TransactionalChange;
 import tools.vitruv.change.composite.description.VitruviusChange;
 import tools.vitruv.change.interaction.UserInteractionBase;
 
-public abstract class AbstractCompositeChangeImpl<Element extends Object, ContainedChange extends VitruviusChange<Element>> implements CompositeChange<Element, ContainedChange> {
-  private List<ContainedChange> changes;
+/**
+ * Base implementation of a {@link CompositeChange} that holds an ordered,
+ * immutable list of contained changes.
+ *
+ * <p>Most queries (changed URIs, affected objects, {@link EChange}s, user
+ * interactions, etc.) are answered by combining the results of all contained
+ * changes in order. Annotations are stored per composite change and are not
+ * passed on to the contained changes.
+ *
+ * @param <E> the type of elements referenced by the changes
+ * @param <C> the type of changes contained in this composite change
+ */
+public abstract class AbstractCompositeChangeImpl<E,
+        C extends VitruviusChange<E>> implements CompositeChange<E,
+        C> {
+  private final List<C> changes;
   protected final Map<Class<?>, Object> annotations = new HashMap<>();
 
-  public AbstractCompositeChangeImpl(final List<? extends ContainedChange> changes) {
+  /**
+   * Creates a composite change containing the given changes.
+   *
+   * <p>The list is copied, so later modifications to it do not affect this change.
+   *
+   * @param changes the changes to contain, in order; must not be {@code null}
+   *     and must not contain {@code null} elements
+   */
+  protected AbstractCompositeChangeImpl(final List<? extends C> changes) {
     this.changes = List.copyOf(changes);
   }
 
   @Override
-  public List<ContainedChange> getChanges() {
+  public List<C> getChanges() {
     return this.changes;
   }
 
@@ -42,7 +63,7 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contai
   @Override
   public Set<URI> getChangedURIs() {
     LinkedHashSet<URI> result = new LinkedHashSet<>();
-    for (ContainedChange it : this.changes) {
+    for (C it : this.changes) {
       result.addAll(it.getChangedURIs());
     }
     return result;
@@ -51,16 +72,16 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contai
   @Override
   public Set<MetamodelDescriptor> getAffectedEObjectsMetamodelDescriptors() {
     HashSet<MetamodelDescriptor> result = new HashSet<>();
-    for (ContainedChange it : this.changes) {
+    for (C it : this.changes) {
       result.addAll(it.getAffectedEObjectsMetamodelDescriptors());
     }
     return result;
   }
 
   @Override
-  public List<EChange<Element>> getEChanges() {
-    List<EChange<Element>> result = new ArrayList<>();
-    for (ContainedChange it : this.changes) {
+  public List<EChange<E>> getEChanges() {
+    List<EChange<E>> result = new ArrayList<>();
+    for (C it : this.changes) {
       result.addAll(it.getEChanges());
     }
     return result;
@@ -69,7 +90,7 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contai
   @Override
   public Set<EObject> getAffectedEObjects() {
     LinkedHashSet<EObject> result = new LinkedHashSet<>();
-    for (ContainedChange it : this.changes) {
+    for (C it : this.changes) {
       result.addAll(it.getAffectedEObjects());
     }
     return result;
@@ -78,7 +99,7 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contai
   @Override
   public Set<EObject> getAffectedAndReferencedEObjects() {
     LinkedHashSet<EObject> result = new LinkedHashSet<>();
-    for (ContainedChange it : this.changes) {
+    for (C it : this.changes) {
       result.addAll(it.getAffectedAndReferencedEObjects());
     }
     return result;
@@ -87,7 +108,7 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contai
   @Override
   public Iterable<UserInteractionBase> getUserInteractions() {
     List<UserInteractionBase> result = new ArrayList<>();
-    for (ContainedChange it : this.changes) {
+    for (C it : this.changes) {
       it.getUserInteractions().forEach(result::add);
     }
     return result;
@@ -109,11 +130,11 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contai
   }
 
   @Override
-  public Iterable<TransactionalChange<Element>> getTransactionalChangeSequence() {
+  public Iterable<TransactionalChange<E>> getTransactionalChangeSequence() {
     return changes.stream()
-        .flatMap(it ->
-                     StreamSupport.stream(it.getTransactionalChangeSequence().spliterator(), false))
-        .collect(Collectors.toList());
+            .flatMap(it ->
+                    StreamSupport.stream(it.getTransactionalChangeSequence().spliterator(), false))
+            .toList();
   }
 
   @Override
@@ -121,21 +142,24 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contai
     if (this.changes.isEmpty()) {
       return this.getClass().getSimpleName() + " (empty)";
     } else {
-      StringBuilder _builder = new StringBuilder();
-      _builder.append(this.getClass().getSimpleName()).append(": [").append(System.lineSeparator());
-      for (ContainedChange change : this.changes) {
-        _builder.append("\t").append(change).append(System.lineSeparator());
+      StringBuilder builder = new StringBuilder();
+      builder.append(this.getClass().getSimpleName()).append(": [").append(System.lineSeparator());
+      for (C change : this.changes) {
+        builder.append("\t").append(change).append(System.lineSeparator());
       }
-      _builder.append("]").append(System.lineSeparator());
-      return _builder.toString();
+      builder.append("]").append(System.lineSeparator());
+      return builder.toString();
     }
   }
 
   /**
    * Indicates whether some other object is "equal to" this composite change.
-   * This means it is a composite change which contains the same changes as this one in no particular order.
-   * @param other is the object to compare with.
-   * @return true, if the object is a composite change and has the same changes in any order.
+   * This is the case if it is a {@link CompositeChange} containing the same
+   * changes in the same order.
+   *
+   * @param other the object to compare with
+   * @return {@code true} if the object is a composite change with the same
+   *     changes in the same order
    */
   @Override
   public boolean equals(final Object other) {
@@ -146,8 +170,9 @@ public abstract class AbstractCompositeChangeImpl<Element extends Object, Contai
       return false;
     }
     if (other instanceof CompositeChange<?, ?>) {
-      List<? extends VitruviusChange<?>> _changes = ((CompositeChange<?, ?>)other).getChanges();
-      return Objects.equals(this.changes, _changes);
+      List<? extends VitruviusChange<?>> vitruviusChanges =
+              ((CompositeChange<?, ?>) other).getChanges();
+      return Objects.equals(this.changes, vitruviusChanges);
     }
     return false;
   }

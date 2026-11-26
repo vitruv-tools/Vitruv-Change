@@ -13,77 +13,127 @@ import tools.vitruv.change.composite.util.AtomicEChangeAssertHelper;
 import tools.vitruv.change.composite.util.CompoundEChangeAssertHelper;
 import tools.vitruv.change.testutils.metamodels.AllElementTypesCreators;
 
-public class ChangeDescription2InsertEAttributeValueTest extends ChangeDescription2ChangeTransformationTest {
+/**
+ * Tests the recording of value insertions into multi-valued attributes.
+ */
+public class ChangeDescription2InsertEAttributeValueTest extends
+        ChangeDescription2ChangeTransformationTest {
+
   @Test
-  public void testInsertEAttributeValue() {
-    this.testInsertEAttributeValue(0, 42);
+  void testInsertEAttributeValue() {
+    this.testInsertEAttributeValue(42);
+  }
+
+  void testInsertEAttributeValue(final int expectedIndex,
+                                 final int expectedValue,
+                                 final int position) {
+    this.getUniquePersistedRoot();
+    final Consumer<Root> function = (Root it) -> {
+      it.getMultiValuedEAttribute().add(position, expectedValue);
+    };
+    final List<EChange<EObject>> result =
+            this.recordObject(this.getUniquePersistedRoot(), function);
+    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
+            .assertInsertEAttribute(ChangeDescription2ChangeTransformationTest
+                            .assertChangeCount(result, 1),
+                    AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE,
+                    expectedValue, expectedIndex, false));
+  }
+
+  void testInsertEAttributeValue(final int expectedValue) {
+    this.getUniquePersistedRoot();
+    final Consumer<Root> function = (Root it) -> {
+      EList<Integer> multiValuedEAttribute = it.getMultiValuedEAttribute();
+      multiValuedEAttribute.add(expectedValue);
+    };
+    final List<EChange<EObject>> result =
+            this.recordObject(this.getUniquePersistedRoot(), function);
+    int size = this.getUniquePersistedRoot().getMultiValuedEAttribute().size();
+    final int index = (size - 1);
+    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper
+            .assertInsertEAttribute(ChangeDescription2ChangeTransformationTest
+                            .assertChangeCount(result, 1),
+                    AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE,
+                    expectedValue, index, false));
   }
 
   @Test
-  public void testMultipleInsertEAttributeValue() {
-    this.testInsertEAttributeValue(0, 42);
-    this.testInsertEAttributeValue(1, 21);
-    this.testInsertEAttributeValue(2, 10);
+  void testMultipleInsertEAttributeValue() {
+    this.testInsertEAttributeValue(42);
+    this.testInsertEAttributeValue(21);
+    this.testInsertEAttributeValue(10);
   }
 
   @Test
-  public void testInsertAtPositionInsertEAttributeValue() {
-    this.testInsertEAttributeValue(0, 42);
+  void testInsertAtPositionInsertEAttributeValue() {
+    this.testInsertEAttributeValue(42);
     this.testInsertEAttributeValue(0, 21, 0);
     this.testInsertEAttributeValue(1, 10, 1);
   }
 
   @Test
-  public void testInsertEAttributeValueSequence() {
+  void testTreeInsertMultiValuedEAttribute() {
     this.getUniquePersistedRoot();
-    final Consumer<Root> _function = (Root it) -> {
-      EList<Integer> _multiValuedEAttribute = it.getMultiValuedEAttribute();
-      _multiValuedEAttribute.add(Integer.valueOf(42));
-      EList<Integer> _multiValuedEAttribute_1 = it.getMultiValuedEAttribute();
-      _multiValuedEAttribute_1.add(Integer.valueOf(55));
-      EList<Integer> _multiValuedEAttribute_2 = it.getMultiValuedEAttribute();
-      _multiValuedEAttribute_2.add(Integer.valueOf(66));
+    final Root innerRoot = AllElementTypesCreators.aet.Root();
+    final Consumer<Root> function = (Root it) -> {
+      EList<Integer> multiValuedEAttribute = it.getMultiValuedEAttribute();
+      multiValuedEAttribute.add(1);
+      EList<Integer> multiValuedEAttribute1 = it.getMultiValuedEAttribute();
+      multiValuedEAttribute1.add(2);
     };
-    final List<EChange<EObject>> result = this.<Root>record(this.getUniquePersistedRoot(), _function);
-    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEAttribute(AtomicEChangeAssertHelper.assertInsertEAttribute(AtomicEChangeAssertHelper.assertInsertEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 3), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, Integer.valueOf(42), 0, false), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, Integer.valueOf(55), 1, false), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, Integer.valueOf(66), 2, false));
+    function.accept(innerRoot);
+    final Consumer<Root> function1 = (Root it) -> {
+      it.setRecursiveRoot(innerRoot);
+    };
+    final List<EChange<EObject>> result =
+            this.recordObject(this.getUniquePersistedRoot(), function1);
+    AtomicEChangeAssertHelper
+            .assertEmpty(AtomicEChangeAssertHelper
+            .assertInsertEAttribute(AtomicEChangeAssertHelper
+                    .assertInsertEAttribute(AtomicEChangeAssertHelper
+                            .assertReplaceSingleValuedEAttribute(CompoundEChangeAssertHelper
+                                    .assertCreateAndReplaceNonRoot(
+                                            ChangeDescription2ChangeTransformationTest
+                                                    .assertChangeCount(result, 5),
+                                            innerRoot, this.getUniquePersistedRoot(),
+                                            AllElementTypesPackage.Literals.ROOT__RECURSIVE_ROOT,
+                                            false), innerRoot,
+                                    AllElementTypesPackage.Literals.IDENTIFIED__ID,
+                                    null, innerRoot.getId(), false, false),
+                            AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE,
+                            1, 0, false),
+                    AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE,
+                    2, 1, false));
   }
 
   @Test
-  public void testTreeInsertMultiValuedEAttribute() {
+  void testInsertEAttributeValueSequence() {
     this.getUniquePersistedRoot();
-    final Root innerRoot = AllElementTypesCreators.aet.Root();
-    final Consumer<Root> _function = (Root it) -> {
-      EList<Integer> _multiValuedEAttribute = it.getMultiValuedEAttribute();
-      _multiValuedEAttribute.add(Integer.valueOf(1));
-      EList<Integer> _multiValuedEAttribute_1 = it.getMultiValuedEAttribute();
-      _multiValuedEAttribute_1.add(Integer.valueOf(2));
+    final Consumer<Root> function = (Root it) -> {
+      EList<Integer> multiValuedEAttribute = it.getMultiValuedEAttribute();
+      multiValuedEAttribute.add(42);
+      EList<Integer> multiValuedEAttribute1 = it.getMultiValuedEAttribute();
+      multiValuedEAttribute1.add(55);
+      EList<Integer> multiValuedEAttribute2 = it.getMultiValuedEAttribute();
+      multiValuedEAttribute2.add(66);
     };
-    _function.accept(innerRoot);
-    final Consumer<Root> _function_1 = (Root it) -> {
-      it.setRecursiveRoot(innerRoot);
-    };
-    final List<EChange<EObject>> result = this.<Root>record(this.getUniquePersistedRoot(), _function_1);
-    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEAttribute(AtomicEChangeAssertHelper.assertInsertEAttribute(AtomicEChangeAssertHelper.assertReplaceSingleValuedEAttribute(CompoundEChangeAssertHelper.assertCreateAndReplaceNonRoot(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 5), innerRoot, this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__RECURSIVE_ROOT, false), innerRoot, AllElementTypesPackage.Literals.IDENTIFIED__ID, null, innerRoot.getId(), false, false), innerRoot, AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, Integer.valueOf(1), 0, false), innerRoot, AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, Integer.valueOf(2), 1, false));
-  }
-
-  public void testInsertEAttributeValue(final int expectedIndex, final int expectedValue, final int position) {
-    this.getUniquePersistedRoot();
-    final Consumer<Root> _function = (Root it) -> {
-      it.getMultiValuedEAttribute().add(position, Integer.valueOf(expectedValue));
-    };
-    final List<EChange<EObject>> result = this.<Root>record(this.getUniquePersistedRoot(), _function);
-    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 1), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, Integer.valueOf(expectedValue), expectedIndex, false));
-  }
-
-  public void testInsertEAttributeValue(final int expectedIndex, final int expectedValue) {
-    this.getUniquePersistedRoot();
-    final Consumer<Root> _function = (Root it) -> {
-      EList<Integer> _multiValuedEAttribute = it.getMultiValuedEAttribute();
-      _multiValuedEAttribute.add(Integer.valueOf(expectedValue));
-    };
-    final List<EChange<EObject>> result = this.<Root>record(this.getUniquePersistedRoot(), _function);
-    int _size = this.getUniquePersistedRoot().getMultiValuedEAttribute().size();
-    final int index = (_size - 1);
-    AtomicEChangeAssertHelper.assertEmpty(AtomicEChangeAssertHelper.assertInsertEAttribute(ChangeDescription2ChangeTransformationTest.<EObject>assertChangeCount(result, 1), this.getUniquePersistedRoot(), AllElementTypesPackage.Literals.ROOT__MULTI_VALUED_EATTRIBUTE, Integer.valueOf(expectedValue), index, false));
+    final List<EChange<EObject>> result = this.recordObject(
+            this.getUniquePersistedRoot(), function);
+    AtomicEChangeAssertHelper
+            .assertEmpty(AtomicEChangeAssertHelper
+            .assertInsertEAttribute(AtomicEChangeAssertHelper
+                            .assertInsertEAttribute(AtomicEChangeAssertHelper
+                                            .assertInsertEAttribute(
+                                                    ChangeDescription2ChangeTransformationTest
+                                                            .assertChangeCount(result, 3),
+                                                    AllElementTypesPackage.Literals
+                                                            .ROOT__MULTI_VALUED_EATTRIBUTE,
+                                                    42, 0, false),
+                                    AllElementTypesPackage.Literals
+                                            .ROOT__MULTI_VALUED_EATTRIBUTE,
+                                    55, 1, false),
+                    AllElementTypesPackage.Literals
+                            .ROOT__MULTI_VALUED_EATTRIBUTE,
+                    66, 2, false));
   }
 }
